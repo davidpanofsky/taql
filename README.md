@@ -1,1 +1,1 @@
-# graphql-tools-poc
+# taql

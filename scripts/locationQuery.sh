@@ -37,9 +37,9 @@ function query {
   | jq .data
 }
 
-query 60745 name &
-query 60890 name &
-query 1 name &
-query 2 name &
+X=0
+while [ $((X++)) -lt 40 ]; do
+  query $X name &
+done
 
 wait

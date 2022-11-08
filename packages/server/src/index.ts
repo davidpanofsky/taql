@@ -1,44 +1,25 @@
-import { ExecutionRequest, ExecutionResult } from '@graphql-tools/utils';
-
-import { GraphQLFileLoader } from '@graphql-tools/graphql-file-loader';
-import { createBatchingExecutor } from '@graphql-tools/batch-execute';
 import { createServer } from 'node:http';
 import { createYoga } from 'graphql-yoga';
-import { fetch } from '@whatwg-node/fetch';
-import { loadSchema } from '@graphql-tools/load';
-import { print } from 'graphql';
-import { stitchSchemas } from '@graphql-tools/stitch';
-import { wrapSchema } from '@graphql-tools/wrap';
+import { makeSchema } from '@taql/schema';
 
-async function executor(request: ExecutionRequest): Promise<ExecutionResult> {
-  const { document, variables } = request;
-  const query = print(document);
-  const response = await fetch(
-    'http://jacobkatz.sleds.dev.tripadvisor.com:14724/v1/graphqlUnwrapped',
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query, variables }),
-    }
-  );
-  return <ExecutionResult>response.json();
-}
-
-async function makeSchema() {
-  // curl http://jacobkatz.sleds.dev.tripadvisor.com:14724/Schema > /tmp/schema
-  const schema = await loadSchema('/tmp/schema.graphql', {
-    loaders: [new GraphQLFileLoader()],
-  });
-  const batchedExecutor = createBatchingExecutor(executor);
-  const subSchema = wrapSchema({ schema, executor: batchedExecutor });
-  // build the combined schema
-  return stitchSchemas({
-    subschemas: [subSchema],
-  });
-}
+const makeLegacyConfig = () => {
+  const host = process.env.LEGACY_GQL_HOST;
+  if (host == undefined) {
+    return undefined;
+  }
+  return {
+    host,
+    httpPort: process.env.LEGACY_GQL_HTTP_PORT || '80',
+    httpsPort: process.env.LEGACY_GQL_HTTPS_PORT || '443',
+  };
+};
 
 export function main() {
-  const yoga = createYoga({ schema: makeSchema() });
+  const legacy = makeLegacyConfig();
+  const yoga = createYoga({
+    schema: makeSchema({ legacy }),
+    batching: { limit: 20 },
+  });
   const server = createServer(yoga);
   server.listen(4000, () => {
     console.info('server running');
