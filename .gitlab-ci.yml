@@ -1,0 +1,18 @@
+default:
+  image: node:16.18.0
+
+stages:
+  - test
+
+test:
+  stage: test
+  cache:
+    key: $CI_COMMIT_REF_NAME
+    when: 'always'
+    paths:
+      - .yarn/cache/
+  script:
+    - yarn install --immutable
+    - yarn run lint
+    - yarn run build
+    - git diff --exit-code
