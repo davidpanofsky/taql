@@ -5,7 +5,8 @@ import {
 } from '@graphql-tools/utils';
 
 import { UrlLoader } from '@graphql-tools/url-loader';
-import { fetch } from '@whatwg-node/fetch';
+import { agent } from '@taql/ssl';
+import fetch from 'node-fetch';
 import { loadSchema } from '@graphql-tools/load';
 import { print } from 'graphql';
 import { wrapSchema } from '@graphql-tools/wrap';
@@ -26,6 +27,7 @@ export function makeLegacyExecutor(url: string): Executor {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ query, variables }),
+      agent,
     });
     return <ExecutionResult>response.json();
   };

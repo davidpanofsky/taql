@@ -2,7 +2,7 @@ import { Server, createServer as httpServer } from 'http';
 import { createYoga } from 'graphql-yoga';
 import { createServer as httpsServer } from 'https';
 import { makeSchema } from '@taql/schema';
-import { readFileSync } from 'fs';
+import { sslConfig } from '@taql/ssl';
 
 const makeLegacyConfig = () => {
   const host = process.env.LEGACY_GQL_HOST;
@@ -16,38 +16,7 @@ const makeLegacyConfig = () => {
   } as const;
 };
 
-const rfs = (file?: string): string | undefined => {
-  if (file == undefined) {
-    return undefined;
-  }
-  return readFileSync(file, 'utf-8');
-};
-
-type SslConfig = {
-  cert: string;
-  key: string;
-  ca?: string;
-};
-
-const makeSslConfig = (): SslConfig | undefined => {
-  const cert = rfs(process.env.CLIENT_CERT_PATH);
-  const key = rfs(process.env.CLIENT_KEY_PATH);
-  const ca = rfs(process.env.CLIENT_CERT_CA_PATH);
-
-  if (cert == undefined || key == undefined) {
-    if ((cert == undefined) !== (key == undefined)) {
-      console.error(
-        'If CLIENT_CERT_PATH is set, CLIENT_KEY_PATH must also be set, and vice versa'
-      );
-    }
-    return undefined;
-  }
-
-  return { cert, key, ca } as const;
-};
-
 export function main() {
-  const sslConfig = makeSslConfig;
   const legacy = makeLegacyConfig();
 
   const yoga = createYoga({

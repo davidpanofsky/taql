@@ -17,7 +17,7 @@
     "@graphql-tools/url-loader": "^7.16.12",
     "@graphql-tools/utils": "^8.13.1",
     "@graphql-tools/wrap": "^9.2.5",
-    "@whatwg-node/fetch": "^0.5.1",
+    "@taql/ssl": "workspace:^",
     "graphql": "^16.6.0"
   }
 }
