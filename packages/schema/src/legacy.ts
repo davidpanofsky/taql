@@ -20,11 +20,20 @@ export function makeLegacyExecutor(url: string): Executor {
   const executor: Executor = async (
     request: ExecutionRequest
   ): Promise<ExecutionResult> => {
-    const { document, variables } = request;
+    const { document, variables, context } = request;
+    // extremely lazy header forwarding, all our custom
+    // headers start with x-, and I guess we should do cookies too.
+    // TODO develop allow-list list of headers to forward
+    const headers = Object.fromEntries(
+      Object.entries(context?.req?.headers || {}).filter(
+        ([header]) => header.startsWith('x-') || header === 'cookie'
+      )
+    );
+
     const query = print(document);
     const response = await fetchWithAgent(url, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { ...headers, 'Content-Type': 'application/json' },
       body: JSON.stringify({ query, variables }),
       ...sslConfig,
     });
