@@ -4,8 +4,8 @@ import {
   Executor,
 } from '@graphql-tools/utils';
 
-import { UrlLoader } from '@graphql-tools/url-loader';
 import { agent } from '@taql/ssl';
+import crypto from 'crypto';
 import fetch from 'node-fetch';
 import { loadSchema } from '@graphql-tools/load';
 import { print } from 'graphql';
@@ -35,10 +35,13 @@ export function makeLegacyExecutor(url: string): Executor {
 }
 
 export async function makeLegacySchema(config: LegacyConfig) {
-  const url = `http://${config.host}:${config.httpPort}/v1/graphqlUnwrapped`;
+  const rootUrl = `http://${config.host}:${config.httpPort}`;
+  const url = `${rootUrl}/v1/graphqlUnwrapped`;
+  const rawSchemaResponse = await fetch(`${rootUrl}/Schema`);
+  const rawSchema = await rawSchemaResponse.text();
+  const schema = await loadSchema(rawSchema, { loaders: [] });
   const executor = makeLegacyExecutor(url);
-  const schema = await loadSchema(url, {
-    loaders: [new UrlLoader()],
-  });
-  return wrapSchema({ schema, executor });
+  const wrappedSchema = wrapSchema({ schema, executor });
+  const hash = crypto.createHash('md5').update(rawSchema).digest('hex');
+  return { schema: wrappedSchema, hash };
 }

@@ -1,8 +1,11 @@
 import { Server, createServer as httpServer } from 'http';
+import { GraphQLSchema } from 'graphql';
 import { createYoga } from 'graphql-yoga';
 import { createServer as httpsServer } from 'https';
-import { makeSchema } from '@taql/schema';
+import { pollSchema } from '@taql/schema';
 import { sslConfig } from '@taql/ssl';
+
+const FIVE_MINUTES_MILLIS = 1000 * 60 * 5;
 
 const makeLegacyConfig = () => {
   const host = process.env.LEGACY_GQL_HOST;
@@ -19,12 +22,6 @@ const makeLegacyConfig = () => {
 export function main() {
   const legacy = makeLegacyConfig();
 
-  const yoga = createYoga({
-    schema: makeSchema({ legacy }),
-    //TODO pick a number that matches the current limit in legacy graphql.
-    batching: { limit: 20 },
-  });
-
   let port = Number(process.env.SERVER_PORT);
   if (port == undefined || isNaN(port)) {
     console.log(
@@ -39,12 +36,33 @@ export function main() {
 
   let server: Server;
   if (sslConfig != undefined) {
-    server = httpsServer({ ...sslConfig }, yoga);
+    server = httpsServer({ ...sslConfig });
     console.log(`launching https server on port ${port}`);
   } else {
-    server = httpServer(yoga);
+    server = httpServer();
     console.log(`launching http server on port ${port}`);
   }
+
+  const yogaOptions = {
+    // TODO pick a number that matches the current limit in legacy graphql,
+    // and draw it from configuration.
+    batching: { limit: 200 },
+  } as const;
+
+  type YogaServer = ReturnType<typeof createYoga>;
+  let yoga: YogaServer;
+
+  const reloadYoga = (schema: GraphQLSchema) => {
+    const next = createYoga({ schema, ...yogaOptions });
+    server.removeListener('request', yoga);
+    yoga = next;
+    server.addListener('request', yoga);
+    console.log('schema reloaded');
+  };
+
+  const initialSchema = pollSchema({ legacy }, FIVE_MINUTES_MILLIS, reloadYoga);
+  yoga = createYoga({ schema: initialSchema, ...yogaOptions });
+
   server.listen(port, () => {
     console.info('server running');
   });

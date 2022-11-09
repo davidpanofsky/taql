@@ -1,20 +1,17 @@
-import { LegacyConfig, makeLegacySchema } from './legacy';
-import { stitchSchemas } from '@graphql-tools/stitch';
+import {
+  Options,
+  makeSchema as _makeSchema,
+  pollSchema as _pollSchema,
+} from './schema';
+import { GraphQLSchema } from 'graphql';
 
-export type Options = {
-  legacy?: LegacyConfig;
-};
-
-export async function makeSchema(options: Options) {
-  const subschemas = [];
-  if (options.legacy != undefined) {
-    subschemas.push(await makeLegacySchema(options.legacy));
-  } else {
-    console.log('legacy graphql will not be stitched');
-  }
-  //TODO: generic loading for every other schema.
-  // build the combined schema
-  return stitchSchemas({
-    subschemas,
-  });
-}
+export const pollSchema = (
+  options: Options,
+  interval: number,
+  callback: (schema: GraphQLSchema) => void
+) =>
+  _pollSchema(options, interval, (schema) => callback(schema.schema)).then(
+    (taSchema) => taSchema.schema
+  );
+export const makeSchema = (options: Options) =>
+  _makeSchema(options).then((s) => s.schema);
