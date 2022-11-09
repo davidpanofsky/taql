@@ -19,7 +19,7 @@ const makeLegacyConfig = () => {
   } as const;
 };
 
-export function main() {
+export async function main() {
   const legacy = makeLegacyConfig();
 
   let port = Number(process.env.SERVER_PORT);
@@ -60,8 +60,16 @@ export function main() {
     console.log('schema reloaded');
   };
 
-  const initialSchema = pollSchema({ legacy }, FIVE_MINUTES_MILLIS, reloadYoga);
+  console.log('loading schema');
+  const initialSchema = await pollSchema(
+    { legacy },
+    FIVE_MINUTES_MILLIS,
+    reloadYoga
+  );
+  console.log('created initial schema');
   yoga = createYoga({ schema: initialSchema, ...yogaOptions });
+  server.addListener('request', yoga);
+  console.log('creating server');
 
   server.listen(port, () => {
     console.info('server running');
