@@ -5,15 +5,6 @@ __metadata:
   version: 6
   cacheKey: 8
 
-"@ardatan/sync-fetch@npm:0.0.1":
-  version: 0.0.1
-  resolution: "@ardatan/sync-fetch@npm:0.0.1::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40ardatan%2Fsync-fetch%2F-%2Fsync-fetch-0.0.1.tgz"
-  dependencies:
-    node-fetch: ^2.6.1
-  checksum: af39bdfb4c2b35bd2c6acc540a5e302730dae17e73d3a18cd1a4aa50c1c741cb1869dffdef1379c491da5ad2e3cfa2bf3a8064e6046c12b46c6a97f54f100a8d
-  languageName: node
-  linkType: hard
-
 "@envelop/core@npm:3.0.2":
   version: 3.0.2
   resolution: "@envelop/core@npm:3.0.2::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40envelop%2Fcore%2F-%2Fcore-3.0.2.tgz"
@@ -90,20 +81,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphql-tools/batch-execute@npm:8.5.11":
-  version: 8.5.11
-  resolution: "@graphql-tools/batch-execute@npm:8.5.11::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-tools%2Fbatch-execute%2F-%2Fbatch-execute-8.5.11.tgz"
-  dependencies:
-    "@graphql-tools/utils": 9.1.0
-    dataloader: 2.1.0
-    tslib: ^2.4.0
-    value-or-promise: 1.0.11
-  peerDependencies:
-    graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
-  checksum: b8ed7c5c6d41e2038e395692d8ea24a932435f2e61df20e8cf6edd19e4da1d4882952a5d1f8197894046b97452c2d096dc97267402f7e738ed7620dc0caf4993
-  languageName: node
-  linkType: hard
-
 "@graphql-tools/batch-execute@npm:8.5.8":
   version: 8.5.8
   resolution: "@graphql-tools/batch-execute@npm:8.5.8::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-tools%2Fbatch-execute%2F-%2Fbatch-execute-8.5.8.tgz"
@@ -135,23 +112,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphql-tools/delegate@npm:9.0.15":
-  version: 9.0.15
-  resolution: "@graphql-tools/delegate@npm:9.0.15::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-tools%2Fdelegate%2F-%2Fdelegate-9.0.15.tgz"
-  dependencies:
-    "@graphql-tools/batch-execute": 8.5.11
-    "@graphql-tools/executor": 0.0.7
-    "@graphql-tools/schema": 9.0.9
-    "@graphql-tools/utils": 9.1.0
-    dataloader: 2.1.0
-    tslib: ~2.4.0
-    value-or-promise: 1.0.11
-  peerDependencies:
-    graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
-  checksum: 11f357752d06b8c9ae9e65da37e343ef3fe77dce55ef71aff35574773292a9e9b541fc254ab8d081729884a2799ecf1e39a7c89e0ea6f9d5117d7863fb948a38
-  languageName: node
-  linkType: hard
-
 "@graphql-tools/executor@npm:0.0.2":
   version: 0.0.2
   resolution: "@graphql-tools/executor@npm:0.0.2::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-tools%2Fexecutor%2F-%2Fexecutor-0.0.2.tgz"
@@ -161,21 +121,6 @@ __metadata:
   peerDependencies:
     graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
   checksum: a5a6aeb1780f2cf14400a53d2d8ad5983c02cd1e9bbd06478c2e3f5b0363319c66383d30ea6e091ea995499137ed1554868e02f83d39e6d58708f7cc69a9e3fe
-  languageName: node
-  linkType: hard
-
-"@graphql-tools/executor@npm:0.0.7":
-  version: 0.0.7
-  resolution: "@graphql-tools/executor@npm:0.0.7::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-tools%2Fexecutor%2F-%2Fexecutor-0.0.7.tgz"
-  dependencies:
-    "@graphql-tools/utils": 9.1.0
-    "@graphql-typed-document-node/core": 3.1.1
-    "@repeaterjs/repeater": 3.0.4
-    tslib: ^2.4.0
-    value-or-promise: 1.0.11
-  peerDependencies:
-    graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
-  checksum: f3932fad016bf52481a64f816ab8edf6fc1a54298fe4929a6bd713c419df964310117a354f282fa8bc907083d94812b3cb2a834b5757afe43847bc6bd7d2db0e
   languageName: node
   linkType: hard
 
@@ -205,18 +150,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphql-tools/merge@npm:8.3.11":
-  version: 8.3.11
-  resolution: "@graphql-tools/merge@npm:8.3.11::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-tools%2Fmerge%2F-%2Fmerge-8.3.11.tgz"
-  dependencies:
-    "@graphql-tools/utils": 9.1.0
-    tslib: ^2.4.0
-  peerDependencies:
-    graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
-  checksum: 3cd16577f1ea1bcc389d232fa620adc0fefc91a6b42b48e7bb5e7bb67b67d206d409a9a8d60cac4d8cd5f0f1c5353369f7c5eb4054b44ce2277545e1fd1de17f
-  languageName: node
-  linkType: hard
-
 "@graphql-tools/merge@npm:8.3.8":
   version: 8.3.8
   resolution: "@graphql-tools/merge@npm:8.3.8::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-tools%2Fmerge%2F-%2Fmerge-8.3.8.tgz"
@@ -243,20 +176,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphql-tools/schema@npm:9.0.9":
-  version: 9.0.9
-  resolution: "@graphql-tools/schema@npm:9.0.9::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-tools%2Fschema%2F-%2Fschema-9.0.9.tgz"
-  dependencies:
-    "@graphql-tools/merge": 8.3.11
-    "@graphql-tools/utils": 9.1.0
-    tslib: ^2.4.0
-    value-or-promise: 1.0.11
-  peerDependencies:
-    graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
-  checksum: 23620a993eff57723302315100d947b81664d6a1e00010ff293b3649f51ab423946d73920cce0ce822b7f7f42b99ea23240902ff47df3d252639613c0df7b971
-  languageName: node
-  linkType: hard
-
 "@graphql-tools/stitch@npm:^8.7.15":
   version: 8.7.15
   resolution: "@graphql-tools/stitch@npm:8.7.15::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-tools%2Fstitch%2F-%2Fstitch-8.7.15.tgz"
@@ -272,30 +191,6 @@ __metadata:
   peerDependencies:
     graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
   checksum: 0024848cf5d29e107b6faef32ea2a4a1975c37a75d10dae38bfb0ba6adb145ab54f190211e6565167c372521ce731a92805b3329a8527589ba28102807ef6a39
-  languageName: node
-  linkType: hard
-
-"@graphql-tools/url-loader@npm:^7.16.12":
-  version: 7.16.12
-  resolution: "@graphql-tools/url-loader@npm:7.16.12::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-tools%2Furl-loader%2F-%2Furl-loader-7.16.12.tgz"
-  dependencies:
-    "@ardatan/sync-fetch": 0.0.1
-    "@graphql-tools/delegate": 9.0.15
-    "@graphql-tools/utils": 9.1.0
-    "@graphql-tools/wrap": 9.2.11
-    "@types/ws": ^8.0.0
-    "@whatwg-node/fetch": ^0.5.0
-    dset: ^3.1.2
-    extract-files: ^11.0.0
-    graphql-ws: ^5.4.1
-    isomorphic-ws: ^5.0.0
-    meros: ^1.1.4
-    tslib: ^2.4.0
-    value-or-promise: ^1.0.11
-    ws: ^8.3.0
-  peerDependencies:
-    graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
-  checksum: 4e3108413d2e13b90b9dd6cf04c9ffdb577c33f1bc5308b72f1f5209eeca85fd699927587bd3d3e6c17b7f9aa5c80e89a33e613d2047da0832be8ba83825bf7b
   languageName: node
   linkType: hard
 
@@ -318,32 +213,6 @@ __metadata:
   peerDependencies:
     graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
   checksum: ff04fdeb29e9ac596ea53386cd5b23cd741bb14c1997c6b0ba3c34ca165bd82b528a355e8c8e2ba726eb39e833ba9cbb0851ba0addb8c6d367089a1145bf9a49
-  languageName: node
-  linkType: hard
-
-"@graphql-tools/utils@npm:9.1.0":
-  version: 9.1.0
-  resolution: "@graphql-tools/utils@npm:9.1.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-tools%2Futils%2F-%2Futils-9.1.0.tgz"
-  dependencies:
-    tslib: ^2.4.0
-  peerDependencies:
-    graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
-  checksum: dcf08df3bd1715e25e3b80bf2dd332376239ebcd2a9b93f4d6b72a7bd3feffe2207b9683bb8fcaed9d0d1286f701d0686fe99ac803b91c0df54509b869c0554d
-  languageName: node
-  linkType: hard
-
-"@graphql-tools/wrap@npm:9.2.11":
-  version: 9.2.11
-  resolution: "@graphql-tools/wrap@npm:9.2.11::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-tools%2Fwrap%2F-%2Fwrap-9.2.11.tgz"
-  dependencies:
-    "@graphql-tools/delegate": 9.0.15
-    "@graphql-tools/schema": 9.0.9
-    "@graphql-tools/utils": 9.1.0
-    tslib: ^2.4.0
-    value-or-promise: 1.0.11
-  peerDependencies:
-    graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
-  checksum: 8b3049c81a2a8d2b08e0bb75316bdb9ee2df1a5da3fd521e57f1a664adcbe1c22ac0e3ac25d19df03dc923b2c157d482dcc624a2baa93636448669f8dd797843
   languageName: node
   linkType: hard
 
@@ -478,7 +347,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@repeaterjs/repeater@npm:3.0.4, @repeaterjs/repeater@npm:^3.0.4":
+"@repeaterjs/repeater@npm:^3.0.4":
   version: 3.0.4
   resolution: "@repeaterjs/repeater@npm:3.0.4::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40repeaterjs%2Frepeater%2F-%2Frepeater-3.0.4.tgz"
   checksum: cca0db3e802bc26fcce0b4a574074d9956da53bf43094de03c0e4732d05e13441279a92f0b96e2a7a39da50933684947a138c1213406eaafe39cfd4683d6c0df
@@ -491,16 +360,14 @@ __metadata:
   dependencies:
     "@graphql-tools/load": ^7.8.2
     "@graphql-tools/stitch": ^8.7.15
-    "@graphql-tools/url-loader": ^7.16.12
     "@graphql-tools/utils": ^8.13.1
     "@graphql-tools/wrap": ^9.2.5
     "@taql/ssl": "workspace:^"
     "@types/deep-equal": ^1.0.1
+    "@types/make-fetch-happen": ^10.0.0
     "@types/node": ^18.11.8
-    "@types/node-fetch": ^2.6.2
     deep-equal: ^2.1.0
     graphql: ^16.6.0
-    node-fetch: ^2.6.7
     typescript: ^4.8.4
   languageName: unknown
   linkType: soft
@@ -512,6 +379,7 @@ __metadata:
     "@taql/schema": "workspace:^"
     "@taql/ssl": "workspace:^"
     "@types/node": ^18.11.8
+    dotenv: ^16.0.3
     graphql: ^16.6.0
     graphql-yoga: three
     typescript: ^4.8.4
@@ -523,6 +391,8 @@ __metadata:
   resolution: "@taql/ssl@workspace:packages/ssl"
   dependencies:
     "@types/node": ^18.11.8
+    "@types/node-fetch": ^2.6.2
+    node-fetch: 2.6.7
     typescript: ^4.8.4
   languageName: unknown
   linkType: soft
@@ -554,6 +424,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/make-fetch-happen@npm:^10.0.0":
+  version: 10.0.0
+  resolution: "@types/make-fetch-happen@npm:10.0.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40types%2Fmake-fetch-happen%2F-%2Fmake-fetch-happen-10.0.0.tgz"
+  dependencies:
+    "@types/node-fetch": "*"
+    "@types/retry": "*"
+    "@types/ssri": "*"
+  checksum: 6911c4f7c404cadcc16a3e7a99142e323e7d1fb882e8e6ff6eee02e17effbb1b0f5eac1846a5f52e3ffb59ad82a5caf93703093ecc555a554968e18f923e3ed7
+  languageName: node
+  linkType: hard
+
+"@types/node-fetch@npm:*":
+  version: 3.0.2
+  resolution: "@types/node-fetch@npm:3.0.2::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40types%2Fnode-fetch%2F-%2Fnode-fetch-3.0.2.tgz"
+  dependencies:
+    node-fetch: "*"
+  checksum: b9f97bc4219c37f70299133b36389719cf4adacad46cea80df70f77d4a9f6999ea5be18a1ab90b34239b684cae032adeec10756cce8d2ae81c17f5e4c56fd4e9
+  languageName: node
+  linkType: hard
+
 "@types/node-fetch@npm:^2.6.2":
   version: 2.6.2
   resolution: "@types/node-fetch@npm:2.6.2::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40types%2Fnode-fetch%2F-%2Fnode-fetch-2.6.2.tgz"
@@ -578,6 +468,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/retry@npm:*":
+  version: 0.12.2
+  resolution: "@types/retry@npm:0.12.2::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40types%2Fretry%2F-%2Fretry-0.12.2.tgz"
+  checksum: e5675035717b39ce4f42f339657cae9637cf0c0051cf54314a6a2c44d38d91f6544be9ddc0280587789b6afd056be5d99dbe3e9f4df68c286c36321579b1bf4a
+  languageName: node
+  linkType: hard
+
 "@types/semver@npm:^7.3.12":
   version: 7.3.13
   resolution: "@types/semver@npm:7.3.13::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40types%2Fsemver%2F-%2Fsemver-7.3.13.tgz"
@@ -585,12 +482,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/ws@npm:^8.0.0":
-  version: 8.5.3
-  resolution: "@types/ws@npm:8.5.3::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40types%2Fws%2F-%2Fws-8.5.3.tgz"
+"@types/ssri@npm:*":
+  version: 7.1.1
+  resolution: "@types/ssri@npm:7.1.1::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40types%2Fssri%2F-%2Fssri-7.1.1.tgz"
   dependencies:
     "@types/node": "*"
-  checksum: 0ce46f850d41383fcdc2149bcacc86d7232fa7a233f903d2246dff86e31701a02f8566f40af5f8b56d1834779255c04ec6ec78660fe0f9b2a69cf3d71937e4ae
+  checksum: 0327eb212a8d52e09f0fe4df5e0f580db9daaf2e03fc9dbbc5c1356c92fd870084588e5b0b9b58546e1a5cae9a825097a74100c463b241f38dafb49043569de3
   languageName: node
   linkType: hard
 
@@ -733,22 +630,6 @@ __metadata:
     undici: ^5.10.0
     web-streams-polyfill: ^3.2.0
   checksum: 65678e9707a376596fc7bdb3b60fc71b96b3e533f07c3c6954860bce5c027c77d11c5fc03530e5f934df7cdaf361710f72260e1f6ef670ed4c7f5c0eb8600512
-  languageName: node
-  linkType: hard
-
-"@whatwg-node/fetch@npm:^0.5.0":
-  version: 0.5.1
-  resolution: "@whatwg-node/fetch@npm:0.5.1::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40whatwg-node%2Ffetch%2F-%2Ffetch-0.5.1.tgz"
-  dependencies:
-    "@peculiar/webcrypto": ^1.4.0
-    abort-controller: ^3.0.0
-    busboy: ^1.6.0
-    form-data-encoder: ^1.7.1
-    formdata-node: ^4.3.1
-    node-fetch: ^2.6.7
-    undici: ^5.12.0
-    web-streams-polyfill: ^3.2.0
-  checksum: f8d43b1bbf7ab20fc36bb9cc1d83094e1bb3d4b8256abd41045a02c3c9569d01f64309646273a4a50838929875408fc66396ada336747d81b2d3f965830bd0b6
   languageName: node
   linkType: hard
 
@@ -963,6 +844,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"data-uri-to-buffer@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "data-uri-to-buffer@npm:4.0.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fdata-uri-to-buffer%2F-%2Fdata-uri-to-buffer-4.0.0.tgz"
+  checksum: a010653869abe8bb51259432894ac62c52bf79ad761d418d94396f48c346f2ae739c46b254e8bb5987bded8a653d467db1968db3a69bab1d33aa5567baa5cfc7
+  languageName: node
+  linkType: hard
+
 "dataloader@npm:2.1.0":
   version: 2.1.0
   resolution: "dataloader@npm:2.1.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fdataloader%2F-%2Fdataloader-2.1.0.tgz"
@@ -1047,7 +935,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dset@npm:^3.1.1, dset@npm:^3.1.2":
+"dotenv@npm:^16.0.3":
+  version: 16.0.3
+  resolution: "dotenv@npm:16.0.3::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fdotenv%2F-%2Fdotenv-16.0.3.tgz"
+  checksum: afcf03f373d7a6d62c7e9afea6328e62851d627a4e73f2e12d0a8deae1cd375892004f3021883f8aec85932cd2834b091f568ced92b4774625b321db83b827f8
+  languageName: node
+  linkType: hard
+
+"dset@npm:^3.1.1":
   version: 3.1.2
   resolution: "dset@npm:3.1.2::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fdset%2F-%2Fdset-3.1.2.tgz"
   checksum: 4f8066f517aa0a70af688c66e9a0a5590f0aada76f6edc7ba9ddb309e27d3a6d65c0a2e31ab2a84005d4c791e5327773cdde59b8ab169050330a0dc283663e87
@@ -1239,13 +1134,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"extract-files@npm:^11.0.0":
-  version: 11.0.0
-  resolution: "extract-files@npm:11.0.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fextract-files%2F-%2Fextract-files-11.0.0.tgz"
-  checksum: 39ebd92772e9a1e30d1e3112fb7db85d353c8243640635668b615ac1d605ceb79fbb13d17829dd308993ef37bb189ad99817f79ab164ae95c9bb3df9f440bd16
-  languageName: node
-  linkType: hard
-
 "fast-deep-equal@npm:^3.1.1, fast-deep-equal@npm:^3.1.3":
   version: 3.1.3
   resolution: "fast-deep-equal@npm:3.1.3::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Ffast-deep-equal%2F-%2Ffast-deep-equal-3.1.3.tgz"
@@ -1286,6 +1174,16 @@ __metadata:
   dependencies:
     reusify: ^1.0.4
   checksum: 32cf15c29afe622af187d12fc9cd93e160a0cb7c31a3bb6ace86b7dea3b28e7b72acde89c882663f307b2184e14782c6c664fa315973c03626c7d4bff070bb0b
+  languageName: node
+  linkType: hard
+
+"fetch-blob@npm:^3.1.2, fetch-blob@npm:^3.1.4":
+  version: 3.2.0
+  resolution: "fetch-blob@npm:3.2.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Ffetch-blob%2F-%2Ffetch-blob-3.2.0.tgz"
+  dependencies:
+    node-domexception: ^1.0.0
+    web-streams-polyfill: ^3.0.3
+  checksum: f19bc28a2a0b9626e69fd7cf3a05798706db7f6c7548da657cbf5026a570945f5eeaedff52007ea35c8bcd3d237c58a20bf1543bc568ab2422411d762dd3d5bf
   languageName: node
   linkType: hard
 
@@ -1368,6 +1266,15 @@ __metadata:
     node-domexception: 1.0.0
     web-streams-polyfill: 4.0.0-beta.3
   checksum: d91d4f667cfed74827fc281594102c0dabddd03c9f8b426fc97123eedbf73f5060ee43205d89284d6854e2fc5827e030cd352ef68b93beda8decc2d72128c576
+  languageName: node
+  linkType: hard
+
+"formdata-polyfill@npm:^4.0.10":
+  version: 4.0.10
+  resolution: "formdata-polyfill@npm:4.0.10::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fformdata-polyfill%2F-%2Fformdata-polyfill-4.0.10.tgz"
+  dependencies:
+    fetch-blob: ^3.1.2
+  checksum: 82a34df292afadd82b43d4a740ce387bc08541e0a534358425193017bf9fb3567875dc5f69564984b1da979979b70703aa73dee715a17b6c229752ae736dd9db
   languageName: node
   linkType: hard
 
@@ -1471,15 +1378,6 @@ __metadata:
   version: 1.0.4
   resolution: "grapheme-splitter@npm:1.0.4::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fgrapheme-splitter%2F-%2Fgrapheme-splitter-1.0.4.tgz"
   checksum: 0c22ec54dee1b05cd480f78cf14f732cb5b108edc073572c4ec205df4cd63f30f8db8025afc5debc8835a8ddeacf648a1c7992fe3dcd6ad38f9a476d84906620
-  languageName: node
-  linkType: hard
-
-"graphql-ws@npm:^5.4.1":
-  version: 5.11.2
-  resolution: "graphql-ws@npm:5.11.2::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fgraphql-ws%2F-%2Fgraphql-ws-5.11.2.tgz"
-  peerDependencies:
-    graphql: ">=0.11 <=16"
-  checksum: 2c94b06c1919217dc15a0556474673de7aabcc7179a2982a87ded51856c105e4f4ee6d54a6c135a0a7f55d85a5997a6a15cff514959258885814adec6a61ff00
   languageName: node
   linkType: hard
 
@@ -1770,15 +1668,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"isomorphic-ws@npm:^5.0.0":
-  version: 5.0.0
-  resolution: "isomorphic-ws@npm:5.0.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fisomorphic-ws%2F-%2Fisomorphic-ws-5.0.0.tgz"
-  peerDependencies:
-    ws: "*"
-  checksum: e20eb2aee09ba96247465fda40c6d22c1153394c0144fa34fe6609f341af4c8c564f60ea3ba762335a7a9c306809349f9b863c8beedf2beea09b299834ad5398
-  languageName: node
-  linkType: hard
-
 "js-sdsl@npm:^4.1.4":
   version: 4.1.5
   resolution: "js-sdsl@npm:4.1.5::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fjs-sdsl%2F-%2Fjs-sdsl-4.1.5.tgz"
@@ -1853,18 +1742,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"meros@npm:^1.1.4":
-  version: 1.2.1
-  resolution: "meros@npm:1.2.1::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fmeros%2F-%2Fmeros-1.2.1.tgz"
-  peerDependencies:
-    "@types/node": ">=13"
-  peerDependenciesMeta:
-    "@types/node":
-      optional: true
-  checksum: 2201c3f7c58ad2a5b5f7d6b1c644d79bde513e25cb64b51a8c41381ec74bc02cd3423425e34f60c96bf3991f1ec51d65dc8b8e3354cbb060cc9f8226b4666a5a
-  languageName: node
-  linkType: hard
-
 "micromatch@npm:^4.0.4":
   version: 4.0.5
   resolution: "micromatch@npm:4.0.5::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fmicromatch%2F-%2Fmicromatch-4.0.5.tgz"
@@ -1914,14 +1791,25 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-domexception@npm:1.0.0":
+"node-domexception@npm:1.0.0, node-domexception@npm:^1.0.0":
   version: 1.0.0
   resolution: "node-domexception@npm:1.0.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fnode-domexception%2F-%2Fnode-domexception-1.0.0.tgz"
   checksum: ee1d37dd2a4eb26a8a92cd6b64dfc29caec72bff5e1ed9aba80c294f57a31ba4895a60fd48347cf17dd6e766da0ae87d75657dfd1f384ebfa60462c2283f5c7f
   languageName: node
   linkType: hard
 
-"node-fetch@npm:^2.6.1, node-fetch@npm:^2.6.7":
+"node-fetch@npm:*":
+  version: 3.2.10
+  resolution: "node-fetch@npm:3.2.10::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fnode-fetch%2F-%2Fnode-fetch-3.2.10.tgz"
+  dependencies:
+    data-uri-to-buffer: ^4.0.0
+    fetch-blob: ^3.1.4
+    formdata-polyfill: ^4.0.10
+  checksum: e65322431f4897ded04197aa5923eaec63a8d53e00432de4e70a4f7006625c8dc32629c5c35f4fe8ee719a4825544d07bf53f6e146a7265914262f493e8deac1
+  languageName: node
+  linkType: hard
+
+"node-fetch@npm:2.6.7, node-fetch@npm:^2.6.7":
   version: 2.6.7
   resolution: "node-fetch@npm:2.6.7::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fnode-fetch%2F-%2Fnode-fetch-2.6.7.tgz"
   dependencies:
@@ -2315,7 +2203,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici@npm:^5.10.0, undici@npm:^5.12.0":
+"undici@npm:^5.10.0":
   version: 5.12.0
   resolution: "undici@npm:5.12.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fundici%2F-%2Fundici-5.12.0.tgz"
   dependencies:
@@ -2347,7 +2235,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"web-streams-polyfill@npm:^3.2.0":
+"web-streams-polyfill@npm:^3.0.3, web-streams-polyfill@npm:^3.2.0":
   version: 3.2.1
   resolution: "web-streams-polyfill@npm:3.2.1::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fweb-streams-polyfill%2F-%2Fweb-streams-polyfill-3.2.1.tgz"
   checksum: b119c78574b6d65935e35098c2afdcd752b84268e18746606af149e3c424e15621b6f1ff0b42b2676dc012fc4f0d313f964b41a4b5031e525faa03997457da02
@@ -2445,21 +2333,6 @@ __metadata:
   version: 1.0.2
   resolution: "wrappy@npm:1.0.2::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fwrappy%2F-%2Fwrappy-1.0.2.tgz"
   checksum: 159da4805f7e84a3d003d8841557196034155008f817172d4e986bd591f74aa82aa7db55929a54222309e01079a65a92a9e6414da5a6aa4b01ee44a511ac3ee5
-  languageName: node
-  linkType: hard
-
-"ws@npm:^8.3.0":
-  version: 8.11.0
-  resolution: "ws@npm:8.11.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fws%2F-%2Fws-8.11.0.tgz"
-  peerDependencies:
-    bufferutil: ^4.0.1
-    utf-8-validate: ^5.0.2
-  peerDependenciesMeta:
-    bufferutil:
-      optional: true
-    utf-8-validate:
-      optional: true
-  checksum: 316b33aba32f317cd217df66dbfc5b281a2f09ff36815de222bc859e3424d83766d9eb2bd4d667de658b6ab7be151f258318fb1da812416b30be13103e5b5c67
   languageName: node
   linkType: hard
 

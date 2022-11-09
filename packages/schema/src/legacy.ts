@@ -4,9 +4,8 @@ import {
   Executor,
 } from '@graphql-tools/utils';
 
-import { agent } from '@taql/ssl';
+import { fetchWithAgent, sslConfig } from '@taql/ssl';
 import crypto from 'crypto';
-import fetch from 'node-fetch';
 import { loadSchema } from '@graphql-tools/load';
 import { print } from 'graphql';
 import { wrapSchema } from '@graphql-tools/wrap';
@@ -23,11 +22,11 @@ export function makeLegacyExecutor(url: string): Executor {
   ): Promise<ExecutionResult> => {
     const { document, variables } = request;
     const query = print(document);
-    const response = await fetch(url, {
+    const response = await fetchWithAgent(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ query, variables }),
-      agent,
+      ...sslConfig,
     });
     return <ExecutionResult>response.json();
   };
@@ -35,9 +34,12 @@ export function makeLegacyExecutor(url: string): Executor {
 }
 
 export async function makeLegacySchema(config: LegacyConfig) {
-  const rootUrl = `http://${config.host}:${config.httpPort}`;
+  const [protocol, port] = sslConfig
+    ? ['https', config.httpsPort]
+    : ['http', config.httpPort];
+  const rootUrl = `${protocol}://${config.host}:${port}`;
   const url = `${rootUrl}/v1/graphqlUnwrapped`;
-  const rawSchemaResponse = await fetch(`${rootUrl}/Schema`);
+  const rawSchemaResponse = await fetchWithAgent(`${rootUrl}/Schema`);
   const rawSchema = await rawSchemaResponse.text();
   const schema = await loadSchema(rawSchema, { loaders: [] });
   const executor = makeLegacyExecutor(url);

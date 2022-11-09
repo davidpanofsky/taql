@@ -1,5 +1,6 @@
 node_modules
 **/build
+.env
 
 # begin ignores for yarn
 .pnp.*
