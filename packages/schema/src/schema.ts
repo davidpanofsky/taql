@@ -27,9 +27,13 @@ export async function makeSchema(
 
   // load legacy schema;
   if (options.legacy != undefined) {
-    const legacy = await makeLegacySchema(options.legacy);
-    legacyHash = legacy.hash;
-    subschemas.push(legacy.schema);
+    const legacy = await makeLegacySchema(options.legacy).catch(
+      () => undefined
+    );
+    if (legacy != undefined) {
+      legacyHash = legacy.hash;
+      subschemas.push(legacy.schema);
+    }
   } else {
     console.log('legacy graphql will not be stitched');
   }
@@ -48,6 +52,7 @@ export async function makeSchema(
   // TODO load schemas from schema repository, add to subschemas.
 
   const schema = stitchSchemas({ subschemas });
+  // TODO handle error case; read schema.__validationErrors
 
   return {
     schema,

@@ -37,13 +37,18 @@ export async function makeLegacySchema(config: LegacyConfig) {
   const [protocol, port] = sslConfig
     ? ['https', config.httpsPort]
     : ['http', config.httpPort];
-  const rootUrl = `${protocol}://${config.host}:${port}`;
-  const url = `${rootUrl}/v1/graphqlUnwrapped`;
-  const rawSchemaResponse = await fetchWithAgent(`${rootUrl}/Schema`);
-  const rawSchema = await rawSchemaResponse.text();
-  const schema = await loadSchema(rawSchema, { loaders: [] });
-  const executor = makeLegacyExecutor(url);
-  const wrappedSchema = wrapSchema({ schema, executor });
-  const hash = crypto.createHash('md5').update(rawSchema).digest('hex');
-  return { schema: wrappedSchema, hash };
+  try {
+    const rootUrl = `${protocol}://${config.host}:${port}`;
+    const url = `${rootUrl}/v1/graphqlUnwrapped`;
+    const rawSchemaResponse = await fetchWithAgent(`${rootUrl}/Schema`);
+    const rawSchema = await rawSchemaResponse.text();
+    const schema = await loadSchema(rawSchema, { loaders: [] });
+    const executor = makeLegacyExecutor(url);
+    const wrappedSchema = wrapSchema({ schema, executor });
+    const hash = crypto.createHash('md5').update(rawSchema).digest('hex');
+    return { schema: wrappedSchema, hash };
+  } catch (e) {
+    console.error(`error loading legacy schema: ${e}`);
+    throw e;
+  }
 }
