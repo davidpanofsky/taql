@@ -2,6 +2,12 @@
 
 TA Graphql service
 
+## Commands
+
+- `yarn install --immutable` - install dependencies
+- `yarn run build` - build the repository
+- `yarn run start` - start the service
+
 ## Environment variables
 
 `taql` is configured via environment variables.
