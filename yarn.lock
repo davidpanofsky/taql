@@ -354,9 +354,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@taql/schema@workspace:^, @taql/schema@workspace:packages/schema":
+"@taql/executors@workspace:^, @taql/executors@workspace:packages/executors":
   version: 0.0.0-use.local
-  resolution: "@taql/schema@workspace:packages/schema"
+  resolution: "@taql/executors@workspace:packages/executors"
   dependencies:
     "@graphql-tools/load": ^7.8.2
     "@graphql-tools/stitch": ^8.7.15
@@ -365,6 +365,25 @@ __metadata:
     "@taql/ssl": "workspace:^"
     "@types/deep-equal": ^1.0.1
     "@types/make-fetch-happen": ^10.0.0
+    "@types/node": ^18.11.8
+    dataloader: ^2.1.0
+    deep-equal: ^2.1.0
+    graphql: ^16.6.0
+    typescript: ^4.8.4
+  languageName: unknown
+  linkType: soft
+
+"@taql/schema@workspace:^, @taql/schema@workspace:packages/schema":
+  version: 0.0.0-use.local
+  resolution: "@taql/schema@workspace:packages/schema"
+  dependencies:
+    "@graphql-tools/load": ^7.8.2
+    "@graphql-tools/stitch": ^8.7.15
+    "@graphql-tools/utils": ^8.13.1
+    "@graphql-tools/wrap": ^9.2.5
+    "@taql/executors": "workspace:^"
+    "@taql/ssl": "workspace:^"
+    "@types/deep-equal": ^1.0.1
     "@types/node": ^18.11.8
     deep-equal: ^2.1.0
     graphql: ^16.6.0
@@ -851,7 +870,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dataloader@npm:2.1.0":
+"dataloader@npm:2.1.0, dataloader@npm:^2.1.0":
   version: 2.1.0
   resolution: "dataloader@npm:2.1.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fdataloader%2F-%2Fdataloader-2.1.0.tgz"
   checksum: bbd43496c41697766f8611f60ed3bae437b450985499140b9603a2447c10d45975d3a0661caaebaa9750bc1bc9fd154676a314423294916c8b8ca1a59a08d139
