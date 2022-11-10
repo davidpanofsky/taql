@@ -7,6 +7,7 @@ import {
 import { createBatchingExecutor, subBatch } from './batching';
 import { fetchWithAgent, sslConfig } from '@taql/ssl';
 import DataLoader from 'dataloader';
+import { createLoadFn } from '@graphql-tools/batch-execute';
 import { print } from 'graphql';
 
 // extremely lazy header forwarding. all our custom
@@ -136,6 +137,21 @@ export function makeLegacyGqlExecutor<T extends string | number = never>(
 ): Executor {
   return createBatchingExecutor(
     subBatch(legacyGqlLoader.bind(null, url), subBatchIdFn),
+    executor,
+    dataLoaderOptions
+  );
+}
+
+export function makeSingleQueryBatchingExecutor<
+  T extends string | number = never
+>(
+  url: string,
+  dataLoaderOptions?: DataLoader.Options<ExecutionRequest, ExecutionResult>,
+  subBatchIdFn?: (req: ExecutionRequest) => T
+): Executor {
+  const executor = makeRemoteExecutor(url);
+  return createBatchingExecutor(
+    subBatch(createLoadFn(executor), subBatchIdFn),
     executor,
     dataLoaderOptions
   );

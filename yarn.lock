@@ -95,6 +95,34 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@graphql-tools/batch-execute@npm:^8.5.11":
+  version: 8.5.11
+  resolution: "@graphql-tools/batch-execute@npm:8.5.11::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-tools%2Fbatch-execute%2F-%2Fbatch-execute-8.5.11.tgz"
+  dependencies:
+    "@graphql-tools/utils": 9.1.0
+    dataloader: 2.1.0
+    tslib: ^2.4.0
+    value-or-promise: 1.0.11
+  peerDependencies:
+    graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
+  checksum: b8ed7c5c6d41e2038e395692d8ea24a932435f2e61df20e8cf6edd19e4da1d4882952a5d1f8197894046b97452c2d096dc97267402f7e738ed7620dc0caf4993
+  languageName: node
+  linkType: hard
+
+"@graphql-tools/batch-execute@patch:@graphql-tools/batch-execute@^8.5.11#./.yarn/patches/@graphql-tools-batch-execute-npm-8.5.11-c0fd4ea03c.patch::locator=%40taql%40workspace%3A.":
+  version: 8.5.11
+  resolution: "@graphql-tools/batch-execute@patch:@graphql-tools/batch-execute@npm%3A8.5.11%3A%3A__archiveUrl=https%253A%252F%252Fmaven.dev.tripadvisor.com%253A443%252Fartifactory%252Fapi%252Fnpm%252Fyarn%252F%2540graphql-tools%252Fbatch-execute%252F-%252Fbatch-execute-8.5.11.tgz#./.yarn/patches/@graphql-tools-batch-execute-npm-8.5.11-c0fd4ea03c.patch::version=8.5.11&hash=58d2fb&locator=%40taql%40workspace%3A."
+  dependencies:
+    "@graphql-tools/utils": 9.1.0
+    dataloader: 2.1.0
+    tslib: ^2.4.0
+    value-or-promise: 1.0.11
+  peerDependencies:
+    graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
+  checksum: 1cbee48c1ddc7bda0c322faec1f491c2022c711177553070536022416f053c2b6584ffab1f38b5da162195379e3add5ed8166927b55df9e0a59681f2c2266e16
+  languageName: node
+  linkType: hard
+
 "@graphql-tools/delegate@npm:9.0.10":
   version: 9.0.10
   resolution: "@graphql-tools/delegate@npm:9.0.10::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-tools%2Fdelegate%2F-%2Fdelegate-9.0.10.tgz"
@@ -213,6 +241,17 @@ __metadata:
   peerDependencies:
     graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
   checksum: ff04fdeb29e9ac596ea53386cd5b23cd741bb14c1997c6b0ba3c34ca165bd82b528a355e8c8e2ba726eb39e833ba9cbb0851ba0addb8c6d367089a1145bf9a49
+  languageName: node
+  linkType: hard
+
+"@graphql-tools/utils@npm:9.1.0":
+  version: 9.1.0
+  resolution: "@graphql-tools/utils@npm:9.1.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-tools%2Futils%2F-%2Futils-9.1.0.tgz"
+  dependencies:
+    tslib: ^2.4.0
+  peerDependencies:
+    graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
+  checksum: dcf08df3bd1715e25e3b80bf2dd332376239ebcd2a9b93f4d6b72a7bd3feffe2207b9683bb8fcaed9d0d1286f701d0686fe99ac803b91c0df54509b869c0554d
   languageName: node
   linkType: hard
 
@@ -358,6 +397,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@taql/executors@workspace:packages/executors"
   dependencies:
+    "@graphql-tools/batch-execute": ^8.5.11
     "@graphql-tools/load": ^7.8.2
     "@graphql-tools/stitch": ^8.7.15
     "@graphql-tools/utils": ^8.13.1
