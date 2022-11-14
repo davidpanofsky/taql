@@ -1,8 +1,7 @@
 import { Server, createServer as httpServer } from 'http';
-import { GraphQLSchema } from 'graphql';
+import { SchemaPoller } from '@taql/schema';
 import { createYoga } from 'graphql-yoga';
 import { createServer as httpsServer } from 'https';
-import { pollSchema } from '@taql/schema';
 import { sslConfig } from '@taql/ssl';
 
 const FIVE_MINUTES_MILLIS = 1000 * 60 * 5;
@@ -34,43 +33,36 @@ export async function main() {
     port = 4000;
   }
 
-  let server: Server;
-  if (sslConfig != undefined) {
-    server = httpsServer({ ...sslConfig });
-    console.log(`launching https server on port ${port}`);
-  } else {
-    server = httpServer();
-    console.log(`launching http server on port ${port}`);
-  }
-
   const yogaOptions = {
     // TODO pick a number that matches the current limit in legacy graphql,
     // and draw it from configuration.
     batching: { limit: 200 },
   } as const;
 
-  type YogaServer = ReturnType<typeof createYoga>;
-  let yoga: YogaServer;
+  const schemaPoller = new SchemaPoller({
+    options: { legacy },
+    interval: FIVE_MINUTES_MILLIS,
+  });
 
-  const reloadYoga = (schema: GraphQLSchema) => {
-    const next = createYoga({ schema, ...yogaOptions });
-    server.removeListener('request', yoga);
-    yoga = next;
-    server.addListener('request', yoga);
-    console.log('schema reloaded');
-  };
-
-  console.log('loading schema');
-  const initialSchema = await pollSchema(
-    { legacy },
-    FIVE_MINUTES_MILLIS,
-    reloadYoga
-  );
+  const schema = await schemaPoller.schema;
+  if (schema == undefined) {
+    throw new Error('failed to load initial schema');
+  }
   console.log('created initial schema');
-  yoga = createYoga({ schema: initialSchema, ...yogaOptions });
-  server.addListener('request', yoga);
-  console.log('creating server');
 
+  const yoga = createYoga({
+    schema,
+    ...yogaOptions,
+    plugins: [() => schemaPoller.asPlugin()],
+  });
+
+  const server: Server =
+    sslConfig == undefined ? httpServer() : httpsServer(sslConfig);
+
+  server.addListener('request', yoga);
+  console.log('created server');
+
+  console.log(`launching server on port ${port}`);
   server.listen(port, () => {
     console.info('server running');
   });
