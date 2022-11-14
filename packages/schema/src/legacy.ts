@@ -1,13 +1,7 @@
-import {
-  ExecutionRequest,
-  ExecutionResult,
-  Executor,
-} from '@graphql-tools/utils';
-
 import { fetchWithAgent, sslConfig } from '@taql/ssl';
+import { makeLegacyGqlExecutor, makeRemoteExecutor } from '@taql/executors';
 import crypto from 'crypto';
 import { loadSchema } from '@graphql-tools/load';
-import { print } from 'graphql';
 import { wrapSchema } from '@graphql-tools/wrap';
 
 export type LegacyConfig = {
@@ -16,44 +10,30 @@ export type LegacyConfig = {
   httpsPort: string;
 };
 
-export function makeLegacyExecutor(url: string): Executor {
-  const executor: Executor = async (
-    request: ExecutionRequest
-  ): Promise<ExecutionResult> => {
-    const { document, variables, context } = request;
-    // extremely lazy header forwarding, all our custom
-    // headers start with x-, and I guess we should do cookies too.
-    // TODO develop allow-list list of headers to forward
-    const headers = Object.fromEntries(
-      Object.entries(context?.req?.headers || {}).filter(
-        ([header]) => header.startsWith('x-') || header === 'cookie'
-      )
-    );
-
-    const query = print(document);
-    const response = await fetchWithAgent(url, {
-      method: 'POST',
-      headers: { ...headers, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query, variables }),
-      ...sslConfig,
-    });
-    return <ExecutionResult>response.json();
-  };
-  return executor;
-}
-
 export async function makeLegacySchema(config: LegacyConfig) {
   const [protocol, port] = sslConfig
     ? ['https', config.httpsPort]
     : ['http', config.httpPort];
   try {
     const rootUrl = `${protocol}://${config.host}:${port}`;
-    const url = `${rootUrl}/v1/graphqlUnwrapped`;
+    const singleUrl = `${rootUrl}/v1/graphqlUnwrapped`;
+    const batchUrl = `${rootUrl}/v1/graphqlBatched`;
     const rawSchemaResponse = await fetchWithAgent(`${rootUrl}/Schema`);
     const rawSchema = await rawSchemaResponse.text();
     const schema = await loadSchema(rawSchema, { loaders: [] });
-    const executor = makeLegacyExecutor(url);
-    const wrappedSchema = wrapSchema({ schema, executor });
+    const executor = makeRemoteExecutor(singleUrl);
+    // TODO refactor stuff so the request & response transformations managed by
+    // makeLegacyGqlExecutor are specified here and a generic method is called.
+    // Our batching logic shouldn't need to know about legacy-specific
+    // transformations at all.
+    // TODO specify subBatchIdFn so graphql requests from different users are
+    // not batched together.
+    const batchExecutor = makeLegacyGqlExecutor(batchUrl, executor, {
+      maxBatchSize: 100,
+      //buffer up to 10ms for more queries.
+      batchScheduleFn: (callback) => setTimeout(callback, 10),
+    });
+    const wrappedSchema = wrapSchema({ schema, executor: batchExecutor });
     const hash = crypto.createHash('md5').update(rawSchema).digest('hex');
     return { schema: wrappedSchema, hash };
   } catch (e) {

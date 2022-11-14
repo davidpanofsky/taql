@@ -26,5 +26,8 @@
     "typescript": "^4.8.4"
   },
   "license": "UNLINCENSED",
-  "private": true
+  "private": true,
+  "resolutions": {
+    "@graphql-tools/batch-execute@^8.5.11": "patch:@graphql-tools/batch-execute@^8.5.11#./.yarn/patches/@graphql-tools-batch-execute-npm-8.5.11-c0fd4ea03c.patch"
+  }
 }

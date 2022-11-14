@@ -1,0 +1,54 @@
+diff --git a/cjs/createBatchingExecutor.js b/cjs/createBatchingExecutor.js
+index db1adb5faae45abfe2642c2db81572aba446b8dd..3e6c2fad98104ab0a82454b82824a0c411589d89 100644
+--- a/cjs/createBatchingExecutor.js
++++ b/cjs/createBatchingExecutor.js
+@@ -15,7 +15,7 @@ function createBatchingExecutor(executor, dataLoaderOptions, extensionsReducer =
+     };
+ }
+ exports.createBatchingExecutor = createBatchingExecutor;
+-function createLoadFn(executor, extensionsReducer) {
++function createLoadFn(executor, extensionsReducer = defaultExtensionsReducer) {
+     return async function batchExecuteLoadFn(requests) {
+         const execBatches = [];
+         let index = 0;
+@@ -47,6 +47,7 @@ function createLoadFn(executor, extensionsReducer) {
+         return results.flat();
+     };
+ }
++exports.createLoadFn = createLoadFn;
+ function defaultExtensionsReducer(mergedExtensions, request) {
+     const newExtensions = request.extensions;
+     if (newExtensions != null) {
+diff --git a/esm/createBatchingExecutor.js b/esm/createBatchingExecutor.js
+index fcc43f45a3a4169af7df6f753d5e776cb0768870..4d8c4aee54e37146e04d0fc41bd5f7c49ff28664 100644
+--- a/esm/createBatchingExecutor.js
++++ b/esm/createBatchingExecutor.js
+@@ -10,7 +10,7 @@ export function createBatchingExecutor(executor, dataLoaderOptions, extensionsRe
+         return operationAst.operation === 'subscription' ? executor(request) : loader.load(request);
+     };
+ }
+-function createLoadFn(executor, extensionsReducer) {
++export function createLoadFn(executor, extensionsReducer = defaultExtensionsReducer) {
+     return async function batchExecuteLoadFn(requests) {
+         const execBatches = [];
+         let index = 0;
+diff --git a/typings/createBatchingExecutor.d.cts b/typings/createBatchingExecutor.d.cts
+index 808f0815d2b1c5d45fb8886adb3f1a1fc320ca2f..60417c8d271164b916dfdf1209ab97d018ab1856 100644
+--- a/typings/createBatchingExecutor.d.cts
++++ b/typings/createBatchingExecutor.d.cts
+@@ -1,3 +1,4 @@
+ import DataLoader from 'dataloader';
+-import { Executor, ExecutionRequest } from '@graphql-tools/utils';
++import { Executor, ExecutionRequest, ExecutionResult } from '@graphql-tools/utils';
+ export declare function createBatchingExecutor(executor: Executor, dataLoaderOptions?: DataLoader.Options<any, any, any>, extensionsReducer?: (mergedExtensions: Record<string, any>, request: ExecutionRequest) => Record<string, any>): Executor;
++export declare function createLoadFn(  executor: Executor, extensionsReducer?: (mergedExtensions: Record<string, any>, request: ExecutionRequest) => Record<string, any>): DataLoader.BatchLoadFn<ExecutionRequest, ExecutionResult>;
+diff --git a/typings/createBatchingExecutor.d.ts b/typings/createBatchingExecutor.d.ts
+index 808f0815d2b1c5d45fb8886adb3f1a1fc320ca2f..60417c8d271164b916dfdf1209ab97d018ab1856 100644
+--- a/typings/createBatchingExecutor.d.ts
++++ b/typings/createBatchingExecutor.d.ts
+@@ -1,3 +1,4 @@
+ import DataLoader from 'dataloader';
+-import { Executor, ExecutionRequest } from '@graphql-tools/utils';
++import { Executor, ExecutionRequest, ExecutionResult } from '@graphql-tools/utils';
+ export declare function createBatchingExecutor(executor: Executor, dataLoaderOptions?: DataLoader.Options<any, any, any>, extensionsReducer?: (mergedExtensions: Record<string, any>, request: ExecutionRequest) => Record<string, any>): Executor;
++export declare function createLoadFn(  executor: Executor, extensionsReducer?: (mergedExtensions: Record<string, any>, request: ExecutionRequest) => Record<string, any>): DataLoader.BatchLoadFn<ExecutionRequest, ExecutionResult>;
