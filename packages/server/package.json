@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@taql/context": "workspace:^",
+    "@taql/prereg": "workspace:^",
     "@taql/schema": "workspace:^",
     "@taql/ssl": "workspace:^",
     "dotenv": "^16.0.3",

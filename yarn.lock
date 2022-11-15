@@ -639,6 +639,16 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@taql/prereg@workspace:^, @taql/prereg@workspace:packages/prereg":
+  version: 0.0.0-use.local
+  resolution: "@taql/prereg@workspace:packages/prereg"
+  dependencies:
+    "@envelop/core": ^3.0.3
+    "@types/node": ^18.11.8
+    typescript: ^4.8.4
+  languageName: unknown
+  linkType: soft
+
 "@taql/schema@workspace:^, @taql/schema@workspace:packages/schema":
   version: 0.0.0-use.local
   resolution: "@taql/schema@workspace:packages/schema"
@@ -663,6 +673,7 @@ __metadata:
   resolution: "@taql/server@workspace:packages/server"
   dependencies:
     "@taql/context": "workspace:^"
+    "@taql/prereg": "workspace:^"
     "@taql/schema": "workspace:^"
     "@taql/ssl": "workspace:^"
     "@types/node": ^18.11.8
