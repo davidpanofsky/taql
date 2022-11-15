@@ -12,6 +12,7 @@
     "typescript": "^4.8.4"
   },
   "dependencies": {
+    "@taql/context": "workspace:^",
     "@taql/schema": "workspace:^",
     "@taql/ssl": "workspace:^",
     "dotenv": "^16.0.3",

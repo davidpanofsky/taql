@@ -1,11 +1,12 @@
 import {
-  ExecutionRequest,
   ExecutionResult,
   Executor,
   getOperationASTFromRequest,
 } from '@graphql-tools/utils';
 
 import DataLoader from 'dataloader';
+import { TaqlContext } from '@taql/context';
+import { TaqlRequest } from './index';
 
 type BatchEntry<T> = { val: T; idx: number };
 
@@ -126,16 +127,16 @@ export const subBatch = <T, K extends string | number, R>(
       };
 
 export const createBatchingExecutor = (
-  loadFn: DataLoader.BatchLoadFn<ExecutionRequest, ExecutionResult>,
-  executor: Executor,
-  dataLoaderOptions?: DataLoader.Options<ExecutionRequest, ExecutionResult>
-): Executor => {
+  loadFn: DataLoader.BatchLoadFn<TaqlRequest, ExecutionResult>,
+  executor: Executor<TaqlContext>,
+  dataLoaderOptions?: DataLoader.Options<TaqlRequest, ExecutionResult>
+): Executor<TaqlContext> => {
   //TODO evaluate whether having caching disabled is the correct default. I
   //think it is; our keys are necessarily the batch identifier  (see
   //batchByKey) AND the details of the execution request, which is an object.
   //Computation will be expensive.
   const loader = new DataLoader(loadFn, { cache: false, ...dataLoaderOptions });
-  return function batchingExecutor(request: ExecutionRequest) {
+  return function batchingExecutor(request: TaqlRequest) {
     const operationAst = getOperationASTFromRequest(request);
     return operationAst.operation === 'subscription'
       ? executor(request)

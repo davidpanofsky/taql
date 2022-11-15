@@ -2,6 +2,7 @@ import { Server, createServer as httpServer } from 'http';
 import { SchemaPoller } from '@taql/schema';
 import { createYoga } from 'graphql-yoga';
 import { createServer as httpsServer } from 'https';
+import { plugins } from '@taql/context';
 import { sslConfig } from '@taql/ssl';
 
 const FIVE_MINUTES_MILLIS = 1000 * 60 * 5;
@@ -53,7 +54,7 @@ export async function main() {
   const yoga = createYoga({
     schema,
     ...yogaOptions,
-    plugins: [() => schemaPoller.asPlugin()],
+    plugins: [schemaPoller.asPlugin(), ...plugins],
   });
 
   const server: Server =
