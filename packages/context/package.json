@@ -1,5 +1,5 @@
 {
-  "name": "@taql/executors",
+  "name": "@taql/context",
   "version": "1.0.0",
   "main": "build/index.js",
   "scripts": {
@@ -8,16 +8,13 @@
   },
   "license": "UNLICENSED",
   "devDependencies": {
-    "@types/node-fetch": "^2.6.2",
+    "@types/node-fetch": "2.6.2",
     "typescript": "^4.8.4"
   },
   "dependencies": {
-    "@graphql-tools/batch-execute": "^8.5.11",
-    "@graphql-tools/utils": "^8.13.1",
-    "@taql/context": "workspace:^",
-    "@taql/ssl": "workspace:^",
-    "dataloader": "^2.1.0",
+    "@envelop/core": "^3.0.3",
     "graphql": "^16.6.0",
+    "graphql-yoga": "three",
     "node-fetch": "^3.3.0"
   }
 }
