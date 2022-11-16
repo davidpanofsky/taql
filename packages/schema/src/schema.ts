@@ -1,14 +1,10 @@
-import { LegacyConfig, makeLegacySchema } from './legacy';
 import { EventEmitter } from 'events';
 import { GraphQLSchema } from 'graphql';
 import { Plugin } from '@envelop/core';
 import TypedEmitter from 'typed-emitter';
 import deepEqual from 'deep-equal';
+import { makeLegacySchema } from './legacy';
 import { stitchSchemas } from '@graphql-tools/stitch';
-
-export type Options = Readonly<{
-  legacy?: LegacyConfig;
-}>;
 
 export type SchemaDigest = {
   legacyHash: string;
@@ -21,24 +17,16 @@ export type TASchema = {
 };
 
 export async function makeSchema(
-  options: Options,
   previous?: TASchema
 ): Promise<TASchema | undefined> {
   const subschemas = [];
   let legacyHash = '';
   const manifest = '';
 
-  // load legacy schema;
-  if (options.legacy != undefined) {
-    const legacy = await makeLegacySchema(options.legacy).catch(
-      () => undefined
-    );
-    if (legacy != undefined) {
-      legacyHash = legacy.hash;
-      subschemas.push(legacy.schema);
-    }
-  } else {
-    console.log('legacy graphql will not be stitched');
+  const legacy = await makeLegacySchema().catch(() => undefined);
+  if (legacy != undefined) {
+    legacyHash = legacy.hash;
+    subschemas.push(legacy.schema);
   }
 
   // TODO load manifest from schema repository
@@ -79,21 +67,18 @@ type SchemaEvents = {
 };
 
 export class SchemaPoller extends (EventEmitter as new () => TypedEmitter<SchemaEvents>) {
-  private readonly options: Options;
-
   private _schema: undefined | TASchema | Promise<TASchema | undefined>;
 
-  constructor(args: { options: Options; interval: number }) {
+  constructor(args: { interval: number }) {
     super();
-    const { options, interval } = args;
-    this.options = options;
-    this._schema = makeSchema(this.options);
+    const { interval } = args;
+    this._schema = makeSchema();
     setInterval(this.tryUpdate.bind(this), interval);
   }
 
   private async tryUpdate() {
     const prev = await this._schema;
-    const next = await makeSchema(this.options, prev);
+    const next = await makeSchema(prev);
     if (next != prev && next != undefined) {
       // Don't update on broken schemas. The change between any two
       // schemas likely concerns very few subgraphs. If changing them

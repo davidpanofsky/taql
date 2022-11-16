@@ -15,9 +15,9 @@
     "@graphql-tools/batch-execute": "^8.5.11",
     "@graphql-tools/utils": "^8.13.1",
     "@taql/context": "workspace:^",
-    "@taql/ssl": "workspace:^",
+    "@taql/httpAgent": "workspace:^",
     "dataloader": "^2.1.0",
     "graphql": "^16.6.0",
-    "node-fetch": "^3.3.0"
+    "node-fetch": "^2.6.7"
   }
 }
