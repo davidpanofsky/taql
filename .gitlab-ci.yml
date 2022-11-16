@@ -13,6 +13,6 @@ test:
       - .yarn/cache/
   script:
     - yarn install --immutable
-    - yarn run lint
     - yarn run build
+    - yarn run lint
     - git diff --exit-code
