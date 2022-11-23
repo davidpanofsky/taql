@@ -4,7 +4,7 @@
   "main": "build/index.js",
   "scripts": {
     "build": "tsc",
-    "start": "node -r dotenv/config build/index.js"
+    "start": "node build/index.js"
   },
   "license": "UNLICENSED",
   "devDependencies": {
@@ -12,11 +12,11 @@
     "typescript": "^4.8.4"
   },
   "dependencies": {
+    "@taql/config": "workspace:^",
     "@taql/context": "workspace:^",
     "@taql/prereg": "workspace:^",
     "@taql/schema": "workspace:^",
     "@taql/ssl": "workspace:^",
-    "dotenv": "^16.0.3",
     "graphql": "^16.6.0",
     "graphql-yoga": "three"
   }

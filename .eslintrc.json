@@ -36,5 +36,21 @@
       "error",
       { "ignoreRestSiblings": true }
     ]
-  }
+  },
+  "overrides": [
+    {
+      "files": "**/*",
+      "excludedFiles": "packages/config/**/*",
+      "rules": {
+        "no-restricted-properties": [
+          "error",
+          {
+            "object": "process",
+            "property": "env",
+            "message": "Access to process.env disallowed outside @taql/config package"
+          }
+        ]
+      }
+    }
+  ]
 }

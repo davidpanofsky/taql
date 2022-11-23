@@ -1,24 +1,23 @@
-import { fetchWithAgent, sslConfig } from '@taql/ssl';
+import { httpAgent, httpsAgent } from '@taql/httpAgent';
 import { makeLegacyGqlExecutor, makeRemoteExecutor } from '@taql/executors';
+import { LEGACY_GQL_PARAMS } from '@taql/config';
 import crypto from 'crypto';
+import fetch from 'node-fetch';
 import { loadSchema } from '@graphql-tools/load';
 import { wrapSchema } from '@graphql-tools/wrap';
 
-export type LegacyConfig = {
-  host: string;
-  httpPort: string;
-  httpsPort: string;
-};
-
-export async function makeLegacySchema(config: LegacyConfig) {
-  const [protocol, port] = sslConfig
-    ? ['https', config.httpsPort]
-    : ['http', config.httpPort];
+export async function makeLegacySchema() {
+  const { host, httpPort, httpsPort } = LEGACY_GQL_PARAMS;
+  LEGACY_GQL_PARAMS.host;
+  const protocol = httpsAgent == undefined ? 'http' : 'https';
+  const port = protocol == 'http' ? httpPort : httpsPort;
   try {
-    const rootUrl = `${protocol}://${config.host}:${port}`;
+    const rootUrl = `${protocol}://${host}:${port}`;
     const singleUrl = `${rootUrl}/v1/graphqlUnwrapped`;
     const batchUrl = `${rootUrl}/v1/graphqlBatched`;
-    const rawSchemaResponse = await fetchWithAgent(`${rootUrl}/Schema`);
+    const rawSchemaResponse = await fetch(`${rootUrl}/Schema`, {
+      agent: httpsAgent || httpAgent,
+    });
     const rawSchema = await rawSchemaResponse.text();
     const schema = await loadSchema(rawSchema, { loaders: [] });
     const executor = makeRemoteExecutor(singleUrl);
