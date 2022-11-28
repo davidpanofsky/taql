@@ -105,7 +105,7 @@ export const makeRemoteExecutor = (url: string) => {
   });
   return async (request: TaqlRequest): Promise<ExecutionResult> =>
     load({
-      forwardHeaders: request.context?.forwardHeaders,
+      forwardHeaders: request.context?.state.forwardHeaders,
       request,
     });
 };

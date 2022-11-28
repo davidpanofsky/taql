@@ -8,16 +8,18 @@
   },
   "license": "UNLICENSED",
   "devDependencies": {
-    "@types/node": "^18.11.8",
+    "@types/koa": "^2.13.5",
     "typescript": "^4.8.4"
   },
   "dependencies": {
     "@taql/config": "workspace:^",
     "@taql/context": "workspace:^",
+    "@taql/plugins": "workspace:^",
     "@taql/prereg": "workspace:^",
     "@taql/schema": "workspace:^",
     "@taql/ssl": "workspace:^",
     "graphql": "^16.6.0",
-    "graphql-yoga": "three"
+    "graphql-yoga": "three",
+    "koa": "^2.13.4"
   }
 }

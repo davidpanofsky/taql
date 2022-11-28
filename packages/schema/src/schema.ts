@@ -91,12 +91,16 @@ export class SchemaPoller extends (EventEmitter as new () => TypedEmitter<Schema
     }
   }
 
-  public asPlugin(): Plugin {
+  public asPlugin(): { envelop: [Plugin] } {
     const onSchema = this.on.bind(this, 'schema');
     return {
-      onPluginInit({ setSchema }) {
-        onSchema((schema) => setSchema(schema));
-      },
+      envelop: [
+        {
+          onPluginInit({ setSchema }) {
+            onSchema((schema) => setSchema(schema));
+          },
+        },
+      ],
     };
   }
 

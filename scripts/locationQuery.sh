@@ -22,11 +22,13 @@ GRAPHQL_URL=${1:-http://localhost:4000/graphql}
 function query {
   IDS="$1"
   FIELDS="$2"
+  UNIQUE="$3"
 
   curl -s "$GRAPHQL_URL" \
     -H 'Accept-Language: en-US,en;q=0.9' \
     -H 'Connection: keep-alive' \
     -H "Origin: $GRAPHQL_URL" \
+    -H "x-unique-id: $UNIQUE" \
     -H "Referer: ${GRAPHQL_URL}?query=query+%7B%0A++locations%28locationIds%3A%5B60745%5D%29+%7B%0A%09%09name%0A++%7D%0A%7D" \
     -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36' \
     -H 'accept: application/graphql-response+json, application/json, multipart/mixed' \
@@ -39,7 +41,7 @@ function query {
 
 X=0
 while [ $((X++)) -lt 40 ]; do
-  query $X name &
+  query $X name $((X % 3)) &
 done
 
 wait

@@ -1,6 +1,7 @@
+import type { Middleware, ParameterizedContext } from 'koa';
 import { Headers as FetchHeaders } from 'node-fetch';
-import { Plugin } from '@envelop/core';
-import { YogaInitialContext } from 'graphql-yoga';
+import type { IncomingHttpHeaders } from 'http';
+import { KoaState } from './index';
 
 // Note: we never want to forward x-tripadvisor-locale, x-tripadvisor-currency,
 // or the like. If the response depends on locale, it must be included in the
@@ -29,47 +30,58 @@ export enum ForwardHeader {
   'x-b3-sampled',
   'b3',
 }
+export type ForwardHeaderName = keyof typeof ForwardHeader;
 
-const FORWARD_HEADERS: ReadonlySet<keyof typeof ForwardHeader> = new Set(
-  <(keyof typeof ForwardHeader)[]>Object.keys(ForwardHeader)
-);
+type HeaderPredicate = (key: string, val: string | undefined) => val is string;
+
+function forwardable(key: string, val: string | undefined): val is string {
+  return ForwardHeader[<ForwardHeaderName>key] != undefined && val != undefined;
+}
+
+function exists(key: string, val: string | undefined): val is string {
+  return val != undefined;
+}
 
 export const copyHeaders = (
-  headers: Headers | FetchHeaders | undefined,
-  filterPredicate?: (args: { val: string; key: string }) => boolean
+  headers: IncomingHttpHeaders | Headers | FetchHeaders | undefined,
+  filterPredicate: HeaderPredicate = exists
 ): FetchHeaders => {
   const copy = new FetchHeaders();
-  headers?.forEach((val, key) => {
-    if (filterPredicate == undefined || filterPredicate({ val, key })) {
-      copy.append(key, val);
+  if (headers == undefined) {
+    return copy;
+  }
+  if (typeof headers.forEach === 'function') {
+    // We have FetchHeaders or Headers
+    headers.forEach((val, key) => {
+      if (filterPredicate(key, val)) {
+        copy.append(key, val);
+      }
+    });
+  } else {
+    // We have IncomingHttpHeaders
+    for (const key in headers) {
+      [(<IncomingHttpHeaders>headers)[key]].flat().forEach((val) => {
+        if (filterPredicate(key, val)) {
+          copy.append(key, val);
+        }
+      });
     }
-  });
+  }
   return copy;
 };
 
-FORWARD_HEADERS;
-
 const deriveHeaders = (
-  context: YogaInitialContext & HeadersContext
-): FetchHeaders =>
-  copyHeaders(context.request.headers, ({ key }) =>
-    FORWARD_HEADERS.has(<keyof typeof ForwardHeader>(<unknown>key))
-  );
+  context: ParameterizedContext<KoaState>
+): FetchHeaders => {
+  const headers = copyHeaders(context.headers, forwardable);
 
-export type HeadersContext = {
-  forwardHeaders: FetchHeaders;
+  return headers;
+};
+export type HeadersState = {
+  readonly forwardHeaders: FetchHeaders;
 };
 
-export const headerPlugin: Plugin<YogaInitialContext & HeadersContext> = {
-  onContextBuilding({ context, extendContext }) {
-    let forwardHeaders: FetchHeaders | undefined = undefined;
-    extendContext({
-      get forwardHeaders() {
-        if (forwardHeaders == undefined) {
-          forwardHeaders = deriveHeaders(context);
-        }
-        return forwardHeaders;
-      },
-    });
-  },
+export const headerMiddleware: Middleware<KoaState> = async (ctx, next) => {
+  ctx.state = { ...ctx.state, forwardHeaders: deriveHeaders(ctx) };
+  await next();
 };
