@@ -2,7 +2,7 @@ import { HeadersState, headerMiddleware } from './headers';
 import type { Middleware, ParameterizedContext } from 'koa';
 import type { Plugin } from '@envelop/core';
 
-export { copyHeaders } from './headers';
+export { ForwardHeader, ForwardHeaderName, copyHeaders } from './headers';
 
 export type KoaState = HeadersState;
 export type EnvelopContext = Record<string, never>; //for now

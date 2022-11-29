@@ -1,6 +1,6 @@
 import { httpAgent, httpsAgent } from '@taql/httpAgent';
-import { makeLegacyGqlExecutor, makeRemoteExecutor } from '@taql/executors';
 import { LEGACY_GQL_PARAMS } from '@taql/config';
+import { createExecutor } from '@taql/batching';
 import crypto from 'crypto';
 import fetch from 'node-fetch';
 import { loadSchema } from '@graphql-tools/load';
@@ -13,26 +13,25 @@ export async function makeLegacySchema() {
   const port = protocol == 'http' ? httpPort : httpsPort;
   try {
     const rootUrl = `${protocol}://${host}:${port}`;
-    const singleUrl = `${rootUrl}/v1/graphqlUnwrapped`;
     const batchUrl = `${rootUrl}/v1/graphqlBatched`;
     const rawSchemaResponse = await fetch(`${rootUrl}/Schema`, {
       agent: httpsAgent || httpAgent,
     });
     const rawSchema = await rawSchemaResponse.text();
     const schema = await loadSchema(rawSchema, { loaders: [] });
-    const executor = makeRemoteExecutor(singleUrl);
-    // TODO refactor stuff so the request & response transformations managed by
-    // makeLegacyGqlExecutor are specified here and a generic method is called.
-    // Our batching logic shouldn't need to know about legacy-specific
-    // transformations at all.
-    // TODO specify subBatchIdFn so graphql requests from different users are
-    // not batched together.
-    const batchExecutor = makeLegacyGqlExecutor(batchUrl, executor, {
-      maxBatchSize: 100,
-      //buffer up to 10ms for more queries.
-      batchScheduleFn: (callback) => setTimeout(callback, 10),
+    const executor = createExecutor(batchUrl, {
+      style: 'Legacy',
+      strategy: 'BatchByUpstreamHeaders',
+      //strategy: 'InsecurelyBatchIndiscriminately',
+      //strategy: 'BatchByInboundRequest',
+      dataLoaderOptions: {
+        maxBatchSize: 100,
+        //buffer up to 10ms for more queries.
+        batchScheduleFn: (callback) => setTimeout(callback, 100),
+      },
     });
-    const wrappedSchema = wrapSchema({ schema, executor: batchExecutor });
+
+    const wrappedSchema = wrapSchema({ schema, executor });
     const hash = crypto.createHash('md5').update(rawSchema).digest('hex');
     return { schema: wrappedSchema, hash };
   } catch (e) {

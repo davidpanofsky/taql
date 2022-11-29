@@ -5,6 +5,7 @@ import { SERVER_PARAMS } from '@taql/config';
 import { SSL_CONFIG } from '@taql/ssl';
 import { SchemaPoller } from '@taql/schema';
 import { TaqlPlugins } from '@taql/plugins';
+import { plugins as batchingPlugins } from '@taql/batching';
 import { createYoga } from 'graphql-yoga';
 import { createServer as httpsServer } from 'https';
 import { plugins as preregPlugins } from '@taql/prereg';
@@ -33,6 +34,7 @@ export async function main() {
   const plugins: TaqlPlugins = new TaqlPlugins(
     schemaPoller.asPlugin(),
     contextPlugins,
+    batchingPlugins,
     { envelop: preregPlugins }
   );
 
