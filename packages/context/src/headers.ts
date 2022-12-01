@@ -12,8 +12,6 @@ export enum ForwardHeader {
   'x-unique-id',
   'x-ta-unique-dec',
   'x-ua',
-  'user-agent',
-  'cookie',
   'x-service-overrides',
   'x-txip',
   'authorization',
