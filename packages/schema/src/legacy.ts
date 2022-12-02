@@ -1,3 +1,4 @@
+import { BatchStyle, BatchingStrategy } from '@taql/batching-config';
 import { httpAgent, httpsAgent } from '@taql/httpAgent';
 import { LEGACY_GQL_PARAMS } from '@taql/config';
 import { createExecutor } from '@taql/batching';
@@ -20,14 +21,12 @@ export async function makeLegacySchema() {
     const rawSchema = await rawSchemaResponse.text();
     const schema = await loadSchema(rawSchema, { loaders: [] });
     const executor = createExecutor(batchUrl, {
-      style: 'Legacy',
-      strategy: 'BatchByUpstreamHeaders',
-      //strategy: 'InsecurelyBatchIndiscriminately',
-      //strategy: 'BatchByInboundRequest',
-      dataLoaderOptions: {
-        maxBatchSize: 100,
-        //buffer up to 10ms for more queries.
-        batchScheduleFn: (callback) => setTimeout(callback, 100),
+      style: BatchStyle.Legacy,
+      strategy: BatchingStrategy.BatchByUpstreamHeaders,
+      maxSize: 100,
+      wait: {
+        queries: 200,
+        millis: 20,
       },
     });
 

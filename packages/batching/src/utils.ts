@@ -1,5 +1,6 @@
+import type { BatchLoadFn, Options as DataLoaderOptions } from 'dataloader';
 import type { ExecutionRequest, ExecutionResult } from '@graphql-tools/utils';
-import type { BatchLoadFn } from 'dataloader';
+import type { BatchingConfig } from '@taql/batching-config';
 import type { Headers } from 'node-fetch';
 import type { PrivateContext } from './context';
 
@@ -13,6 +14,13 @@ export type TaqlBatchLoader = (args: {
 }) => ReturnType<BatchLoadFn<TaqlRequest, ExecutionResult>>;
 
 export type BatchEntry<T> = { val: T; idx: number };
+
+export const translateConfigToLoaderOptions = <T = unknown, E = unknown>(
+  config: BatchingConfig
+): DataLoaderOptions<T, E> => ({
+  batchScheduleFn: (callback) => setTimeout(callback, config.wait.millis),
+  maxBatchSize: config.maxSize,
+});
 
 export type BatchingOptions<
   T,

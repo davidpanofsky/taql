@@ -1,3 +1,4 @@
+import { BatchingConfig, BatchingStrategy } from '@taql/batching-config';
 import {
   ExecutionResult,
   getOperationASTFromRequest,
@@ -12,13 +13,9 @@ import {
 import type { BatchHeaders } from './context';
 import type { BatchLoadFn } from 'dataloader';
 
-export type BatchingStrategy =
-  | 'BatchByInboundRequest'
-  | 'BatchByUpstreamHeaders'
-  | 'InsecurelyBatchIndiscriminately';
-
 type Strategy = (
-  executor: TaqlBatchLoader
+  executor: TaqlBatchLoader,
+  config: BatchingConfig
 ) => BatchLoadFn<TaqlRequest, ExecutionResult>;
 
 /**
@@ -33,24 +30,24 @@ type Strategy = (
 const seriesIdFn = (req: TaqlRequest) =>
   getOperationASTFromRequest(req).operation;
 
-const byRequestStrategy: Strategy =
-  (executor: TaqlBatchLoader) => async (requests) => {
-    const batches = batchByKey(requests, {
-      subBatchIdFn: (req) =>
-        // Fall back to a symbol (which will never match another value)
-        req.context?.state._batching.requestUnique || Symbol(),
-      seriesIdFn,
-    });
-    const resultBatches = await Promise.all(
-      batches.map((subBatch) =>
-        executor({
-          request: subBatch.map((sub) => sub.val),
-          forwardHeaders: subBatch[0]?.val?.context?.state.forwardHeaders,
-        })
-      )
-    );
-    return restoreOrder(batches, resultBatches);
-  };
+const byRequestStrategy: Strategy = (executor, config) => async (requests) => {
+  const batches = batchByKey(requests, {
+    subBatchIdFn: (req) =>
+      // Fall back to a symbol (which will never match another value)
+      req.context?.state._batching.requestUnique || Symbol(),
+    seriesIdFn,
+    maxSize: config.maxSize,
+  });
+  const resultBatches = await Promise.all(
+    batches.map((subBatch) =>
+      executor({
+        request: subBatch.map((sub) => sub.val),
+        forwardHeaders: subBatch[0]?.val?.context?.state.forwardHeaders,
+      })
+    )
+  );
+  return restoreOrder(batches, resultBatches);
+};
 
 // Check a list of headers _assumed to be ordered_ for equality.
 const headersEqual = (
@@ -72,7 +69,7 @@ const headersEqual = (
     }));
 
 const byHeadersStrategy: Strategy =
-  (executor: TaqlBatchLoader) => async (requests) => {
+  (executor: TaqlBatchLoader, config: BatchingConfig) => async (requests) => {
     const batches = batchByKey(requests, {
       subBatchIdFn: (req) =>
         // Fall back to a symbol (which will never match another value)
@@ -83,6 +80,7 @@ const byHeadersStrategy: Strategy =
           rhs.context?.state?._batching.batchByHeaders
         ),
       seriesIdFn,
+      maxSize: config.maxSize,
     });
 
     const resultBatches = await Promise.all(
@@ -103,33 +101,7 @@ const insecureStrategy: Strategy = (executor: TaqlBatchLoader) => (request) =>
   });
 
 export const STRATEGIES: Record<BatchingStrategy, Strategy> = {
-  /**
-   * Barely permissive. Requests to upstream services triggered by the same
-   * request to taql may be batched.
-   */
-  BatchByInboundRequest: byRequestStrategy,
-  /**
-   * Moderately permissive. Requests to upstream services using this strategy
-   * may be batched with any other upstream request to that service so long as
-   * each upstream request has identical headers. The principle here is that if
-   * the service relies on headers to determine the contents of the response
-   * (say, for security reasons), and the requests have the same headers, the
-   * upstream service will make the same determinations either way. That is,
-   * such requests implicitly have the same origin.
-   *
-   * Note: Tracing headers (e.g., b3, x-b3-*) are ignored for these purposes.
-   */
-  BatchByUpstreamHeaders: byHeadersStrategy,
-  /**
-   * Note: This is incredibly dangerous. It has impressive performance
-   * implications, but you should use this strategy in only the most
-   * constrained, well-understood cases, or you will be the reason we're paying
-   * out an expensive bug bounty. Your call.
-   *
-   * Most permissive. Requests to upstream services may be batched together
-   * regardless of origin, with only headers from the first request sent
-   * upstream. If the upstream service consumes headers to provide security,
-   * this is incredibly dangerous, and should be used with caution.
-   */
-  InsecurelyBatchIndiscriminately: insecureStrategy,
+  [BatchingStrategy.BatchByInboundRequest]: byRequestStrategy,
+  [BatchingStrategy.BatchByUpstreamHeaders]: byHeadersStrategy,
+  [BatchingStrategy.InsecurelyBatchIndiscriminately]: insecureStrategy,
 };

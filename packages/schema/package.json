@@ -20,6 +20,7 @@
     "@graphql-tools/stitch": "^8.7.15",
     "@graphql-tools/wrap": "^9.2.5",
     "@taql/batching": "workspace:^",
+    "@taql/batching-config": "workspace:^",
     "@taql/config": "workspace:^",
     "@taql/httpAgent": "workspace:^",
     "deep-equal": "^2.1.0",

@@ -629,12 +629,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@taql/batching-config@workspace:^, @taql/batching-config@workspace:packages/batching-config":
+  version: 0.0.0-use.local
+  resolution: "@taql/batching-config@workspace:packages/batching-config"
+  dependencies:
+    typescript: ^4.8.4
+  languageName: unknown
+  linkType: soft
+
 "@taql/batching@workspace:^, @taql/batching@workspace:packages/batching":
   version: 0.0.0-use.local
   resolution: "@taql/batching@workspace:packages/batching"
   dependencies:
     "@graphql-tools/batch-execute": ^8.5.11
     "@graphql-tools/utils": ^8.13.1
+    "@taql/batching-config": "workspace:^"
     "@taql/context": "workspace:^"
     "@taql/executors": "workspace:^"
     "@types/koa": ^2.13.5
@@ -719,6 +728,7 @@ __metadata:
     "@graphql-tools/stitch": ^8.7.15
     "@graphql-tools/wrap": ^9.2.5
     "@taql/batching": "workspace:^"
+    "@taql/batching-config": "workspace:^"
     "@taql/config": "workspace:^"
     "@taql/httpAgent": "workspace:^"
     "@types/deep-equal": ^1.0.1

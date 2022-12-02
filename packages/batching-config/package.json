@@ -1,0 +1,13 @@
+{
+  "name": "@taql/batching-config",
+  "version": "1.0.0",
+  "main": "build/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node build/index.js"
+  },
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "typescript": "^4.8.4"
+  }
+}
