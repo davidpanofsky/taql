@@ -13,6 +13,15 @@ const preregisteredQueryResolver: Plugin = {
   // koa plugins.
   onParse(params) {
     console.log(inspect({ onParse: params }));
+    let context = params['context'];
+    let extensions = context['params' as keyof typeof context]['extensions'];
+    console.log(typeof extensions);
+    console.log(extensions);
+    
+    const maybePreregisteredId: string | null = extensions['preRegisteredQueryId'];
+    if (maybePreregisteredId) {
+      console.log("Got preregistered query id: " + maybePreregisteredId);
+    }
   },
 };
 
