@@ -58,6 +58,10 @@ function normalizeArgs {
   done
 }
 
+SOURCE=${BASH_SOURCE[0]}
+SCRIPT_DIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
+#navigate to the top level of the project
+cd "${SCRIPT_DIR}/.."
 if [ $# -gt 0 ]; then
   ARGS=()
   while read ARG; do
