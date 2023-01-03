@@ -12,7 +12,4 @@ test:
     paths:
       - .yarn/cache/
   script:
-    - yarn install --immutable
-    - yarn run build
-    - yarn run lint
-    - git diff --exit-code
+    - ./scripts/ci.bash

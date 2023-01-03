@@ -1,16 +1,9 @@
-import {
-  ExecutionRequest,
-  ExecutionResult,
-  Executor,
-} from '@graphql-tools/utils';
+import { ExecutionRequest, ExecutionResult } from '@graphql-tools/utils';
 
 import { TaqlContext, copyHeaders } from '@taql/context';
-import { createBatchingExecutor, subBatch } from './batching';
 import fetch, { Headers } from 'node-fetch';
 import { httpAgent, httpsAgent } from '@taql/httpAgent';
-import { Agent } from 'http';
-import DataLoader from 'dataloader';
-import { createLoadFn } from '@graphql-tools/batch-execute';
+import type { Agent } from 'http';
 import { print } from 'graphql';
 
 export type TaqlRequest = ExecutionRequest<
@@ -18,7 +11,7 @@ export type TaqlRequest = ExecutionRequest<
   TaqlContext
 >;
 
-const formatRequest = (request: TaqlRequest) => {
+export const formatRequest = (request: TaqlRequest) => {
   const { document, variables } = request;
   const query = print(document);
   return { query, variables } as const;
@@ -65,7 +58,7 @@ const load = async <T, R>({
   return <R>response.json();
 };
 
-const bindLoad = <T_1, R_1, T_2 = unknown, R_2 = unknown>(
+export const bindLoad = <T_1, R_1, T_2 = unknown, R_2 = unknown>(
   url: string,
   transform?: Transform<T_1, R_1, T_2, R_2>
 ): Load<T_1, R_1> => {
@@ -105,93 +98,7 @@ export const makeRemoteExecutor = (url: string) => {
   });
   return async (request: TaqlRequest): Promise<ExecutionResult> =>
     load({
-      forwardHeaders: request.context?.forwardHeaders,
+      forwardHeaders: request.context?.state.forwardHeaders,
       request,
     });
 };
-
-export function createArrayBatchingExecutor<T extends string | number = never>(
-  url: string,
-  dataLoaderOptions?: DataLoader.Options<TaqlRequest, ExecutionResult>,
-  subBatchIdFn?: (req: TaqlRequest) => T
-): Executor<TaqlContext> {
-  const arrayLoader = bindLoad(url, {
-    request: (requests: ReadonlyArray<TaqlRequest>) =>
-      requests.map(formatRequest),
-  });
-
-  return createBatchingExecutor(
-    subBatch(
-      (requests) => <Promise<ExecutionResult[]>>arrayLoader({
-          request: requests,
-          // thankfully we know all these requests have the same context, so
-          // these headers are correct for all the requests in the batch, not
-          // just the first.
-          // TODO this is tremendously bad code smell, though.
-          // The headers must be passed in.
-          forwardHeaders: requests[0].context?.forwardHeaders,
-        }),
-      subBatchIdFn
-    ),
-    makeRemoteExecutor(url),
-    dataLoaderOptions
-  );
-}
-
-export function makeLegacyGqlExecutor<T extends string | number = never>(
-  url: string,
-  executor: Executor<TaqlContext>,
-  dataLoaderOptions?: DataLoader.Options<TaqlRequest, ExecutionResult>,
-  subBatchIdFn?: (req: TaqlRequest) => T
-): Executor {
-  type LegacyResponse = { results: { result: ExecutionResult }[] };
-
-  const load = bindLoad<
-    ReadonlyArray<TaqlRequest>,
-    ExecutionResult[],
-    unknown,
-    LegacyResponse
-  >(url, {
-    // legacy graphql's batched endpoint accepts `{ requests: request[] }`, not request[]
-    request: (requests) => ({
-      requests: requests.map(formatRequest),
-    }),
-    //legacy graphql's batched endpoint returns `{ results: {result}[] }`,
-    //not `result[]`
-    response: (response) =>
-      response.results.map((result) => <ExecutionResult>result.result),
-  });
-
-  return createBatchingExecutor(
-    subBatch(
-      (requests) =>
-        load({
-          request: requests,
-          // thankfully we know all these requests have the same context, so
-          // these headers are correct for all the requests in the batch, not
-          // just the first.
-          // TODO this is tremendously bad code smell, though.
-          // The headers must be passed in.
-          forwardHeaders: requests[0].context?.forwardHeaders,
-        }),
-      subBatchIdFn
-    ),
-    executor,
-    dataLoaderOptions
-  );
-}
-
-export function makeSingleQueryBatchingExecutor<
-  T extends string | number = never
->(
-  url: string,
-  dataLoaderOptions?: DataLoader.Options<TaqlRequest, ExecutionResult>,
-  subBatchIdFn?: (req: TaqlRequest) => T
-): Executor<TaqlContext> {
-  const executor = makeRemoteExecutor(url);
-  return createBatchingExecutor(
-    subBatch(createLoadFn(<Executor>executor), subBatchIdFn),
-    executor,
-    dataLoaderOptions
-  );
-}

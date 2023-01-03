@@ -1,8 +1,11 @@
 import { Server, createServer as httpServer } from 'http';
+import { TaqlContext, plugins as contextPlugins } from '@taql/context';
+import Koa from 'koa';
 import { SERVER_PARAMS } from '@taql/config';
 import { SSL_CONFIG } from '@taql/ssl';
 import { SchemaPoller } from '@taql/schema';
-import { plugins as contextPlugins } from '@taql/context';
+import { TaqlPlugins } from '@taql/plugins';
+import { plugins as batchingPlugins } from '@taql/batching';
 import { createYoga } from 'graphql-yoga';
 import { createServer as httpsServer } from 'https';
 import { plugins as preregPlugins } from '@taql/prereg';
@@ -28,16 +31,42 @@ export async function main() {
   }
   console.log('created initial schema');
 
-  const yoga = createYoga({
+  const plugins: TaqlPlugins = new TaqlPlugins(
+    schemaPoller.asPlugin(),
+    contextPlugins,
+    batchingPlugins,
+    { envelop: preregPlugins }
+  );
+
+  const yoga = createYoga<TaqlContext>({
     schema,
     ...yogaOptions,
-    plugins: [schemaPoller.asPlugin(), ...preregPlugins, ...contextPlugins],
+    plugins: plugins.envelop(),
+  });
+
+  const koa = new Koa();
+  plugins.koa().forEach((mw) => koa.use(mw));
+
+  koa.use(async (ctx) => {
+    // Second parameter adds Koa's context into GraphQL Context
+    const response = await yoga.handleNodeRequest(ctx.req, ctx);
+
+    // Set status code
+    ctx.status = response.status;
+
+    // Set headers
+    response.headers.forEach((value, key) => {
+      ctx.append(key, value);
+    });
+
+    // Converts ReadableStream to a NodeJS Stream
+    ctx.body = response.body;
   });
 
   const server: Server =
     SSL_CONFIG == undefined ? httpServer() : httpsServer(SSL_CONFIG);
 
-  server.addListener('request', yoga);
+  server.addListener('request', koa.callback());
   console.log('created server');
 
   console.log(`launching server on port ${port}`);

@@ -4,8 +4,10 @@
   "main": "build/index.js",
   "scripts": {
     "format": "prettier --write . || true && eslint --fix . || true",
-    "lint": "prettier --write . && eslint --fix --max-warnings 0 --no-error-on-unmatched-pattern . && depcheck && yarn workspaces foreach -pv exec depcheck",
-    "start": "yarn workspace @taql/server run start",
+    "lint": "prettier --write . && eslint --fix --max-warnings 0 --no-error-on-unmatched-pattern .",
+    "depcheck": "depcheck && yarn workspaces foreach -pv exec depcheck",
+    "server": "./scripts/server.bash",
+    "start": "echo \"deprecated; use 'yarn run server start'\" >/dev/stderr ; yarn run server start",
     "build": "yarn workspaces foreach -tpv run build"
   },
   "engines": {
