@@ -34,3 +34,19 @@ If `LEGACY_GQL_HOST` is not set, the legacy graphql service will not be stitched
 - `LEGACY_GQL_HOST`: _(optional)_ The host of the legacy graphql service
 - `LEGACY_GQL_HTTP_PORT`: _(optional, default `80`)_ The port to use when making http requests to the legacy graphql service
 - `LEGACY_GQL_HTTPS_PORT`: _(optional, default `443`)_ The port to use when making https requests to the legacy graphql service.
+
+## Building containers
+
+### Build
+```
+VERSION=<version>
+IMAGE=siteops-docker.maven.dev.tripadvisor.com/taql
+docker build . -t "${IMAGE}:${VERSION}"
+```
+
+### Push
+```
+IMAGE=siteops-docker.maven.dev.tripadvisor.com/taql
+docker login siteops-docker.maven.dev.tripadvisor.com
+docker push ${IMAGE}
+```
