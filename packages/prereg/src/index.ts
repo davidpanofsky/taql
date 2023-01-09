@@ -12,8 +12,9 @@ import { inspect } from 'util';
 // configuration passable
 const defaultDbUri =
   'postgres://graphql_operations_ros@graphql-operations-ros.db.var.ml.tripadvisor.com';
+
 const connectionString =
-  process.env['PREREGISTERED_QUERY_DB_URI'] || defaultDbUri;
+  process.env['PREREGISTERED_QUERY_DB_URI'] || defaultDbUri; // eslint-disable-line no-restricted-properties
 const db = new Pool({
   connectionString,
   max: 10,
