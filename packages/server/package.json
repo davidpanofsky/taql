@@ -4,18 +4,23 @@
   "main": "build/index.js",
   "scripts": {
     "build": "tsc",
-    "start": "node -r dotenv/config build/index.js"
+    "start": "node build/index.js"
   },
   "license": "UNLICENSED",
   "devDependencies": {
-    "@types/node": "^18.11.8",
+    "@types/koa": "^2.13.5",
     "typescript": "^4.8.4"
   },
   "dependencies": {
+    "@taql/batching": "workspace:^",
+    "@taql/config": "workspace:^",
+    "@taql/context": "workspace:^",
+    "@taql/plugins": "workspace:^",
+    "@taql/prereg": "workspace:^",
     "@taql/schema": "workspace:^",
     "@taql/ssl": "workspace:^",
-    "dotenv": "^16.0.3",
     "graphql": "^16.6.0",
-    "graphql-yoga": "three"
+    "graphql-yoga": "three",
+    "koa": "^2.13.4"
   }
 }

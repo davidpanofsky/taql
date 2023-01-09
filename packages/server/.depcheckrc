@@ -1,0 +1,1 @@
+ignores: ["dotenv", "@types/koa"]

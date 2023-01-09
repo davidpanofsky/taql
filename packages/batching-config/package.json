@@ -1,5 +1,5 @@
 {
-  "name": "@taql/ssl",
+  "name": "@taql/batching-config",
   "version": "1.0.0",
   "main": "build/index.js",
   "scripts": {
@@ -9,8 +9,5 @@
   "license": "UNLICENSED",
   "devDependencies": {
     "typescript": "^4.8.4"
-  },
-  "dependencies": {
-    "@taql/config": "workspace:^"
   }
 }

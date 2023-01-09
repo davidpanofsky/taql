@@ -1,5 +1,5 @@
 {
-  "name": "@taql/ssl",
+  "name": "@taql/context",
   "version": "1.0.0",
   "main": "build/index.js",
   "scripts": {
@@ -8,9 +8,12 @@
   },
   "license": "UNLICENSED",
   "devDependencies": {
+    "@types/node-fetch": "2.6.2",
+    "koa": "^2.13.4",
     "typescript": "^4.8.4"
   },
   "dependencies": {
-    "@taql/config": "workspace:^"
+    "@envelop/core": "^3.0.3",
+    "node-fetch": "^2.6.7"
   }
 }
