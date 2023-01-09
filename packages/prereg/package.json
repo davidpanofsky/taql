@@ -12,6 +12,8 @@
     "typescript": "^4.8.4"
   },
   "dependencies": {
-    "@envelop/core": "^3.0.3"
+    "@envelop/core": "^3.0.3",
+    "@types/pg": "^8.6.6",
+    "pg": "^8.6.6"
   }
 }
