@@ -10,27 +10,30 @@ import { inspect } from 'util';
 // the pool during the call.  That would be sweet if we were passed some params at that time.
 // TODO(smitchell): Climb to the top of the stack and see where this is initialized and if we have access to make
 // configuration passable
-const defaultDbUri = 'postgres://graphql_operations_ros@graphql-operations-ros.db.var.ml.tripadvisor.com'
-const connectionString = process.env['PREREGISTERED_QUERY_DB_URI'] || defaultDbUri;
+const defaultDbUri =
+  'postgres://graphql_operations_ros@graphql-operations-ros.db.var.ml.tripadvisor.com';
+const connectionString =
+  process.env['PREREGISTERED_QUERY_DB_URI'] || defaultDbUri;
 const db = new Pool({
   connectionString,
   max: 10,
-  idleTimeoutMillis: 5000
+  idleTimeoutMillis: 5000,
 });
 
-process.on('exit', function() {
-  db.end()
-    .then(() => console.log(`Shutting down connection pool to ${connectionString}`));
+process.on('exit', function () {
+  db.end().then(() =>
+    console.log(`Shutting down connection pool to ${connectionString}`)
+  );
 });
 
 function lookupQuery(queryId: string, pool: Pool): Promise<string> {
   return pool
     .query('SELECT code FROM t_graphql_operations WHERE id = $1', [queryId])
     .then((res) => {
-      const query = res.rows.length > 0 ? res.rows[0].code : ''
+      const query = res.rows.length > 0 ? res.rows[0].code : '';
       console.log(`resolved ${queryId} to ${query}`);
       return query;
-    })
+    });
 }
 
 const preregisteredQueryResolver: Plugin = {
@@ -45,18 +48,21 @@ const preregisteredQueryResolver: Plugin = {
   // koa plugins.
   onParse(params) {
     console.log(inspect({ onParse: params }));
-    let context = params['context'];
-    let extensions = context['params' as keyof typeof context]['extensions'];
+    const context = params['context'];
+    const extensions = context['params' as keyof typeof context]['extensions'];
     console.log(extensions);
 
-    const maybePreregisteredId: string | null = extensions && extensions['preRegisteredQueryId'];
+    const maybePreregisteredId: string | null =
+      extensions && extensions['preRegisteredQueryId'];
     if (maybePreregisteredId) {
-      console.log("Got preregistered query id: " + maybePreregisteredId);
-      params.setParsedDocument(lookupQuery(maybePreregisteredId, db).then(params.parseFn));
+      console.log(`Got preregistered query id: ${maybePreregisteredId}`);
+      params.setParsedDocument(
+        lookupQuery(maybePreregisteredId, db).then(params.parseFn)
+      );
     }
   },
   onContextBuilding(params) {
-    console.log(inspect({ onContextBuilding: params}));
+    console.log(inspect({ onContextBuilding: params }));
     console.log(params['context']);
   },
 };
