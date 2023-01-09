@@ -24,7 +24,13 @@ process.on('exit', function() {
 });
 
 function lookupQuery(queryId: string, pool: Pool): Promise<string> {
-  return Promise.resolve('query{LocationSelection_getLocations(locationIds:[1,730099]){ locationId isBroadGeo}}');
+  return pool
+    .query('SELECT code FROM t_graphql_operations WHERE id = $1', [queryId])
+    .then((res) => {
+      const query = res.rows.length > 0 ? res.rows[0].code : ''
+      console.log(`resolved ${queryId} to ${query}`);
+      return query;
+    })
 }
 
 const preregisteredQueryResolver: Plugin = {
