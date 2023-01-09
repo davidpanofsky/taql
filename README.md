@@ -38,6 +38,7 @@ If `LEGACY_GQL_HOST` is not set, the legacy graphql service will not be stitched
 ## Building containers
 
 ### Build
+
 ```
 VERSION=<version>
 IMAGE=siteops-docker.maven.dev.tripadvisor.com/taql
@@ -45,6 +46,7 @@ docker build . -t "${IMAGE}:${VERSION}"
 ```
 
 ### Push
+
 ```
 IMAGE=siteops-docker.maven.dev.tripadvisor.com/taql
 docker login siteops-docker.maven.dev.tripadvisor.com
