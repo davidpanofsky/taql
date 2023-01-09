@@ -5,4 +5,4 @@ WORKDIR /opt/taql
 RUN yarn install --immutable && \
     yarn run build
 
-CMD ["yarn", "run", "start"]
+CMD ["yarn", "run", "server", "start"]
