@@ -7,12 +7,10 @@ function main {
   NO_CLEAN=false
   while [ $# -gt 0 ]; do
     case $1 in
-      --ignore-changes ) ;&
-      -i )
+      --ignore-changes|-i )
         IGNORE_CHANGES=true
         ;;
-      --no-clean ) ;&
-      -n )
+      --no-clean|-n )
         NO_CLEAN=true
         ;;
     esac
