@@ -1,5 +1,5 @@
 import { Plugin } from '@envelop/core';
-import { Pool } from 'pg';
+const Client = require('pg-native');
 import { inspect } from 'util';
 
 // One single pool at the top level; it seems overly complicated to try to keep this inside the plugin object,
@@ -15,26 +15,14 @@ const defaultDbUri =
 
 const connectionString =
   process.env['PREREGISTERED_QUERY_DB_URI'] || defaultDbUri; // eslint-disable-line no-restricted-properties
-const db = new Pool({
-  connectionString,
-  max: 10,
-  idleTimeoutMillis: 5000,
-});
+const db = new Client(connectionString);
+// The plugin's onParse method is synchronous and setting the document to a promise of the parsed query breaks
+// things. Instead we just bite the bullet and do synchronous IO.
+db.connectSync();
 
-process.on('exit', function () {
-  db.end().then(() =>
-    console.log(`Shutting down connection pool to ${connectionString}`)
-  );
-});
-
-function lookupQuery(queryId: string, pool: Pool): Promise<string> {
-  return pool
-    .query('SELECT code FROM t_graphql_operations WHERE id = $1', [queryId])
-    .then((res) => {
-      const query = res.rows.length > 0 ? res.rows[0].code : '';
-      console.log(`resolved ${queryId} to ${query}`);
-      return query;
-    });
+function lookupQuery(queryId: string, db: typeof Client): Promise<string> {
+  const res = db.querySync('SELECT code FROM t_graphql_operations WHERE id = $1', [queryId])
+  return res.length > 0 ? res[0].code : '';
 }
 
 const preregisteredQueryResolver: Plugin = {
@@ -44,7 +32,7 @@ const preregisteredQueryResolver: Plugin = {
   // query parsing.
   //
   // If this can't be done here, we'll need to swap to using koa for our server
-  // and add middlewhere there that can do it. If so, I will be annoyed because
+  // and add middleware there that can do it. If so, I will be annoyed because
   // we will have a mix of middleware-like things, some envelop plugins and some
   // koa plugins.
   onParse(params) {
@@ -57,10 +45,14 @@ const preregisteredQueryResolver: Plugin = {
       extensions && extensions['preRegisteredQueryId'];
     if (maybePreregisteredId) {
       console.log(`Got preregistered query id: ${maybePreregisteredId}`);
-      params.setParsedDocument(
-        lookupQuery(maybePreregisteredId, db).then(params.parseFn)
-      );
+      params.setParsedDocument(params.parseFn(lookupQuery(maybePreregisteredId, db)));
     }
+  },
+  onValidate(params) {
+    console.log(inspect({ onValidate: params }));
+  },
+  async onExecute(params) {
+    console.log(inspect({ onExecute: params }));
   },
   onContextBuilding(params) {
     console.log(inspect({ onContextBuilding: params }));
