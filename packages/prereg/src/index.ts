@@ -19,11 +19,7 @@ const db = new Client();
 
 // envelop plugins' onParse method is synchronous and setting the document to a promise of the parsed query
 // breaks things. Instead we just bite the bullet and do synchronous IO.
-
-// Currently, within the alpine-node image libpq and node seem to link different openssl versions, leading to
-// Segmentation Faults when using ssl to make connections.  Until this is fixed, disable ssl
-const disableSsl = 'sslmode=disable';
-db.connectSync(connectionString.endsWith(disableSsl) ? connectionString : `${connectionString}?${disableSsl}`);
+db.connectSync(connectionString);
 
 function lookupQuery(queryId: string, db: typeof Client): Promise<string> {
   const res = db.querySync('SELECT code FROM t_graphql_operations WHERE id = $1', [queryId])
