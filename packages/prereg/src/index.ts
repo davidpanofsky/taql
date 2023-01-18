@@ -2,7 +2,8 @@ import LRUCache = require('lru-cache');
 import { Plugin } from '@envelop/core';
 import { inspect } from 'util';
 
-const Client = require('pg-native');
+// pg-native doesn't have typescript type definitions, so `const ... = require(...)` is the way to import it
+const Client = require('pg-native'); // eslint-disable-line @typescript-eslint/no-var-requires
 
 // One single pool at the top level; it seems overly complicated to try to keep this inside the plugin object,
 // especially considering there's no lifecycle method for plugin destruction, meaning we arent' really going to
@@ -17,22 +18,39 @@ const defaultDbUri =
 
 const connectionString =
   process.env['PREREGISTERED_QUERY_DB_URI'] || defaultDbUri; // eslint-disable-line no-restricted-properties
-const DB = new Client();
 
-// envelop plugins' onParse method is synchronous and setting the document to a promise of the parsed query
-// breaks things. Instead we just bite the bullet and do synchronous IO.
-DB.connectSync(connectionString);
+let DB: typeof Client | undefined;
+try {
+  DB = new Client();
+  // envelop plugins' onParse method is synchronous and setting the document to a promise of the parsed query
+  // breaks things. Instead we just bite the bullet and do synchronous IO.
+  DB.connectSync(connectionString);
+} catch (e) {
+  console.error('Failed to connect to ${connectionString}: ${e}');
+}
 
 const CACHE = new LRUCache<string, string>({
   max: 2000,
 });
 
-function lookupQuery(queryId: string, db: typeof Client, cache: LRUCache<string, string>): string | undefined {
+function lookupQuery(
+  queryId: string,
+  db: typeof Client,
+  cache: LRUCache<string, string>
+): string | undefined {
   if (cache.has(queryId)) {
     return cache.get(queryId);
   } else {
-    const res = db.querySync('SELECT code FROM t_graphql_operations WHERE id = $1', [queryId])
-    const queryText = res.length > 0 ? res[0].code : undefined;
+    let queryText: string | undefined = undefined;
+    try {
+      const res = db.querySync(
+        'SELECT code FROM t_graphql_operations WHERE id = $1',
+        [queryId]
+      );
+      queryText = res.length > 0 ? res[0].code : undefined;
+    } catch (e) {
+      console.error(`Unexpected database error: ${e}`);
+    }
     if (queryText) {
       cache.set(queryId, queryText);
     }
@@ -60,7 +78,9 @@ const preregisteredQueryResolver: Plugin = {
       extensions && extensions['preRegisteredQueryId'];
     if (maybePreregisteredId) {
       console.log(`Got preregistered query id: ${maybePreregisteredId}`);
-      params.setParsedDocument(params.parseFn(lookupQuery(maybePreregisteredId, DB, CACHE)));
+      params.setParsedDocument(
+        params.parseFn(lookupQuery(maybePreregisteredId, DB, CACHE))
+      );
     }
   },
   onValidate(params) {
