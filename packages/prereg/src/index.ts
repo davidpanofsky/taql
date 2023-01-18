@@ -30,7 +30,7 @@ try {
 }
 
 const CACHE = new LRUCache<string, string>({
-  max: 2000,
+  max: Number(process.env['PREREGISTERED_QUERY_CACHE_SIZE']) || 2000, // eslint-disable-line no-restricted-properties
 });
 
 function lookupQuery(
