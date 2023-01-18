@@ -715,6 +715,7 @@ __metadata:
   dependencies:
     "@envelop/core": ^3.0.3
     "@types/node": ^18.11.8
+    lru-cache: ^7.14.1
     pg-native: ^3.0.1
     typescript: ^4.8.4
   languageName: unknown
@@ -3169,7 +3170,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lru-cache@npm:^7.7.1":
+"lru-cache@npm:^7.14.1, lru-cache@npm:^7.7.1":
   version: 7.14.1
   resolution: "lru-cache@npm:7.14.1::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Flru-cache%2F-%2Flru-cache-7.14.1.tgz"
   checksum: d72c6713c6a6d86836a7a6523b3f1ac6764768cca47ec99341c3e76db06aacd4764620e5e2cda719a36848785a52a70e531822dc2b33fb071fa709683746c104

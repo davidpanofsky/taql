@@ -1,6 +1,8 @@
+import LRUCache = require('lru-cache');
 import { Plugin } from '@envelop/core';
-const Client = require('pg-native');
 import { inspect } from 'util';
+
+const Client = require('pg-native');
 
 // One single pool at the top level; it seems overly complicated to try to keep this inside the plugin object,
 // especially considering there's no lifecycle method for plugin destruction, meaning we arent' really going to
@@ -15,15 +17,27 @@ const defaultDbUri =
 
 const connectionString =
   process.env['PREREGISTERED_QUERY_DB_URI'] || defaultDbUri; // eslint-disable-line no-restricted-properties
-const db = new Client();
+const DB = new Client();
 
 // envelop plugins' onParse method is synchronous and setting the document to a promise of the parsed query
 // breaks things. Instead we just bite the bullet and do synchronous IO.
-db.connectSync(connectionString);
+DB.connectSync(connectionString);
 
-function lookupQuery(queryId: string, db: typeof Client): Promise<string> {
-  const res = db.querySync('SELECT code FROM t_graphql_operations WHERE id = $1', [queryId])
-  return res.length > 0 ? res[0].code : '';
+const CACHE = new LRUCache<string, string>({
+  max: 2000,
+});
+
+function lookupQuery(queryId: string, db: typeof Client, cache: LRUCache<string, string>): string | undefined {
+  if (cache.has(queryId)) {
+    return cache.get(queryId);
+  } else {
+    const res = db.querySync('SELECT code FROM t_graphql_operations WHERE id = $1', [queryId])
+    const queryText = res.length > 0 ? res[0].code : undefined;
+    if (queryText) {
+      cache.set(queryId, queryText);
+    }
+    return queryText;
+  }
 }
 
 const preregisteredQueryResolver: Plugin = {
@@ -46,7 +60,7 @@ const preregisteredQueryResolver: Plugin = {
       extensions && extensions['preRegisteredQueryId'];
     if (maybePreregisteredId) {
       console.log(`Got preregistered query id: ${maybePreregisteredId}`);
-      params.setParsedDocument(params.parseFn(lookupQuery(maybePreregisteredId, db)));
+      params.setParsedDocument(params.parseFn(lookupQuery(maybePreregisteredId, DB, CACHE)));
     }
   },
   onValidate(params) {
