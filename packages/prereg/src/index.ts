@@ -26,7 +26,7 @@ try {
   // breaks things. Instead we just bite the bullet and do synchronous IO.
   DB.connectSync(connectionString);
 } catch (e) {
-  console.error('Failed to connect to ${connectionString}: ${e}');
+  console.error(`Failed to connect to ${connectionString}: ${e}`);
 }
 
 const CACHE = new LRUCache<string, string>({
