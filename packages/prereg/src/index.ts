@@ -68,9 +68,12 @@ const preregisteredQueryResolver: Plugin = {
       extensions && extensions['preRegisteredQueryId'];
     if (maybePreregisteredId) {
       console.log(`Got preregistered query id: ${maybePreregisteredId}`);
-      params.setParsedDocument(
-        params.parseFn(lookupQuery(maybePreregisteredId, DB, CACHE))
-      );
+      const preregisteredQuery: string | undefined = lookupQuery(maybePreregisteredId, DB, CACHE);
+      if (preregisteredQuery) {
+        params.setParsedDocument(
+          params.parseFn(preregisteredQuery)
+        );
+      }
     }
   },
 };
