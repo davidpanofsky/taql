@@ -59,20 +59,10 @@ function lookupQuery(
 }
 
 const preregisteredQueryResolver: Plugin = {
-  // TODO fill in preregistered query resolution. We basically
-  // need to transform requests that use preregistered query hashes
-  // by swapping the hashes for actual queries before proceeding to
-  // query parsing.
-  //
-  // If this can't be done here, we'll need to swap to using koa for our server
-  // and add middleware there that can do it. If so, I will be annoyed because
-  // we will have a mix of middleware-like things, some envelop plugins and some
-  // koa plugins.
+  // Check extensions for a potential preregistered query id, and resolve it to the query text, parsed
   onParse(params) {
-    console.log(inspect({ onParse: params }));
     const context = params['context'];
     const extensions = context['params' as keyof typeof context]['extensions'];
-    console.log(extensions);
 
     const maybePreregisteredId: string | null =
       extensions && extensions['preRegisteredQueryId'];
@@ -82,16 +72,6 @@ const preregisteredQueryResolver: Plugin = {
         params.parseFn(lookupQuery(maybePreregisteredId, DB, CACHE))
       );
     }
-  },
-  onValidate(params) {
-    console.log(inspect({ onValidate: params }));
-  },
-  async onExecute(params) {
-    console.log(inspect({ onExecute: params }));
-  },
-  onContextBuilding(params) {
-    console.log(inspect({ onContextBuilding: params }));
-    console.log(params['context']);
   },
 };
 
