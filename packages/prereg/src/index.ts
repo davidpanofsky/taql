@@ -1,6 +1,7 @@
 import LRUCache = require('lru-cache');
 import { Plugin } from '@envelop/core';
 import { inspect } from 'util';
+import { PREREGISTERED_QUERY_PARAMS } from '@taql/config'
 
 // pg-native doesn't have typescript type definitions, so `const ... = require(...)` is the way to import it
 const Client = require('pg-native'); // eslint-disable-line @typescript-eslint/no-var-requires
@@ -13,24 +14,19 @@ const Client = require('pg-native'); // eslint-disable-line @typescript-eslint/n
 // the pool during the call.  That would be sweet if we were passed some params at that time.
 // TODO(smitchell): Climb to the top of the stack and see where this is initialized and if we have access to make
 // configuration passable
-const defaultDbUri =
-  'postgres://graphql_operations_ros@graphql-operations-ros.db.var.ml.tripadvisor.com';
-
-const connectionString =
-  process.env['PREREGISTERED_QUERY_DB_URI'] || defaultDbUri; // eslint-disable-line no-restricted-properties
 
 let DB: typeof Client | undefined;
 try {
   DB = new Client();
   // envelop plugins' onParse method is synchronous and setting the document to a promise of the parsed query
   // breaks things. Instead we just bite the bullet and do synchronous IO.
-  DB.connectSync(connectionString);
+  DB.connectSync(PREREGISTERED_QUERY_PARAMS.database_uri);
 } catch (e) {
-  console.error(`Failed to connect to ${connectionString}: ${e}`);
+  console.error(`Failed to connect to ${PREREGISTERED_QUERY_PARAMS.database_uri}: ${e}`);
 }
 
 const CACHE = new LRUCache<string, string>({
-  max: Number(process.env['PREREGISTERED_QUERY_CACHE_SIZE']) || 2000, // eslint-disable-line no-restricted-properties
+  max: PREREGISTERED_QUERY_PARAMS.max_cache_size
 });
 
 function lookupQuery(
