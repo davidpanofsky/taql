@@ -43,10 +43,11 @@ export const PREREGISTERED_QUERY_PARAMS = resolve({
   max_cache_size: {
     property: 'PREREGISTERED_QUERY_CACHE_SIZE',
     resolver: resolvers.nonNegativeInteger,
-    defaultTo: 2000
+    defaultTo: 2000,
   },
   database_uri: {
     property: 'PREREGISTERED_QUERY_DB_URI',
-    defaultTo: 'postgres://graphql_operations_ros@graphql-operations-ros.db.var.ml.tripadvisor.com'
-  }
+    defaultTo:
+      'postgres://graphql_operations_ros@graphql-operations-ros.db.var.ml.tripadvisor.com',
+  },
 });
