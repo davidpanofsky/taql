@@ -30,6 +30,18 @@ const CACHE = new LRUCache<string, string>({
   max: PREREGISTERED_QUERY_PARAMS.max_cache_size,
 });
 
+const KNOWN_QUERIES: Set<string> = new Set<string>();
+
+function populateKnownQueries(known: Set<string>, db: typeof Client): number {
+  const initialCount = known.size;
+  db.querySync('SELECT id from t_graphql_operations').forEach(
+    (
+      o: any // eslint-disable-line @typescript-eslint/no-explicit-any
+    ) => known.add(o.id)
+  );
+  return known.size - initialCount;
+}
+
 function lookupQuery(
   queryId: string,
   db: typeof Client,
@@ -82,6 +94,9 @@ const preregisteredQueryResolver: Plugin = {
       PREREGISTERED_QUERY_PARAMS.max_cache_size
     );
     console.log(`Preloaded ${loaded} preregistered queries`);
+    const knownCount = populateKnownQueries(KNOWN_QUERIES, DB);
+    setTimeout(populateKnownQueries.bind(null, KNOWN_QUERIES, DB), 10000);
+    console.log(`Populated ${knownCount} 'known' preregistered IDs`);
   },
   // Check extensions for a potential preregistered query id, and resolve it to the query text, parsed
   onParse(params) {
@@ -90,7 +105,7 @@ const preregisteredQueryResolver: Plugin = {
 
     const maybePreregisteredId: string | null =
       extensions && extensions['preRegisteredQueryId'];
-    if (maybePreregisteredId) {
+    if (maybePreregisteredId && KNOWN_QUERIES.has(maybePreregisteredId)) {
       console.log(`Got preregistered query id: ${maybePreregisteredId}`);
       const preregisteredQuery: string | undefined = lookupQuery(
         maybePreregisteredId,
