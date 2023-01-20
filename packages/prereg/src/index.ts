@@ -1,7 +1,6 @@
 import LRUCache = require('lru-cache');
+import { PREREGISTERED_QUERY_PARAMS } from '@taql/config';
 import { Plugin } from '@envelop/core';
-import { inspect } from 'util';
-import { PREREGISTERED_QUERY_PARAMS } from '@taql/config'
 
 // pg-native doesn't have typescript type definitions, so `const ... = require(...)` is the way to import it
 const Client = require('pg-native'); // eslint-disable-line @typescript-eslint/no-var-requires
@@ -22,11 +21,13 @@ try {
   // breaks things. Instead we just bite the bullet and do synchronous IO.
   DB.connectSync(PREREGISTERED_QUERY_PARAMS.database_uri);
 } catch (e) {
-  console.error(`Failed to connect to ${PREREGISTERED_QUERY_PARAMS.database_uri}: ${e}`);
+  console.error(
+    `Failed to connect to ${PREREGISTERED_QUERY_PARAMS.database_uri}: ${e}`
+  );
 }
 
 const CACHE = new LRUCache<string, string>({
-  max: PREREGISTERED_QUERY_PARAMS.max_cache_size
+  max: PREREGISTERED_QUERY_PARAMS.max_cache_size,
 });
 
 function lookupQuery(
@@ -54,7 +55,34 @@ function lookupQuery(
   }
 }
 
+function preloadCache(
+  cache: LRUCache<string, string>,
+  db: typeof Client,
+  limit: number
+): number {
+  try {
+    const rows = db.querySync(
+      'WITH most_recent as (SELECT max(updated) as updated from t_graphql_operations) ' +
+        'SELECT id, code from t_graphql_operations where updated = (select updated from most_recent) LIMIT $1',
+      [limit]
+    );
+    rows.forEach((o: any) => cache.set(o.id, o.code)); // eslint-disable-line @typescript-eslint/no-explicit-any
+    return rows.length;
+  } catch (e) {
+    console.error(`Failed to preload preregisted query cache: ${e}`);
+    return 0;
+  }
+}
+
 const preregisteredQueryResolver: Plugin = {
+  onPluginInit(_) {
+    const loaded = preloadCache(
+      CACHE,
+      DB,
+      PREREGISTERED_QUERY_PARAMS.max_cache_size
+    );
+    console.log(`Preloaded ${loaded} preregistered queries`);
+  },
   // Check extensions for a potential preregistered query id, and resolve it to the query text, parsed
   onParse(params) {
     const context = params['context'];
@@ -64,11 +92,13 @@ const preregisteredQueryResolver: Plugin = {
       extensions && extensions['preRegisteredQueryId'];
     if (maybePreregisteredId) {
       console.log(`Got preregistered query id: ${maybePreregisteredId}`);
-      const preregisteredQuery: string | undefined = lookupQuery(maybePreregisteredId, DB, CACHE);
+      const preregisteredQuery: string | undefined = lookupQuery(
+        maybePreregisteredId,
+        DB,
+        CACHE
+      );
       if (preregisteredQuery) {
-        params.setParsedDocument(
-          params.parseFn(preregisteredQuery)
-        );
+        params.setParsedDocument(params.parseFn(preregisteredQuery));
       }
     }
   },
