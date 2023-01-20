@@ -95,7 +95,7 @@ const preregisteredQueryResolver: Plugin = {
     );
     console.log(`Preloaded ${loaded} preregistered queries`);
     const knownCount = populateKnownQueries(KNOWN_QUERIES, DB);
-    setTimeout(populateKnownQueries.bind(null, KNOWN_QUERIES, DB), 10000);
+    setInterval(populateKnownQueries.bind(null, KNOWN_QUERIES, DB), 10000);
     console.log(`Populated ${knownCount} 'known' preregistered IDs`);
   },
   // Check extensions for a potential preregistered query id, and resolve it to the query text, parsed
