@@ -106,7 +106,6 @@ const preregisteredQueryResolver: Plugin = {
     const maybePreregisteredId: string | null =
       extensions && extensions['preRegisteredQueryId'];
     if (maybePreregisteredId && KNOWN_QUERIES.has(maybePreregisteredId)) {
-      console.log(`Got preregistered query id: ${maybePreregisteredId}`);
       const preregisteredQuery: string | undefined = lookupQuery(
         maybePreregisteredId,
         DB,
