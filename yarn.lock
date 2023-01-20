@@ -714,7 +714,7 @@ __metadata:
   resolution: "@taql/prereg@workspace:packages/prereg"
   dependencies:
     "@envelop/core": ^3.0.3
-    "@types/node": ^18.11.8
+    "@taql/config": "workspace:^"
     lru-cache: ^7.14.1
     pg-native: ^3.0.1
     typescript: ^4.8.4
