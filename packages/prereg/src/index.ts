@@ -34,7 +34,7 @@ const KNOWN_QUERIES: Set<string> = new Set<string>();
 
 function populateKnownQueries(known: Set<string>, db: typeof Client): number {
   const initialCount = known.size;
-  db.querySync('SELECT id from t_graphql_operations').forEach(
+  db.querySync('SELECT id FROM t_graphql_operations').forEach(
     (
       o: any // eslint-disable-line @typescript-eslint/no-explicit-any
     ) => known.add(o.id)
@@ -74,8 +74,8 @@ function preloadCache(
 ): number {
   try {
     const rows = db.querySync(
-      'WITH most_recent as (SELECT max(updated) as updated from t_graphql_operations) ' +
-        'SELECT id, code from t_graphql_operations where updated = (select updated from most_recent) LIMIT $1',
+      'WITH most_recent AS (SELECT max(updated) AS updated FROM t_graphql_operations) ' +
+        'SELECT id, code FROM t_graphql_operations WHERE updated = (select updated from most_recent) LIMIT $1',
       [limit]
     );
     rows.forEach((o: any) => cache.set(o.id, o.code)); // eslint-disable-line @typescript-eslint/no-explicit-any
