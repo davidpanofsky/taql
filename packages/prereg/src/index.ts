@@ -32,14 +32,35 @@ const CACHE = new LRUCache<string, string>({
 
 const KNOWN_QUERIES: Set<string> = new Set<string>();
 
-function populateKnownQueries(known: Set<string>, db: typeof Client): number {
-  const initialCount = known.size;
-  db.querySync('SELECT id FROM t_graphql_operations').forEach(
-    (
-      o: any // eslint-disable-line @typescript-eslint/no-explicit-any
-    ) => known.add(o.id)
-  );
-  return known.size - initialCount;
+// epoch
+let MOST_RECENT_KNOWN = 0;
+
+function populateKnownQueries(
+  known: Set<string>,
+  db: typeof Client
+): Promise<number> {
+  return new Promise((resolve, reject) => {
+    db.query(
+      'SELECT id FROM t_graphql_operations WHERE extract(epoch from updated) > $1',
+      [MOST_RECENT_KNOWN],
+      function (err: Error, rows: unknown[]) {
+        if (err) {
+          reject(err);
+          return;
+        }
+        const previousKnown = known.size;
+        rows.forEach(
+          (
+            o: any // eslint-disable-line @typescript-eslint/no-explicit-any
+          ) => known.add(o.id)
+        );
+        // Small fudge factor to avoid any concern about updated times falling between query execution
+        // and updating the most recently known.  A bit of overlap is fine.
+        MOST_RECENT_KNOWN = Date.now() - 5000;
+        resolve(known.size - previousKnown);
+      }
+    );
+  });
 }
 
 function lookupQuery(
@@ -71,32 +92,38 @@ function preloadCache(
   cache: LRUCache<string, string>,
   db: typeof Client,
   limit: number
-): number {
-  try {
-    const rows = db.querySync(
-      'WITH most_recent AS (SELECT max(updated) AS updated FROM t_graphql_operations) ' +
-        'SELECT id, code FROM t_graphql_operations WHERE updated = (select updated from most_recent) LIMIT $1',
-      [limit]
-    );
-    rows.forEach((o: any) => cache.set(o.id, o.code)); // eslint-disable-line @typescript-eslint/no-explicit-any
-    return rows.length;
-  } catch (e) {
-    console.error(`Failed to preload preregisted query cache: ${e}`);
-    return 0;
-  }
+): void {
+  db.query(
+    'WITH most_recent AS (SELECT max(updated) AS updated FROM t_graphql_operations) ' +
+      'SELECT id, code FROM t_graphql_operations WHERE updated = (select updated from most_recent) LIMIT $1',
+    [limit],
+    function (err: Error, rows: unknown[]) {
+      if (err) {
+        console.error(`Failed to preload preregistered query cache: ${err}`);
+        return;
+      }
+      rows.forEach((o: any) => cache.set(o.id, o.code)); // eslint-disable-line @typescript-eslint/no-explicit-any
+    }
+  );
 }
 
 const preregisteredQueryResolver: Plugin = {
-  onPluginInit(_) {
-    const loaded = preloadCache(
-      CACHE,
-      DB,
-      PREREGISTERED_QUERY_PARAMS.max_cache_size
+  async onPluginInit(_) {
+    try {
+      const known = await populateKnownQueries(KNOWN_QUERIES, DB);
+      console.log(`Loaded ${known} known preregistered query ids`);
+    } catch (e) {
+      console.error(`Failed to load known preregistered queries: ${e}`);
+      throw e; // Let's shut down; we could choose not to and hope that the next try works, but why be optimistic
+    }
+    preloadCache(CACHE, DB, PREREGISTERED_QUERY_PARAMS.max_cache_size);
+    setInterval(
+      () =>
+        populateKnownQueries(KNOWN_QUERIES, DB).catch((e) =>
+          console.error(`Failed to update known query ids: ${e}`)
+        ),
+      10000
     );
-    console.log(`Preloaded ${loaded} preregistered queries`);
-    const known = populateKnownQueries(KNOWN_QUERIES, DB);
-    setInterval(populateKnownQueries, 10000, KNOWN_QUERIES, DB);
-    console.log(`Populated ${known} 'known' preregistered IDs`);
   },
   // Check extensions for a potential preregistered query id, and resolve it to the query text, parsed
   onParse(params) {
@@ -105,7 +132,10 @@ const preregisteredQueryResolver: Plugin = {
 
     const maybePreregisteredId: string | null =
       extensions && extensions['preRegisteredQueryId'];
-    if (maybePreregisteredId && KNOWN_QUERIES.has(maybePreregisteredId)) {
+    if (
+      maybePreregisteredId &&
+      (KNOWN_QUERIES.has(maybePreregisteredId) || KNOWN_QUERIES.size == 0)
+    ) {
       const preregisteredQuery: string | undefined = lookupQuery(
         maybePreregisteredId,
         DB,
