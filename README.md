@@ -2,6 +2,24 @@
 
 TA Graphql service
 
+## Requirements
+
+### libpq
+
+For postgres operations (e.g to resolve preregistered queries) we use `pg-native`, which requires `libpq` to build.
+
+On Centos:
+
+```
+yum install postgresql-libs
+```
+
+On Mac:
+
+```
+brew install libpq
+```
+
 ## Commands
 
 - `yarn install --immutable` - install dependencies

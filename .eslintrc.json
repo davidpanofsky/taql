@@ -34,7 +34,7 @@
     ],
     "@typescript-eslint/no-unused-vars": [
       "error",
-      { "ignoreRestSiblings": true }
+      { "argsIgnorePattern": "^_", "ignoreRestSiblings": true }
     ]
   },
   "overrides": [
