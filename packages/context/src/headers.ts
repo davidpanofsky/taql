@@ -3,6 +3,8 @@ import { Headers as FetchHeaders } from 'node-fetch';
 import type { IncomingHttpHeaders } from 'http';
 import { KoaState } from './index';
 
+import { inspect } from 'util';
+
 // Note: we never want to forward x-tripadvisor-locale, x-tripadvisor-currency,
 // or the like. If the response depends on locale, it must be included in the
 // query parameters, end of story.
@@ -14,6 +16,7 @@ export enum ForwardHeader {
   'x-ta-unique-dec',
   'x-ua',
   'x-service-overrides',
+  'x-tripadvisor-locale',
   'x-txip',
   'authorization',
 
@@ -77,11 +80,57 @@ const deriveHeaders = (
 
   return headers;
 };
+
+const getHeaderOrDefault = <T>(
+  headers: IncomingHttpHeaders | Headers | FetchHeaders | undefined,
+  key: string,
+  defaultV: T
+): string | T => {
+  if (headers == undefined) {
+    return defaultV;
+  }
+  let val: string | null | undefined = null;
+  if (typeof headers.get === 'function') {
+    val = headers.get(key);
+  } else {
+    // IncomingHttpHeaders
+    if ((key as keyof IncomingHttpHeaders) in <IncomingHttpHeaders>headers) {
+      val = [(<IncomingHttpHeaders>headers)[key as keyof IncomingHttpHeaders]]
+        .flat()
+        .find((i) => i);
+    }
+  }
+  return val || defaultV;
+};
+
+const legacyContextFromHeaders = (
+  headers: IncomingHttpHeaders | Headers | FetchHeaders | undefined
+): LegacyContext => ({
+  locale: getHeaderOrDefault(headers, 'x-tripadvisor-locale', 'en-US'),
+  debug:
+    getHeaderOrDefault(headers, 'x-tripadvisor-graphql-debug', 'false') ===
+    'true',
+  uniqueId: getHeaderOrDefault(headers, 'x-request-id', null),
+  userClientIp: getHeaderOrDefault(headers, 'x-forwarded-for', null),
+});
+
+export type LegacyContext = {
+  readonly locale: string;
+  readonly debug: boolean;
+  readonly uniqueId: string | null;
+  readonly userClientIp: string | null;
+};
+
 export type HeadersState = {
   readonly forwardHeaders: FetchHeaders;
+  readonly legacyContext: LegacyContext;
 };
 
 export const headerMiddleware: Middleware<KoaState> = async (ctx, next) => {
-  ctx.state = { ...ctx.state, forwardHeaders: deriveHeaders(ctx) };
+  ctx.state = {
+    ...ctx.state,
+    forwardHeaders: deriveHeaders(ctx),
+    legacyContext: legacyContextFromHeaders(ctx.headers),
+  };
   await next();
 };
