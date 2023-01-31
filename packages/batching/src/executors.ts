@@ -73,9 +73,22 @@ function makeLegacyGqlExecutor(url: string, config: BatchingConfig): Executor {
     { results: { result: ExecutionResult }[] }
   >(url, {
     // legacy graphql's batched endpoint accepts `{ requests: request[] }`, not request[]
-    request: (requests) => ({
-      requests: requests.map(formatRequest),
-    }),
+    request(requests) {
+      const a_request = requests.length > 0 ? requests[0] : undefined;
+      const legacyContext = a_request?.context?.state.legacyContext;
+      const formatted: {
+        requests: unknown[];
+        requestContext?: unknown | undefined;
+      } = {
+        requests: requests.map(formatRequest),
+      };
+
+      if (legacyContext) {
+        formatted.requestContext = legacyContext;
+      }
+
+      return formatted;
+    },
     // legacy graphql's batched endpoint returns `{ results: {result}[] }`,
     // not `result[]`
     response: (response) =>
