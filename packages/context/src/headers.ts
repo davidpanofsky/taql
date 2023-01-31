@@ -3,8 +3,6 @@ import { Headers as FetchHeaders } from 'node-fetch';
 import type { IncomingHttpHeaders } from 'http';
 import { KoaState } from './index';
 
-import { inspect } from 'util';
-
 // Note: we never want to forward x-tripadvisor-locale, x-tripadvisor-currency,
 // or the like. If the response depends on locale, it must be included in the
 // query parameters, end of story.
