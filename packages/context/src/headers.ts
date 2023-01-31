@@ -107,18 +107,18 @@ const legacyContextFromHeaders = (
   headers: IncomingHttpHeaders | Headers | FetchHeaders | undefined
 ): LegacyContext => ({
   locale: getHeaderOrDefault(headers, 'x-tripadvisor-locale', 'en-US'),
-  debug:
+  debugToolEnabled:
     getHeaderOrDefault(headers, 'x-tripadvisor-graphql-debug', 'false') ===
     'true',
   uniqueId: getHeaderOrDefault(headers, 'x-request-id', null),
-  userClientIp: getHeaderOrDefault(headers, 'x-forwarded-for', null),
+  userClientIP: getHeaderOrDefault(headers, 'x-forwarded-for', null),
 });
 
 export type LegacyContext = {
   readonly locale: string;
-  readonly debug: boolean;
+  readonly debugToolEnabled: boolean;
   readonly uniqueId: string | null;
-  readonly userClientIp: string | null;
+  readonly userClientIP: string | null;
 };
 
 export type HeadersState = {
