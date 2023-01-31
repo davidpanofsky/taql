@@ -14,7 +14,6 @@ export enum ForwardHeader {
   'x-ta-unique-dec',
   'x-ua',
   'x-service-overrides',
-  'x-tripadvisor-locale',
   'x-txip',
   'authorization',
 
@@ -22,6 +21,7 @@ export enum ForwardHeader {
   'lt',
   'x-loadtest',
   'x-swedwig-feed-viewer',
+  'x-tripadvisor-graphql-debug',
 
   // tracing headers
   'x-b3-traceid',
