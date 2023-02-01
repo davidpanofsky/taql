@@ -101,6 +101,14 @@ const getHeaderOrDefault = <T>(
   return val || defaultV;
 };
 
+const clientFromXff = (xff: string | undefined): string | undefined => {
+  if (!xff) {
+    return xff;
+  }
+  const client = xff.split(',').shift();
+  return client && client.trim();
+};
+
 const legacyContextFromHeaders = (
   headers: IncomingHttpHeaders | Headers | FetchHeaders | undefined
 ): LegacyContext => ({
@@ -108,15 +116,17 @@ const legacyContextFromHeaders = (
   debugToolEnabled:
     getHeaderOrDefault(headers, 'x-tripadvisor-graphql-debug', 'false') ===
     'true',
-  uniqueId: getHeaderOrDefault(headers, 'x-request-id', null),
-  userClientIP: getHeaderOrDefault(headers, 'x-forwarded-for', null),
+  uniqueId: clientFromXff(
+    getHeaderOrDefault(headers, 'x-request-id', undefined)
+  ),
+  userClientIP: getHeaderOrDefault(headers, 'x-forwarded-for', undefined),
 });
 
 export type LegacyContext = {
   readonly locale: string;
   readonly debugToolEnabled: boolean;
-  readonly uniqueId: string | null;
-  readonly userClientIP: string | null;
+  readonly uniqueId: string | undefined;
+  readonly userClientIP: string | undefined;
 };
 
 export type HeadersState = {
