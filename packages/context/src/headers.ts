@@ -79,6 +79,14 @@ const deriveHeaders = (
   return headers;
 };
 
+/*
+ * Retrieves a header value or returns the default of type T
+ * @param headers one of several header types with unique ways of access
+ * @param key the header to retrieve
+ * @param defaultV the default value to return
+ *
+ * @return the header value, or the provided default
+ */
 const getHeaderOrDefault = <T>(
   headers: IncomingHttpHeaders | Headers | FetchHeaders | undefined,
   key: string,
@@ -101,6 +109,10 @@ const getHeaderOrDefault = <T>(
   return val || defaultV;
 };
 
+/**
+ * pull the first client from a value of the 'x-forwarded-for' header
+ * https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For
+ */
 const clientFromXff = (xff: string | undefined): string | undefined => {
   if (!xff) {
     return xff;
@@ -109,6 +121,9 @@ const clientFromXff = (xff: string | undefined): string | undefined => {
   return client && client.trim();
 };
 
+/**
+ * build a "LegacyContext" i.e a RequestContext in the terms of legacy "stitched" graphql's api using http headers
+ */
 const legacyContextFromHeaders = (
   headers: IncomingHttpHeaders | Headers | FetchHeaders | undefined
 ): LegacyContext => ({
@@ -122,6 +137,10 @@ const legacyContextFromHeaders = (
   ),
 });
 
+/*
+ * See:
+ * https://grok.dev.tripadvisor.com/xref/dplat__graphql/src/main/resources/exports/com/tripadvisor/service/graphql/graphql.swagger?r=279bef78#188
+ */
 export type LegacyContext = {
   readonly locale: string;
   readonly debugToolEnabled: boolean;
