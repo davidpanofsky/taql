@@ -116,10 +116,10 @@ const legacyContextFromHeaders = (
   debugToolEnabled:
     getHeaderOrDefault(headers, 'x-tripadvisor-graphql-debug', 'false') ===
     'true',
-  uniqueId: clientFromXff(
-    getHeaderOrDefault(headers, 'x-request-id', undefined)
+  uniqueId: getHeaderOrDefault(headers, 'x-request-id', undefined),
+  userClientIP: clientFromXff(
+    getHeaderOrDefault(headers, 'x-forwarded-for', undefined)
   ),
-  userClientIP: getHeaderOrDefault(headers, 'x-forwarded-for', undefined),
 });
 
 export type LegacyContext = {
