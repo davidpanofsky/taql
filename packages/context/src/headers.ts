@@ -113,13 +113,8 @@ const getHeaderOrDefault = <T>(
  * pull the first client from a value of the 'x-forwarded-for' header
  * https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For
  */
-const clientFromXff = (xff: string | undefined): string | undefined => {
-  if (!xff) {
-    return xff;
-  }
-  const client = xff.split(',').shift();
-  return client && client.trim();
-};
+const clientFromXff = (xff: string | undefined): string | undefined =>
+  xff?.split(',').shift()?.trim();
 
 /**
  * build a "LegacyContext" i.e a RequestContext in the terms of legacy "stitched" graphql's api using http headers
