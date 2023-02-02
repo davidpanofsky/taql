@@ -21,6 +21,7 @@ export enum ForwardHeader {
   'lt',
   'x-loadtest',
   'x-swedwig-feed-viewer',
+  'x-tripadvisor-graphql-debug',
 
   // tracing headers
   'x-b3-traceid',
@@ -77,11 +78,81 @@ const deriveHeaders = (
 
   return headers;
 };
+
+/*
+ * Retrieves a header value or returns the default of type T
+ * @param headers one of several header types with unique ways of access
+ * @param key the header to retrieve
+ * @param defaultV the default value to return
+ *
+ * @return the header value, or the provided default
+ */
+const getHeaderOrDefault = <T>(
+  headers: IncomingHttpHeaders | Headers | FetchHeaders | undefined,
+  key: string,
+  defaultV: T
+): string | T => {
+  if (headers == undefined) {
+    return defaultV;
+  }
+  let val: string | undefined | null;
+  if (typeof headers.get === 'function') {
+    val = headers.get(key);
+  } else {
+    // IncomingHttpHeaders
+    if ((key as keyof IncomingHttpHeaders) in <IncomingHttpHeaders>headers) {
+      val = [(<IncomingHttpHeaders>headers)[key as keyof IncomingHttpHeaders]]
+        .flat()
+        .find((i) => i);
+    }
+  }
+  return val || defaultV;
+};
+
+/**
+ * pull the first client from a value of the 'x-forwarded-for' header
+ * https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For
+ */
+const clientFromXff = (xff: string | undefined): string | undefined =>
+  xff?.split(',').shift()?.trim();
+
+/**
+ * build a "LegacyContext" i.e a RequestContext in the terms of legacy "stitched" graphql's api using http headers
+ */
+const legacyContextFromHeaders = (
+  headers: IncomingHttpHeaders | Headers | FetchHeaders | undefined
+): LegacyContext => ({
+  locale: getHeaderOrDefault(headers, 'x-tripadvisor-locale', 'en-US'),
+  debugToolEnabled:
+    getHeaderOrDefault(headers, 'x-tripadvisor-graphql-debug', 'false') ===
+    'true',
+  uniqueId: getHeaderOrDefault(headers, 'x-request-id', undefined),
+  userClientIP: clientFromXff(
+    getHeaderOrDefault(headers, 'x-forwarded-for', undefined)
+  ),
+});
+
+/*
+ * See:
+ * https://grok.dev.tripadvisor.com/xref/dplat__graphql/src/main/resources/exports/com/tripadvisor/service/graphql/graphql.swagger?r=279bef78#188
+ */
+export type LegacyContext = {
+  readonly locale: string;
+  readonly debugToolEnabled: boolean;
+  readonly uniqueId: string | undefined;
+  readonly userClientIP: string | undefined;
+};
+
 export type HeadersState = {
   readonly forwardHeaders: FetchHeaders;
+  readonly legacyContext: LegacyContext;
 };
 
 export const headerMiddleware: Middleware<KoaState> = async (ctx, next) => {
-  ctx.state = { ...ctx.state, forwardHeaders: deriveHeaders(ctx) };
+  ctx.state = {
+    ...ctx.state,
+    forwardHeaders: deriveHeaders(ctx),
+    legacyContext: legacyContextFromHeaders(ctx.headers),
+  };
   await next();
 };

@@ -73,9 +73,24 @@ function makeLegacyGqlExecutor(url: string, config: BatchingConfig): Executor {
     { results: { result: ExecutionResult }[] }
   >(url, {
     // legacy graphql's batched endpoint accepts `{ requests: request[] }`, not request[]
-    request: (requests) => ({
-      requests: requests.map(formatRequest),
-    }),
+    request(requests) {
+      // Since we generate the legacy RequestContext from headers we assume that if those headers are considered batch-compatible,
+      // we can just select any request in the batch from which to use the derived context.
+      const legacyContext = requests?.find((i) => i)?.context?.state
+        .legacyContext;
+      const formatted: {
+        requests: unknown[];
+        requestContext?: unknown | undefined;
+      } = {
+        requests: requests.map(formatRequest),
+      };
+
+      if (legacyContext) {
+        formatted.requestContext = legacyContext;
+      }
+
+      return formatted;
+    },
     // legacy graphql's batched endpoint returns `{ results: {result}[] }`,
     // not `result[]`
     response: (response) =>
