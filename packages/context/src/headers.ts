@@ -95,7 +95,7 @@ const getHeaderOrDefault = <T>(
   if (headers == undefined) {
     return defaultV;
   }
-  let val: string | null | undefined = null;
+  let val: string | undefined | null;
   if (typeof headers.get === 'function') {
     val = headers.get(key);
   } else {
