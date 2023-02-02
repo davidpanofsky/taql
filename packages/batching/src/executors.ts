@@ -76,8 +76,8 @@ function makeLegacyGqlExecutor(url: string, config: BatchingConfig): Executor {
     request(requests) {
       // Since we generate the legacy RequestContext from headers we assume that if those headers are considered batch-compatible,
       // we can just select any request in the batch from which to use the derived context.
-      const a_request = requests.length > 0 ? requests[0] : undefined;
-      const legacyContext = a_request?.context?.state.legacyContext;
+      const legacyContext = requests?.find((i) => i)?.context?.state
+        .legacyContext;
       const formatted: {
         requests: unknown[];
         requestContext?: unknown | undefined;
