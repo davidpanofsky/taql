@@ -4,6 +4,7 @@ import { Plugin } from '@envelop/core';
 import TypedEmitter from 'typed-emitter';
 import deepEqual from 'deep-equal';
 import { makeLegacySchema } from './legacy';
+import { obfuscateDirective } from './directives'
 import { stitchSchemas } from '@graphql-tools/stitch';
 
 export type SchemaDigest = {
@@ -41,9 +42,10 @@ export async function makeSchema(
   }
 
   // TODO load schemas from schema repository, add to subschemas.
-
+  const encodeDirective = obfuscateDirective("encode");
+  
   try {
-    const schema = stitchSchemas({ subschemas });
+    const schema = encodeDirective.obfuscateDirectiveTransformer(stitchSchemas({ subschemas }));
     if (
       schema.__validationErrors == undefined ||
       schema.__validationErrors.length === 0
