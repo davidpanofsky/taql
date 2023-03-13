@@ -18,6 +18,8 @@ On Mac:
 
 ```
 brew install libpq
+# brew doesn't link into /usr/local/lib
+ln -s /usr/local/opt/libpq/lib/libpq.5.dylib /usr/local/lib/libpq.5.dylib
 ```
 
 ## Commands
