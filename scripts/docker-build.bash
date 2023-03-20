@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 IMAGE=siteops-docker.maven.dev.tripadvisor.com/taql
-: "${VERSION:=0.1}"
+: "${VERSION:=0.2-test}"
 echo "VERSION = ${VERSION}"
 
 docker build . -t "${IMAGE}:${VERSION}"
