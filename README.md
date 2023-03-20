@@ -14,7 +14,7 @@ On Centos:
 yum install postgresql-libs
 ```
 
-The node `libpq` package might exercise newer g++ features than are supported by your installation.  To upgrade on centos systems, use SCL:
+The node `libpq` package might exercise newer g++ features than are supported by your installation. To upgrade on centos systems, use SCL:
 
 ```
 # 1. Install a package with repository for your system:
