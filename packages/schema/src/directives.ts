@@ -5,8 +5,8 @@ import { inspect } from 'util';
 
 export function obfuscateDirective(directiveName: string) {
   return {
-    obfuscateDirectiveTypeDefs: `directive @${directiveName} on FIELD`,
-    obfuscateDirectiveTransformer: (schema: GraphQLSchema) =>
+    typeDefs: `directive @${directiveName} on FIELD`,
+    transformer: (schema: GraphQLSchema) =>
       mapSchema(schema, {
         [MapperKind.OBJECT_FIELD](fieldConfig) {
           // This is how you would extract a _schema_ directive.

@@ -6,6 +6,8 @@ import deepEqual from 'deep-equal';
 import { makeLegacySchema } from './legacy';
 import { obfuscateDirective } from './directives'
 import { stitchSchemas } from '@graphql-tools/stitch';
+import { mergeSchemas } from '@graphql-tools/schema';
+import { loadSchema } from '@graphql-tools/load'
 
 export type SchemaDigest = {
   legacyHash: string;
@@ -43,9 +45,13 @@ export async function makeSchema(
 
   // TODO load schemas from schema repository, add to subschemas.
   const encodeDirective = obfuscateDirective("encode");
-  
   try {
-    const schema = encodeDirective.obfuscateDirectiveTransformer(stitchSchemas({ subschemas }));
+    const schema = encodeDirective.transformer(
+      mergeSchemas({
+        schemas: [stitchSchemas({ subschemas })],
+        typeDefs: [encodeDirective.typeDefs]
+      })
+    );
     if (
       schema.__validationErrors == undefined ||
       schema.__validationErrors.length === 0
