@@ -80,7 +80,6 @@ export function obfuscateDirective(directiveName: string) {
         [MapperKind.OBJECT_FIELD](fieldConfig) {
           // This is how you would extract a _schema_ directive.
           // const obfuscateDirective = getDirective(schema, fieldConfig, directiveName)?.[0]
-
           const { resolve = defaultFieldResolver } = fieldConfig;
           fieldConfig.resolve = async (source, args, context, info) => {
             // Pull a potential query directive out of `info`

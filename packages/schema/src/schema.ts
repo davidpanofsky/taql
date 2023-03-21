@@ -8,6 +8,8 @@ import { mergeSchemas } from '@graphql-tools/schema';
 import { obfuscateDirective } from './directives';
 import { stitchSchemas } from '@graphql-tools/stitch';
 
+import { inspect } from 'util';
+
 export type SchemaDigest = {
   legacyHash: string;
   manifest: string;
@@ -47,7 +49,16 @@ export async function makeSchema(
   try {
     const schema = encodeDirective.transformer(
       mergeSchemas({
-        schemas: [stitchSchemas({ subschemas })],
+        schemas: [
+          stitchSchemas({
+            subschemas,
+            mergeDirectives: true,
+            subschemaConfigTransforms: [(subschemaConfig) => {
+              console.log(`subschemaConfig: ${inspect(subschemaConfig)}`);
+              return subschemaConfig;
+            }],
+          })
+        ],
         typeDefs: [encodeDirective.typeDefs],
       })
     );

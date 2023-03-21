@@ -19,7 +19,19 @@ export async function makeLegacySchema() {
       agent: httpsAgent || httpAgent,
     });
     const rawSchema = await rawSchemaResponse.text();
-    const schema = await loadSchema(rawSchema, { loaders: [] });
+
+    // For test: Strip 'directive @encode on FIELD' from schema
+    //console.log("Legacy Schema:");
+    //console.log(rawSchema);
+    const encodeDecl = /".*"\ndirective @encode on FIELD\n\n/;
+    const queryDirectiveStrippedSchema = rawSchema.replace(encodeDecl, "");
+    if (queryDirectiveStrippedSchema != rawSchema) {
+      console.log("successfully stripped query directive from schema");
+    } else {
+      console.log("did not remove query directive from legacy schema");
+    }
+
+    const schema = await loadSchema(queryDirectiveStrippedSchema, { loaders: [] });
     const executor = createExecutor(batchUrl, {
       style: BatchStyle.Legacy,
       strategy: BatchingStrategy.BatchByUpstreamHeaders,
