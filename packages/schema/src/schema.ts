@@ -3,12 +3,11 @@ import { GraphQLSchema } from 'graphql';
 import { Plugin } from '@envelop/core';
 import TypedEmitter from 'typed-emitter';
 import deepEqual from 'deep-equal';
+import { inspect } from 'util';
 import { makeLegacySchema } from './legacy';
 import { mergeSchemas } from '@graphql-tools/schema';
 import { obfuscateDirective } from './directives';
 import { stitchSchemas } from '@graphql-tools/stitch';
-
-import { inspect } from 'util';
 
 export type SchemaDigest = {
   legacyHash: string;
@@ -53,11 +52,13 @@ export async function makeSchema(
           stitchSchemas({
             subschemas,
             mergeDirectives: true,
-            subschemaConfigTransforms: [(subschemaConfig) => {
-              console.log(`subschemaConfig: ${inspect(subschemaConfig)}`);
-              return subschemaConfig;
-            }],
-          })
+            subschemaConfigTransforms: [
+              (subschemaConfig) => {
+                console.log(`subschemaConfig: ${inspect(subschemaConfig)}`);
+                return subschemaConfig;
+              },
+            ],
+          }),
         ],
         typeDefs: [encodeDirective.typeDefs],
       })

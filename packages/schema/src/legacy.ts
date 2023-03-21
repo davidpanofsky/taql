@@ -24,14 +24,16 @@ export async function makeLegacySchema() {
     //console.log("Legacy Schema:");
     //console.log(rawSchema);
     const encodeDecl = /".*"\ndirective @encode on FIELD\n\n/;
-    const queryDirectiveStrippedSchema = rawSchema.replace(encodeDecl, "");
+    const queryDirectiveStrippedSchema = rawSchema.replace(encodeDecl, '');
     if (queryDirectiveStrippedSchema != rawSchema) {
-      console.log("successfully stripped query directive from schema");
+      console.log('successfully stripped query directive from schema');
     } else {
-      console.log("did not remove query directive from legacy schema");
+      console.log('did not remove query directive from legacy schema');
     }
 
-    const schema = await loadSchema(queryDirectiveStrippedSchema, { loaders: [] });
+    const schema = await loadSchema(queryDirectiveStrippedSchema, {
+      loaders: [],
+    });
     const executor = createExecutor(batchUrl, {
       style: BatchStyle.Legacy,
       strategy: BatchingStrategy.BatchByUpstreamHeaders,
