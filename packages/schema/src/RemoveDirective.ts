@@ -15,11 +15,11 @@ type RemoveDirectiveTransformationContext = Record<string, any>;
 export default class RemoveDirective<TContext = Record<string, any>>
   implements Transform<RemoveDirectiveTransformationContext, TContext>
 {
-  private readonly directive: string;
   private readonly matcher: (directiveObj: {
     kind: string;
     name: { value: string };
   }) => boolean;
+
   constructor(directive: string) {
     this.matcher = (directiveObj) => directiveObj?.name?.value === directive;
   }
