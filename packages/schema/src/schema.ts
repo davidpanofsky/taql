@@ -25,14 +25,19 @@ export async function makeSchema(
   let legacyHash = '';
   const manifest = '';
 
-  const encodeDirective = obfuscateDirective('encode');
+  const queryDirectives = [
+    obfuscateDirective('encode'),
+    obfuscateDirective('obfuscate'),
+  ];
 
   const legacy = await makeLegacySchema().catch(() => undefined);
   if (legacy != undefined) {
     legacyHash = legacy.hash;
     subschemas.push({
       schema: legacy.schema,
-      transforms: [encodeDirective.queryTransformer],
+      transforms: queryDirectives.map(
+        (directive) => directive.queryTransformer
+      ),
     });
   }
 
@@ -50,17 +55,22 @@ export async function makeSchema(
   // TODO load schemas from schema repository, add to subschemas.
 
   try {
-    const schema = encodeDirective.schemaTransformer(
-      mergeSchemas({
-        schemas: [
-          stitchSchemas({
-            subschemas,
-            mergeDirectives: true,
-          }),
-        ],
-        typeDefs: [encodeDirective.typeDefs],
-      })
+    let schema = mergeSchemas({
+      schemas: [
+        stitchSchemas({
+          subschemas,
+          mergeDirectives: true,
+        }),
+      ],
+      typeDefs: queryDirectives.map((directive) => directive.typeDefs),
+    });
+
+    // Apply directive transformations to the schema
+    schema = queryDirectives.reduce(
+      (curSchema, directive) => directive.schemaTransformer(curSchema),
+      schema
     );
+
     if (
       schema.__validationErrors == undefined ||
       schema.__validationErrors.length === 0
