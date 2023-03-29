@@ -21,7 +21,7 @@ export default class RemoveDirective<TContext = Record<string, any>>
   }) => boolean;
 
   constructor(directive: string) {
-    this.matcher = (directiveObj) => directiveObj?.name?.value === directive;
+    this.matcher = (directiveObj) => directiveObj?.name?.value == directive;
   }
 
   public transformRequest(
