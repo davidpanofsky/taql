@@ -1,5 +1,4 @@
 import {
-  DirectiveNode,
   GraphQLResolveInfo,
   GraphQLSchema,
   defaultFieldResolver,
@@ -37,39 +36,12 @@ function findDirective(directiveName: string, info: GraphQLResolveInfo) {
   return failed;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function hasDirective(
   directiveName: string,
   info: GraphQLResolveInfo
 ): boolean {
   const { fieldNodeIndex, directiveIndex } = findDirective(directiveName, info);
   return fieldNodeIndex >= 0 && directiveIndex >= 0;
-}
-
-function stripDirective(
-  info: GraphQLResolveInfo,
-  fieldNodeIndex: number,
-  directiveIndex: number
-): GraphQLResolveInfo {
-  if (!info.fieldNodes[fieldNodeIndex].directives) {
-    return info;
-  }
-  const newDirectives = [
-    ...(info.fieldNodes[fieldNodeIndex].directives as DirectiveNode[]),
-  ];
-  // Remove the directive
-  newDirectives.splice(directiveIndex, 1);
-  const newFieldNode = {
-    ...info.fieldNodes[fieldNodeIndex],
-    directives: newDirectives,
-  };
-
-  const newFieldNodes = [...info.fieldNodes];
-  newFieldNodes.splice(fieldNodeIndex, 1, newFieldNode);
-  return {
-    ...info,
-    fieldNodes: newFieldNodes,
-  };
 }
 
 export function obfuscateDirective(directiveName: string) {
@@ -82,23 +54,8 @@ export function obfuscateDirective(directiveName: string) {
           // const obfuscateDirective = getDirective(schema, fieldConfig, directiveName)?.[0]
           const { resolve = defaultFieldResolver } = fieldConfig;
           fieldConfig.resolve = async (source, args, context, info) => {
-            // Pull a potential query directive out of `info`
-            const { fieldNodeIndex, directiveIndex } = findDirective(
-              directiveName,
-              info
-            );
-            const shouldObfuscate = fieldNodeIndex >= 0 && directiveIndex >= 0;
-
-            // We will double obfuscate if the upstream graphql that resolves the field also supports it.
-            // Therefore we should modify the info object passed to the inner resolve to _not_ include the directive
-            // that we are handling.
-            // TODO: remove this stuff, as it's handled by the RemoveDirective transform
-            let newInfo = info;
-            if (shouldObfuscate) {
-              newInfo = stripDirective(info, fieldNodeIndex, directiveIndex);
-            }
-
-            const value = await resolve(source, args, context, newInfo);
+            const shouldObfuscate = hasDirective(directiveName, info);
+            const value = await resolve(source, args, context, info);
 
             if (typeof value === 'string' && shouldObfuscate) {
               return obfuscate(value);
