@@ -6,7 +6,7 @@ import {
 } from 'graphql';
 import { MapperKind, mapSchema } from '@graphql-tools/utils';
 
-import { inspect } from 'util';
+import RemoveDirective from './RemoveDirective';
 
 function findDirective(directiveName: string, info: GraphQLResolveInfo) {
   const failed = { fieldNodeIndex: -1, directiveIndex: -1 };
@@ -75,7 +75,7 @@ function stripDirective(
 export function obfuscateDirective(directiveName: string) {
   return {
     typeDefs: `directive @${directiveName} on FIELD`,
-    transformer: (schema: GraphQLSchema) =>
+    schemaTransformer: (schema: GraphQLSchema) =>
       mapSchema(schema, {
         [MapperKind.OBJECT_FIELD](fieldConfig) {
           // This is how you would extract a _schema_ directive.
@@ -92,16 +92,11 @@ export function obfuscateDirective(directiveName: string) {
             // We will double obfuscate if the upstream graphql that resolves the field also supports it.
             // Therefore we should modify the info object passed to the inner resolve to _not_ include the directive
             // that we are handling.
-            // TODO: above
+            // TODO: remove this stuff, as it's handled by the RemoveDirective transform
             let newInfo = info;
             if (shouldObfuscate) {
               newInfo = stripDirective(info, fieldNodeIndex, directiveIndex);
             }
-
-            console.log(`source: ${inspect(source)}`);
-            console.log(`args: ${inspect(args)}`);
-            console.log(`context: ${inspect(context)}`);
-            console.log(`(new)Info: ${inspect(newInfo)}`);
 
             const value = await resolve(source, args, context, newInfo);
 
@@ -114,6 +109,7 @@ export function obfuscateDirective(directiveName: string) {
           return fieldConfig;
         },
       }),
+    queryTransformer: new RemoveDirective(directiveName),
   };
 }
 

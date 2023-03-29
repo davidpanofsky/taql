@@ -3,7 +3,6 @@ import { GraphQLSchema } from 'graphql';
 import { Plugin } from '@envelop/core';
 import TypedEmitter from 'typed-emitter';
 import deepEqual from 'deep-equal';
-import { inspect } from 'util';
 import { makeLegacySchema } from './legacy';
 import { mergeSchemas } from '@graphql-tools/schema';
 import { obfuscateDirective } from './directives';
@@ -26,10 +25,15 @@ export async function makeSchema(
   let legacyHash = '';
   const manifest = '';
 
+  const encodeDirective = obfuscateDirective('encode');
+
   const legacy = await makeLegacySchema().catch(() => undefined);
   if (legacy != undefined) {
     legacyHash = legacy.hash;
-    subschemas.push(legacy.schema);
+    subschemas.push({
+      schema: legacy.schema,
+      transforms: [encodeDirective.queryTransformer],
+    });
   }
 
   // TODO load manifest from schema repository
@@ -44,20 +48,14 @@ export async function makeSchema(
   }
 
   // TODO load schemas from schema repository, add to subschemas.
-  const encodeDirective = obfuscateDirective('encode');
+
   try {
-    const schema = encodeDirective.transformer(
+    const schema = encodeDirective.schemaTransformer(
       mergeSchemas({
         schemas: [
           stitchSchemas({
             subschemas,
             mergeDirectives: true,
-            subschemaConfigTransforms: [
-              (subschemaConfig) => {
-                console.log(`subschemaConfig: ${inspect(subschemaConfig)}`);
-                return subschemaConfig;
-              },
-            ],
           }),
         ],
         typeDefs: [encodeDirective.typeDefs],
