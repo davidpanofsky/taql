@@ -42,6 +42,7 @@ export default class RemoveDirective<TContext = Record<string, any>>
               directives,
             };
           }
+          // undefined indicates that the node should be left unmodified
           return undefined;
         },
       },
