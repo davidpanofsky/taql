@@ -114,5 +114,21 @@ export function obfuscateDirective(directiveName: string) {
 }
 
 function obfuscate(value: string): string {
-  return `_${value}_`;
+  if (!value) {
+    return value;
+  }
+  const head = randomAlphanumeric(3);
+  const tail = randomAlphanumeric(3);
+  const surrounded = `${head}_${value}_${tail}`;
+  return Buffer.from(surrounded, 'utf-8').toString('base64');
+}
+
+/**
+ * Match roughly the behavior of apache's RandomStringUtils
+ * https://commons.apache.org/proper/commons-lang/apidocs/org/apache/commons/lang3/RandomStringUtils.html#randomAlphanumeric-int-
+ *
+ * This implementation doesn't ever include capital letters, but this seems like a fair tradeoff for it being a compact, noncustom implementation
+ */
+function randomAlphanumeric(length: number): string {
+  return Math.random().toString(36).substr(2, length);
 }
