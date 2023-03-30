@@ -17,8 +17,8 @@
   "workspaces": [
     "packages/*"
   ],
-  "repository": "git@gitlab.dev.tripadvisor.com:jacobkatz/taql.git",
-  "author": "jacobkatz <jacobkatz@tripadvisor.com>",
+  "repository": "git@gitlab.dev.tripadvisor.com:dplat/taql.git",
+  "author": "GraphQL Team <graphql@tripadvisor.com>",
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.41.0",
     "@typescript-eslint/parser": "^5.41.0",
