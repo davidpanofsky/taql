@@ -10,7 +10,7 @@ export const LEGACY_GQL_PARAMS = resolve({
     defaultTo: 'graphql.graphql-lapin.svc.kub.n.tripadvisor.com',
   },
   httpPort: {
-    property: 'LEGACY_GQL_HTTPS_PORT',
+    property: 'LEGACY_GQL_HTTP_PORT',
     resolver: resolvers.nonNegativeInteger,
     defaultTo: 80,
   },
