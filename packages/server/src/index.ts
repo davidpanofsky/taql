@@ -9,6 +9,7 @@ import { plugins as batchingPlugins } from '@taql/batching';
 import { createYoga } from 'graphql-yoga';
 import { createServer as httpsServer } from 'https';
 import { plugins as preregPlugins } from '@taql/prereg';
+import { useAPQ } from '@graphql-yoga/plugin-apq';
 
 const FIVE_MINUTES_MILLIS = 1000 * 60 * 5;
 
@@ -42,7 +43,7 @@ export async function main() {
   const yoga = createYoga<TaqlContext>({
     schema,
     ...yogaOptions,
-    plugins: plugins.envelop(),
+    plugins: [plugins.envelop(), useAPQ()],
   });
 
   const koa = new Koa();

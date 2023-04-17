@@ -33,6 +33,6 @@
     "@graphql-tools/batch-execute@^8.5.11": "patch:@graphql-tools/batch-execute@^8.5.11#./.yarn/patches/@graphql-tools-batch-execute-npm-8.5.11-c0fd4ea03c.patch"
   },
   "dependencies": {
-    "@graphql-yoga/plugin-apq": "^1.9.0"
+    "@graphql-yoga/plugin-apq": "1.0.0-next.8"
   }
 }

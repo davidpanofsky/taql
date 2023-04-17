@@ -453,6 +453,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@graphql-yoga/plugin-apq@npm:1.0.0-next.8":
+  version: 1.0.0-next.8
+  resolution: "@graphql-yoga/plugin-apq@npm:1.0.0-next.8::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-yoga%2Fplugin-apq%2F-%2Fplugin-apq-1.0.0-next.8.tgz"
+  dependencies:
+    "@whatwg-node/fetch": 0.5.0
+    tiny-lru: ^9.0.0
+  peerDependencies:
+    graphql-yoga: ^3.0.0-next.8
+  checksum: a48c376ca01eafe7aceeaacc2869eb585dea9248b9358a3cdac5ec0c7876651bd52f04ba5f18c9fcb3c3e30192f14155e30d1b6c6d21e7d885c63f15f50406e7
+  languageName: node
+  linkType: hard
+
 "@graphql-yoga/subscription@npm:^3.0.0-next.0":
   version: 3.0.0-next.0
   resolution: "@graphql-yoga/subscription@npm:3.0.0-next.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-yoga%2Fsubscription%2F-%2Fsubscription-3.0.0-next.0.tgz"
@@ -776,6 +788,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@taql@workspace:."
   dependencies:
+    "@graphql-yoga/plugin-apq": 1.0.0-next.8
     "@typescript-eslint/eslint-plugin": ^5.41.0
     "@typescript-eslint/parser": ^5.41.0
     depcheck: ^1.4.3
@@ -4223,6 +4236,13 @@ __metadata:
   version: 0.2.0
   resolution: "text-table@npm:0.2.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Ftext-table%2F-%2Ftext-table-0.2.0.tgz"
   checksum: b6937a38c80c7f84d9c11dd75e49d5c44f71d95e810a3250bd1f1797fc7117c57698204adf676b71497acc205d769d65c16ae8fa10afad832ae1322630aef10a
+  languageName: node
+  linkType: hard
+
+"tiny-lru@npm:^9.0.0":
+  version: 9.0.3
+  resolution: "tiny-lru@npm:9.0.3::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Ftiny-lru%2F-%2Ftiny-lru-9.0.3.tgz"
+  checksum: 8ded11a875d622a2d4c3ee2d33331ddfaa80f86b5b280bad17810ecbfd94d774c1726948f91031527bb03e2fd38c4385bd4db27fd5614b3c59fe3fa7d3359451
   languageName: node
   linkType: hard
 

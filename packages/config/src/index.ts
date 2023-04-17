@@ -54,3 +54,11 @@ export const PREREGISTERED_QUERY_PARAMS = resolve({
       'postgres://graphql_operations_ros@graphql-operations-ros.db.var.ml.tripadvisor.com',
   },
 });
+
+export const AUTOMATIC_PERSISTED_QUERY_PARAMS = resolve({
+  max_cache_size: {
+    property: 'AUTOMATIC_PERSISTED_QUERY_CACHE_SIZE',
+    resolver: resolvers.nonNegativeInteger,
+    defaultTo: 1000,
+  },
+});
