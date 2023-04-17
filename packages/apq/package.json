@@ -1,0 +1,10 @@
+{
+  "name": "@taql/apq",
+  "version": "1.0.0",
+  "main": "build/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node build/index.js"
+  },
+  "license": "UNLICENSED"
+}
