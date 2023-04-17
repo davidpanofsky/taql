@@ -56,7 +56,16 @@ export const PREREGISTERED_QUERY_PARAMS = resolve({
 });
 
 export const AUTOMATIC_PERSISTED_QUERY_PARAMS = resolve({
-  max_cache_size: {
+  redis_url: {
+    property: 'AUTOMATIC_PERSISTED_QUERY_REDIS_URL',
+    defaultTo: 'redis://localhost:6379',
+  },
+  redis_ttl: {
+    property: 'AUTOMATIC_PERSISTED_QUERY_REDIS_TTL',
+    resolver: resolvers.nonNegativeInteger,
+    defaultTo: 60 * 60 * 24,
+  },
+  mem_cache_size: {
     property: 'AUTOMATIC_PERSISTED_QUERY_CACHE_SIZE',
     resolver: resolvers.nonNegativeInteger,
     defaultTo: 1000,
