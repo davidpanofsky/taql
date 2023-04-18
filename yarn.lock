@@ -825,7 +825,7 @@ __metadata:
     "@taql/schema": "workspace:^"
     "@taql/ssl": "workspace:^"
     "@types/koa": ^2.13.5
-    cache-manager: 5.1.6
+    cache-manager: /Users/dpanofsky/envs/3rdParty/node-cache-manager/node-cache-manager/cache-manager-5.1.7.tgz
     cache-manager-redis-yet: ^4.1.1
     graphql: ^16.6.0
     graphql-yoga: three
@@ -1605,13 +1605,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cache-manager@npm:5.1.6":
-  version: 5.1.6
-  resolution: "cache-manager@npm:5.1.6::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fcache-manager%2F-%2Fcache-manager-5.1.6.tgz"
+"cache-manager@file:/Users/dpanofsky/envs/3rdParty/node-cache-manager/node-cache-manager/cache-manager-5.1.7.tgz::locator=%40taql%2Fserver%40workspace%3Apackages%2Fserver":
+  version: 5.1.7
+  resolution: "cache-manager@file:/Users/dpanofsky/envs/3rdParty/node-cache-manager/node-cache-manager/cache-manager-5.1.7.tgz::locator=%40taql%2Fserver%40workspace%3Apackages%2Fserver"
   dependencies:
     lodash.clonedeep: ^4.5.0
     lru-cache: ^7.14.0
-  checksum: f84cdfd067c1aca7cff3e09c4db61d55bfec3da589907503151a1fd17f46c13fbce3e51ae9c508cd7f5fdb0389159af5931b9f67b99d0dbd698ed575e96947e3
+  checksum: 5b06431f64c75e6a64f8cc5654b66189457e63e1d034a615c1ee8705abab6321613ae06cfee0553029f87fbe88498ab4d4c460ce98e7782fb92869a6fd6bb5b3
   languageName: node
   linkType: hard
 

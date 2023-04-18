@@ -63,7 +63,7 @@ export const AUTOMATIC_PERSISTED_QUERY_PARAMS = resolve({
   redis_ttl: {
     property: 'AUTOMATIC_PERSISTED_QUERY_REDIS_TTL',
     resolver: resolvers.nonNegativeInteger,
-    defaultTo: 60 * 60 * 24,
+    defaultTo: 36_000,
   },
   mem_cache_size: {
     property: 'AUTOMATIC_PERSISTED_QUERY_CACHE_SIZE',
