@@ -47,7 +47,7 @@ export async function main() {
     max: AUTOMATIC_PERSISTED_QUERY_PARAMS.mem_cache_size,
   });
   const redisConfig = {
-    url: AUTOMATIC_PERSISTED_QUERY_PARAMS.redis_url,
+    url: AUTOMATIC_PERSISTED_QUERY_PARAMS.redis_uri,
     options: {
       ttl: AUTOMATIC_PERSISTED_QUERY_PARAMS.redis_ttl,
     },
