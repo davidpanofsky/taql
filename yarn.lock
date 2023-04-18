@@ -697,18 +697,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@taql/apq@workspace:packages/apq":
-  version: 0.0.0-use.local
-  resolution: "@taql/apq@workspace:packages/apq"
-  dependencies:
-    "@graphql-tools/utils": ^8.13.1
-    "@graphql-yoga/plugin-apq": 1.0.0-next.8
-    cache-manager: 5.1.6
-    graphql: ^16.6.0
-    typescript: ^4.8.4
-  languageName: unknown
-  linkType: soft
-
 "@taql/batching-config@workspace:^, @taql/batching-config@workspace:packages/batching-config":
   version: 0.0.0-use.local
   resolution: "@taql/batching-config@workspace:packages/batching-config"
@@ -828,6 +816,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@taql/server@workspace:packages/server"
   dependencies:
+    "@graphql-yoga/plugin-apq": 1.0.0-next.8
     "@taql/batching": "workspace:^"
     "@taql/config": "workspace:^"
     "@taql/context": "workspace:^"
@@ -836,6 +825,8 @@ __metadata:
     "@taql/schema": "workspace:^"
     "@taql/ssl": "workspace:^"
     "@types/koa": ^2.13.5
+    cache-manager: 5.1.6
+    cache-manager-redis-yet: ^4.1.1
     graphql: ^16.6.0
     graphql-yoga: three
     koa: ^2.13.4
@@ -858,8 +849,6 @@ __metadata:
   dependencies:
     "@typescript-eslint/eslint-plugin": ^5.41.0
     "@typescript-eslint/parser": ^5.41.0
-    cache-manager: 5.1.6
-    cache-manager-redis-yet: ^4.1.1
     depcheck: ^1.4.3
     eslint: ^8.26.0
     eslint-config-prettier: ^8.5.0

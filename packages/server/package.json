@@ -12,6 +12,7 @@
     "typescript": "^4.8.4"
   },
   "dependencies": {
+    "@graphql-yoga/plugin-apq": "1.0.0-next.8",
     "@taql/batching": "workspace:^",
     "@taql/config": "workspace:^",
     "@taql/context": "workspace:^",
@@ -19,6 +20,8 @@
     "@taql/prereg": "workspace:^",
     "@taql/schema": "workspace:^",
     "@taql/ssl": "workspace:^",
+    "cache-manager": "5.1.6",
+    "cache-manager-redis-yet": "^4.1.1",
     "graphql": "^16.6.0",
     "graphql-yoga": "three",
     "koa": "^2.13.4"
