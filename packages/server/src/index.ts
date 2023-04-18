@@ -1,7 +1,7 @@
+import { ENABLE_GRAPHIQL, SERVER_PARAMS } from '@taql/config';
 import { Server, createServer as httpServer } from 'http';
 import { TaqlContext, plugins as contextPlugins } from '@taql/context';
 import Koa from 'koa';
-import { SERVER_PARAMS, ENABLE_GRAPHIQL } from '@taql/config';
 import { SSL_CONFIG } from '@taql/ssl';
 import { SchemaPoller } from '@taql/schema';
 import { TaqlPlugins } from '@taql/plugins';
