@@ -56,8 +56,10 @@ export async function main() {
       ttl: AUTOMATIC_PERSISTED_QUERY_PARAMS.redis_ttl,
     },
   };
-  const redisCache = await caching(redisStore, redisConfig);
-  const apqStore: APQStore = multiCaching([memoryCache, redisCache]);
+  const redisCache = AUTOMATIC_PERSISTED_QUERY_PARAMS.redis_uri
+    ? [await caching(redisStore, redisConfig)]
+    : [];
+  const apqStore: APQStore = multiCaching([memoryCache, ...redisCache]);
 
   const yoga = createYoga<TaqlContext>({
     schema,
