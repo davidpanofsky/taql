@@ -39,6 +39,9 @@ export const SERVER_PARAMS = resolve({
   },
 });
 
+export const ENABLE_GRAPHIQL =
+  process.env.NODE_ENV === 'production' ? false : true;
+
 export const PREREGISTERED_QUERY_PARAMS = resolve({
   max_cache_size: {
     property: 'PREREGISTERED_QUERY_CACHE_SIZE',

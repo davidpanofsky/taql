@@ -1,7 +1,7 @@
+import { ENABLE_GRAPHIQL, SERVER_PARAMS } from '@taql/config';
 import { Server, createServer as httpServer } from 'http';
 import { TaqlContext, plugins as contextPlugins } from '@taql/context';
 import Koa from 'koa';
-import { SERVER_PARAMS } from '@taql/config';
 import { SSL_CONFIG } from '@taql/ssl';
 import { SchemaPoller } from '@taql/schema';
 import { TaqlPlugins } from '@taql/plugins';
@@ -19,6 +19,7 @@ export async function main() {
     // TODO pick a number that matches the current limit in legacy graphql,
     // and draw it from configuration.
     batching: { limit: 200 },
+    graphiql: ENABLE_GRAPHIQL,
   } as const;
 
   const schemaPoller = new SchemaPoller({
