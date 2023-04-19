@@ -1,5 +1,9 @@
 import { APQStore, useAPQ } from '@graphql-yoga/plugin-apq';
-import { AUTOMATIC_PERSISTED_QUERY_PARAMS, SERVER_PARAMS } from '@taql/config';
+import {
+  AUTOMATIC_PERSISTED_QUERY_PARAMS,
+  ENABLE_GRAPHIQL,
+  SERVER_PARAMS,
+} from '@taql/config';
 import { Server, createServer as httpServer } from 'http';
 import { TaqlContext, plugins as contextPlugins } from '@taql/context';
 import { caching, multiCaching } from 'cache-manager';
