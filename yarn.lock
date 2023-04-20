@@ -453,6 +453,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@graphql-yoga/plugin-apq@npm:1.0.0-next.8":
+  version: 1.0.0-next.8
+  resolution: "@graphql-yoga/plugin-apq@npm:1.0.0-next.8::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-yoga%2Fplugin-apq%2F-%2Fplugin-apq-1.0.0-next.8.tgz"
+  dependencies:
+    "@whatwg-node/fetch": 0.5.0
+    tiny-lru: ^9.0.0
+  peerDependencies:
+    graphql-yoga: ^3.0.0-next.8
+  checksum: a48c376ca01eafe7aceeaacc2869eb585dea9248b9358a3cdac5ec0c7876651bd52f04ba5f18c9fcb3c3e30192f14155e30d1b6c6d21e7d885c63f15f50406e7
+  languageName: node
+  linkType: hard
+
 "@graphql-yoga/subscription@npm:^3.0.0-next.0":
   version: 3.0.0-next.0
   resolution: "@graphql-yoga/subscription@npm:3.0.0-next.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-yoga%2Fsubscription%2F-%2Fsubscription-3.0.0-next.0.tgz"
@@ -622,6 +634,62 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@redis/bloom@npm:1.2.0, @redis/bloom@npm:^1.0.2":
+  version: 1.2.0
+  resolution: "@redis/bloom@npm:1.2.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40redis%2Fbloom%2F-%2Fbloom-1.2.0.tgz"
+  peerDependencies:
+    "@redis/client": ^1.0.0
+  checksum: 8c214227287d6b278109098bca00afc601cf84f7da9c6c24f4fa7d3854b946170e5893aa86ed607ba017a4198231d570541c79931b98b6d50b262971022d1d6c
+  languageName: node
+  linkType: hard
+
+"@redis/client@npm:1.5.6, @redis/client@npm:^1.3.0":
+  version: 1.5.6
+  resolution: "@redis/client@npm:1.5.6::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40redis%2Fclient%2F-%2Fclient-1.5.6.tgz"
+  dependencies:
+    cluster-key-slot: 1.1.2
+    generic-pool: 3.9.0
+    yallist: 4.0.0
+  checksum: df03f77d43e95fa4016b0c434cbdbc1822d2f30b2bfba1b046f7f4d0a6ee9ad15f350e56d6f8030b82b47e1cfa1444e7c43d659e27777ac8b66a1d95e6707f6b
+  languageName: node
+  linkType: hard
+
+"@redis/graph@npm:1.1.0, @redis/graph@npm:^1.0.1":
+  version: 1.1.0
+  resolution: "@redis/graph@npm:1.1.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40redis%2Fgraph%2F-%2Fgraph-1.1.0.tgz"
+  peerDependencies:
+    "@redis/client": ^1.0.0
+  checksum: d3df807108a42929ed65269c691fe6ab7eda55de91318f02a22b2d637c1bfef8817fccd17025904f5a0be8cf1cea5941334ec9f10719336da5d8f1c54cd4997e
+  languageName: node
+  linkType: hard
+
+"@redis/json@npm:1.0.4, @redis/json@npm:^1.0.4":
+  version: 1.0.4
+  resolution: "@redis/json@npm:1.0.4::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40redis%2Fjson%2F-%2Fjson-1.0.4.tgz"
+  peerDependencies:
+    "@redis/client": ^1.0.0
+  checksum: de07f9c37abed603dec352593eb69fc8a94475e7f86b4f65b9805394492d448a1e4181db74269d80eb9dba6f3ae8a41804204821db36bb801cd7c1e30ac7ec80
+  languageName: node
+  linkType: hard
+
+"@redis/search@npm:1.1.2, @redis/search@npm:^1.1.0":
+  version: 1.1.2
+  resolution: "@redis/search@npm:1.1.2::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40redis%2Fsearch%2F-%2Fsearch-1.1.2.tgz"
+  peerDependencies:
+    "@redis/client": ^1.0.0
+  checksum: fc3c0bd62c150ea7f8b3f08b0e67893b4e8df71b4820d750de6ba00ccff3720fdc5d4f50618e385c9e183c784635185e2e98a3e6c3d20ac30f2c60996f38b992
+  languageName: node
+  linkType: hard
+
+"@redis/time-series@npm:1.0.4, @redis/time-series@npm:^1.0.3":
+  version: 1.0.4
+  resolution: "@redis/time-series@npm:1.0.4::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40redis%2Ftime-series%2F-%2Ftime-series-1.0.4.tgz"
+  peerDependencies:
+    "@redis/client": ^1.0.0
+  checksum: a5fca079deb04a2f204a7f9a375a6ff698a119d5dd53f7581fa8fd9e3bacacf1ecb0253b97fada484a012fea7a98014bc0f4f79707d4e92ff61c00318f2bfe04
+  languageName: node
+  linkType: hard
+
 "@repeaterjs/repeater@npm:^3.0.4":
   version: 3.0.4
   resolution: "@repeaterjs/repeater@npm:3.0.4::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40repeaterjs%2Frepeater%2F-%2Frepeater-3.0.4.tgz"
@@ -748,6 +816,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@taql/server@workspace:packages/server"
   dependencies:
+    "@graphql-yoga/plugin-apq": 1.0.0-next.8
     "@taql/batching": "workspace:^"
     "@taql/config": "workspace:^"
     "@taql/context": "workspace:^"
@@ -756,6 +825,8 @@ __metadata:
     "@taql/schema": "workspace:^"
     "@taql/ssl": "workspace:^"
     "@types/koa": ^2.13.5
+    cache-manager: 5.1.6
+    cache-manager-redis-yet: ^4.1.1
     graphql: ^16.6.0
     graphql-yoga: three
     koa: ^2.13.4
@@ -1518,6 +1589,42 @@ __metadata:
   languageName: node
   linkType: hard
 
+"cache-manager-redis-yet@npm:^4.1.1":
+  version: 4.1.1
+  resolution: "cache-manager-redis-yet@npm:4.1.1::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fcache-manager-redis-yet%2F-%2Fcache-manager-redis-yet-4.1.1.tgz"
+  dependencies:
+    "@redis/bloom": ^1.0.2
+    "@redis/client": ^1.3.0
+    "@redis/graph": ^1.0.1
+    "@redis/json": ^1.0.4
+    "@redis/search": ^1.1.0
+    "@redis/time-series": ^1.0.3
+    cache-manager: ^5.1.0
+    redis: ^4.3.1
+  checksum: 0376087a58e0a823fcf0025a1e2df41397ad76d6ee335efd88ac5509fb7fe49c797a083093b129b30e8bc64469ee73d4dafdb12fb4e5e1e10f3e730c3b517746
+  languageName: node
+  linkType: hard
+
+"cache-manager@npm:5.1.6":
+  version: 5.1.6
+  resolution: "cache-manager@npm:5.1.6::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fcache-manager%2F-%2Fcache-manager-5.1.6.tgz"
+  dependencies:
+    lodash.clonedeep: ^4.5.0
+    lru-cache: ^7.14.0
+  checksum: f84cdfd067c1aca7cff3e09c4db61d55bfec3da589907503151a1fd17f46c13fbce3e51ae9c508cd7f5fdb0389159af5931b9f67b99d0dbd698ed575e96947e3
+  languageName: node
+  linkType: hard
+
+"cache-manager@npm:^5.1.0":
+  version: 5.2.0
+  resolution: "cache-manager@npm:5.2.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fcache-manager%2F-%2Fcache-manager-5.2.0.tgz"
+  dependencies:
+    lodash.clonedeep: ^4.5.0
+    lru-cache: ~7.18.3
+  checksum: 1f1ec19c902c01817af782c2fc3ba96705325794e20fc4865ec9382eb91c1cee76dc560a63f774cb54b85067142134b5338183c4cc7f465375fb063ce62b84ac
+  languageName: node
+  linkType: hard
+
 "call-bind@npm:^1.0.0, call-bind@npm:^1.0.2":
   version: 1.0.2
   resolution: "call-bind@npm:1.0.2::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fcall-bind%2F-%2Fcall-bind-1.0.2.tgz"
@@ -1604,6 +1711,13 @@ __metadata:
     strip-ansi: ^6.0.0
     wrap-ansi: ^7.0.0
   checksum: ce2e8f578a4813806788ac399b9e866297740eecd4ad1823c27fd344d78b22c5f8597d548adbcc46f0573e43e21e751f39446c5a5e804a12aace402b7a315d7f
+  languageName: node
+  linkType: hard
+
+"cluster-key-slot@npm:1.1.2":
+  version: 1.1.2
+  resolution: "cluster-key-slot@npm:1.1.2::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fcluster-key-slot%2F-%2Fcluster-key-slot-1.1.2.tgz"
+  checksum: be0ad2d262502adc998597e83f9ded1b80f827f0452127c5a37b22dfca36bab8edf393f7b25bb626006fb9fb2436106939ede6d2d6ecf4229b96a47f27edd681
   languageName: node
   linkType: hard
 
@@ -2388,6 +2502,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"generic-pool@npm:3.9.0":
+  version: 3.9.0
+  resolution: "generic-pool@npm:3.9.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fgeneric-pool%2F-%2Fgeneric-pool-3.9.0.tgz"
+  checksum: 3d89e9b2018d2e3bbf44fec78c76b2b7d56d6a484237aa9daf6ff6eedb14b0899dadd703b5d810219baab2eb28e5128fb18b29e91e602deb2eccac14492d8ca8
+  languageName: node
+  linkType: hard
+
 "get-caller-file@npm:^2.0.5":
   version: 2.0.5
   resolution: "get-caller-file@npm:2.0.5::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fget-caller-file%2F-%2Fget-caller-file-2.0.5.tgz"
@@ -3136,6 +3257,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"lodash.clonedeep@npm:^4.5.0":
+  version: 4.5.0
+  resolution: "lodash.clonedeep@npm:4.5.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Flodash.clonedeep%2F-%2Flodash.clonedeep-4.5.0.tgz"
+  checksum: 92c46f094b064e876a23c97f57f81fbffd5d760bf2d8a1c61d85db6d1e488c66b0384c943abee4f6af7debf5ad4e4282e74ff83177c9e63d8ff081a4837c3489
+  languageName: node
+  linkType: hard
+
 "lodash.merge@npm:^4.6.2":
   version: 4.6.2
   resolution: "lodash.merge@npm:4.6.2::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Flodash.merge%2F-%2Flodash.merge-4.6.2.tgz"
@@ -3167,6 +3295,13 @@ __metadata:
   dependencies:
     yallist: ^4.0.0
   checksum: f97f499f898f23e4585742138a22f22526254fdba6d75d41a1c2526b3b6cc5747ef59c5612ba7375f42aca4f8461950e925ba08c991ead0651b4918b7c978297
+  languageName: node
+  linkType: hard
+
+"lru-cache@npm:^7.14.0, lru-cache@npm:~7.18.3":
+  version: 7.18.3
+  resolution: "lru-cache@npm:7.18.3::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Flru-cache%2F-%2Flru-cache-7.18.3.tgz"
+  checksum: e550d772384709deea3f141af34b6d4fa392e2e418c1498c078de0ee63670f1f46f5eee746e8ef7e69e1c895af0d4224e62ee33e66a543a14763b0f2e74c1356
   languageName: node
   linkType: hard
 
@@ -3841,6 +3976,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"redis@npm:^4.3.1":
+  version: 4.6.5
+  resolution: "redis@npm:4.6.5::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fredis%2F-%2Fredis-4.6.5.tgz"
+  dependencies:
+    "@redis/bloom": 1.2.0
+    "@redis/client": 1.5.6
+    "@redis/graph": 1.1.0
+    "@redis/json": 1.0.4
+    "@redis/search": 1.1.2
+    "@redis/time-series": 1.0.4
+  checksum: 81696673a4c3acefcde310289ac83f40fe974af76f6d2f2a682befd6486128f8870f48b9e6fee1213cecfba9ac705649d27b750e853809d734cccce05868f1b7
+  languageName: node
+  linkType: hard
+
 "regexp.prototype.flags@npm:^1.4.3":
   version: 1.4.3
   resolution: "regexp.prototype.flags@npm:1.4.3::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fregexp.prototype.flags%2F-%2Fregexp.prototype.flags-1.4.3.tgz"
@@ -4226,6 +4375,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"tiny-lru@npm:^9.0.0":
+  version: 9.0.3
+  resolution: "tiny-lru@npm:9.0.3::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Ftiny-lru%2F-%2Ftiny-lru-9.0.3.tgz"
+  checksum: 8ded11a875d622a2d4c3ee2d33331ddfaa80f86b5b280bad17810ecbfd94d774c1726948f91031527bb03e2fd38c4385bd4db27fd5614b3c59fe3fa7d3359451
+  languageName: node
+  linkType: hard
+
 "to-fast-properties@npm:^2.0.0":
   version: 2.0.0
   resolution: "to-fast-properties@npm:2.0.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fto-fast-properties%2F-%2Fto-fast-properties-2.0.0.tgz"
@@ -4552,7 +4708,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yallist@npm:^4.0.0":
+"yallist@npm:4.0.0, yallist@npm:^4.0.0":
   version: 4.0.0
   resolution: "yallist@npm:4.0.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fyallist%2F-%2Fyallist-4.0.0.tgz"
   checksum: 343617202af32df2a15a3be36a5a8c0c8545208f3d3dfbc6bb7c3e3b7e8c6f8e7485432e4f3b88da3031a6e20afa7c711eded32ddfb122896ac5d914e75848d5

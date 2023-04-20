@@ -1,6 +1,12 @@
-import { ENABLE_GRAPHIQL, SERVER_PARAMS } from '@taql/config';
+import { APQStore, useAPQ } from '@graphql-yoga/plugin-apq';
+import {
+  AUTOMATIC_PERSISTED_QUERY_PARAMS,
+  ENABLE_GRAPHIQL,
+  SERVER_PARAMS,
+} from '@taql/config';
 import { Server, createServer as httpServer } from 'http';
 import { TaqlContext, plugins as contextPlugins } from '@taql/context';
+import { caching, multiCaching } from 'cache-manager';
 import Koa from 'koa';
 import { SSL_CONFIG } from '@taql/ssl';
 import { SchemaPoller } from '@taql/schema';
@@ -9,6 +15,7 @@ import { plugins as batchingPlugins } from '@taql/batching';
 import { createYoga } from 'graphql-yoga';
 import { createServer as httpsServer } from 'https';
 import { plugins as preregPlugins } from '@taql/prereg';
+import { redisStore } from 'cache-manager-redis-yet';
 
 const FIVE_MINUTES_MILLIS = 1000 * 60 * 5;
 
@@ -39,10 +46,25 @@ export async function main() {
     { envelop: preregPlugins }
   );
 
+  // Two tier store for automatic persisted queries
+  const memoryCache = await caching('memory', {
+    max: AUTOMATIC_PERSISTED_QUERY_PARAMS.mem_cache_size,
+  });
+  const redisConfig = {
+    url: AUTOMATIC_PERSISTED_QUERY_PARAMS.redis_uri,
+    options: {
+      ttl: AUTOMATIC_PERSISTED_QUERY_PARAMS.redis_ttl,
+    },
+  };
+  const redisCache = AUTOMATIC_PERSISTED_QUERY_PARAMS.redis_uri
+    ? [await caching(redisStore, redisConfig)]
+    : [];
+  const apqStore: APQStore = multiCaching([memoryCache, ...redisCache]);
+
   const yoga = createYoga<TaqlContext>({
     schema,
     ...yogaOptions,
-    plugins: plugins.envelop(),
+    plugins: [useAPQ({ store: apqStore }), plugins.envelop()],
   });
 
   const koa = new Koa();
