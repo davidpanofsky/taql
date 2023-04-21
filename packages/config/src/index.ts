@@ -57,7 +57,7 @@ export const PREREGISTERED_QUERY_PARAMS = resolve({
 
 export const AUTOMATIC_PERSISTED_QUERY_PARAMS = resolve({
   redis_uri: {
-    property: 'AUTOMATIC_PERSISTED_QUERY_REDIS_URI',
+    property: 'AUTOMATIC_PERSISTED_QUERY_REDIS_HOST',
     defaultTo: undefined,
   },
   redis_ttl: {
