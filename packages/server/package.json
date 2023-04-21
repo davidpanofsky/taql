@@ -24,7 +24,6 @@
     "cache-manager": "^5.1.0",
     "graphql": "^16.6.0",
     "graphql-yoga": "three",
-    "ioredis": "^5.2.3",
     "koa": "^2.13.4"
   }
 }
