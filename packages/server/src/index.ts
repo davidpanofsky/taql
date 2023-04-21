@@ -51,15 +51,28 @@ export async function main() {
     max: AUTOMATIC_PERSISTED_QUERY_PARAMS.mem_cache_size,
   });
 
-  const redisConfig = {
-    ttl: AUTOMATIC_PERSISTED_QUERY_PARAMS.redis_ttl,
-    clusterConfig: {
-      nodes: [{ host: AUTOMATIC_PERSISTED_QUERY_PARAMS.redis_uri, port: 6379 }],
-    },
-  };
-
-  const redisCache = AUTOMATIC_PERSISTED_QUERY_PARAMS.redis_uri
-    ? [await caching(ioRedisStore, redisConfig)]
+  const redisCache = AUTOMATIC_PERSISTED_QUERY_PARAMS.redis_instance
+    ? [
+        await caching(ioRedisStore, {
+          ttl: AUTOMATIC_PERSISTED_QUERY_PARAMS.redis_ttl,
+          host: AUTOMATIC_PERSISTED_QUERY_PARAMS.redis_instance,
+          port: 6379,
+        }),
+      ]
+    : AUTOMATIC_PERSISTED_QUERY_PARAMS.redis_cluster
+    ? [
+        await caching(ioRedisStore, {
+          ttl: AUTOMATIC_PERSISTED_QUERY_PARAMS.redis_ttl,
+          clusterConfig: {
+            nodes: [
+              {
+                host: AUTOMATIC_PERSISTED_QUERY_PARAMS.redis_cluster,
+                port: 6379,
+              },
+            ],
+          },
+        }),
+      ]
     : [];
   const apqStore: APQStore = multiCaching([memoryCache, ...redisCache]);
 
