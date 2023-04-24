@@ -79,7 +79,7 @@ export async function main() {
   const yoga = createYoga<TaqlContext>({
     schema,
     ...yogaOptions,
-    plugins: [useAPQ({ store: apqStore }), plugins.envelop()],
+    plugins: [useAPQ({ store: apqStore }), ...plugins.envelop()],
   });
 
   const koa = new Koa();
