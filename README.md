@@ -10,7 +10,7 @@ For postgres operations (e.g to resolve preregistered queries) we use `pg-native
 
 On Centos:
 
-```
+```shell
 yum install postgresql-libs
 ```
 
@@ -32,7 +32,7 @@ $ yarn install
 
 On Mac:
 
-```
+```shell
 brew install libpq
 # brew doesn't link into /usr/local/lib
 ln -s /usr/local/opt/libpq/lib/libpq.5.dylib /usr/local/lib/libpq.5.dylib
@@ -42,7 +42,7 @@ ln -s /usr/local/opt/libpq/lib/libpq.5.dylib /usr/local/lib/libpq.5.dylib
 
 - `yarn install --immutable` - install dependencies
 - `yarn run build` - build the repository
-- `yarn run start` - start the service
+- `yarn run server start` - start the service
 
 ## Environment variables
 
@@ -61,6 +61,25 @@ ln -s /usr/local/opt/libpq/lib/libpq.5.dylib /usr/local/lib/libpq.5.dylib
 
 When both `CLIENT_CERT_PATH` and `CLIENT_KEY_PATH` are set, the server will use them (and `CLIENT_CERT_CA_PATH`, if set) to provide MTLS when connecting to other servers. Likewise, when both are set, the server will use them to sign responses to clients, and should be queried using the https protocol. If one or both values is not present, the server will not use MTLS for requests, and will not sign responses, so it should be queried using the http protocol.
 
+### Automatic Persisted Query Cache
+
+APQ always has an in-memory LRU cache:
+
+- `AUTOMATIC_PERSISTED_QUERY_CACHE_SIZE`: _(optional, default 1000)_ size of the LRU cache.
+
+Additionally, it can be configured to use redis as a second teir of the cache:
+
+- `AUTOMATIC_PERSISTED_QUERY_REDIS_CLUSTER`: _(optional)_ hostname of the redis cluster.
+- `AUTOMATIC_PERSISTED_QUERY_REDIS_INSTANCE`: _(optional)_ hostname of a standalone redis instance.
+- `AUTOMATIC_PERSISTED_QUERY_REDIS_TTL`: _(optional, default 36000)_ TTL of APQ entries in redis.
+
+If neither of `AUTOMATIC_PERSISTED_QUERY_REDIS_CLUSTER` or `AUTOMATIC_PERSISTED_QUERY_REDIS_INSTANCE` are specified, only the LRU cache is used.
+
+For most development operations, the LRU cache is sufficient. If you need to test something with the redis backend, this can be accomplished by
+
+1. Running redis in docker: `docker run -d -p 6379:6379 -p 8001:8001 redis/redis-stack:latest`
+1. setting `AUTOMATIC_PERSISTED_QUERY_REDIS_INSTANCE=localhost`
+
 ### Stitching
 
 #### legacy graphql
@@ -75,7 +94,7 @@ If `LEGACY_GQL_HOST` is not set, the legacy graphql service will not be stitched
 
 ### Build
 
-```
+```shell
 VERSION=<version>
 IMAGE=siteops-docker.maven.dev.tripadvisor.com/taql
 docker build . -t "${IMAGE}:${VERSION}"
@@ -83,7 +102,7 @@ docker build . -t "${IMAGE}:${VERSION}"
 
 ### Push
 
-```
+```shell
 IMAGE=siteops-docker.maven.dev.tripadvisor.com/taql
 docker login siteops-docker.maven.dev.tripadvisor.com
 docker push ${IMAGE}

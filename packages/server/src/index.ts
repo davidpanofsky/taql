@@ -14,8 +14,8 @@ import { TaqlPlugins } from '@taql/plugins';
 import { plugins as batchingPlugins } from '@taql/batching';
 import { createYoga } from 'graphql-yoga';
 import { createServer as httpsServer } from 'https';
+import { ioRedisStore } from '@tirke/node-cache-manager-ioredis';
 import { plugins as preregPlugins } from '@taql/prereg';
-import { redisStore } from 'cache-manager-redis-yet';
 
 const FIVE_MINUTES_MILLIS = 1000 * 60 * 5;
 
@@ -51,21 +51,36 @@ export async function main() {
   const memoryCache = await caching('memory', {
     max: AUTOMATIC_PERSISTED_QUERY_PARAMS.mem_cache_size,
   });
-  const redisConfig = {
-    url: AUTOMATIC_PERSISTED_QUERY_PARAMS.redis_uri,
-    options: {
-      ttl: AUTOMATIC_PERSISTED_QUERY_PARAMS.redis_ttl,
-    },
-  };
-  const redisCache = AUTOMATIC_PERSISTED_QUERY_PARAMS.redis_uri
-    ? [await caching(redisStore, redisConfig)]
+
+  const redisCache = AUTOMATIC_PERSISTED_QUERY_PARAMS.redis_instance
+    ? [
+        await caching(ioRedisStore, {
+          ttl: AUTOMATIC_PERSISTED_QUERY_PARAMS.redis_ttl,
+          host: AUTOMATIC_PERSISTED_QUERY_PARAMS.redis_instance,
+          port: 6379,
+        }),
+      ]
+    : AUTOMATIC_PERSISTED_QUERY_PARAMS.redis_cluster
+    ? [
+        await caching(ioRedisStore, {
+          ttl: AUTOMATIC_PERSISTED_QUERY_PARAMS.redis_ttl,
+          clusterConfig: {
+            nodes: [
+              {
+                host: AUTOMATIC_PERSISTED_QUERY_PARAMS.redis_cluster,
+                port: 6379,
+              },
+            ],
+          },
+        }),
+      ]
     : [];
   const apqStore: APQStore = multiCaching([memoryCache, ...redisCache]);
 
   const yoga = createYoga<TaqlContext>({
     schema,
     ...yogaOptions,
-    plugins: [useAPQ({ store: apqStore }), plugins.envelop()],
+    plugins: [useAPQ({ store: apqStore }), ...plugins.envelop()],
   });
 
   const koa = new Koa();
