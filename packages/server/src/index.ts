@@ -26,6 +26,7 @@ export async function main() {
     // TODO pick a number that matches the current limit in legacy graphql,
     // and draw it from configuration.
     batching: { limit: 200 },
+    multipart: false,
     graphiql: ENABLE_GRAPHIQL,
   } as const;
 
