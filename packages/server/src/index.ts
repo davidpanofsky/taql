@@ -7,6 +7,7 @@ import {
 import { Server, createServer as httpServer } from 'http';
 import { TaqlContext, plugins as contextPlugins } from '@taql/context';
 import { caching, multiCaching } from 'cache-manager';
+
 import Koa from 'koa';
 import { SSL_CONFIG } from '@taql/ssl';
 import { SchemaPoller } from '@taql/schema';
@@ -16,6 +17,7 @@ import { createYoga } from 'graphql-yoga';
 import { createServer as httpsServer } from 'https';
 import { ioRedisStore } from '@tirke/node-cache-manager-ioredis';
 import { plugins as preregPlugins } from '@taql/prereg';
+import { usePrometheus } from '@graphql-yoga/plugin-prometheus';
 
 const FIVE_MINUTES_MILLIS = 1000 * 60 * 5;
 
@@ -80,7 +82,26 @@ export async function main() {
   const yoga = createYoga<TaqlContext>({
     schema,
     ...yogaOptions,
-    plugins: [useAPQ({ store: apqStore }), ...plugins.envelop()],
+    plugins: [
+      useAPQ({ store: apqStore }),
+      usePrometheus({
+        // Options specified by @graphql-yoga/plugin-prometheus
+        http: true,
+        // Options passed on to @envelop/prometheus
+        // https://the-guild.dev/graphql/envelop/plugins/use-prometheus
+        // all optional, and by default, all set to false
+        requestCount: true, // requries `execute` to be true as well
+        requestSummary: true, // requries `execute` to be true as well
+        parse: true,
+        validate: true,
+        contextBuilding: true,
+        execute: true,
+        errors: true,
+        resolvers: true, // requires "execute" to be `true` as well
+        deprecatedFields: true,
+      }),
+      ...plugins.envelop(),
+    ],
   });
 
   const koa = new Koa();

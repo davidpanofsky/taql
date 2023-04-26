@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@graphql-yoga/plugin-apq": "1.0.0-next.8",
+    "@graphql-yoga/plugin-prometheus": "^1.9.1",
     "@taql/batching": "workspace:^",
     "@taql/config": "workspace:^",
     "@taql/context": "workspace:^",
