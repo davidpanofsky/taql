@@ -1,6 +1,7 @@
 import LRUCache = require('lru-cache');
 import { PREREGISTERED_QUERY_PARAMS } from '@taql/config';
-import { Plugin } from '@envelop/core';
+import { Plugin, handleStreamOrSingleExecutionResult } from '@envelop/core';
+import { OperationDefinitionNode, OperationTypeNode, Kind } from 'graphql';
 
 // pg-native doesn't have typescript type definitions, so `const ... = require(...)` is the way to import it
 const Client = require('pg-native'); // eslint-disable-line @typescript-eslint/no-var-requires
@@ -148,6 +149,40 @@ const preregisteredQueryResolver: Plugin = {
   },
 };
 
+const mutatedFieldsExtension: Plugin = {
+  onExecute({ args }) {
+    const mutatedFields: string[] = [];
+    args.document.definitions.forEach((d: OperationDefinitionNode) => {
+      if (d.operation === OperationTypeNode.MUTATION && d.selectionSet && d.selectionSet.selections) {
+        d.selectionSet.selections.forEach(selection => {
+          if (selection.kind === Kind.FIELD) {
+            mutatedFields.push(selection.name.value);
+          }
+        });
+      }
+    });
+
+    if (mutatedFields.length === 0) {
+      return {};
+    }
+
+    return {
+      onExecuteDone(payload) {
+        return handleStreamOrSingleExecutionResult(payload, ({ result, setResult }) => {
+          setResult({
+            ...result,
+            extensions: {
+              ...(result.extensions || {}),
+              mutatedFields,
+            }
+          });
+        });
+      },
+    };
+  },
+}
+
 export const plugins: (Plugin | (() => Plugin))[] = [
   preregisteredQueryResolver,
+  mutatedFieldsExtension,
 ];
