@@ -25,6 +25,7 @@
     "cache-manager": "^5.1.0",
     "graphql": "^16.6.0",
     "graphql-yoga": "three",
-    "koa": "^2.13.4"
+    "koa": "^2.13.4",
+    "prom-client": "^14.2.0"
   }
 }
