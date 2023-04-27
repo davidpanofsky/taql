@@ -167,6 +167,7 @@ const mutatedFieldsExtension: Plugin = {
     });
 
     if (mutatedFields.length === 0) {
+      // No mutated fields means no need to have any hooks, so return an empty map of hooks
       return {};
     }
 
