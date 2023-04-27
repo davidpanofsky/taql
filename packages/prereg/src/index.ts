@@ -1,6 +1,8 @@
+import { Kind, OperationDefinitionNode, OperationTypeNode } from 'graphql';
+import { Plugin, handleStreamOrSingleExecutionResult } from '@envelop/core';
 import { LRUCache } from 'lru-cache';
+
 import { PREREGISTERED_QUERY_PARAMS } from '@taql/config';
-import { Plugin } from '@envelop/core';
 
 // pg-native doesn't have typescript type definitions, so `const ... = require(...)` is the way to import it
 const Client = require('pg-native'); // eslint-disable-line @typescript-eslint/no-var-requires
@@ -148,6 +150,54 @@ const preregisteredQueryResolver: Plugin = {
   },
 };
 
+/**
+ * Envelop plugin which adds the 'mutatedFields' extension.
+ * When using preregistered queries, the client doesn't have any view of the query text, so is unaware
+ * what, if any, mutations take place.  By adding the mutatedFields extension, clients can still cache bust
+ * on mutations.
+ */
+const mutatedFieldsExtension: Plugin = {
+  onExecute({ args }) {
+    const mutatedFields: string[] = [];
+    args.document.definitions.forEach((d: OperationDefinitionNode) => {
+      if (
+        d.operation === OperationTypeNode.MUTATION &&
+        d.selectionSet &&
+        d.selectionSet.selections
+      ) {
+        d.selectionSet.selections.forEach((selection) => {
+          if (selection.kind === Kind.FIELD) {
+            mutatedFields.push(selection.name.value);
+          }
+        });
+      }
+    });
+
+    if (mutatedFields.length === 0) {
+      // No mutated fields means no need to have any hooks, so return an empty map of hooks
+      return {};
+    }
+
+    return {
+      onExecuteDone(payload) {
+        return handleStreamOrSingleExecutionResult(
+          payload,
+          ({ result, setResult }) => {
+            setResult({
+              ...result,
+              extensions: {
+                ...(result.extensions || {}),
+                mutatedFields,
+              },
+            });
+          }
+        );
+      },
+    };
+  },
+};
+
 export const plugins: (Plugin | (() => Plugin))[] = [
   preregisteredQueryResolver,
+  mutatedFieldsExtension,
 ];

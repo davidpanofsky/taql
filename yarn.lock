@@ -778,6 +778,7 @@ __metadata:
   dependencies:
     "@envelop/core": ^3.0.6
     "@taql/config": "workspace:^"
+    graphql: ^16.6.0
     lru-cache: ^9.1.1
     pg-native: ^3.0.1
     typescript: ^4.8.4
