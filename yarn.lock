@@ -173,6 +173,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@envelop/on-resolve@npm:^2.0.6":
+  version: 2.0.6
+  resolution: "@envelop/on-resolve@npm:2.0.6::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40envelop%2Fon-resolve%2F-%2Fon-resolve-2.0.6.tgz"
+  peerDependencies:
+    "@envelop/core": ^3.0.6
+    graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
+  checksum: 299c9282e8ab4acda136a689702e1bd6cfd1e036b96e0ae7cc0a0265da82456d2460eab3f89f21654514a51ee07aa7b5e2e15e93039514586d6b9799e133dcd5
+  languageName: node
+  linkType: hard
+
 "@envelop/parser-cache@npm:5.0.2":
   version: 5.0.2
   resolution: "@envelop/parser-cache@npm:5.0.2::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40envelop%2Fparser-cache%2F-%2Fparser-cache-5.0.2.tgz"
@@ -183,6 +193,20 @@ __metadata:
     "@envelop/core": ^3.0.2
     graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
   checksum: add1eb126b85c76bd676d21017b97fc1e1cb39cb9373d29aec94a31adc22d00fc72355aecf4b5cc2b34d26eaf93505bd0373315ebc84e64dfcccd73061524b11
+  languageName: node
+  linkType: hard
+
+"@envelop/prometheus@npm:7.0.6":
+  version: 7.0.6
+  resolution: "@envelop/prometheus@npm:7.0.6::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40envelop%2Fprometheus%2F-%2Fprometheus-7.0.6.tgz"
+  dependencies:
+    "@envelop/on-resolve": ^2.0.6
+    tslib: ^2.5.0
+  peerDependencies:
+    "@envelop/core": ^3.0.6
+    graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
+    prom-client: ^13 || ^14.0.0
+  checksum: fe32cfe6078b02f576194b0ec1aeedb9ac8b103c7673f762c2bdf6b6427c22e2082a006560c8b971684e08e505e7ee23302284697d95766c516c5f5e82f90c98
   languageName: node
   linkType: hard
 
@@ -462,6 +486,19 @@ __metadata:
   peerDependencies:
     graphql-yoga: ^3.0.0-next.8
   checksum: a48c376ca01eafe7aceeaacc2869eb585dea9248b9358a3cdac5ec0c7876651bd52f04ba5f18c9fcb3c3e30192f14155e30d1b6c6d21e7d885c63f15f50406e7
+  languageName: node
+  linkType: hard
+
+"@graphql-yoga/plugin-prometheus@npm:^1.9.1":
+  version: 1.9.1
+  resolution: "@graphql-yoga/plugin-prometheus@npm:1.9.1::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-yoga%2Fplugin-prometheus%2F-%2Fplugin-prometheus-1.9.1.tgz"
+  dependencies:
+    "@envelop/prometheus": 7.0.6
+  peerDependencies:
+    graphql: ^15.2.0 || ^16.0.0
+    graphql-yoga: ^3.9.1
+    prom-client: ^13 || ^14.0.0
+  checksum: 21d6818288109a66a3adf202edca381fed279fbffdee1f3f68cabbcea8b6b9ecea3e6d3b24f1c494d96ebea7c8cae0548a3b47f0e86d0105b9e614406ed9daec
   languageName: node
   linkType: hard
 
@@ -771,6 +808,7 @@ __metadata:
   resolution: "@taql/server@workspace:packages/server"
   dependencies:
     "@graphql-yoga/plugin-apq": 1.0.0-next.8
+    "@graphql-yoga/plugin-prometheus": ^1.9.1
     "@taql/batching": "workspace:^"
     "@taql/config": "workspace:^"
     "@taql/context": "workspace:^"
@@ -784,6 +822,7 @@ __metadata:
     graphql: ^16.6.0
     graphql-yoga: three
     koa: ^2.13.4
+    prom-client: ^14.2.0
     typescript: ^4.8.4
   languageName: unknown
   linkType: soft
@@ -1476,6 +1515,13 @@ __metadata:
   dependencies:
     file-uri-to-path: 1.0.0
   checksum: 65b6b48095717c2e6105a021a7da4ea435aa8d3d3cd085cb9e85bcb6e5773cf318c4745c3f7c504412855940b585bdf9b918236612a1c7a7942491de176f1ae7
+  languageName: node
+  linkType: hard
+
+"bintrees@npm:1.0.2":
+  version: 1.0.2
+  resolution: "bintrees@npm:1.0.2::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fbintrees%2F-%2Fbintrees-1.0.2.tgz"
+  checksum: 56a52b7d3634e30002b1eda740d2517a22fa8e9e2eb088e919f37c030a0ed86e364ab59e472fc770fc8751308054bb1c892979d150e11d9e11ac33bcc1b5d16e
   languageName: node
   linkType: hard
 
@@ -3856,6 +3902,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"prom-client@npm:^14.2.0":
+  version: 14.2.0
+  resolution: "prom-client@npm:14.2.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fprom-client%2F-%2Fprom-client-14.2.0.tgz"
+  dependencies:
+    tdigest: ^0.1.1
+  checksum: d4c04e57616c72643dd02862d0d4bde09cf8869a19d0aef5e7b785e6e27d02439b66cdc165e3492f62d579fa91579183820870cc757a09b99399d2d02f46b9f1
+  languageName: node
+  linkType: hard
+
 "promise-inflight@npm:^1.0.1":
   version: 1.0.1
   resolution: "promise-inflight@npm:1.0.1::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fpromise-inflight%2F-%2Fpromise-inflight-1.0.1.tgz"
@@ -4345,6 +4400,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"tdigest@npm:^0.1.1":
+  version: 0.1.2
+  resolution: "tdigest@npm:0.1.2::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Ftdigest%2F-%2Ftdigest-0.1.2.tgz"
+  dependencies:
+    bintrees: 1.0.2
+  checksum: 44de8246752b6f8c2924685f969fd3d94c36949f22b0907e99bef2b2220726dd8467f4730ea96b06040b9aa2587c0866049640039d1b956952dfa962bc2075a3
+  languageName: node
+  linkType: hard
+
 "text-table@npm:^0.2.0":
   version: 0.2.0
   resolution: "text-table@npm:0.2.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Ftext-table%2F-%2Ftext-table-0.2.0.tgz"
@@ -4407,6 +4471,13 @@ __metadata:
   version: 2.4.1
   resolution: "tslib@npm:2.4.1::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Ftslib%2F-%2Ftslib-2.4.1.tgz"
   checksum: 19480d6e0313292bd6505d4efe096a6b31c70e21cf08b5febf4da62e95c265c8f571f7b36fcc3d1a17e068032f59c269fab3459d6cd3ed6949eafecf64315fca
+  languageName: node
+  linkType: hard
+
+"tslib@npm:^2.5.0":
+  version: 2.5.0
+  resolution: "tslib@npm:2.5.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Ftslib%2F-%2Ftslib-2.5.0.tgz"
+  checksum: ae3ed5f9ce29932d049908ebfdf21b3a003a85653a9a140d614da6b767a93ef94f460e52c3d787f0e4f383546981713f165037dc2274df212ea9f8a4541004e1
   languageName: node
   linkType: hard
 
