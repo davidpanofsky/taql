@@ -26,7 +26,7 @@ export async function main() {
   const yogaOptions = {
     // TODO pick a number that matches the current limit in legacy graphql,
     // and draw it from configuration.
-    batching: { limit: 200 },
+    batching: { limit: 2000 },
     multipart: false,
     graphiql: ENABLE_GRAPHIQL,
   } as const;

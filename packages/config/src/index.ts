@@ -19,6 +19,21 @@ export const LEGACY_GQL_PARAMS = resolve({
     resolver: resolvers.nonNegativeInteger,
     defaultTo: 443,
   },
+  batchMaxSize: {
+    property: 'LEGACY_GQL_BATCH_MAX_SIZE',
+    resolver: resolvers.nonNegativeInteger,
+    defaultTo: 100,
+  },
+  batchWaitQueries: {
+    property: 'LEGACY_GQL_BATCH_WAIT_QUERIES',
+    resolver: resolvers.nonNegativeInteger,
+    defaultTo: 200,
+  },
+  batchWaitMillis: {
+    property: 'LEGACY_GQL_BATCH_WAIT_MILLIS',
+    resolver: resolvers.nonNegativeInteger,
+    defaultTo: 20,
+  },
 });
 
 export const SSL_PARAMS = resolve({

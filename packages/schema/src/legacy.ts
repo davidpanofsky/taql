@@ -8,7 +8,14 @@ import { loadSchema } from '@graphql-tools/load';
 import { wrapSchema } from '@graphql-tools/wrap';
 
 export async function makeLegacySchema() {
-  const { host, httpPort, httpsPort } = LEGACY_GQL_PARAMS;
+  const {
+    host,
+    httpPort,
+    httpsPort,
+    batchMaxSize,
+    batchWaitQueries,
+    batchWaitMillis,
+  } = LEGACY_GQL_PARAMS;
   LEGACY_GQL_PARAMS.host;
   const protocol = httpsAgent == undefined ? 'http' : 'https';
   const port = protocol == 'http' ? httpPort : httpsPort;
@@ -23,10 +30,10 @@ export async function makeLegacySchema() {
     const executor = createExecutor(batchUrl, {
       style: BatchStyle.Legacy,
       strategy: BatchingStrategy.BatchByUpstreamHeaders,
-      maxSize: 100,
+      maxSize: batchMaxSize,
       wait: {
-        queries: 200,
-        millis: 20,
+        queries: batchWaitQueries,
+        millis: batchWaitMillis,
       },
     });
 
