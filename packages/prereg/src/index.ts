@@ -1,6 +1,7 @@
-import LRUCache = require('lru-cache');
 import { Kind, OperationDefinitionNode, OperationTypeNode } from 'graphql';
 import { Plugin, handleStreamOrSingleExecutionResult } from '@envelop/core';
+import { LRUCache } from 'lru-cache';
+
 import { PREREGISTERED_QUERY_PARAMS } from '@taql/config';
 
 // pg-native doesn't have typescript type definitions, so `const ... = require(...)` is the way to import it
