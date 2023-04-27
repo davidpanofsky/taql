@@ -29,7 +29,6 @@ export async function main() {
     batching: { limit: 200 },
     multipart: false,
     graphiql: ENABLE_GRAPHIQL,
-    healthCheckEndpoint: '/ServerHealth',
   } as const;
 
   const schemaPoller = new SchemaPoller({
@@ -101,7 +100,7 @@ export async function main() {
         deprecatedFields: true,
       }),
       useReadinessCheck({
-        endpoint: '/ServerReady',
+        endpoint: '/NotImplemented',
         // eslint-disable-next-line object-shorthand
         check: async () => {
           await apqStore.set('readinessCheck', '1');
