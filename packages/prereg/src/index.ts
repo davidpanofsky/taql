@@ -149,6 +149,12 @@ const preregisteredQueryResolver: Plugin = {
   },
 };
 
+/**
+ * Envelop plugin which adds the 'mutatedFields' extension.
+ * When using preregistered queries, the client doesn't have any view of the query text, so is unaware
+ * what, if any, mutations take place.  By adding the mutatedFields extension, clients can still cache bust
+ * on mutations.
+ */
 const mutatedFieldsExtension: Plugin = {
   onExecute({ args }) {
     const mutatedFields: string[] = [];
