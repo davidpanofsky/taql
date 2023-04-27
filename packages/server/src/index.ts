@@ -7,13 +7,12 @@ import {
 import { Server, createServer as httpServer } from 'http';
 import { TaqlContext, plugins as contextPlugins } from '@taql/context';
 import { caching, multiCaching } from 'cache-manager';
-
+import { createYoga, useReadinessCheck } from 'graphql-yoga';
 import Koa from 'koa';
 import { SSL_CONFIG } from '@taql/ssl';
 import { SchemaPoller } from '@taql/schema';
 import { TaqlPlugins } from '@taql/plugins';
 import { plugins as batchingPlugins } from '@taql/batching';
-import { createYoga } from 'graphql-yoga';
 import { createServer as httpsServer } from 'https';
 import { ioRedisStore } from '@tirke/node-cache-manager-ioredis';
 import { plugins as preregPlugins } from '@taql/prereg';
@@ -30,6 +29,7 @@ export async function main() {
     batching: { limit: 200 },
     multipart: false,
     graphiql: ENABLE_GRAPHIQL,
+    healthCheckEndpoint: '/ServerHealth',
   } as const;
 
   const schemaPoller = new SchemaPoller({
@@ -99,6 +99,13 @@ export async function main() {
         errors: true,
         resolvers: true, // requires "execute" to be `true` as well
         deprecatedFields: true,
+      }),
+      useReadinessCheck({
+        endpoint: '/ServerReady',
+        // eslint-disable-next-line object-shorthand
+        check: async () => {
+          await apqStore.set('readinessCheck', '1');
+        },
       }),
       ...plugins.envelop(),
     ],
