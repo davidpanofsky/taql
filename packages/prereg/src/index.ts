@@ -1,4 +1,4 @@
-import LRUCache = require('lru-cache');
+import { LRUCache } from 'lru-cache';
 import { PREREGISTERED_QUERY_PARAMS } from '@taql/config';
 import { Plugin } from '@envelop/core';
 

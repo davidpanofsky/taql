@@ -15,6 +15,6 @@
     "@taql/context": "workspace:^",
     "@taql/httpAgent": "workspace:^",
     "graphql": "^16.6.0",
-    "node-fetch": "^2.6.7"
+    "node-fetch": "^2.6.9"
   }
 }
