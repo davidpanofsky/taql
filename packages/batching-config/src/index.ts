@@ -139,7 +139,7 @@ export const maximumOptions: Options = {
    * Large batches are more complicated and may overwhelm upstreams, or even taql's ability to
    * compose the upstream requests
    */
-  maxSize: 100,
+  maxSize: 250,
   wait: {
     /**
      * If the buffer is too large, it may place memory pressure on taql

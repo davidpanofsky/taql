@@ -20,9 +20,12 @@ export const LEGACY_GQL_PARAMS = resolve({
     defaultTo: 443,
   },
   batchMaxSize: {
+    /* Matches MAX_MERGED_STEPS in legacy graphql
+     * https://gitlab.dev.tripadvisor.com/dplat/graphql/-/blob/master/src/main/params/common.ini#L555
+     */
     property: 'LEGACY_GQL_BATCH_MAX_SIZE',
     resolver: resolvers.nonNegativeInteger,
-    defaultTo: 100,
+    defaultTo: 250,
   },
   batchWaitQueries: {
     property: 'LEGACY_GQL_BATCH_WAIT_QUERIES',
@@ -51,6 +54,11 @@ export const SERVER_PARAMS = resolve({
     property: 'SERVER_PORT',
     resolver: resolvers.nonNegativeInteger,
     defaultTo: 4000,
+  },
+  batchLimit: {
+    property: 'SERVER_BATCH_LIMIT',
+    resolver: resolvers.nonNegativeInteger,
+    defaultTo: 2000,
   },
 });
 
