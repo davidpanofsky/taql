@@ -22,12 +22,12 @@ import { usePrometheus } from '@graphql-yoga/plugin-prometheus';
 const FIVE_MINUTES_MILLIS = 1000 * 60 * 5;
 
 export async function main() {
-  const { port } = SERVER_PARAMS;
+  const { port, batchLimit } = SERVER_PARAMS;
 
   const yogaOptions = {
     // TODO pick a number that matches the current limit in legacy graphql,
     // and draw it from configuration.
-    batching: { limit: 200 },
+    batching: { limit: batchLimit },
     multipart: false,
     graphiql: ENABLE_GRAPHIQL,
   } as const;
