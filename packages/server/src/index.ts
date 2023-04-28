@@ -125,6 +125,10 @@ export async function main() {
       ctx.append(key, value);
     });
 
+    // If response body is null, koa will change response to a 204. We flush the headers here to prevent this.
+    // https://github.com/koajs/koa/blob/master/docs/api/response.md#responsebody-1
+    ctx.flushHeaders();
+
     // Converts ReadableStream to a NodeJS Stream
     ctx.body = response.body;
   });
