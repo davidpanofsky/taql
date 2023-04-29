@@ -102,8 +102,14 @@ export async function main() {
       useReadinessCheck({
         endpoint: '/NotImplemented',
         // eslint-disable-next-line object-shorthand
-        check: async () => {
-          await apqStore.set('readinessCheck', '1');
+        check: async ({ fetchAPI }) => {
+          try {
+            await apqStore.set('readinessCheck', '1');
+            return new fetchAPI.Response('<NotImplemented/>');
+          } catch (err) {
+            console.error(err);
+            return false;
+          }
         },
       }),
       ...plugins.envelop(),
