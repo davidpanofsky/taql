@@ -830,8 +830,6 @@ __metadata:
     graphql: ^16.6.0
     graphql-yoga: ^3.9.1
     koa: ^2.14.2
-    lru-cache: ^9.1.1
-    node-fetch: ^2.6.9
     prom-client: ^14.2.0
     typescript: ^4.8.4
   languageName: unknown
