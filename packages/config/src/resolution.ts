@@ -1,51 +1,46 @@
 import { readFileSync } from 'fs';
 
-type Error = { errorMessage: string };
+export type Resolver<V = unknown> = (val: string | undefined) => V;
 
-type Resolver<V = unknown> = (val: string | undefined) => V;
-
-type Defaulting<V> = { defaultTo: V };
 type Named = { property: string | string[] };
-type Resolvable<V> = { resolver: Resolver<V> };
+type Resolving<V = unknown> = { resolver: Resolver<V> };
+type Defaulting<V = unknown> = { defaultTo: Exclude<V, undefined> };
 
-type SimpleEnvVal = string | Named | (Named & Defaulting<string>);
+type SimpleEnvVal = string | undefined | Named | (Named & Defaulting<string>);
+type EnvVal =
+  | SimpleEnvVal
+  | (Named & (Resolving | Defaulting | (Resolving & Defaulting)));
 
-type ExtractedEnvVal<V, K> = Named &
-  (Resolvable<V> | (Resolvable<V | undefined> & Defaulting<K>));
-
-type EnvVal<V = unknown> = ExtractedEnvVal<unknown, V> | SimpleEnvVal;
-
-type Resolved<T> = T extends Defaulting<infer V>
-  ? V
-  : T extends Resolvable<infer V>
-  ? Error extends V
-    ? Exclude<V | undefined, Error>
-    : V
-  : T extends SimpleEnvVal
-  ? string | undefined
-  : never;
+type Resolved<T extends EnvVal> = T extends Defaulting<infer D>
+  ? T extends Resolving<infer V>
+    ? // If there is a default and aresolver, the result will be resolver type
+      // unless it resolves to undefined; then it will be the default type.
+      D | Exclude<V, undefined>
+    : // If no resolver, when a value is defined it will be a string
+      D | string
+  : T extends Resolving<infer V>
+  ? // If there is a resolver and no default, the result type is whatever the env val resolves to.
+    V
+  : // If there is no resolver or default, the result is string | undefined
+    string | undefined;
 
 function resolveSingle<T extends EnvVal>(decl: T): Resolved<T> {
   if (typeof decl === 'object') {
-    let resolved: Resolved<T> | Error | undefined = undefined;
-    [decl.property]
+    let resolved: Resolved<T> | undefined = [decl.property]
       .flat()
-      .map((prop) => process.env[prop])
-      .forEach((rawVal) => {
-        resolved = <Resolved<T> | Error | undefined>(
-          ('resolver' in decl ? decl.resolver(rawVal) : rawVal)
-        );
-        if (
-          resolved != undefined &&
-          typeof resolved === 'object' &&
-          'errorMessage' in resolved
-        ) {
-          console.error(
-            `Unable to process value "${rawVal}" for environment variable "${decl.property}": ${resolved.errorMessage}`
+      .map((prop) => ({ prop, rawVal: process.env[prop] }))
+      .map(({ prop, rawVal }) => {
+        try {
+          return <Resolved<T> | undefined>(
+            ('resolver' in decl ? decl.resolver(rawVal) : rawVal)
           );
-          resolved = undefined;
+        } catch (error: unknown) {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore error causes _are_ supported by this minor version of node 16, but ts only cares about the major.
+          throw Error(`error resolving property ${prop}`, { cause: error });
         }
-      });
+      })
+      .find((x) => x != undefined);
 
     if ('defaultTo' in decl && resolved == undefined) {
       console.log(
@@ -53,6 +48,7 @@ function resolveSingle<T extends EnvVal>(decl: T): Resolved<T> {
       );
       resolved = <Resolved<T>>decl.defaultTo;
     }
+
     return <Resolved<T>>resolved;
   } else {
     return <Resolved<T>>process.env[<string>decl];
@@ -76,25 +72,28 @@ export const resolve = <T extends { [property: string]: EnvVal }>(
     )
   );
 
-const fileContents = (
-  file?: string | undefined
-): string | undefined | Error => {
+const fileContents = (file?: string | undefined): string | undefined => {
   if (file == undefined) {
     return undefined;
   }
   try {
     return readFileSync(file, 'utf-8');
   } catch (err: unknown) {
-    return { errorMessage: `Cannot read file ${file}: ${err}` };
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore error causes _are_ supported by this minor version of node 16, but ts only cares about the major.
+    throw new Error(`Cannot read file ${file}`, { cause: err });
   }
 };
 
-const nonNegativeInteger = (raw: string | undefined): number | Error => {
+const nonNegativeInteger = (raw: string | undefined): number | undefined => {
+  if (raw == undefined) {
+    return undefined;
+  }
   const number = Number(raw);
   if (Number.isInteger(number) && number >= 0) {
     return number;
   }
-  return { errorMessage: `"${raw}" is not a non-negative integer` };
+  throw new Error(`"${raw}" is not a non-negative integer`);
 };
 
 const booleanFromString = (value: string | undefined): boolean | undefined =>
