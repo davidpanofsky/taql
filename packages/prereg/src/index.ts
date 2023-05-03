@@ -35,13 +35,13 @@ const CACHE = new LRUCache<string, string>({
 const KNOWN_QUERIES: Set<string> = new Set<string>();
 
 // metrics
-const PQ_MISS = new promClient.Counter({
-  name: 'pq_cache_miss',
+const PREREG_MISS = new promClient.Counter({
+  name: 'preregistered_query_miss',
   help: 'Count of preregistered query IDs encountered which were not resolved',
 });
 
-const PQ_HIT = new promClient.Counter({
-  name: 'pq_cache_hit',
+const PREREG_HIT = new promClient.Counter({
+  name: 'pregegistered_query_hit',
   help: 'Count of preregistered query IDs that were resolved',
 });
 
@@ -155,13 +155,13 @@ const preregisteredQueryResolver: Plugin = {
         CACHE
       );
       if (preregisteredQuery) {
-        PQ_HIT.inc();
+        PREREG_HIT.inc();
         params.setParsedDocument(params.parseFn(preregisteredQuery));
       } else {
-        PQ_MISS.inc();
+        PREREG_MISS.inc();
       }
     } else if (maybePreregisteredId) {
-      PQ_MISS.inc();
+      PREREG_MISS.inc();
     }
   },
 };
