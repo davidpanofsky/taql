@@ -4,11 +4,13 @@ import {
   ENABLE_GRAPHIQL,
   SERVER_PARAMS,
 } from '@taql/config';
+import { DocumentNode, GraphQLError } from 'graphql';
 import { Server, createServer as httpServer } from 'http';
 import { TaqlContext, plugins as contextPlugins } from '@taql/context';
 import { caching, multiCaching } from 'cache-manager';
 import { createYoga, useReadinessCheck } from 'graphql-yoga';
 import Koa from 'koa';
+import { LRUCache } from 'lru-cache';
 import { SSL_CONFIG } from '@taql/ssl';
 import { SchemaPoller } from '@taql/schema';
 import { TaqlPlugins } from '@taql/plugins';
@@ -24,11 +26,34 @@ export async function main() {
   const { port, batchLimit } = SERVER_PARAMS;
 
   const yogaOptions = {
+    graphiql: ENABLE_GRAPHIQL,
+    multipart: false,
     // TODO pick a number that matches the current limit in legacy graphql,
     // and draw it from configuration.
     batching: { limit: batchLimit },
-    multipart: false,
-    graphiql: ENABLE_GRAPHIQL,
+
+    // The following are graphql-yoga defaults added explicitly here for future stability.
+    logging: true,
+    maskedErrors: true,
+    cors: undefined,
+    graphqlEndpoint: '/graphql',
+    healthCheckEndpoint: '/health',
+    landingPage: true,
+    parserCache: {
+      documentCache: new LRUCache<string, DocumentNode>({
+        max: 1024,
+        ttl: 3_600_000,
+      }),
+      errorCache: new LRUCache<string, Error>({ max: 1024, ttl: 3_600_000 }),
+    },
+    validationCache: new LRUCache<string, readonly GraphQLError[]>({
+      max: 1024,
+      ttl: 3_600_000,
+    }),
+
+    // Setting this to false as legacy Yoga Server-Sent Events are deprecated:
+    // https://github.com/dotansimha/graphql-yoga/blob/b309ca0db1c45264878c3cec0137c3fdbd22fc97/packages/graphql-yoga/src/server.ts#L184
+    legacySse: false,
   } as const;
 
   const schemaPoller = new SchemaPoller({
@@ -45,7 +70,9 @@ export async function main() {
     schemaPoller.asPlugin(),
     contextPlugins,
     batchingPlugins,
-    { envelop: preregPlugins }
+    {
+      envelop: preregPlugins,
+    }
   );
 
   // Two tier store for automatic persisted queries
