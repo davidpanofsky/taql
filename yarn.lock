@@ -781,6 +781,7 @@ __metadata:
     graphql: ^16.6.0
     lru-cache: ^9.1.1
     pg-native: ^3.0.1
+    prom-client: ^14.2.0
     typescript: ^4.8.4
   languageName: unknown
   linkType: soft

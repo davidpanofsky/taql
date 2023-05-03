@@ -1,6 +1,7 @@
 import { Kind, OperationDefinitionNode, OperationTypeNode } from 'graphql';
 import { Plugin, handleStreamOrSingleExecutionResult } from '@envelop/core';
 import { LRUCache } from 'lru-cache';
+import promClient from 'prom-client';
 
 import { PREREGISTERED_QUERY_PARAMS } from '@taql/config';
 
@@ -33,6 +34,12 @@ const CACHE = new LRUCache<string, string>({
 });
 
 const KNOWN_QUERIES: Set<string> = new Set<string>();
+
+// metrics
+const PREREGISTERED_MISSES = new promClient.Counter({
+  name: "taql_preregistered_query_id_misses",
+  help: "Count of preregistered query IDs encountered which were not resolved",
+});
 
 // epoch
 let MOST_RECENT_KNOWN = 0;
@@ -145,7 +152,11 @@ const preregisteredQueryResolver: Plugin = {
       );
       if (preregisteredQuery) {
         params.setParsedDocument(params.parseFn(preregisteredQuery));
+      } else {
+        PREREGISTERED_MISSES.inc();
       }
+    } else if (maybePreregisteredId) {
+      PREREGISTERED_MISSES.inc();
     }
   },
 };
