@@ -102,8 +102,16 @@ export async function main() {
       useReadinessCheck({
         endpoint: '/NotImplemented',
         // eslint-disable-next-line object-shorthand
-        check: async () => {
-          await apqStore.set('readinessCheck', '1');
+        check: async ({ fetchAPI }) => {
+          try {
+            // For now, readiness check is same as healthcheck, but with a different response body.
+            // Todo: Add checks for other things like database connection, etc.
+            //redisCache[0].store.client.status
+            return new fetchAPI.Response('<NotImplemented/>');
+          } catch (err) {
+            console.error(err);
+            return false;
+          }
         },
       }),
       ...plugins.envelop(),
