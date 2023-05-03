@@ -45,6 +45,11 @@ const PREREG_HIT = new promClient.Counter({
   help: 'Count of preregistered query IDs that were resolved',
 });
 
+const PREREG_UPDATED_AT = new promClient.Gauge({
+  name: 'preregistered_query_last_load',
+  help: 'epoch of last load of preregistered queries',
+});
+
 // epoch
 let MOST_RECENT_KNOWN = 0;
 
@@ -69,7 +74,9 @@ function populateKnownQueries(
         );
         // Small fudge factor to avoid any concern about updated times falling between query execution
         // and updating the most recently known.  A bit of overlap is fine.
-        MOST_RECENT_KNOWN = Date.now() - 5000;
+        const now = Date.now();
+        MOST_RECENT_KNOWN = now - 5000;
+        PREREG_UPDATED_AT.set(now);
         resolve(known.size - previousKnown);
       }
     );
