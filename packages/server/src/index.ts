@@ -1,7 +1,7 @@
 import { APQStore, useAPQ } from '@graphql-yoga/plugin-apq';
 import {
   AUTOMATIC_PERSISTED_QUERY_PARAMS,
-  ENABLE_GRAPHIQL,
+  ENABLE_FEATURES,
   SERVER_PARAMS,
 } from '@taql/config';
 import { DocumentNode, GraphQLError } from 'graphql';
@@ -18,6 +18,7 @@ import { plugins as batchingPlugins } from '@taql/batching';
 import { createServer as httpsServer } from 'https';
 import { ioRedisStore } from '@tirke/node-cache-manager-ioredis';
 import { plugins as preregPlugins } from '@taql/prereg';
+import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspection';
 import { usePrometheus } from '@graphql-yoga/plugin-prometheus';
 
 const FIVE_MINUTES_MILLIS = 1000 * 60 * 5;
@@ -26,7 +27,7 @@ export async function main() {
   const { port, batchLimit } = SERVER_PARAMS;
 
   const yogaOptions = {
-    graphiql: ENABLE_GRAPHIQL,
+    graphiql: ENABLE_FEATURES.graphiql,
     multipart: false,
     // TODO pick a number that matches the current limit in legacy graphql,
     // and draw it from configuration.
@@ -66,15 +67,6 @@ export async function main() {
   }
   console.log('created initial schema');
 
-  const plugins: TaqlPlugins = new TaqlPlugins(
-    schemaPoller.asPlugin(),
-    contextPlugins,
-    batchingPlugins,
-    {
-      envelop: preregPlugins,
-    }
-  );
-
   // Two tier store for automatic persisted queries
   const memoryCache = await caching('memory', {
     max: AUTOMATIC_PERSISTED_QUERY_PARAMS.mem_cache_size,
@@ -105,44 +97,54 @@ export async function main() {
     : [];
   const apqStore: APQStore = multiCaching([memoryCache, ...redisCache]);
 
+  const yogaPlugins = [
+    useAPQ({ store: apqStore }),
+    usePrometheus({
+      // Options specified by @graphql-yoga/plugin-prometheus
+      http: true,
+      // Options passed on to @envelop/prometheus
+      // https://the-guild.dev/graphql/envelop/plugins/use-prometheus
+      // all optional, and by default, all set to false
+      requestCount: true, // requries `execute` to be true as well
+      requestSummary: true, // requries `execute` to be true as well
+      parse: true,
+      validate: true,
+      contextBuilding: true,
+      execute: true,
+      errors: true,
+      resolvers: true, // requires "execute" to be `true` as well
+      deprecatedFields: true,
+    }),
+    useReadinessCheck({
+      endpoint: '/NotImplemented',
+      async check({ fetchAPI }) {
+        try {
+          // For now, readiness check is same as healthcheck, but with a different response body.
+          // Todo: Add checks for other things like database connection, etc.
+          //redisCache[0].store.client.status
+          return new fetchAPI.Response('<NotImplemented/>');
+        } catch (err) {
+          console.error(err);
+          return false;
+        }
+      },
+    }),
+  ];
+
+  ENABLE_FEATURES.introspection || yogaPlugins.push(useDisableIntrospection());
+
+  const plugins: TaqlPlugins = new TaqlPlugins(
+    schemaPoller.asPlugin(),
+    contextPlugins,
+    batchingPlugins,
+    { envelop: preregPlugins },
+    { yoga: yogaPlugins }
+  );
+
   const yoga = createYoga<TaqlContext>({
     schema,
     ...yogaOptions,
-    plugins: [
-      useAPQ({ store: apqStore }),
-      usePrometheus({
-        // Options specified by @graphql-yoga/plugin-prometheus
-        http: true,
-        // Options passed on to @envelop/prometheus
-        // https://the-guild.dev/graphql/envelop/plugins/use-prometheus
-        // all optional, and by default, all set to false
-        requestCount: true, // requries `execute` to be true as well
-        requestSummary: true, // requries `execute` to be true as well
-        parse: true,
-        validate: true,
-        contextBuilding: true,
-        execute: true,
-        errors: true,
-        resolvers: true, // requires "execute" to be `true` as well
-        deprecatedFields: true,
-      }),
-      useReadinessCheck({
-        endpoint: '/NotImplemented',
-        // eslint-disable-next-line object-shorthand
-        check: async ({ fetchAPI }) => {
-          try {
-            // For now, readiness check is same as healthcheck, but with a different response body.
-            // Todo: Add checks for other things like database connection, etc.
-            //redisCache[0].store.client.status
-            return new fetchAPI.Response('<NotImplemented/>');
-          } catch (err) {
-            console.error(err);
-            return false;
-          }
-        },
-      }),
-      ...plugins.envelop(),
-    ],
+    plugins: [...plugins.yoga(), ...plugins.envelop()],
   });
 
   const koa = new Koa();

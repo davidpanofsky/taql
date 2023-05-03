@@ -1,6 +1,7 @@
 node_modules
 **/build
 .env
+.tool-versions
 
 # begin ignores for yarn
 .pnp.*

@@ -496,6 +496,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@graphql-yoga/plugin-disable-introspection@npm:^0.8.1":
+  version: 0.8.1
+  resolution: "@graphql-yoga/plugin-disable-introspection@npm:0.8.1::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-yoga%2Fplugin-disable-introspection%2F-%2Fplugin-disable-introspection-0.8.1.tgz"
+  peerDependencies:
+    graphql: ^15.2.0 || ^16.0.0
+    graphql-yoga: ^3.9.1
+  checksum: 066c584d9eef0d8e18654e9bddf9ed9ca40728bd1077b198d20b754c54e9295aa698667ff9c7a5fca33cccf48512e308b8ca237e8e7cb1844746babf4278df9e
+  languageName: node
+  linkType: hard
+
 "@graphql-yoga/plugin-prometheus@npm:^1.9.1":
   version: 1.9.1
   resolution: "@graphql-yoga/plugin-prometheus@npm:1.9.1::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-yoga%2Fplugin-prometheus%2F-%2Fplugin-prometheus-1.9.1.tgz"
@@ -768,6 +778,7 @@ __metadata:
   dependencies:
     "@envelop/core": ^3.0.6
     "@types/koa": ^2.13.5
+    graphql-yoga: ^3.9.1
     typescript: ^4.8.4
   languageName: unknown
   linkType: soft
@@ -816,6 +827,7 @@ __metadata:
   resolution: "@taql/server@workspace:packages/server"
   dependencies:
     "@graphql-yoga/plugin-apq": ^1.9.1
+    "@graphql-yoga/plugin-disable-introspection": ^0.8.1
     "@graphql-yoga/plugin-prometheus": ^1.9.1
     "@taql/batching": "workspace:^"
     "@taql/config": "workspace:^"
