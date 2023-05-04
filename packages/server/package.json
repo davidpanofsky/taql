@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@graphql-yoga/plugin-apq": "^1.9.1",
+    "@graphql-yoga/plugin-disable-introspection": "^0.8.1",
     "@graphql-yoga/plugin-prometheus": "^1.9.1",
     "@taql/batching": "workspace:^",
     "@taql/config": "workspace:^",
@@ -26,6 +27,7 @@
     "graphql": "^16.6.0",
     "graphql-yoga": "^3.9.1",
     "koa": "^2.14.2",
+    "lru-cache": "^9.1.1",
     "prom-client": "^14.2.0"
   }
 }

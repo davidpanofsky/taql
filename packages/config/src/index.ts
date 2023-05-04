@@ -62,8 +62,18 @@ export const SERVER_PARAMS = resolve({
   },
 });
 
-export const ENABLE_GRAPHIQL =
-  process.env.NODE_ENV === 'production' ? false : true;
+export const ENABLE_FEATURES = resolve({
+  graphiql: {
+    property: 'ENABLE_GRAPHIQL',
+    resolver: resolvers.booleanFromString,
+    defaultTo: process.env.NODE_ENV === 'production' ? false : true,
+  },
+  introspection: {
+    property: 'ENABLE_INTROSPECTION',
+    resolver: resolvers.booleanFromString,
+    defaultTo: process.env.NODE_ENV === 'production' ? false : true,
+  },
+});
 
 export const PREREGISTERED_QUERY_PARAMS = resolve({
   max_cache_size: {

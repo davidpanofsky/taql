@@ -97,7 +97,11 @@ const nonNegativeInteger = (raw: string | undefined): number | Error => {
   return { errorMessage: `"${raw}" is not a non-negative integer` };
 };
 
+const booleanFromString = (value: string | undefined): boolean | undefined =>
+  value == undefined ? undefined : value.toLowerCase() === 'true';
+
 export const resolvers = {
   fileContents,
   nonNegativeInteger,
+  booleanFromString,
 };
