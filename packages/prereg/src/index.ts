@@ -35,14 +35,19 @@ const CACHE = new LRUCache<string, string>({
 const KNOWN_QUERIES: Set<string> = new Set<string>();
 
 // metrics
+const PREREG_UNK = new promClient.Counter({
+  name: 'preregistered_query_unknown',
+  help: 'Count of preregistered query IDs encountered which were unknown/unresolved',
+});
+
 const PREREG_MISS = new promClient.Counter({
-  name: 'preregistered_query_miss',
-  help: 'Count of preregistered query IDs encountered which were not resolved',
+  name: 'preregistered_query_cache_miss',
+  help: 'Count of preregistered query IDs encountered which were resolved not from cache',
 });
 
 const PREREG_HIT = new promClient.Counter({
-  name: 'pregegistered_query_hit',
-  help: 'Count of preregistered query IDs that were resolved',
+  name: 'pregegistered_query_cache_hit',
+  help: 'Count of preregistered query IDs that were resolved from cache',
 });
 
 const PREREG_UPDATED_AT = new promClient.Gauge({
@@ -89,6 +94,7 @@ function lookupQuery(
   cache: LRUCache<string, string>
 ): string | undefined {
   if (cache.has(queryId)) {
+    PREREG_HIT.inc();
     return cache.get(queryId);
   } else {
     let queryText: string | undefined = undefined;
@@ -102,7 +108,10 @@ function lookupQuery(
       console.error(`Unexpected database error: ${e}`);
     }
     if (queryText) {
+      PREREG_MISS.inc();
       cache.set(queryId, queryText);
+    } else {
+      PREREG_UNK.inc();
     }
     return queryText;
   }
@@ -162,13 +171,10 @@ const preregisteredQueryResolver: Plugin = {
         CACHE
       );
       if (preregisteredQuery) {
-        PREREG_HIT.inc();
         params.setParsedDocument(params.parseFn(preregisteredQuery));
-      } else {
-        PREREG_MISS.inc();
       }
     } else if (maybePreregisteredId) {
-      PREREG_MISS.inc();
+      PREREG_UNK.inc();
     }
   },
 };
