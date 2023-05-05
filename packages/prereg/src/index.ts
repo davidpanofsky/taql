@@ -62,6 +62,31 @@ function populateKnownQueries(
   });
 }
 
+async function populateKnownQueriesAsync(
+  known: Set<string>,
+  db: Pool
+): Promise<number> {
+  try {
+    const known_queries_res = await db.query(
+      'SELECT id FROM t_graphql_operations WHERE extract(epoch from updated) > $1',
+      [MOST_RECENT_KNOWN]
+    );
+    const previousKnown = known.size;
+    known_queries_res.rows.forEach(
+      (
+        o: any // eslint-disable-line @typescript-eslint/no-explicit-any
+      ) => known.add(o.id)
+    );
+    // Small fudge factor to avoid any concern about updated times falling between query execution
+    // and updating the most recently known.  A bit of overlap is fine.
+    MOST_RECENT_KNOWN = Date.now() - 5000;
+    return known.size - previousKnown;
+  } catch (e) {
+    console.error(`Unexpected database error: ${e}`);
+    return 0;
+  }
+}
+
 async function lookupQueryAsync(
   queryId: string,
   db: Pool,
