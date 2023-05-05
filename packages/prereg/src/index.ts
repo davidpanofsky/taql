@@ -2,8 +2,8 @@ import { Kind, OperationDefinitionNode, OperationTypeNode } from 'graphql';
 import { Plugin, handleStreamOrSingleExecutionResult } from '@envelop/core';
 import { LRUCache } from 'lru-cache';
 
-import { Pool } from 'pg';
 import { PREREGISTERED_QUERY_PARAMS } from '@taql/config';
+import { Pool } from 'pg';
 import { Plugin as YogaPlugin } from 'graphql-yoga';
 import promClient from 'prom-client';
 
@@ -191,10 +191,29 @@ function preloadCache(
   );
 }
 
+function preloadCachePg(
+  cache: LRUCache<string, string>,
+  db: Pool,
+  limit: number
+): void {
+  db.query(
+    'WITH most_recent AS (SELECT max(updated) AS updated FROM t_graphql_operations) ' +
+      'SELECT id, code FROM t_graphql_operations WHERE updated = (select updated from most_recent) LIMIT $1',
+    [limit],
+    (err, res) => {
+      if (err) {
+        console.error(`Failed to preload preregistered query cache: ${err}`);
+        return;
+      }
+      res.rows.forEach((o: any) => cache.set(o.id, o.code)); // eslint-disable-line @typescript-eslint/no-explicit-any
+    }
+  );
+}
+
 export function usePreregisteredQueries(
   options: {
-    max_cache_size?: number,
-    postgresConnectionString?: string
+    max_cache_size?: number;
+    postgresConnectionString?: string;
   } = {}
 ): YogaPlugin {
   const {
@@ -207,7 +226,7 @@ export function usePreregisteredQueries(
   });
 
   const pool = new Pool({
-    connectionString: postgresConnectionString
+    connectionString: postgresConnectionString,
   });
 
   return {
@@ -219,7 +238,7 @@ export function usePreregisteredQueries(
         console.error(`Failed to load known preregistered queries: ${e}`);
         throw e; // Let's shut down; we could choose not to and hope that the next try works, but why be optimistic
       }
-      preloadCache(CACHE, DB, PREREGISTERED_QUERY_PARAMS.max_cache_size);
+      preloadCachePg(CACHE, pool, max_cache_size);
       setInterval(
         () =>
           populateKnownQueries(KNOWN_QUERIES, DB).catch((e) =>
