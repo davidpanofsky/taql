@@ -1,8 +1,8 @@
 import { Kind, OperationDefinitionNode, OperationTypeNode } from 'graphql';
 import { Plugin, handleStreamOrSingleExecutionResult } from '@envelop/core';
+import { Plugin as YogaPlugin, createGraphQLError } from 'graphql-yoga';
 import { LRUCache } from 'lru-cache';
 import { Pool } from 'pg';
-import { Plugin as YogaPlugin } from 'graphql-yoga';
 import promClient from 'prom-client';
 
 // metrics
@@ -58,31 +58,19 @@ async function populateKnownQueries(
 
 async function lookupQuery(
   queryId: string,
-  db: Pool,
-  cache: LRUCache<string, string>
+  db: Pool
 ): Promise<string | undefined> {
-  if (cache.has(queryId)) {
-    PREREG_HIT.inc();
-    return cache.get(queryId);
-  } else {
-    let queryText: string | undefined = undefined;
-    try {
-      const res = await db.query(
-        'SELECT code FROM t_graphql_operations WHERE id = $1',
-        [queryId]
-      );
-      queryText = res.rows.length > 0 ? res.rows[0].code : undefined;
-    } catch (e) {
-      console.error(`Unexpected database error: ${e}`);
-    }
-    if (queryText) {
-      PREREG_MISS.inc();
-      cache.set(queryId, queryText);
-    } else {
-      PREREG_UNK.inc();
-    }
-    return queryText;
+  let queryText: string | undefined = undefined;
+  try {
+    const res = await db.query(
+      'SELECT code FROM t_graphql_operations WHERE id = $1',
+      [queryId]
+    );
+    queryText = res.rows.length > 0 ? res.rows[0].code : undefined;
+  } catch (e) {
+    console.error(`Unexpected database error: ${e}`);
   }
+  return queryText;
 }
 
 async function preloadCache(
@@ -162,19 +150,40 @@ export function usePreregisteredQueries(
         maybePreregisteredId &&
         (knownQueries.has(maybePreregisteredId) || knownQueries.size == 0)
       ) {
-        const preregisteredQuery: string | undefined = await lookupQuery(
-          maybePreregisteredId,
-          pool,
-          cache
-        );
+        let preregisteredQuery: string | undefined;
+        if (cache.has(maybePreregisteredId)) {
+          preregisteredQuery = cache.get(maybePreregisteredId);
+          PREREG_HIT.inc();
+        } else if (
+          (preregisteredQuery = await lookupQuery(maybePreregisteredId, pool))
+        ) {
+          PREREG_MISS.inc();
+        }
+
         if (preregisteredQuery) {
           setParams({
             ...params,
             query: preregisteredQuery,
           });
+        } else {
+          PREREG_UNK.inc();
+          throw createGraphQLError('PreregisteredQueryNotResolved', {
+            extensions: {
+              http: {
+                status: 503,
+              },
+            },
+          });
         }
       } else if (maybePreregisteredId) {
         PREREG_UNK.inc();
+        throw createGraphQLError('PreregisteredQueryNotFound', {
+          extensions: {
+            http: {
+              status: 404,
+            },
+          },
+        });
       }
     },
   };
