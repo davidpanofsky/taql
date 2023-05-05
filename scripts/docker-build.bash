@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -eo pipefail
 IMAGE=siteops-docker.maven.dev.tripadvisor.com/taql
-: "${VERSION:=0.2-test}"
+: "${VERSION:=1.2-test}"
 echo "VERSION = ${VERSION}"
 
 docker build . -t "${IMAGE}:${VERSION}"
