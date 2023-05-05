@@ -17,7 +17,7 @@ import { TaqlPlugins } from '@taql/plugins';
 import { plugins as batchingPlugins } from '@taql/batching';
 import { createServer as httpsServer } from 'https';
 import { ioRedisStore } from '@tirke/node-cache-manager-ioredis';
-import { plugins as preregPlugins } from '@taql/prereg';
+import { plugins as preregPlugins, usePreregisteredQueries } from '@taql/prereg';
 import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspection';
 import { usePrometheus } from '@graphql-yoga/plugin-prometheus';
 
@@ -99,6 +99,7 @@ export async function main() {
 
   const yogaPlugins = [
     useAPQ({ store: apqStore }),
+    usePreregisteredQueries(),
     usePrometheus({
       // Options specified by @graphql-yoga/plugin-prometheus
       http: true,

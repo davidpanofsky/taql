@@ -1,8 +1,8 @@
 import { Kind, OperationDefinitionNode, OperationTypeNode } from 'graphql';
 import { Plugin, handleStreamOrSingleExecutionResult } from '@envelop/core';
 import { LRUCache } from 'lru-cache';
-
 import { PREREGISTERED_QUERY_PARAMS } from '@taql/config';
+import { Plugin as YogaPlugin } from 'graphql-yoga';
 
 // pg-native doesn't have typescript type definitions, so `const ... = require(...)` is the way to import it
 const Client = require('pg-native'); // eslint-disable-line @typescript-eslint/no-var-requires
@@ -27,10 +27,6 @@ try {
     `Failed to connect to ${PREREGISTERED_QUERY_PARAMS.database_uri}: ${e}`
   );
 }
-
-const CACHE = new LRUCache<string, string>({
-  max: PREREGISTERED_QUERY_PARAMS.max_cache_size,
-});
 
 const KNOWN_QUERIES: Set<string> = new Set<string>();
 
@@ -109,46 +105,57 @@ function preloadCache(
   );
 }
 
-const preregisteredQueryResolver: Plugin = {
-  async onPluginInit(_) {
-    try {
-      const known = await populateKnownQueries(KNOWN_QUERIES, DB);
-      console.log(`Loaded ${known} known preregistered query ids`);
-    } catch (e) {
-      console.error(`Failed to load known preregistered queries: ${e}`);
-      throw e; // Let's shut down; we could choose not to and hope that the next try works, but why be optimistic
-    }
-    preloadCache(CACHE, DB, PREREGISTERED_QUERY_PARAMS.max_cache_size);
-    setInterval(
-      () =>
-        populateKnownQueries(KNOWN_QUERIES, DB).catch((e) =>
-          console.error(`Failed to update known query ids: ${e}`)
-        ),
-      10000
-    );
-  },
-  // Check extensions for a potential preregistered query id, and resolve it to the query text, parsed
-  onParse(params) {
-    const context = params['context'];
-    const extensions = context['params' as keyof typeof context]['extensions'];
+export function usePreregisteredQueries(
+  options: { max_cache_size?: number } = {}
+): YogaPlugin {
+  const { max_cache_size = PREREGISTERED_QUERY_PARAMS.max_cache_size } =
+    options;
+  const CACHE = new LRUCache<string, string>({
+    max: max_cache_size,
+  });
 
-    const maybePreregisteredId: string | null =
-      extensions && extensions['preRegisteredQueryId'];
-    if (
-      maybePreregisteredId &&
-      (KNOWN_QUERIES.has(maybePreregisteredId) || KNOWN_QUERIES.size == 0)
-    ) {
-      const preregisteredQuery: string | undefined = lookupQuery(
-        maybePreregisteredId,
-        DB,
-        CACHE
-      );
-      if (preregisteredQuery) {
-        params.setParsedDocument(params.parseFn(preregisteredQuery));
+  return {
+    async onPluginInit(_) {
+      try {
+        const known = await populateKnownQueries(KNOWN_QUERIES, DB);
+        console.log(`Loaded ${known} known preregistered query ids`);
+      } catch (e) {
+        console.error(`Failed to load known preregistered queries: ${e}`);
+        throw e; // Let's shut down; we could choose not to and hope that the next try works, but why be optimistic
       }
-    }
-  },
-};
+      preloadCache(CACHE, DB, PREREGISTERED_QUERY_PARAMS.max_cache_size);
+      setInterval(
+        () =>
+          populateKnownQueries(KNOWN_QUERIES, DB).catch((e) =>
+            console.error(`Failed to update known query ids: ${e}`)
+          ),
+        10000
+      );
+    },
+    // Check extensions for a potential preregistered query id, and resolve it to the query text, parsed
+    async onParams({ params, setParams }) {
+      const extensions = params.extensions;
+      const maybePreregisteredId: string | null =
+        extensions && extensions['preRegisteredQueryId'];
+      if (
+        maybePreregisteredId &&
+        (KNOWN_QUERIES.has(maybePreregisteredId) || KNOWN_QUERIES.size == 0)
+      ) {
+        const preregisteredQuery: string | undefined = lookupQuery(
+          maybePreregisteredId,
+          DB,
+          CACHE
+        );
+        if (preregisteredQuery) {
+          setParams({
+            ...params,
+            query: preregisteredQuery,
+          });
+        }
+      }
+    },
+  };
+}
 
 /**
  * Envelop plugin which adds the 'mutatedFields' extension.
@@ -197,7 +204,4 @@ const mutatedFieldsExtension: Plugin = {
   },
 };
 
-export const plugins: (Plugin | (() => Plugin))[] = [
-  preregisteredQueryResolver,
-  mutatedFieldsExtension,
-];
+export const plugins: (Plugin | (() => Plugin))[] = [mutatedFieldsExtension];
