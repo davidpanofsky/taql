@@ -32,7 +32,7 @@ let MOST_RECENT_KNOWN = 0;
 async function populateKnownQueries(
   known: Set<string>,
   db: Pool
-): Promise<number> {
+): Promise<{ count: number; asOf?: number }> {
   try {
     const known_queries_res = await db.query(
       'SELECT id FROM t_graphql_operations WHERE extract(epoch from updated) > $1',
@@ -48,11 +48,13 @@ async function populateKnownQueries(
     // and updating the most recently known.  A bit of overlap is fine.
     const now = Date.now();
     MOST_RECENT_KNOWN = now - 5000;
-    PREREG_UPDATED_AT.set(now);
-    return known.size - previousKnown;
+    return {
+      count: known.size - previousKnown,
+      asOf: now,
+    };
   } catch (e) {
     console.error(`Unexpected database error: ${e}`);
-    return 0;
+    return { count: 0 };
   }
 }
 
@@ -124,8 +126,11 @@ export function usePreregisteredQueries(
   return {
     async onPluginInit(_) {
       try {
-        const known = await populateKnownQueries(knownQueries, pool);
-        console.log(`Loaded ${known} known preregistered query ids`);
+        const { count, asOf } = await populateKnownQueries(knownQueries, pool);
+        console.log(`Loaded ${count} known preregistered query ids`);
+        if (asOf) {
+          PREREG_UPDATED_AT.set(asOf);
+        }
       } catch (e) {
         console.error(`Failed to load known preregistered queries: ${e}`);
         throw e; // Let's shut down; we could choose not to and hope that the next try works, but why be optimistic
@@ -135,12 +140,19 @@ export function usePreregisteredQueries(
       );
       setInterval(
         () =>
-          populateKnownQueries(knownQueries, pool).catch((e) =>
-            console.error(`Failed to update known query ids: ${e}`)
-          ),
+          populateKnownQueries(knownQueries, pool)
+            .then(({ count, asOf }) => {
+              if (count > 0 && asOf) {
+                PREREG_UPDATED_AT.set(asOf);
+              }
+            })
+            .catch((e) =>
+              console.error(`Failed to update known query ids: ${e}`)
+            ),
         10000
       );
     },
+
     // Check extensions for a potential preregistered query id, and resolve it to the query text, parsed
     async onParams({ params, setParams }) {
       const extensions = params.extensions;
