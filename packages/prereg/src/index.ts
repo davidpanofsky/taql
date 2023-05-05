@@ -1,8 +1,6 @@
 import { Kind, OperationDefinitionNode, OperationTypeNode } from 'graphql';
 import { Plugin, handleStreamOrSingleExecutionResult } from '@envelop/core';
 import { LRUCache } from 'lru-cache';
-
-import { PREREGISTERED_QUERY_PARAMS } from '@taql/config';
 import { Pool } from 'pg';
 import { Plugin as YogaPlugin } from 'graphql-yoga';
 import promClient from 'prom-client';
@@ -111,9 +109,11 @@ export function usePreregisteredQueries(
   } = {}
 ): YogaPlugin {
   const {
-    max_cache_size = PREREGISTERED_QUERY_PARAMS.max_cache_size,
-    postgresConnectionString = PREREGISTERED_QUERY_PARAMS.database_uri,
+    max_cache_size = 2000,
+    postgresConnectionString = "postgres:///graphql_operations_ros@localhost"
   } = options;
+
+  console.log(`Initializing preregistered queries plugin using ${postgresConnectionString}, max cache size = ${max_cache_size}`);
 
   const known_queries = new Set<string>();
 

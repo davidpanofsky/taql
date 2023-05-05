@@ -2,6 +2,7 @@ import { APQStore, useAPQ } from '@graphql-yoga/plugin-apq';
 import {
   AUTOMATIC_PERSISTED_QUERY_PARAMS,
   ENABLE_FEATURES,
+  PREREGISTERED_QUERY_PARAMS,
   SERVER_PARAMS,
 } from '@taql/config';
 import { DocumentNode, GraphQLError } from 'graphql';
@@ -102,7 +103,10 @@ export async function main() {
 
   const yogaPlugins = [
     useAPQ({ store: apqStore }),
-    usePreregisteredQueries(),
+    usePreregisteredQueries({
+      max_cache_size: PREREGISTERED_QUERY_PARAMS.max_cache_size,
+      postgresConnectionString: PREREGISTERED_QUERY_PARAMS.database_uri,
+    }),
     usePrometheus({
       // Options specified by @graphql-yoga/plugin-prometheus
       http: true,
