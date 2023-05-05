@@ -9,6 +9,10 @@ import { Server, createServer as httpServer } from 'http';
 import { TaqlContext, plugins as contextPlugins } from '@taql/context';
 import { caching, multiCaching } from 'cache-manager';
 import { createYoga, useReadinessCheck } from 'graphql-yoga';
+import {
+  plugins as preregPlugins,
+  usePreregisteredQueries,
+} from '@taql/prereg';
 import Koa from 'koa';
 import { LRUCache } from 'lru-cache';
 import { SSL_CONFIG } from '@taql/ssl';
@@ -17,7 +21,6 @@ import { TaqlPlugins } from '@taql/plugins';
 import { plugins as batchingPlugins } from '@taql/batching';
 import { createServer as httpsServer } from 'https';
 import { ioRedisStore } from '@tirke/node-cache-manager-ioredis';
-import { plugins as preregPlugins, usePreregisteredQueries } from '@taql/prereg';
 import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspection';
 import { usePrometheus } from '@graphql-yoga/plugin-prometheus';
 
