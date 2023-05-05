@@ -10,7 +10,7 @@ import { TaqlContext, plugins as contextPlugins } from '@taql/context';
 import { caching, multiCaching } from 'cache-manager';
 import { createYoga, useReadinessCheck } from 'graphql-yoga';
 import {
-  plugins as preregPlugins,
+  mutatedFieldsExtensionPlugin,
   usePreregisteredQueries,
 } from '@taql/prereg';
 import Koa from 'koa';
@@ -141,7 +141,7 @@ export async function main() {
     schemaPoller.asPlugin(),
     contextPlugins,
     batchingPlugins,
-    { envelop: preregPlugins },
+    { envelop: [mutatedFieldsExtensionPlugin] },
     { yoga: yogaPlugins }
   );
 

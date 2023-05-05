@@ -175,7 +175,7 @@ export function usePreregisteredQueries(
  * what, if any, mutations take place.  By adding the mutatedFields extension, clients can still cache bust
  * on mutations.
  */
-const mutatedFieldsExtension: Plugin = {
+export const mutatedFieldsExtensionPlugin: Plugin = {
   onExecute({ args }) {
     const mutatedFields: string[] = [];
     args.document.definitions.forEach((d: OperationDefinitionNode) => {
@@ -216,4 +216,3 @@ const mutatedFieldsExtension: Plugin = {
   },
 };
 
-export const plugins: (Plugin | (() => Plugin))[] = [mutatedFieldsExtension];
