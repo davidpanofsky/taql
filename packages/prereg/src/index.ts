@@ -170,6 +170,7 @@ export function usePreregisteredQueries(
           (preregisteredQuery = await lookupQuery(maybePreregisteredId, pool))
         ) {
           PREREG_MISS.inc();
+          cache.set(maybePreregisteredId, preregisteredQuery);
         }
 
         if (preregisteredQuery) {
