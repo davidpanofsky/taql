@@ -92,14 +92,16 @@ async function preloadCache(
   db: Pool,
   limit: number
 ): Promise<number> {
-  return db.query(
-    'WITH most_recent AS (SELECT max(updated) AS updated FROM t_graphql_operations) ' +
-      'SELECT id, code FROM t_graphql_operations WHERE updated = (select updated from most_recent) LIMIT $1',
-    [limit]
-  ).then((res) => {
-    res.rows.forEach((o: any) => cache.set(o.id, o.code)); // eslint-disable-line @typescript-eslint/no-explicit-any
-    return res.rows.length;
-  });
+  return db
+    .query(
+      'WITH most_recent AS (SELECT max(updated) AS updated FROM t_graphql_operations) ' +
+        'SELECT id, code FROM t_graphql_operations WHERE updated = (select updated from most_recent) LIMIT $1',
+      [limit]
+    )
+    .then((res) => {
+      res.rows.forEach((o: any) => cache.set(o.id, o.code)); // eslint-disable-line @typescript-eslint/no-explicit-any
+      return res.rows.length;
+    });
 }
 
 export function usePreregisteredQueries(
@@ -132,8 +134,9 @@ export function usePreregisteredQueries(
         console.error(`Failed to load known preregistered queries: ${e}`);
         throw e; // Let's shut down; we could choose not to and hope that the next try works, but why be optimistic
       }
-      await preloadCache(cache, pool, max_cache_size)
-        .catch((err) => console.error(`Failed to preload preregisterd queries cache`));
+      await preloadCache(cache, pool, max_cache_size).catch((err) =>
+        console.error(`Failed to preload preregisterd queries cache: ${err}`)
+      );
       setInterval(
         () =>
           populateKnownQueries(known_queries, pool).catch((e) =>
@@ -215,4 +218,3 @@ export const mutatedFieldsExtensionPlugin: Plugin = {
     };
   },
 };
-
