@@ -791,6 +791,7 @@ __metadata:
     "@taql/config": "workspace:^"
     "@types/pg": ^8.6.6
     graphql: ^16.6.0
+    graphql-yoga: ^3.9.1
     lru-cache: ^9.1.1
     pg: ^8.10.0
     prom-client: ^14.2.0
