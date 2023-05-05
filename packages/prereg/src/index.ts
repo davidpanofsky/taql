@@ -7,32 +7,6 @@ import { Pool } from 'pg';
 import { Plugin as YogaPlugin } from 'graphql-yoga';
 import promClient from 'prom-client';
 
-// pg-native doesn't have typescript type definitions, so `const ... = require(...)` is the way to import it
-const Client = require('pg-native'); // eslint-disable-line @typescript-eslint/no-var-requires
-
-// One single pool at the top level; it seems overly complicated to try to keep this inside the plugin object,
-// especially considering there's no lifecycle method for plugin destruction, meaning we arent' really going to
-// do anything smart with destroying the pool when the plugin goes away.
-//
-// Another approach would be to change the exported plugin to be a () => Plugin and initialize
-// the pool during the call.  That would be sweet if we were passed some params at that time.
-// TODO(smitchell): Climb to the top of the stack and see where this is initialized and if we have access to make
-// configuration passable
-
-let DB: typeof Client | undefined;
-try {
-  DB = new Client();
-  // envelop plugins' onParse method is synchronous and setting the document to a promise of the parsed query
-  // breaks things. Instead we just bite the bullet and do synchronous IO.
-  DB.connectSync(PREREGISTERED_QUERY_PARAMS.database_uri);
-} catch (e) {
-  console.error(
-    `Failed to connect to ${PREREGISTERED_QUERY_PARAMS.database_uri}: ${e}`
-  );
-}
-
-const KNOWN_QUERIES: Set<string> = new Set<string>();
-
 // metrics
 const PREREG_UNK = new promClient.Counter({
   name: 'preregistered_query_unknown',
@@ -57,37 +31,7 @@ const PREREG_UPDATED_AT = new promClient.Gauge({
 // epoch
 let MOST_RECENT_KNOWN = 0;
 
-function populateKnownQueries(
-  known: Set<string>,
-  db: typeof Client
-): Promise<number> {
-  return new Promise((resolve, reject) => {
-    db.query(
-      'SELECT id FROM t_graphql_operations WHERE extract(epoch from updated) > $1',
-      [MOST_RECENT_KNOWN],
-      function (err: Error, rows: unknown[]) {
-        if (err) {
-          reject(err);
-          return;
-        }
-        const previousKnown = known.size;
-        rows.forEach(
-          (
-            o: any // eslint-disable-line @typescript-eslint/no-explicit-any
-          ) => known.add(o.id)
-        );
-        // Small fudge factor to avoid any concern about updated times falling between query execution
-        // and updating the most recently known.  A bit of overlap is fine.
-        const now = Date.now();
-        MOST_RECENT_KNOWN = now - 5000;
-        PREREG_UPDATED_AT.set(now);
-        resolve(known.size - previousKnown);
-      }
-    );
-  });
-}
-
-async function populateKnownQueriesAsync(
+async function populateKnownQueries(
   known: Set<string>,
   db: Pool
 ): Promise<number> {
@@ -114,7 +58,7 @@ async function populateKnownQueriesAsync(
   }
 }
 
-async function lookupQueryAsync(
+async function lookupQuery(
   queryId: string,
   db: Pool,
   cache: LRUCache<string, string>
@@ -143,71 +87,19 @@ async function lookupQueryAsync(
   }
 }
 
-function lookupQuery(
-  queryId: string,
-  db: typeof Client,
-  cache: LRUCache<string, string>
-): string | undefined {
-  if (cache.has(queryId)) {
-    PREREG_HIT.inc();
-    return cache.get(queryId);
-  } else {
-    let queryText: string | undefined = undefined;
-    try {
-      const res = db.querySync(
-        'SELECT code FROM t_graphql_operations WHERE id = $1',
-        [queryId]
-      );
-      queryText = res.length > 0 ? res[0].code : undefined;
-    } catch (e) {
-      console.error(`Unexpected database error: ${e}`);
-    }
-    if (queryText) {
-      PREREG_MISS.inc();
-      cache.set(queryId, queryText);
-    } else {
-      PREREG_UNK.inc();
-    }
-    return queryText;
-  }
-}
-
-function preloadCache(
-  cache: LRUCache<string, string>,
-  db: typeof Client,
-  limit: number
-): void {
-  db.query(
-    'WITH most_recent AS (SELECT max(updated) AS updated FROM t_graphql_operations) ' +
-      'SELECT id, code FROM t_graphql_operations WHERE updated = (select updated from most_recent) LIMIT $1',
-    [limit],
-    function (err: Error, rows: unknown[]) {
-      if (err) {
-        console.error(`Failed to preload preregistered query cache: ${err}`);
-        return;
-      }
-      rows.forEach((o: any) => cache.set(o.id, o.code)); // eslint-disable-line @typescript-eslint/no-explicit-any
-    }
-  );
-}
-
-function preloadCachePg(
+async function preloadCache(
   cache: LRUCache<string, string>,
   db: Pool,
   limit: number
-): void {
-  db.query(
+): Promise<number> {
+  return db.query(
     'WITH most_recent AS (SELECT max(updated) AS updated FROM t_graphql_operations) ' +
       'SELECT id, code FROM t_graphql_operations WHERE updated = (select updated from most_recent) LIMIT $1',
-    [limit],
-    (err, res) => {
-      if (err) {
-        console.error(`Failed to preload preregistered query cache: ${err}`);
-        return;
-      }
-      res.rows.forEach((o: any) => cache.set(o.id, o.code)); // eslint-disable-line @typescript-eslint/no-explicit-any
-    }
-  );
+    [limit]
+  ).then((res) => {
+    res.rows.forEach((o: any) => cache.set(o.id, o.code)); // eslint-disable-line @typescript-eslint/no-explicit-any
+    return res.rows.length;
+  });
 }
 
 export function usePreregisteredQueries(
@@ -221,7 +113,9 @@ export function usePreregisteredQueries(
     postgresConnectionString = PREREGISTERED_QUERY_PARAMS.database_uri,
   } = options;
 
-  const CACHE = new LRUCache<string, string>({
+  const known_queries = new Set<string>();
+
+  const cache = new LRUCache<string, string>({
     max: max_cache_size,
   });
 
@@ -232,16 +126,17 @@ export function usePreregisteredQueries(
   return {
     async onPluginInit(_) {
       try {
-        const known = await populateKnownQueries(KNOWN_QUERIES, DB);
+        const known = await populateKnownQueries(known_queries, pool);
         console.log(`Loaded ${known} known preregistered query ids`);
       } catch (e) {
         console.error(`Failed to load known preregistered queries: ${e}`);
         throw e; // Let's shut down; we could choose not to and hope that the next try works, but why be optimistic
       }
-      preloadCachePg(CACHE, pool, max_cache_size);
+      await preloadCache(cache, pool, max_cache_size)
+        .catch((err) => console.error(`Failed to preload preregisterd queries cache`));
       setInterval(
         () =>
-          populateKnownQueries(KNOWN_QUERIES, DB).catch((e) =>
+          populateKnownQueries(known_queries, pool).catch((e) =>
             console.error(`Failed to update known query ids: ${e}`)
           ),
         10000
@@ -254,12 +149,12 @@ export function usePreregisteredQueries(
         extensions && extensions['preRegisteredQueryId'];
       if (
         maybePreregisteredId &&
-        (KNOWN_QUERIES.has(maybePreregisteredId) || KNOWN_QUERIES.size == 0)
+        (known_queries.has(maybePreregisteredId) || known_queries.size == 0)
       ) {
-        const preregisteredQuery: string | undefined = lookupQuery(
+        const preregisteredQuery: string | undefined = await lookupQuery(
           maybePreregisteredId,
-          DB,
-          CACHE
+          pool,
+          cache
         );
         if (preregisteredQuery) {
           setParams({
