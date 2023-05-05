@@ -104,7 +104,9 @@ async function populateKnownQueriesAsync(
     );
     // Small fudge factor to avoid any concern about updated times falling between query execution
     // and updating the most recently known.  A bit of overlap is fine.
-    MOST_RECENT_KNOWN = Date.now() - 5000;
+    const now = Date.now();
+    MOST_RECENT_KNOWN = now - 5000;
+    PREREG_UPDATED_AT.set(now);
     return known.size - previousKnown;
   } catch (e) {
     console.error(`Unexpected database error: ${e}`);
@@ -118,6 +120,7 @@ async function lookupQueryAsync(
   cache: LRUCache<string, string>
 ): Promise<string | undefined> {
   if (cache.has(queryId)) {
+    PREREG_HIT.inc();
     return cache.get(queryId);
   } else {
     let queryText: string | undefined = undefined;
@@ -131,7 +134,10 @@ async function lookupQueryAsync(
       console.error(`Unexpected database error: ${e}`);
     }
     if (queryText) {
+      PREREG_MISS.inc();
       cache.set(queryId, queryText);
+    } else {
+      PREREG_UNK.inc();
     }
     return queryText;
   }
