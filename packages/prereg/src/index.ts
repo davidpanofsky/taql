@@ -1,6 +1,7 @@
 import { Kind, OperationDefinitionNode, OperationTypeNode } from 'graphql';
 import { Plugin, handleStreamOrSingleExecutionResult } from '@envelop/core';
 import { LRUCache } from 'lru-cache';
+import { Pool } from 'pg';
 import { PREREGISTERED_QUERY_PARAMS } from '@taql/config';
 import { Plugin as YogaPlugin } from 'graphql-yoga';
 
@@ -61,6 +62,31 @@ function populateKnownQueries(
   });
 }
 
+async function lookupQueryAsync(
+  queryId: string,
+  db: Pool,
+  cache: LRUCache<string, string>
+): Promise<string | undefined> {
+  if (cache.has(queryId)) {
+    return cache.get(queryId);
+  } else {
+    let queryText: string | undefined = undefined;
+    try {
+      const res = await db.query(
+        'SELECT code FROM t_graphql_operations WHERE id = $1',
+        [queryId]
+      );
+      queryText = res.rows.length > 0 ? res.rows[0].code : undefined;
+    } catch (e) {
+      console.error(`Unexpected database error: ${e}`);
+    }
+    if (queryText) {
+      cache.set(queryId, queryText);
+    }
+    return queryText;
+  }
+}
+
 function lookupQuery(
   queryId: string,
   db: typeof Client,
@@ -106,12 +132,22 @@ function preloadCache(
 }
 
 export function usePreregisteredQueries(
-  options: { max_cache_size?: number } = {}
+  options: {
+    max_cache_size?: number,
+    postgresConnectionString?: string
+  } = {}
 ): YogaPlugin {
-  const { max_cache_size = PREREGISTERED_QUERY_PARAMS.max_cache_size } =
-    options;
+  const {
+    max_cache_size = PREREGISTERED_QUERY_PARAMS.max_cache_size,
+    postgresConnectionString = PREREGISTERED_QUERY_PARAMS.database_uri,
+  } = options;
+
   const CACHE = new LRUCache<string, string>({
     max: max_cache_size,
+  });
+
+  const pool = new Pool({
+    connectionString: postgresConnectionString
   });
 
   return {
