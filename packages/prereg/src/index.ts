@@ -102,7 +102,7 @@ export function usePreregisteredQueries(
 ): YogaPlugin {
   const {
     maxCacheSize = 2000,
-    postgresConnectionString = 'postgres:///graphql_operations_ros@localhost',
+    postgresConnectionString = 'postgres://graphql_operations_ros@localhost',
     maxPoolSize = 10,
     poolConnectionTimeoutMillis = 0,
   } = options;
