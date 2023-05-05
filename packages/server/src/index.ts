@@ -104,8 +104,8 @@ export async function main() {
   const yogaPlugins = [
     useAPQ({ store: apqStore }),
     usePreregisteredQueries({
-      max_cache_size: PREREGISTERED_QUERY_PARAMS.max_cache_size,
-      postgresConnectionString: PREREGISTERED_QUERY_PARAMS.database_uri,
+      maxCacheSize: PREREGISTERED_QUERY_PARAMS.maxCacheSize,
+      postgresConnectionString: PREREGISTERED_QUERY_PARAMS.databaseUri,
     }),
     usePrometheus({
       // Options specified by @graphql-yoga/plugin-prometheus

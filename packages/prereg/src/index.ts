@@ -104,44 +104,50 @@ async function preloadCache(
 
 export function usePreregisteredQueries(
   options: {
-    max_cache_size?: number;
+    maxCacheSize?: number;
     postgresConnectionString?: string;
+    maxPoolSize?: number;
+    poolConnectionTimeoutMillis?: number;
   } = {}
 ): YogaPlugin {
   const {
-    max_cache_size = 2000,
+    maxCacheSize = 2000,
     postgresConnectionString = 'postgres:///graphql_operations_ros@localhost',
+    maxPoolSize = 10,
+    poolConnectionTimeoutMillis = 0,
   } = options;
 
   console.log(
-    `Initializing preregistered queries plugin using ${postgresConnectionString}, max cache size = ${max_cache_size}`
+    `Initializing preregistered queries plugin using ${postgresConnectionString}, max cache size = ${maxCacheSize}`
   );
 
-  const known_queries = new Set<string>();
+  const knownQueries = new Set<string>();
 
   const cache = new LRUCache<string, string>({
-    max: max_cache_size,
+    max: maxCacheSize,
   });
 
   const pool = new Pool({
     connectionString: postgresConnectionString,
+    max: maxPoolSize,
+    connectionTimeoutMillis: poolConnectionTimeoutMillis,
   });
 
   return {
     async onPluginInit(_) {
       try {
-        const known = await populateKnownQueries(known_queries, pool);
+        const known = await populateKnownQueries(knownQueries, pool);
         console.log(`Loaded ${known} known preregistered query ids`);
       } catch (e) {
         console.error(`Failed to load known preregistered queries: ${e}`);
         throw e; // Let's shut down; we could choose not to and hope that the next try works, but why be optimistic
       }
-      await preloadCache(cache, pool, max_cache_size).catch((err) =>
+      await preloadCache(cache, pool, maxCacheSize).catch((err) =>
         console.error(`Failed to preload preregisterd queries cache: ${err}`)
       );
       setInterval(
         () =>
-          populateKnownQueries(known_queries, pool).catch((e) =>
+          populateKnownQueries(knownQueries, pool).catch((e) =>
             console.error(`Failed to update known query ids: ${e}`)
           ),
         10000
@@ -154,7 +160,7 @@ export function usePreregisteredQueries(
         extensions && extensions['preRegisteredQueryId'];
       if (
         maybePreregisteredId &&
-        (known_queries.has(maybePreregisteredId) || known_queries.size == 0)
+        (knownQueries.has(maybePreregisteredId) || knownQueries.size == 0)
       ) {
         const preregisteredQuery: string | undefined = await lookupQuery(
           maybePreregisteredId,
