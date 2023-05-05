@@ -1,3 +1,21 @@
-# ignore node_modules of all kinds, as they may be from a different platform than the container's
+# git? nah.
+**/.git/**
+# it is extremely important that no .env files leak from dev
+# boxes into docker images, or taql may not be configured the way
+# we think it is
+.env
+
 node_modules
 **/node_modules
+**/build
+.tool-versions
+
+# begin ignores for yarn
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+# end yarn

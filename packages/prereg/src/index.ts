@@ -1,9 +1,11 @@
 import { Kind, OperationDefinitionNode, OperationTypeNode } from 'graphql';
 import { Plugin, handleStreamOrSingleExecutionResult } from '@envelop/core';
 import { LRUCache } from 'lru-cache';
+
 import { Pool } from 'pg';
 import { PREREGISTERED_QUERY_PARAMS } from '@taql/config';
 import { Plugin as YogaPlugin } from 'graphql-yoga';
+import promClient from 'prom-client';
 
 // pg-native doesn't have typescript type definitions, so `const ... = require(...)` is the way to import it
 const Client = require('pg-native'); // eslint-disable-line @typescript-eslint/no-var-requires
@@ -31,6 +33,27 @@ try {
 
 const KNOWN_QUERIES: Set<string> = new Set<string>();
 
+// metrics
+const PREREG_UNK = new promClient.Counter({
+  name: 'preregistered_query_unknown',
+  help: 'Count of preregistered query IDs encountered which were unknown/unresolved',
+});
+
+const PREREG_MISS = new promClient.Counter({
+  name: 'preregistered_query_cache_miss',
+  help: 'Count of preregistered query IDs encountered which were resolved not from cache',
+});
+
+const PREREG_HIT = new promClient.Counter({
+  name: 'pregegistered_query_cache_hit',
+  help: 'Count of preregistered query IDs that were resolved from cache',
+});
+
+const PREREG_UPDATED_AT = new promClient.Gauge({
+  name: 'preregistered_query_last_load',
+  help: 'epoch of last load of preregistered queries',
+});
+
 // epoch
 let MOST_RECENT_KNOWN = 0;
 
@@ -55,7 +78,9 @@ function populateKnownQueries(
         );
         // Small fudge factor to avoid any concern about updated times falling between query execution
         // and updating the most recently known.  A bit of overlap is fine.
-        MOST_RECENT_KNOWN = Date.now() - 5000;
+        const now = Date.now();
+        MOST_RECENT_KNOWN = now - 5000;
+        PREREG_UPDATED_AT.set(now);
         resolve(known.size - previousKnown);
       }
     );
@@ -118,6 +143,7 @@ function lookupQuery(
   cache: LRUCache<string, string>
 ): string | undefined {
   if (cache.has(queryId)) {
+    PREREG_HIT.inc();
     return cache.get(queryId);
   } else {
     let queryText: string | undefined = undefined;
@@ -131,7 +157,10 @@ function lookupQuery(
       console.error(`Unexpected database error: ${e}`);
     }
     if (queryText) {
+      PREREG_MISS.inc();
       cache.set(queryId, queryText);
+    } else {
+      PREREG_UNK.inc();
     }
     return queryText;
   }
@@ -213,6 +242,8 @@ export function usePreregisteredQueries(
             query: preregisteredQuery,
           });
         }
+      } else if (maybePreregisteredId) {
+        PREREG_UNK.inc();
       }
     },
   };

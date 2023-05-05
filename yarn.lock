@@ -794,6 +794,7 @@ __metadata:
     lru-cache: ^9.1.1
     pg: ^8.10.0
     pg-native: ^3.0.1
+    prom-client: ^14.2.0
     typescript: ^4.8.4
   languageName: unknown
   linkType: soft

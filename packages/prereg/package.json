@@ -17,6 +17,7 @@
     "graphql": "^16.6.0",
     "lru-cache": "^9.1.1",
     "pg": "^8.10.0",
-    "pg-native": "^3.0.1"
+    "pg-native": "^3.0.1",
+    "prom-client": "^14.2.0"
   }
 }
