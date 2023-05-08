@@ -2,6 +2,8 @@ node_modules
 **/build
 .env
 .tool-versions
+.vscode/*
+
 
 # begin ignores for yarn
 .pnp.*
