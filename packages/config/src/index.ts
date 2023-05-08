@@ -89,20 +89,20 @@ export const PREREGISTERED_QUERY_PARAMS = resolve({
 });
 
 export const AUTOMATIC_PERSISTED_QUERY_PARAMS = resolve({
-  redis_cluster: {
+  redisCluster: {
     property: 'AUTOMATIC_PERSISTED_QUERY_REDIS_CLUSTER',
     defaultTo: undefined,
   },
-  redis_instance: {
+  redisInstance: {
     property: 'AUTOMATIC_PERSISTED_QUERY_REDIS_INSTANCE',
     defaultTo: undefined,
   },
-  redis_ttl: {
+  redisTTL: {
     property: 'AUTOMATIC_PERSISTED_QUERY_REDIS_TTL',
     resolver: resolvers.nonNegativeInteger,
     defaultTo: 36_000,
   },
-  mem_cache_size: {
+  memCacheSize: {
     property: 'AUTOMATIC_PERSISTED_QUERY_CACHE_SIZE',
     resolver: resolvers.nonNegativeInteger,
     defaultTo: 1000,

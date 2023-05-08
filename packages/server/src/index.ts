@@ -69,25 +69,25 @@ export async function main() {
 
   // Two tier store for automatic persisted queries
   const memoryCache = await caching('memory', {
-    max: AUTOMATIC_PERSISTED_QUERY_PARAMS.mem_cache_size,
+    max: AUTOMATIC_PERSISTED_QUERY_PARAMS.memCacheSize,
   });
 
-  const redisCache = AUTOMATIC_PERSISTED_QUERY_PARAMS.redis_instance
+  const redisCache = AUTOMATIC_PERSISTED_QUERY_PARAMS.redisInstance
     ? [
         await caching(ioRedisStore, {
-          ttl: AUTOMATIC_PERSISTED_QUERY_PARAMS.redis_ttl,
-          host: AUTOMATIC_PERSISTED_QUERY_PARAMS.redis_instance,
+          ttl: AUTOMATIC_PERSISTED_QUERY_PARAMS.redisTTL,
+          host: AUTOMATIC_PERSISTED_QUERY_PARAMS.redisInstance,
           port: 6379,
         }),
       ]
-    : AUTOMATIC_PERSISTED_QUERY_PARAMS.redis_cluster
+    : AUTOMATIC_PERSISTED_QUERY_PARAMS.redisCluster
     ? [
         await caching(ioRedisStore, {
-          ttl: AUTOMATIC_PERSISTED_QUERY_PARAMS.redis_ttl,
+          ttl: AUTOMATIC_PERSISTED_QUERY_PARAMS.redisTTL,
           clusterConfig: {
             nodes: [
               {
-                host: AUTOMATIC_PERSISTED_QUERY_PARAMS.redis_cluster,
+                host: AUTOMATIC_PERSISTED_QUERY_PARAMS.redisCluster,
                 port: 6379,
               },
             ],
