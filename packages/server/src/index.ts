@@ -18,6 +18,7 @@ import { plugins as batchingPlugins } from '@taql/batching';
 import { createServer as httpsServer } from 'https';
 import { ioRedisStore } from '@tirke/node-cache-manager-ioredis';
 import { plugins as preregPlugins } from '@taql/prereg';
+import { plugins as debugPlugins } from '@taql/debug';
 import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspection';
 import { usePrometheus } from '@graphql-yoga/plugin-prometheus';
 
@@ -137,7 +138,10 @@ export async function main() {
     schemaPoller.asPlugin(),
     contextPlugins,
     batchingPlugins,
-    { envelop: preregPlugins },
+    { envelop: [
+        ...preregPlugins,
+        ...ENABLE_FEATURES.debugExtensions ? debugPlugins : [],
+    ]},
     { yoga: yogaPlugins }
   );
 

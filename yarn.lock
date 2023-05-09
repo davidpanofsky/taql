@@ -748,6 +748,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@taql/debug@workspace:packages/debug":
+  version: 0.0.0-use.local
+  resolution: "@taql/debug@workspace:packages/debug"
+  dependencies:
+    "@envelop/core": ^3.0.6
+    typescript: ^4.8.4
+  languageName: unknown
+  linkType: soft
+
 "@taql/executors@workspace:^, @taql/executors@workspace:packages/executors":
   version: 0.0.0-use.local
   resolution: "@taql/executors@workspace:packages/executors"
