@@ -45,7 +45,8 @@ export const SSL_PARAMS = resolve({
   ca: { property: 'CLIENT_CERT_CA_PATH', resolver: resolvers.fileContents },
   rejectUnauthorized: {
     property: 'SSL_REJECT_UNAUTHORIZED',
-    resolver: (val) => val !== 'false',
+    resolver: resolvers.booleanFromString,
+    defaultTo: true,
   },
 });
 
