@@ -92,14 +92,12 @@ async function preloadCache(
     });
 }
 
-export function usePreregisteredQueries(
-  options: {
-    maxCacheSize: number;
-    postgresConnectionString?: string;
-    maxPoolSize?: number;
-    poolConnectionTimeoutMillis?: number;
-  }
-): YogaPlugin {
+export function usePreregisteredQueries(options: {
+  maxCacheSize: number;
+  postgresConnectionString?: string;
+  maxPoolSize?: number;
+  poolConnectionTimeoutMillis?: number;
+}): YogaPlugin {
   const {
     maxCacheSize,
     postgresConnectionString = 'postgres://graphql_operations_ros@localhost',
