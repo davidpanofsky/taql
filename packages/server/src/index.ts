@@ -2,6 +2,7 @@ import { APQStore, useAPQ } from '@graphql-yoga/plugin-apq';
 import {
   AUTOMATIC_PERSISTED_QUERY_PARAMS,
   ENABLE_FEATURES,
+  PREREGISTERED_QUERY_PARAMS,
   SERVER_PARAMS,
 } from '@taql/config';
 import { DocumentNode, GraphQLError, GraphQLSchema } from 'graphql';
@@ -10,6 +11,10 @@ import { Server, createServer as httpServer } from 'http';
 import { TaqlContext, plugins as contextPlugins } from '@taql/context';
 import { caching, multiCaching } from 'cache-manager';
 import { createYoga, useReadinessCheck } from 'graphql-yoga';
+import {
+  mutatedFieldsExtensionPlugin,
+  usePreregisteredQueries,
+} from '@taql/prereg';
 import Koa from 'koa';
 import { LRUCache } from 'lru-cache';
 import { SSL_CONFIG } from '@taql/ssl';
@@ -17,7 +22,6 @@ import { TaqlPlugins } from '@taql/plugins';
 import { plugins as batchingPlugins } from '@taql/batching';
 import { createServer as httpsServer } from 'https';
 import { ioRedisStore } from '@tirke/node-cache-manager-ioredis';
-import { plugins as preregPlugins } from '@taql/prereg';
 import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspection';
 import { usePrometheus } from '@graphql-yoga/plugin-prometheus';
 
@@ -99,6 +103,10 @@ export async function main() {
 
   const yogaPlugins = [
     useAPQ({ store: apqStore }),
+    usePreregisteredQueries({
+      maxCacheSize: PREREGISTERED_QUERY_PARAMS.maxCacheSize,
+      postgresConnectionString: PREREGISTERED_QUERY_PARAMS.databaseUri,
+    }),
     usePrometheus({
       // Options specified by @graphql-yoga/plugin-prometheus
       http: true,
@@ -137,7 +145,7 @@ export async function main() {
     schemaPoller.asPlugin(),
     contextPlugins,
     batchingPlugins,
-    { envelop: preregPlugins },
+    { envelop: [mutatedFieldsExtensionPlugin] },
     { yoga: yogaPlugins }
   );
 
