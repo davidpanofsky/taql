@@ -4,7 +4,6 @@ import { Plugin } from '@envelop/core';
 import TypedEmitter from 'typed-emitter';
 import deepEqual from 'deep-equal';
 import { makeLegacySchema } from './legacy';
-import { mergeSchemas } from '@graphql-tools/schema';
 import { obfuscateDirective } from './directives';
 import { stitchSchemas } from '@graphql-tools/stitch';
 
@@ -58,7 +57,7 @@ export async function makeSchema(
     let schema = stitchSchemas({
       subschemas,
       mergeDirectives: true,
-      typeDefs: queryDirectives.map((directive) => directive.typeDefs)
+      typeDefs: queryDirectives.map((directive) => directive.typeDefs),
     });
 
     // Apply directive transformations to the schema
