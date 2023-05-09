@@ -376,7 +376,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphql-tools/schema@npm:^9.0.18, @graphql-tools/schema@npm:^9.0.19":
+"@graphql-tools/schema@npm:^9.0.18":
   version: 9.0.19
   resolution: "@graphql-tools/schema@npm:9.0.19::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-tools%2Fschema%2F-%2Fschema-9.0.19.tgz"
   dependencies:
@@ -804,7 +804,6 @@ __metadata:
     "@envelop/core": ^3.0.6
     "@graphql-tools/delegate": 9.0.10
     "@graphql-tools/load": ^7.8.14
-    "@graphql-tools/schema": ^9.0.19
     "@graphql-tools/stitch": ^8.7.15
     "@graphql-tools/utils": ^8.13.1
     "@graphql-tools/wrap": ^9.2.5
