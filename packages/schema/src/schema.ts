@@ -55,14 +55,10 @@ export async function makeSchema(
   // TODO load schemas from schema repository, add to subschemas.
 
   try {
-    let schema = mergeSchemas({
-      schemas: [
-        stitchSchemas({
-          subschemas,
-          mergeDirectives: true,
-        }),
-      ],
-      typeDefs: queryDirectives.map((directive) => directive.typeDefs),
+    let schema = stitchSchemas({
+      subschemas,
+      mergeDirectives: true,
+      typeDefs: queryDirectives.map((directive) => directive.typeDefs)
     });
 
     // Apply directive transformations to the schema
