@@ -20,9 +20,9 @@ import { LRUCache } from 'lru-cache';
 import { SSL_CONFIG } from '@taql/ssl';
 import { TaqlPlugins } from '@taql/plugins';
 import { plugins as batchingPlugins } from '@taql/batching';
-import { plugins as debugPlugins } from '@taql/debug';
 import { createServer as httpsServer } from 'https';
 import { ioRedisStore } from '@tirke/node-cache-manager-ioredis';
+import { serverHostExtensionPlugin } from '@taql/debug';
 import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspection';
 import { usePrometheus } from '@graphql-yoga/plugin-prometheus';
 
@@ -149,7 +149,7 @@ export async function main() {
     {
       envelop: [
         mutatedFieldsExtensionPlugin,
-        ...(ENABLE_FEATURES.debugExtensions ? debugPlugins : []),
+        ...(ENABLE_FEATURES.debugExtensions ? [serverHostExtensionPlugin] : []),
       ],
     },
     { yoga: yogaPlugins }

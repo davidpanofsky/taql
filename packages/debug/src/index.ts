@@ -4,7 +4,7 @@ import { SERVER_PARAMS } from '@taql/config';
 /**
  * Envelop plugin which adds server host extension to the response
  */
-const serverHostExtension: Plugin = {
+export const serverHostExtensionPlugin: Plugin = {
   onExecute() {
     return {
       onExecuteDone(payload) {
@@ -24,5 +24,3 @@ const serverHostExtension: Plugin = {
     };
   },
 };
-
-export const plugins: (Plugin | (() => Plugin))[] = [serverHostExtension];
