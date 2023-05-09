@@ -4,7 +4,8 @@ import {
   ENABLE_FEATURES,
   SERVER_PARAMS,
 } from '@taql/config';
-import { DocumentNode, GraphQLError } from 'graphql';
+import { DocumentNode, GraphQLError, GraphQLSchema } from 'graphql';
+import { SchemaPoller, makeSchema } from '@taql/schema';
 import { Server, createServer as httpServer } from 'http';
 import { TaqlContext, plugins as contextPlugins } from '@taql/context';
 import { caching, multiCaching } from 'cache-manager';
@@ -12,7 +13,6 @@ import { createYoga, useReadinessCheck } from 'graphql-yoga';
 import Koa from 'koa';
 import { LRUCache } from 'lru-cache';
 import { SSL_CONFIG } from '@taql/ssl';
-import { SchemaPoller } from '@taql/schema';
 import { TaqlPlugins } from '@taql/plugins';
 import { plugins as batchingPlugins } from '@taql/batching';
 import { createServer as httpsServer } from 'https';
@@ -141,8 +141,29 @@ export async function main() {
     { yoga: yogaPlugins }
   );
 
+  const schemaForContextCache = ENABLE_FEATURES.serviceOverrides
+    ? new LRUCache<string, GraphQLSchema>({ max: 32, ttl: 1000 * 60 * 2 })
+    : null;
+  async function getSchemaForContext(
+    context: TaqlContext
+  ): Promise<GraphQLSchema | undefined> {
+    const legacySVCO = context.state.legacyContext.SVCO;
+    let schemaForContext: GraphQLSchema | undefined;
+    if (legacySVCO) {
+      if (schemaForContextCache?.has(legacySVCO)) {
+        schemaForContext = schemaForContextCache.get(legacySVCO);
+      } else {
+        schemaForContext = await makeSchema(legacySVCO);
+        schemaForContext != undefined &&
+          schemaForContextCache?.set(legacySVCO, schemaForContext);
+      }
+    }
+    return schemaForContext;
+  }
   const yoga = createYoga<TaqlContext>({
-    schema,
+    schema: ENABLE_FEATURES.serviceOverrides
+      ? async (context) => (await getSchemaForContext(context)) ?? schema
+      : schema,
     ...yogaOptions,
     plugins: [...plugins.yoga(), ...plugins.envelop()],
   });

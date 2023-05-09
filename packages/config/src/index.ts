@@ -74,6 +74,11 @@ export const ENABLE_FEATURES = resolve({
     resolver: resolvers.booleanFromString,
     defaultTo: process.env.NODE_ENV === 'production' ? false : true,
   },
+  serviceOverrides: {
+    property: 'ENABLE_SERVICE_OVERRIDES',
+    resolver: resolvers.booleanFromString,
+    defaultTo: process.env.NODE_ENV === 'production' ? false : true,
+  },
 });
 
 export const PREREGISTERED_QUERY_PARAMS = resolve({
