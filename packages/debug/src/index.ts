@@ -4,10 +4,10 @@ import { hostname } from 'os';
 const serverHost = hostname();
 
 /**
- * Envelop plugin which adds server host extension to the response 
+ * Envelop plugin which adds server host extension to the response
  */
 const serverHostExtension: Plugin = {
-  onExecute({ args }) {
+  onExecute() {
     return {
       onExecuteDone(payload) {
         return handleStreamOrSingleExecutionResult(
@@ -27,6 +27,4 @@ const serverHostExtension: Plugin = {
   },
 };
 
-export const plugins: (Plugin | (() => Plugin))[] = [
-  serverHostExtension,
-];
+export const plugins: (Plugin | (() => Plugin))[] = [serverHostExtension];
