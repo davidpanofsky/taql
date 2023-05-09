@@ -2,6 +2,7 @@
 *.js
 *.d.ts
 build
+.gitlab-ci.yml
 
 # begin ignores for yarn
 .pnp.*
