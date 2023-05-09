@@ -3,6 +3,7 @@ default:
 
 stages:
   - test
+  - docker
 
 test:
   stage: test
