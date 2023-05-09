@@ -17,7 +17,7 @@ test:
 
 docker-nopush:
   variables:
-    CI_REGISTRY_NAME: "graphql-docker.maven.dev.tripadvisor.com"
+    CI_REGISTRY_IMAGE: "graphql-docker.maven.dev.tripadvisor.com/taql"
   stage: docker
   image:
     name: gcr.io/kaniko-project/executor:v1.9.0-debug
