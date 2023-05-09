@@ -4,7 +4,6 @@ import { Plugin } from '@envelop/core';
 import TypedEmitter from 'typed-emitter';
 import deepEqual from 'deep-equal';
 import { makeLegacySchema } from './legacy';
-import { mergeSchemas } from '@graphql-tools/schema';
 import { obfuscateDirective } from './directives';
 import { stitchSchemas } from '@graphql-tools/stitch';
 
@@ -55,13 +54,9 @@ export async function makeSchema(
   // TODO load schemas from schema repository, add to subschemas.
 
   try {
-    let schema = mergeSchemas({
-      schemas: [
-        stitchSchemas({
-          subschemas,
-          mergeDirectives: true,
-        }),
-      ],
+    let schema = stitchSchemas({
+      subschemas,
+      mergeDirectives: true,
       typeDefs: queryDirectives.map((directive) => directive.typeDefs),
     });
 
