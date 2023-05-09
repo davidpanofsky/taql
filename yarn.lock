@@ -753,6 +753,7 @@ __metadata:
   resolution: "@taql/debug@workspace:packages/debug"
   dependencies:
     "@envelop/core": ^3.0.6
+    "@taql/config": "workspace:^"
     typescript: ^4.8.4
   languageName: unknown
   linkType: soft

@@ -1,5 +1,7 @@
 import { resolve, resolvers } from './resolution';
 import { config } from 'dotenv';
+import { hostname } from 'os';
+
 config();
 
 // TODO: Remove all this one day. Legacy gql is just something we'll find in the schema
@@ -60,6 +62,10 @@ export const SERVER_PARAMS = resolve({
     property: 'SERVER_BATCH_LIMIT',
     resolver: resolvers.nonNegativeInteger,
     defaultTo: 2000,
+  },
+  hostname: {
+    property: 'HOSTNAME',
+    defaultTo: hostname(),
   },
 });
 

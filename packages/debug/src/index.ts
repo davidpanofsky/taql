@@ -1,7 +1,5 @@
 import { Plugin, handleStreamOrSingleExecutionResult } from '@envelop/core';
-import { hostname } from 'os';
-
-const serverHost = hostname();
+import { SERVER_PARAMS } from '@taql/config';
 
 /**
  * Envelop plugin which adds server host extension to the response
@@ -17,7 +15,7 @@ const serverHostExtension: Plugin = {
               ...result,
               extensions: {
                 ...(result.extensions || {}),
-                serverHost,
+                serverHost: SERVER_PARAMS.hostname,
               },
             });
           }
