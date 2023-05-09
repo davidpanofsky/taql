@@ -28,6 +28,7 @@ docker-test:
     entrypoint: [""]
   script:
     - /kaniko/executor
+      --cache=false
       --context "${CI_PROJECT_DIR}"
       --dockerfile "${CI_PROJECT_DIR}/Dockerfile"
       --destination "${CI_REGISTRY_NAME}/${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA}"
