@@ -1,3 +1,7 @@
+variables:
+  CI_REGISTRY_NAME: "graphql-docker.maven.dev.tripadvisor.com"
+  CI_REGISTRY_IMAGE: "taql"
+
 default:
   image: node:16.18.0
 
@@ -16,8 +20,6 @@ test:
     - ./scripts/ci.bash
 
 docker-nopush:
-  variables:
-    CI_REGISTRY_IMAGE: "graphql-docker.maven.dev.tripadvisor.com/taql"
   stage: docker
   image:
     name: gcr.io/kaniko-project/executor:v1.9.0-debug
@@ -26,5 +28,12 @@ docker-nopush:
     - /kaniko/executor
       --context "${CI_PROJECT_DIR}"
       --dockerfile "${CI_PROJECT_DIR}/Dockerfile"
-      --destination "${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA}"
+      --destination "${CI_REGISTRY_NAME}/${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA}"
+      --label org.label-schema.build-date=$(date +%Y%m%d)
+      --label org.label-schema.description="$CI_PROJECT_TITLE"
+      --label org.label-schema.license="TripAdvisor Proprietary"
+      --label org.label-schema.name="$CI_PROJECT_NAME"
+      --label org.label-schema.schema-version=1.0
+      --label org.label-schema.vcs-ref="$CI_COMMIT_SHA"
+      --label org.label-schema.vcs-url="$CI_PROJECT_URL"
       --no-push
