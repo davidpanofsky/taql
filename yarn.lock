@@ -748,7 +748,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@taql/debug@workspace:packages/debug":
+"@taql/debug@workspace:^, @taql/debug@workspace:packages/debug":
   version: 0.0.0-use.local
   resolution: "@taql/debug@workspace:packages/debug"
   dependencies:
@@ -842,6 +842,7 @@ __metadata:
     "@taql/batching": "workspace:^"
     "@taql/config": "workspace:^"
     "@taql/context": "workspace:^"
+    "@taql/debug": "workspace:^"
     "@taql/plugins": "workspace:^"
     "@taql/prereg": "workspace:^"
     "@taql/schema": "workspace:^"
