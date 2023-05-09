@@ -85,15 +85,20 @@ export const ENABLE_FEATURES = resolve({
     resolver: resolvers.booleanFromString,
     defaultTo: process.env.NODE_ENV === 'production' ? false : true,
   },
+  serviceOverrides: {
+    property: 'ENABLE_SERVICE_OVERRIDES',
+    resolver: resolvers.booleanFromString,
+    defaultTo: process.env.NODE_ENV === 'production' ? false : true,
+  },
 });
 
 export const PREREGISTERED_QUERY_PARAMS = resolve({
-  max_cache_size: {
+  maxCacheSize: {
     property: 'PREREGISTERED_QUERY_CACHE_SIZE',
     resolver: resolvers.nonNegativeInteger,
     defaultTo: 2000,
   },
-  database_uri: {
+  databaseUri: {
     property: 'PREREGISTERED_QUERY_DB_URI',
     defaultTo:
       'postgres://graphql_operations_ros@graphql-operations-ros.db.var.ml.tripadvisor.com',

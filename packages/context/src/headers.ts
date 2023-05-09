@@ -130,6 +130,7 @@ const legacyContextFromHeaders = (
   userClientIP: clientFromXff(
     getHeaderOrDefault(headers, 'x-forwarded-for', undefined)
   ),
+  SVCO: getHeaderOrDefault(headers, 'x-service-overrides', undefined),
 });
 
 /*
@@ -139,6 +140,7 @@ const legacyContextFromHeaders = (
 export type LegacyContext = {
   readonly locale: string;
   readonly debugToolEnabled: boolean;
+  readonly SVCO: string | undefined;
   readonly uniqueId: string | undefined;
   readonly userClientIP: string | undefined;
 };
