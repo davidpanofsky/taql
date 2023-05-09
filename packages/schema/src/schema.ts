@@ -18,9 +18,13 @@ export type TASchema = {
   digest: SchemaDigest;
 };
 
-export async function makeSchema(
-  previous?: TASchema
-): Promise<TASchema | undefined> {
+export async function makeSchema({
+  previous,
+  legacySVCO,
+}: {
+  previous?: TASchema;
+  legacySVCO?: string;
+} = {}): Promise<TASchema | undefined> {
   const subschemas = [];
   let legacyHash = '';
   const manifest = '';
@@ -30,7 +34,7 @@ export async function makeSchema(
     obfuscateDirective('obfuscate'),
   ];
 
-  const legacy = await makeLegacySchema().catch(() => undefined);
+  const legacy = await makeLegacySchema(legacySVCO).catch(() => undefined);
   if (legacy != undefined) {
     legacyHash = legacy.hash;
     subschemas.push({
@@ -105,7 +109,7 @@ export class SchemaPoller extends (EventEmitter as new () => TypedEmitter<Schema
 
   private async tryUpdate() {
     const prev = await this._schema;
-    const next = await makeSchema(prev);
+    const next = await makeSchema({ previous: prev });
     if (next != prev && next != undefined) {
       // Don't update on broken schemas. The change between any two
       // schemas likely concerns very few subgraphs. If changing them

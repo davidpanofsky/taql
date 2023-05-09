@@ -7,7 +7,7 @@ import fetch from 'node-fetch';
 import { loadSchema } from '@graphql-tools/load';
 import { wrapSchema } from '@graphql-tools/wrap';
 
-export async function makeLegacySchema() {
+export async function makeLegacySchema(legacySVCO?: string) {
   const {
     host,
     httpPort,
@@ -24,6 +24,10 @@ export async function makeLegacySchema() {
     const batchUrl = `${rootUrl}/v1/graphqlBatched`;
     const rawSchemaResponse = await fetch(`${rootUrl}/Schema`, {
       agent: httpsAgent || httpAgent,
+      headers:
+        legacySVCO == undefined
+          ? undefined
+          : { 'X-Service-Overrides': legacySVCO },
     });
     const rawSchema = await rawSchemaResponse.text();
     const schema = await loadSchema(rawSchema, { loaders: [] });
