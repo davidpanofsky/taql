@@ -98,7 +98,7 @@ export function usePreregisteredQueries(
     postgresConnectionString?: string;
     maxPoolSize?: number;
     poolConnectionTimeoutMillis?: number;
-  } = {}
+  }
 ): YogaPlugin {
   const {
     maxCacheSize,
