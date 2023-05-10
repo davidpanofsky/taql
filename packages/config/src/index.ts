@@ -125,3 +125,15 @@ export const AUTOMATIC_PERSISTED_QUERY_PARAMS = resolve({
     defaultTo: 1000,
   },
 });
+
+export const TRACING_PARAMS = resolve({
+  zipkinUrl: {
+    property: 'TRACING_ZIPKIN_URL',
+    defaultTo: undefined,
+  },
+  useBatchingProcessor: {
+    property: 'TRACING_USE_BATCHING_PROCESSOR',
+    resolver: resolvers.booleanFromString,
+    defaultTo: false,
+  },
+});
