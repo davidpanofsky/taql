@@ -18,6 +18,7 @@
     "@taql/batching": "workspace:^",
     "@taql/config": "workspace:^",
     "@taql/context": "workspace:^",
+    "@taql/debug": "workspace:^",
     "@taql/plugins": "workspace:^",
     "@taql/prereg": "workspace:^",
     "@taql/schema": "workspace:^",

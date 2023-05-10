@@ -1,0 +1,17 @@
+{
+  "name": "@taql/debug",
+  "version": "1.0.0",
+  "main": "build/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node build/index.js"
+  },
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "typescript": "^4.8.4"
+  },
+  "dependencies": {
+    "@envelop/core": "^3.0.6",
+    "@taql/config": "workspace:^"
+  }
+}

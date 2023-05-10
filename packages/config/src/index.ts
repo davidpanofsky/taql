@@ -1,5 +1,7 @@
 import { resolve, resolvers } from './resolution';
 import { config } from 'dotenv';
+import { hostname } from 'os';
+
 config();
 
 // TODO: Remove all this one day. Legacy gql is just something we'll find in the schema
@@ -12,7 +14,7 @@ export const LEGACY_GQL_PARAMS = resolve({
   httpPort: {
     property: 'LEGACY_GQL_HTTP_PORT',
     resolver: resolvers.nonNegativeInteger,
-    defaultTo: 80,
+    defaultTo: 4723,
   },
   httpsPort: {
     property: 'LEGACY_GQL_HTTPS_PORT',
@@ -61,9 +63,18 @@ export const SERVER_PARAMS = resolve({
     resolver: resolvers.nonNegativeInteger,
     defaultTo: 2000,
   },
+  hostname: {
+    property: 'HOSTNAME',
+    defaultTo: hostname(),
+  },
 });
 
 export const ENABLE_FEATURES = resolve({
+  debugExtensions: {
+    property: 'ENABLE_DEBUG_EXTENSIONS',
+    resolver: resolvers.booleanFromString,
+    defaultTo: process.env.NODE_ENV === 'production' ? false : true,
+  },
   graphiql: {
     property: 'ENABLE_GRAPHIQL',
     resolver: resolvers.booleanFromString,
