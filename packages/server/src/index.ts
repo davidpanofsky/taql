@@ -4,7 +4,13 @@ import {
   ENABLE_FEATURES,
   PREREGISTERED_QUERY_PARAMS,
   SERVER_PARAMS,
+  TRACING_PARAMS,
 } from '@taql/config';
+import {
+  BasicTracerProvider,
+  BatchSpanProcessor,
+  SimpleSpanProcessor,
+} from '@opentelemetry/sdk-trace-base';
 import { DocumentNode, GraphQLError, GraphQLSchema } from 'graphql';
 import { SchemaPoller, makeSchema } from '@taql/schema';
 import { Server, createServer as httpServer } from 'http';
@@ -19,11 +25,13 @@ import Koa from 'koa';
 import { LRUCache } from 'lru-cache';
 import { SSL_CONFIG } from '@taql/ssl';
 import { TaqlPlugins } from '@taql/plugins';
+import { ZipkinExporter } from '@opentelemetry/exporter-zipkin';
 import { plugins as batchingPlugins } from '@taql/batching';
 import { createServer as httpsServer } from 'https';
 import { ioRedisStore } from '@tirke/node-cache-manager-ioredis';
 import { serverHostExtensionPlugin } from '@taql/debug';
 import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspection';
+import { useOpenTelemetry } from '@envelop/opentelemetry';
 import { usePrometheus } from '@graphql-yoga/plugin-prometheus';
 
 const FIVE_MINUTES_MILLIS = 1000 * 60 * 5;
@@ -142,16 +150,37 @@ export async function main() {
 
   ENABLE_FEATURES.introspection || yogaPlugins.push(useDisableIntrospection());
 
+  const zipkinExporter = new ZipkinExporter({
+    serviceName: 'taql',
+    url: TRACING_PARAMS.zipkinUrl,
+  });
+  const tracerProvider = new BasicTracerProvider();
+  tracerProvider.addSpanProcessor(
+    TRACING_PARAMS.useBatchingProcessor
+      ? new BatchSpanProcessor(zipkinExporter)
+      : new SimpleSpanProcessor(zipkinExporter)
+  );
+  tracerProvider.register();
+
+  const envelopPlugins = [
+    mutatedFieldsExtensionPlugin,
+    useOpenTelemetry(
+      {
+        resolvers: true, // Tracks resolvers calls, and tracks resolvers thrown errors
+        variables: true, // Includes the operation variables values as part of the metadata collected
+        result: true, // Includes execution result object as part of the metadata collected
+      },
+      tracerProvider
+    ),
+    ...(ENABLE_FEATURES.debugExtensions ? [serverHostExtensionPlugin] : []),
+  ];
+
   const plugins: TaqlPlugins = new TaqlPlugins(
     schemaPoller.asPlugin(),
     contextPlugins,
     batchingPlugins,
-    {
-      envelop: [
-        mutatedFieldsExtensionPlugin,
-        ...(ENABLE_FEATURES.debugExtensions ? [serverHostExtensionPlugin] : []),
-      ],
-    },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    { envelop: <any>envelopPlugins },
     { yoga: yogaPlugins }
   );
 
