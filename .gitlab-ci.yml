@@ -54,7 +54,7 @@ docker-publish:
     name: gcr.io/kaniko-project/executor:v1.9.0-debug
     entrypoint: [""]
   script:
-    - echo "using ci user = $CI_REGISTRY_USER, masked password = $CI_REGISTRY_PASSWORD"
+    - echo "using ci user = $CI_REGISTRY_USER"
     # Save maven credentials so that the push will succeed. Caution when editing:
     # avoid ": " because it interacts poorly with YAML's "plain scalar" parser.
     - mkdir -p /kaniko/.docker
