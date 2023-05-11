@@ -23,7 +23,7 @@ test:
     - ./scripts/ci.bash
 
 docker-test:
-  stage: test
+  stage: docker
   only:
     - merge_requests
   image:
