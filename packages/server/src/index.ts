@@ -30,6 +30,7 @@ import { ZipkinExporter } from '@opentelemetry/exporter-zipkin';
 import { plugins as batchingPlugins } from '@taql/batching';
 import { createServer as httpsServer } from 'https';
 import { ioRedisStore } from '@tirke/node-cache-manager-ioredis';
+import promClient from 'prom-client';
 import { serverHostExtensionPlugin } from '@taql/debug';
 import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspection';
 import { useOpenTelemetry } from '@envelop/opentelemetry';
@@ -246,6 +247,17 @@ export async function main() {
     logger.debug(
       `Koa Response: ${ctx.response.status} ${ctx.response.message} ${ctx.response.length} bytes`
     );
+  });
+
+  const koaConcurrency = new promClient.Gauge({
+    name: 'taql_koa_concurrency',
+    help: 'concurrent requests inside of the koa context',
+  });
+
+  koa.use(async (ctx, next) => {
+    koaConcurrency.inc();
+    await next();
+    koaConcurrency.dec();
   });
 
   const server: Server =
