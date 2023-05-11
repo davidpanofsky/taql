@@ -1,8 +1,16 @@
+variables:
+  CI_REGISTRY_NAME: "graphql-docker.maven.dev.tripadvisor.com"
+  CI_REGISTRY_IMAGE: "taql"
+  # CI user configured in project's CI/CD settings
+  # Service accounts are created using: https://onboard.itsupport.tamg.cloud/#/
+  # And renewed with: https://sponsor.tamg.io/
+
 default:
   image: node:16.18.0
 
 stages:
   - test
+  - docker
 
 test:
   stage: test
@@ -13,3 +21,63 @@ test:
       - .yarn/cache/
   script:
     - ./scripts/ci.bash
+
+docker-test:
+  stage: docker
+  only:
+    - merge_requests
+  image:
+    name: gcr.io/kaniko-project/executor:v1.9.0-debug
+    entrypoint: [""]
+  script:
+    - /kaniko/executor
+      --cache=false
+      --context "${CI_PROJECT_DIR}"
+      --dockerfile "${CI_PROJECT_DIR}/Dockerfile"
+      --destination "${CI_REGISTRY_NAME}/${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA}"
+      --label org.label-schema.build-date=$(date +%Y%m%d)
+      --label org.label-schema.description="$CI_PROJECT_TITLE"
+      --label org.label-schema.license="TripAdvisor Proprietary"
+      --label org.label-schema.name="$CI_PROJECT_NAME"
+      --label org.label-schema.schema-version=1.0
+      --label org.label-schema.vcs-ref="$CI_COMMIT_SHA"
+      --label org.label-schema.vcs-url="$CI_PROJECT_URL"
+      --label org.label-schema.vendor=TripAdvisor
+      --verbosity=info
+      --no-push
+
+docker-publish:
+  stage: docker
+  only:
+    - tags
+  image:
+    name: gcr.io/kaniko-project/executor:v1.9.0-debug
+    entrypoint: [""]
+  script:
+    - echo "using ci user = $CI_REGISTRY_USER"
+    # Save maven credentials so that the push will succeed. Caution when editing:
+    # avoid ": " because it interacts poorly with YAML's "plain scalar" parser.
+    - mkdir -p /kaniko/.docker
+    - printf > /kaniko/.docker/config.json '{
+        "auths":{
+          "%s":{
+            "username":"%s", "password":"%s"
+          }
+        }
+      }\n' "$CI_REGISTRY_NAME" "$CI_REGISTRY_USER" "$CI_REGISTRY_PASSWORD"
+    # Build + push image
+    - /kaniko/executor
+      --cache=false
+      --context "${CI_PROJECT_DIR}"
+      --dockerfile "${CI_PROJECT_DIR}/Dockerfile"
+      --destination "${CI_REGISTRY_NAME}/${CI_REGISTRY_IMAGE}:${CI_COMMIT_TAG}"
+      --label org.label-schema.build-date=$(date +%Y%m%d)
+      --label org.label-schema.description="$CI_PROJECT_TITLE"
+      --label org.label-schema.license="TripAdvisor Proprietary"
+      --label org.label-schema.name="$CI_PROJECT_NAME"
+      --label org.label-schema.schema-version=1.0
+      --label org.label-schema.vcs-ref="$CI_COMMIT_SHA"
+      --label org.label-schema.vcs-url="$CI_PROJECT_URL"
+      --label org.label-schema.vendor=TripAdvisor
+      --verbosity=info
+
