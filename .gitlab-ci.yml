@@ -27,7 +27,7 @@ docker-test:
   only:
     - merge_requests
   image:
-    name: gcr.io/kaniko-project/executor:v1.6.0-debug
+    name: gcr.io/kaniko-project/executor:v1.9.0-debug
     entrypoint: [""]
   script:
     - /kaniko/executor
@@ -51,20 +51,20 @@ docker-publish:
   only:
     - tags
   image:
-    name: gcr.io/kaniko-project/executor:v1.6.0-debug
+    name: gcr.io/kaniko-project/executor:v1.9.0-debug
     entrypoint: [""]
   script:
-    - echo "using ci user = $CI_REGISTRY_USER"
+    - echo "using ci token = $CI_REGISTRY_AUTH"
     # Save maven credentials so that the push will succeed. Caution when editing:
     # avoid ": " because it interacts poorly with YAML's "plain scalar" parser.
     - mkdir -p /kaniko/.docker
     - printf > /kaniko/.docker/config.json '{
         "auths":{
           "%s":{
-            "username":"%s", "password":"%s"
+            "auth":"%s"
           }
         }
-      }\n' "$CI_REGISTRY_NAME" "$CI_REGISTRY_USER" "$CI_REGISTRY_PASSWORD"
+      }\n' "$CI_REGISTRY_NAME" "$CI_REGISTRY_AUTH"
     # Build + push image
     - /kaniko/executor
       --cache=false
