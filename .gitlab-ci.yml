@@ -63,7 +63,7 @@ docker-publish:
             "username":"%s", "password":"%s"
           }
         }
-      }\n' "$CI_REGISTRY" "$CI_REGISTRY_USER" "$CI_REGISTRY_PASSWORD"
+      }\n' "$CI_REGISTRY_NAME" "$CI_REGISTRY_USER" "$CI_REGISTRY_PASSWORD"
     # Build + push image
     - /kaniko/executor
       --cache=false
