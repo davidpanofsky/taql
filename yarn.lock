@@ -810,6 +810,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@taql/config@workspace:packages/config"
   dependencies:
+    "@graphql-yoga/logger": ^0.0.1
     dotenv: ^16.0.3
     typescript: ^4.8.4
   languageName: unknown
@@ -842,6 +843,7 @@ __metadata:
   resolution: "@taql/executors@workspace:packages/executors"
   dependencies:
     "@graphql-tools/utils": ^8.13.1
+    "@taql/config": "workspace:^"
     "@taql/context": "workspace:^"
     "@taql/httpAgent": "workspace:^"
     graphql: ^16.6.0
@@ -877,6 +879,7 @@ __metadata:
   resolution: "@taql/prereg@workspace:packages/prereg"
   dependencies:
     "@envelop/core": ^3.0.6
+    "@taql/config": "workspace:^"
     "@types/pg": ^8.6.6
     graphql: ^16.6.0
     graphql-yoga: ^3.9.1
@@ -937,6 +940,7 @@ __metadata:
     graphql: ^16.6.0
     graphql-yoga: ^3.9.1
     koa: ^2.14.2
+    koa-logger: ^3.2.1
     lru-cache: ^9.1.1
     prom-client: ^14.2.0
     typescript: ^4.8.4
@@ -1693,6 +1697,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"bytes@npm:^3.1.0":
+  version: 3.1.2
+  resolution: "bytes@npm:3.1.2::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fbytes%2F-%2Fbytes-3.1.2.tgz"
+  checksum: e4bcd3948d289c5127591fbedf10c0b639ccbf00243504e4e127374a15c3bc8eed0d28d4aaab08ff6f1cf2abc0cce6ba3085ed32f4f90e82a5683ce0014e1b6e
+  languageName: node
+  linkType: hard
+
 "cacache@npm:^16.1.0":
   version: 16.1.3
   resolution: "cacache@npm:16.1.3::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fcacache%2F-%2Fcacache-16.1.3.tgz"
@@ -1763,7 +1774,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chalk@npm:^2.0.0":
+"chalk@npm:^2.0.0, chalk@npm:^2.4.2":
   version: 2.4.2
   resolution: "chalk@npm:2.4.2::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fchalk%2F-%2Fchalk-2.4.2.tgz"
   dependencies:
@@ -2904,6 +2915,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"humanize-number@npm:0.0.2":
+  version: 0.0.2
+  resolution: "humanize-number@npm:0.0.2::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fhumanize-number%2F-%2Fhumanize-number-0.0.2.tgz"
+  checksum: 9c98c9d06b0f3d801960be3957199232a5df52377e2502acae92e4f71de633fa62c315a83f24bf96bef76f47b2e3e0e1e4f4157c891e27074fd3272cad6724bb
+  languageName: node
+  linkType: hard
+
 "iconv-lite@npm:^0.6.2":
   version: 0.6.3
   resolution: "iconv-lite@npm:0.6.3::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Ficonv-lite%2F-%2Ficonv-lite-0.6.3.tgz"
@@ -3345,6 +3363,18 @@ __metadata:
     co: ^4.6.0
     koa-compose: ^4.1.0
   checksum: 7385b3391995f59c1312142e110d5dff677f9850dbfbcf387cd36a7b0af03b5d26e82b811eb9bb008b4f3e661cdab1f8817596e46b1929da2cf6e97a2f7456ed
+  languageName: node
+  linkType: hard
+
+"koa-logger@npm:^3.2.1":
+  version: 3.2.1
+  resolution: "koa-logger@npm:3.2.1::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fkoa-logger%2F-%2Fkoa-logger-3.2.1.tgz"
+  dependencies:
+    bytes: ^3.1.0
+    chalk: ^2.4.2
+    humanize-number: 0.0.2
+    passthrough-counter: ^1.0.0
+  checksum: b29ba25eb433452bfda48e51acd5d206128411966acc09bb13ce3a0cec9192f78bb27e23efd615d0e7f46eeb2588ee8d2541d72665a4aa18d27a177e78dca909
   languageName: node
   linkType: hard
 
@@ -3899,6 +3929,13 @@ __metadata:
   version: 1.3.3
   resolution: "parseurl@npm:1.3.3::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fparseurl%2F-%2Fparseurl-1.3.3.tgz"
   checksum: 407cee8e0a3a4c5cd472559bca8b6a45b82c124e9a4703302326e9ab60fc1081442ada4e02628efef1eb16197ddc7f8822f5a91fd7d7c86b51f530aedb17dfa2
+  languageName: node
+  linkType: hard
+
+"passthrough-counter@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "passthrough-counter@npm:1.0.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fpassthrough-counter%2F-%2Fpassthrough-counter-1.0.0.tgz"
+  checksum: 942a0addeb677e24ddb154b04cc29ce1c5720032efc268689446420f9350d47e94f2f1f76d469686bc87c1543c2f2165f2d004d265fe1b81465c76e02d272c63
   languageName: node
   linkType: hard
 

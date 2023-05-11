@@ -1,4 +1,4 @@
-import { SSL_PARAMS } from '@taql/config';
+import { SSL_PARAMS, logger } from '@taql/config';
 
 export type SslConfig = {
   cert: string;
@@ -11,7 +11,7 @@ const makeSslConfig = (): SslConfig | undefined => {
 
   if (cert == undefined || key == undefined) {
     if ((cert == undefined) !== (key == undefined)) {
-      console.error(
+      logger.error(
         'If CLIENT_CERT_PATH is set, CLIENT_KEY_PATH must also be set, and vice versa'
       );
     }

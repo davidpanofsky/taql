@@ -4,6 +4,7 @@ import { TaqlContext, copyHeaders } from '@taql/context';
 import fetch, { Headers } from 'node-fetch';
 import { httpAgent, httpsAgent } from '@taql/httpAgent';
 import type { Agent } from 'http';
+import { logger } from '@taql/config';
 import { print } from 'graphql';
 
 export type TaqlRequest = ExecutionRequest<
@@ -49,6 +50,7 @@ const load = async <T, R>({
 }: ConstantLoadParams & LoadParams<T>): Promise<R> => {
   const headers = copyHeaders(forwardHeaders);
   headers.set('content-type', 'application/json');
+  logger.debug('Fetching from remote: ', url);
   const response = await fetch(url, {
     method: 'POST',
     headers,

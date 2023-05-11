@@ -3,6 +3,7 @@ import { GraphQLSchema } from 'graphql';
 import { Plugin } from '@envelop/core';
 import TypedEmitter from 'typed-emitter';
 import deepEqual from 'deep-equal';
+import { logger } from '@taql/config';
 import { makeLegacySchema } from './legacy';
 import { obfuscateDirective } from './directives';
 import { stitchSchemas } from '@graphql-tools/stitch';
@@ -79,11 +80,11 @@ export async function makeSchema({
         digest,
       };
     }
-    console.error(
+    logger.error(
       `Schema failed to validate: [${schema.__validationErrors?.join('; ')}]`
     );
   } catch (err: unknown) {
-    console.error(`Error stitching schemas: ${err}`);
+    logger.error(`Error stitching schemas: ${err}`);
   }
   return undefined;
 }
