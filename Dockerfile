@@ -1,4 +1,4 @@
-FROM node:16-alpine3.16
+FROM node:18-alpine3.17
 WORKDIR /opt/taql
 
 # Prepare a skeleton of the project including only what is needed for yarn
@@ -14,7 +14,7 @@ COPY ./.yarn /opt/taql/.yarn
 COPY ./packages /opt/taql/packages
 RUN find /opt/taql/packages -type f \! -name "package.json" | xargs rm
 
-FROM node:16-alpine3.16
+FROM node:18-alpine3.17
 WORKDIR /opt/taql
 
 # Install non-application packages

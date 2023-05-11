@@ -858,7 +858,7 @@ __metadata:
   dependencies:
     "@taql/config": "workspace:^"
     "@taql/ssl": "workspace:^"
-    "@types/node": ^18.11.8
+    "@types/node": ^18.16.7
     typescript: ^4.8.4
   languageName: unknown
   linkType: soft
@@ -905,7 +905,7 @@ __metadata:
     "@taql/config": "workspace:^"
     "@taql/httpAgent": "workspace:^"
     "@types/deep-equal": ^1.0.1
-    "@types/node": ^18.11.8
+    "@types/node": ^18.16.7
     "@types/node-fetch": ^2.6.3
     deep-equal: ^2.2.0
     graphql: ^16.6.0
@@ -1146,10 +1146,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^18.11.8":
-  version: 18.11.8
-  resolution: "@types/node@npm:18.11.8::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40types%2Fnode%2F-%2Fnode-18.11.8.tgz"
-  checksum: 60b358f97c1a029722dc785811b217615ef20249c3fbde60a65869cfd7a5cd5b1872ee95c79c187ef70e5a078f4ac7670d2129803985268b1f021ad6e8040af8
+"@types/node@npm:^18.16.7":
+  version: 18.16.7
+  resolution: "@types/node@npm:18.16.7::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40types%2Fnode%2F-%2Fnode-18.16.7.tgz"
+  checksum: dbff7d41a050557cc81aa37cb186aaf3a799b3001bc4bb1015b240398abde1f9d0ac1e943959bba7f2ab2701292ae407a9ee2fc0f735a05b28bfc97d0b2b5e91
   languageName: node
   linkType: hard
 
@@ -3732,8 +3732,8 @@ __metadata:
   linkType: hard
 
 "node-fetch@npm:^2.6.9":
-  version: 2.6.9
-  resolution: "node-fetch@npm:2.6.9::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fnode-fetch%2F-%2Fnode-fetch-2.6.9.tgz"
+  version: 2.6.11
+  resolution: "node-fetch@npm:2.6.11::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fnode-fetch%2F-%2Fnode-fetch-2.6.11.tgz"
   dependencies:
     whatwg-url: ^5.0.0
   peerDependencies:
@@ -3741,7 +3741,7 @@ __metadata:
   peerDependenciesMeta:
     encoding:
       optional: true
-  checksum: acb04f9ce7224965b2b59e71b33c639794d8991efd73855b0b250921382b38331ffc9d61bce502571f6cc6e11a8905ca9b1b6d4aeb586ab093e2756a1fd190d0
+  checksum: 249d0666a9497553384d46b5ab296ba223521ac88fed4d8a17d6ee6c2efb0fc890f3e8091cafe7f9fba8151a5b8d925db2671543b3409a56c3cd522b468b47b3
   languageName: node
   linkType: hard
 
