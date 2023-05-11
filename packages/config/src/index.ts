@@ -1,9 +1,17 @@
+import { LogLevel, createLogger } from '@graphql-yoga/logger';
 import { resolve, resolvers } from './resolution';
 import { config } from 'dotenv';
 import { hostname } from 'os';
 
 config();
 
+const logLevel = resolve({
+  level: {
+    property: 'LOG_LEVEL',
+    resolver: resolvers.logLevel,
+  },
+});
+export const logger = createLogger(logLevel.level as LogLevel);
 // TODO: Remove all this one day. Legacy gql is just something we'll find in the schema
 // repo and use a custom executor for.
 export const LEGACY_GQL_PARAMS = resolve({

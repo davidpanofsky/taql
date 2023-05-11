@@ -3,6 +3,7 @@ import { Plugin, handleStreamOrSingleExecutionResult } from '@envelop/core';
 import { Plugin as YogaPlugin, createGraphQLError } from 'graphql-yoga';
 import { LRUCache } from 'lru-cache';
 import { Pool } from 'pg';
+import { logger } from '@taql/config';
 import promClient from 'prom-client';
 
 // metrics
@@ -33,6 +34,7 @@ async function populateKnownQueries(
   known: Set<string>,
   db: Pool
 ): Promise<{ count: number; asOf?: number }> {
+  logger.debug('Populating preregistered queries');
   try {
     const known_queries_res = await db.query(
       'SELECT id FROM t_graphql_operations WHERE extract(epoch from updated) > $1',
@@ -53,7 +55,7 @@ async function populateKnownQueries(
       asOf: now,
     };
   } catch (e) {
-    console.error(`Unexpected database error: ${e}`);
+    logger.error(`Unexpected database error: ${e}`);
     return { count: 0 };
   }
 }
@@ -63,6 +65,7 @@ async function lookupQuery(
   db: Pool
 ): Promise<string | undefined> {
   let queryText: string | undefined = undefined;
+  logger.debug(`Looking up query ${queryId}`);
   try {
     const res = await db.query(
       'SELECT code FROM t_graphql_operations WHERE id = $1',
@@ -70,7 +73,7 @@ async function lookupQuery(
     );
     queryText = res.rows.length > 0 ? res.rows[0].code : undefined;
   } catch (e) {
-    console.error(`Unexpected database error: ${e}`);
+    logger.error(`Unexpected database error: ${e}`);
   }
   return queryText;
 }
@@ -105,7 +108,7 @@ export function usePreregisteredQueries(options: {
     poolConnectionTimeoutMillis = 0,
   } = options;
 
-  console.log(
+  logger.info(
     `Initializing preregistered queries plugin using ${postgresConnectionString}, max cache size = ${maxCacheSize}`
   );
 
@@ -125,16 +128,16 @@ export function usePreregisteredQueries(options: {
     async onPluginInit(_) {
       try {
         const { count, asOf } = await populateKnownQueries(knownQueries, pool);
-        console.log(`Loaded ${count} known preregistered query ids`);
+        logger.info(`Loaded ${count} known preregistered query ids`);
         if (asOf) {
           PREREG_UPDATED_AT.set(asOf);
         }
       } catch (e) {
-        console.error(`Failed to load known preregistered queries: ${e}`);
+        logger.error(`Failed to load known preregistered queries: ${e}`);
         throw e; // Let's shut down; we could choose not to and hope that the next try works, but why be optimistic
       }
       await preloadCache(cache, pool, maxCacheSize).catch((err) =>
-        console.error(`Failed to preload preregisterd queries cache: ${err}`)
+        logger.error(`Failed to preload preregisterd queries cache: ${err}`)
       );
       setInterval(
         () =>
@@ -145,7 +148,7 @@ export function usePreregisteredQueries(options: {
               }
             })
             .catch((e) =>
-              console.error(`Failed to update known query ids: ${e}`)
+              logger.error(`Failed to update known query ids: ${e}`)
             ),
         10000
       );
@@ -162,11 +165,16 @@ export function usePreregisteredQueries(options: {
       ) {
         let preregisteredQuery: string | undefined;
         if (cache.has(maybePreregisteredId)) {
+          logger.debug('preregistered query cache hit: ', maybePreregisteredId);
           preregisteredQuery = cache.get(maybePreregisteredId);
           PREREG_HIT.inc();
         } else if (
           (preregisteredQuery = await lookupQuery(maybePreregisteredId, pool))
         ) {
+          logger.debug(
+            'preregistered query cache miss: ',
+            maybePreregisteredId
+          );
           PREREG_MISS.inc();
           cache.set(maybePreregisteredId, preregisteredQuery);
         }
@@ -177,6 +185,10 @@ export function usePreregisteredQueries(options: {
             query: preregisteredQuery,
           });
         } else {
+          logger.warn(
+            'preregistered query unresolved warning: ',
+            maybePreregisteredId
+          );
           PREREG_UNK.inc();
           throw createGraphQLError('PreregisteredQueryNotResolved', {
             extensions: {
@@ -187,6 +199,7 @@ export function usePreregisteredQueries(options: {
           });
         }
       } else if (maybePreregisteredId) {
+        logger.debug('preregistered query unresolved: ', maybePreregisteredId);
         PREREG_UNK.inc();
         throw createGraphQLError('PreregisteredQueryNotFound', {
           extensions: {

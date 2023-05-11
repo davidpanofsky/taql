@@ -5,6 +5,7 @@ import {
   PREREGISTERED_QUERY_PARAMS,
   SERVER_PARAMS,
   TRACING_PARAMS,
+  logger,
 } from '@taql/config';
 import {
   BasicTracerProvider,
@@ -33,6 +34,8 @@ import { serverHostExtensionPlugin } from '@taql/debug';
 import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspection';
 import { useOpenTelemetry } from '@envelop/opentelemetry';
 import { usePrometheus } from '@graphql-yoga/plugin-prometheus';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const koaLogger = require('koa-logger');
 
 const FIVE_MINUTES_MILLIS = 1000 * 60 * 5;
 
@@ -47,7 +50,8 @@ export async function main() {
     batching: { limit: batchLimit },
 
     // The following are graphql-yoga defaults added explicitly here for future stability.
-    logging: true,
+    //logging: true,
+    logging: logger,
     maskedErrors: true,
     cors: undefined,
     graphqlEndpoint: '/graphql',
@@ -78,7 +82,7 @@ export async function main() {
   if (schema == undefined) {
     throw new Error('failed to load initial schema');
   }
-  console.log('created initial schema');
+  logger.info('created initial schema');
 
   // Two tier store for automatic persisted queries
   const memoryCache = await caching('memory', {
@@ -135,13 +139,15 @@ export async function main() {
     useReadinessCheck({
       endpoint: '/NotImplemented',
       async check({ fetchAPI }) {
+        logger.debug('Requested Readiness Check');
         try {
           // For now, readiness check is same as healthcheck, but with a different response body.
           // Todo: Add checks for other things like database connection, etc.
           //redisCache[0].store.client.status
+          logger.debug('Responding Readiness Check');
           return new fetchAPI.Response('<NotImplemented/>');
         } catch (err) {
-          console.error(err);
+          logger.error(err);
           return false;
         }
       },
@@ -194,8 +200,10 @@ export async function main() {
     let schemaForContext: GraphQLSchema | undefined;
     if (legacySVCO) {
       if (schemaForContextCache?.has(legacySVCO)) {
+        logger.debug('Using cached schema for SVCO: ', legacySVCO);
         schemaForContext = schemaForContextCache.get(legacySVCO);
       } else {
+        logger.debug('Fetching schema for SVCO: ', legacySVCO);
         schemaForContext = await makeSchema(legacySVCO);
         schemaForContext != undefined &&
           schemaForContextCache?.set(legacySVCO, schemaForContext);
@@ -212,11 +220,14 @@ export async function main() {
   });
 
   const koa = new Koa();
+  koa.use(koaLogger());
   plugins.koa().forEach((mw) => koa.use(mw));
 
   koa.use(async (ctx) => {
+    logger.debug(`Koa Request: ${ctx.request.method} ${ctx.request.url}`);
     // Second parameter adds Koa's context into GraphQL Context
     const response = await yoga.handleNodeRequest(ctx.req, ctx);
+    logger.debug(`Yoga Response: ${response.status} ${response.statusText}`);
 
     // Set status code
     ctx.status = response.status;
@@ -232,17 +243,20 @@ export async function main() {
 
     // Converts ReadableStream to a NodeJS Stream
     ctx.body = response.body;
+    logger.debug(
+      `Koa Response: ${ctx.response.status} ${ctx.response.message} ${ctx.response.length} bytes`
+    );
   });
 
   const server: Server =
     SSL_CONFIG == undefined ? httpServer() : httpsServer(SSL_CONFIG);
 
   server.addListener('request', koa.callback());
-  console.log('created server');
+  logger.info('created server');
 
-  console.log(`launching server on port ${port}`);
+  logger.info(`launching server on port ${port}`);
   server.listen(port, () => {
-    console.info('server running');
+    logger.info('server running');
   });
 }
 
