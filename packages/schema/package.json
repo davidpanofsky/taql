@@ -25,8 +25,8 @@
     "@taql/batching-config": "workspace:^",
     "@taql/config": "workspace:^",
     "@taql/httpAgent": "workspace:^",
-    "deep-equal": "^2.2.0",
+    "deep-equal": "^2.2.1",
     "graphql": "^16.6.0",
-    "node-fetch": "^2.6.9"
+    "node-fetch": "^2.6.11"
   }
 }

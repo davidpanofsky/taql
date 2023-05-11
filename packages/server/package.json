@@ -8,7 +8,7 @@
   },
   "license": "UNLICENSED",
   "devDependencies": {
-    "@types/koa": "^2.13.5",
+    "@types/koa": "^2.13.6",
     "typescript": "^5.0.4"
   },
   "dependencies": {
@@ -28,7 +28,7 @@
     "@taql/schema": "workspace:^",
     "@taql/ssl": "workspace:^",
     "@tirke/node-cache-manager-ioredis": "^3.2.0",
-    "cache-manager": "^5.1.0",
+    "cache-manager": "^5.2.1",
     "graphql": "^16.6.0",
     "graphql-yoga": "^3.9.1",
     "koa": "^2.14.2",

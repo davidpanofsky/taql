@@ -8,7 +8,7 @@
   },
   "license": "UNLICENSED",
   "devDependencies": {
-    "@types/koa": "^2.13.5",
+    "@types/koa": "^2.13.6",
     "@types/node-fetch": "^2.6.3",
     "typescript": "^5.0.4"
   },

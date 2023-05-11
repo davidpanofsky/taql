@@ -9,7 +9,7 @@
   "license": "UNLICENSED",
   "devDependencies": {
     "@envelop/core": "^3.0.6",
-    "@types/koa": "^2.13.5",
+    "@types/koa": "^2.13.6",
     "graphql-yoga": "^3.9.1",
     "typescript": "^5.0.4"
   }
