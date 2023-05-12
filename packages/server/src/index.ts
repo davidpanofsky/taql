@@ -42,7 +42,7 @@ const FIVE_MINUTES_MILLIS = 1000 * 60 * 5;
 
 export async function main() {
   // Set up memory monitoring
-  const prefix = "taql_"
+  const prefix = 'taql_';
   // The defaults includes valuable metrics including heap allocation, available memory.
   // ex:
   // taql_nodejs_heap_space_size_available_bytes{space="..."}
