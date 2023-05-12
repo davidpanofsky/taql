@@ -14,6 +14,8 @@ stages:
 
 test:
   stage: test
+  only:
+    - merge_requests
   cache:
     key: $CI_COMMIT_REF_NAME
     when: 'always'
@@ -23,7 +25,7 @@ test:
     - ./scripts/ci.bash
 
 docker-test:
-  stage: docker
+  stage: test
   only:
     - merge_requests
   image:
