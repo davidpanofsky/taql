@@ -2,9 +2,9 @@
   "exclude": ["**/build"],
   "compilerOptions": {
     "outDir": "build",
-    "target": "ES2021",
+    "target": "ES2022",
     "module": "commonjs",
-    "lib": ["es2021", "dom"],
+    "lib": ["es2022", "dom"],
     "declaration": true,
     "strict": true,
     "noImplicitAny": true,

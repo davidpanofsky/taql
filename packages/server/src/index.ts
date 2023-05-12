@@ -88,6 +88,7 @@ export async function main() {
   // Two tier store for automatic persisted queries
   const memoryCache = await caching('memory', {
     max: AUTOMATIC_PERSISTED_QUERY_PARAMS.memCacheSize,
+    ttl: AUTOMATIC_PERSISTED_QUERY_PARAMS.redisTTL,
   });
 
   const redisCache = AUTOMATIC_PERSISTED_QUERY_PARAMS.redisInstance
