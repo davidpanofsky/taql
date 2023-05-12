@@ -14,6 +14,9 @@ stages:
 
 test:
   stage: test
+  only:
+    - merge_requests
+    - main
   cache:
     key: $CI_COMMIT_REF_NAME
     when: 'always'
@@ -23,9 +26,10 @@ test:
     - ./scripts/ci.bash
 
 docker-test:
-  stage: docker
+  stage: test
   only:
     - merge_requests
+    - main
   image:
     name: gcr.io/kaniko-project/executor:v1.9.0-debug
     entrypoint: [""]
