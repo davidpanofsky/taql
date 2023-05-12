@@ -457,7 +457,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphql-tools/wrap@npm:9.2.5, @graphql-tools/wrap@npm:^9.2.5":
+"@graphql-tools/wrap@npm:9.2.5":
   version: 9.2.5
   resolution: "@graphql-tools/wrap@npm:9.2.5::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-tools%2Fwrap%2F-%2Fwrap-9.2.5.tgz"
   dependencies:
@@ -899,7 +899,6 @@ __metadata:
     "@graphql-tools/load": ^7.8.14
     "@graphql-tools/stitch": ^8.7.15
     "@graphql-tools/utils": ^8.13.1
-    "@graphql-tools/wrap": ^9.2.5
     "@taql/batching": "workspace:^"
     "@taql/batching-config": "workspace:^"
     "@taql/config": "workspace:^"
