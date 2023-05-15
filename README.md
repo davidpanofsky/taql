@@ -43,6 +43,7 @@ ln -s /usr/local/opt/libpq/lib/libpq.5.dylib /usr/local/lib/libpq.5.dylib
 - `yarn install --immutable` - install dependencies
 - `yarn run build` - build the repository
 - `yarn run server start` - start the service
+- `yarn run test` - run the unit tests
 
 ## Environment variables
 
@@ -87,7 +88,7 @@ For most development operations, the LRU cache is sufficient. If you need to tes
 If `LEGACY_GQL_HOST` is not set, the legacy graphql service will not be stitched.
 
 - `LEGACY_GQL_HOST`: _(optional)_ The host of the legacy graphql service
-- `LEGACY_GQL_HTTP_PORT`: _(optional, default `80`)_ The port to use when making http requests to the legacy graphql service
+- `LEGACY_GQL_HTTP_PORT`: _(optional, default `4723`)_ The port to use when making http requests to the legacy graphql service
 - `LEGACY_GQL_HTTPS_PORT`: _(optional, default `443`)_ The port to use when making https requests to the legacy graphql service.
 
 ## Building containers

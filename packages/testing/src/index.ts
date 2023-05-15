@@ -29,16 +29,16 @@ export const getExecutor = <
 };
 
 const authors = [
-  { id: 1, firstName: 'Tom', lastName: 'Coleman' },
-  { id: 2, firstName: 'Sashko', lastName: 'Stubailo' },
-  { id: 3, firstName: 'Mikhail', lastName: 'Novikov' },
+  { id: 1, firstName: 'James', lastName: 'Smith' },
+  { id: 2, firstName: 'John', lastName: 'Miller' },
+  { id: 3, firstName: 'Richard', lastName: 'Brown' },
 ];
 
 const posts = [
   { id: 1, authorId: 1, title: 'Introduction to GraphQL', votes: 2 },
-  { id: 2, authorId: 2, title: 'Welcome to Meteor', votes: 3 },
-  { id: 3, authorId: 2, title: 'Advanced GraphQL', votes: 1 },
-  { id: 4, authorId: 3, title: 'Launchpad is Cool', votes: 7 },
+  { id: 2, authorId: 2, title: 'Queries and Mutations', votes: 3 },
+  { id: 3, authorId: 2, title: 'Schemas and Types', votes: 7 },
+  { id: 4, authorId: 3, title: 'Advanced GraphQL', votes: 1 },
 ];
 
 export const testSchema = createSchema({
