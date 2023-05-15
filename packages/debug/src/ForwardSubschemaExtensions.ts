@@ -6,7 +6,7 @@ export const SUBSCHEMA_RESPONSE_EXTENSIONS_SYMBOL = Symbol.for(
 );
 
 export type SubschemaExtensionsContext = {
-  [SUBSCHEMA_RESPONSE_EXTENSIONS_SYMBOL]: { [key: string]: unknown };
+  [SUBSCHEMA_RESPONSE_EXTENSIONS_SYMBOL]: { [key: string]: unknown[] };
 };
 
 export class ForwardSubschemaExtensions<T = Record<string, unknown>>
@@ -30,12 +30,14 @@ export class ForwardSubschemaExtensions<T = Record<string, unknown>>
         // if this object is missing, it means the plugin is not enabled
         throw new Error('subschemaExtensionsPlugin is not present');
       }
+      const extensionsList =
+        delegationCtx.context[SUBSCHEMA_RESPONSE_EXTENSIONS_SYMBOL][
+          this.subschemaKey
+        ] || [];
       Object.assign(
         delegationCtx.context[SUBSCHEMA_RESPONSE_EXTENSIONS_SYMBOL],
         {
-          [this.subschemaKey]: {
-            ...forwardedExtensions,
-          },
+          [this.subschemaKey]: [...extensionsList, forwardedExtensions],
         }
       );
     }

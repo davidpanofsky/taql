@@ -46,6 +46,6 @@ describe('subschemaExtensionsPlugin', () => {
       plugins: [subschemaExtensionsPlugin],
     });
     const result = await executor({ document: testQuery });
-    expect(result.extensions).toEqual({ test: { foo: 'bar' } });
+    expect(result.extensions).toEqual({ test: [{ foo: 'bar' }] });
   });
 });
