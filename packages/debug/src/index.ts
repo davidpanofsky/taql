@@ -13,7 +13,8 @@ export { ForwardSubschemaExtensions } from './ForwardSubschemaExtensions';
 
 const createExtendResultFunction = <ContextType>(
   extensions: Record<string, unknown>
-): OnExecuteDoneHookResultOnNextHook<ContextType> => function extendResult({ result, setResult }) {
+): OnExecuteDoneHookResultOnNextHook<ContextType> =>
+  function extendResult({ result, setResult }) {
     setResult({
       ...result,
       extensions: {

@@ -31,6 +31,7 @@ function main {
   yarn run lint
   yarn run build
   yarn run depcheck
+  yarn run test
 
   $IGNORE_CHANGES || git diff --exit-code
 }

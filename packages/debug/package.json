@@ -8,6 +8,10 @@
   },
   "license": "UNLICENSED",
   "devDependencies": {
+    "@graphql-tools/delegate": "9.0.10",
+    "@graphql-tools/stitch": "^8.7.15",
+    "@graphql-tools/utils": "^8.13.1",
+    "@taql/testing": "workspace:^",
     "typescript": "^4.8.4"
   },
   "dependencies": {

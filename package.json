@@ -8,7 +8,8 @@
     "depcheck": "depcheck && yarn workspaces foreach -pv exec depcheck",
     "server": "./scripts/server.bash",
     "start": "echo \"deprecated; use 'yarn run server start'\" >/dev/stderr ; yarn run server start",
-    "build": "yarn workspaces foreach -tpv run build"
+    "build": "yarn workspaces foreach -tpv run build",
+    "test": "jest"
   },
   "engines": {
     "node": "16.18.0",
@@ -20,12 +21,15 @@
   "repository": "git@gitlab.dev.tripadvisor.com:dplat/taql.git",
   "author": "GraphQL Team <graphql@tripadvisor.com>",
   "devDependencies": {
+    "@types/jest": "^29.5.1",
     "@typescript-eslint/eslint-plugin": "^5.41.0",
     "@typescript-eslint/parser": "^5.41.0",
     "depcheck": "^1.4.3",
     "eslint": "^8.26.0",
     "eslint-config-prettier": "^8.5.0",
-    "prettier": "^2.7.1"
+    "jest": "^29.5.0",
+    "prettier": "^2.7.1",
+    "ts-jest": "^29.1.0"
   },
   "license": "UNLINCENSED",
   "private": true,
