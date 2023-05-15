@@ -44,6 +44,15 @@ const koaLogger = require('koa-logger');
 const FIVE_MINUTES_MILLIS = 1000 * 60 * 5;
 
 export async function main() {
+  // Set up memory monitoring
+  const prefix = 'taql_';
+  // The defaults includes valuable metrics including heap allocation, available memory.
+  // ex:
+  // taql_nodejs_heap_space_size_available_bytes{space="..."}
+  // taql_nodejs_heap_space_size_used_bytes{space="..."}
+  // taql_nodejs_gc_duration_seconds_sum{kind="..."}
+  promClient.collectDefaultMetrics({ prefix });
+  // end: memory monitoring
   const { port, batchLimit } = SERVER_PARAMS;
 
   const yogaOptions = {
@@ -91,6 +100,7 @@ export async function main() {
   // Two tier store for automatic persisted queries
   const memoryCache = await caching('memory', {
     max: AUTOMATIC_PERSISTED_QUERY_PARAMS.memCacheSize,
+    ttl: AUTOMATIC_PERSISTED_QUERY_PARAMS.redisTTL,
   });
 
   const redisCache = AUTOMATIC_PERSISTED_QUERY_PARAMS.redisInstance
