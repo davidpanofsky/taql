@@ -48,7 +48,7 @@ export async function makeSchema({
         ...(ENABLE_FEATURES.debugExtensions
           ? [
               new ForwardSubschemaExtensions<LegacyDebugResponseExtensions>(
-                'legacy',
+                'legacy-graphql',
                 ({ serviceTimings }) => ({ serviceTimings })
               ),
             ]
