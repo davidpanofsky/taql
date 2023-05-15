@@ -38,7 +38,7 @@ import { usePrometheus } from '@graphql-yoga/plugin-prometheus';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const koaLogger = require('koa-logger');
 
-const FIVE_MINUTES_MILLIS = 1000 * 60 * 5;
+const TEN_MINUTES_MILLIS = 1000 * 60 * 10;
 
 export async function main() {
   // Set up memory monitoring
@@ -85,7 +85,7 @@ export async function main() {
   } as const;
 
   const schemaPoller = new SchemaPoller({
-    interval: FIVE_MINUTES_MILLIS,
+    interval: TEN_MINUTES_MILLIS,
   });
 
   const schema = await schemaPoller.schema;
