@@ -1,16 +1,12 @@
 import type { BatchLoadFn, Options as DataLoaderOptions } from 'dataloader';
 import type { ExecutionRequest, ExecutionResult } from '@graphql-tools/utils';
+import type { ForwardableHeaders, TaqlState } from '@taql/context';
 import type { BatchingConfig } from '@taql/batching-config';
-import type { Headers } from 'node-fetch';
-import type { PrivateContext } from './context';
 
-export type TaqlRequest = ExecutionRequest<
-  Record<string, unknown>,
-  PrivateContext
->;
+export type TaqlRequest = ExecutionRequest<Record<string, unknown>, TaqlState>;
 export type TaqlBatchLoader = (args: {
   request: Readonly<TaqlRequest[]>;
-  forwardHeaders: Headers | undefined;
+  forwardHeaders: ForwardableHeaders | undefined;
 }) => ReturnType<BatchLoadFn<TaqlRequest, ExecutionResult>>;
 
 export type BatchEntry<T> = { val: T; idx: number };

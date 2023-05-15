@@ -1506,8 +1506,6 @@ __metadata:
     "@taql/batching-config": "workspace:^"
     "@taql/context": "workspace:^"
     "@taql/executors": "workspace:^"
-    "@types/koa": ^2.13.6
-    "@types/node-fetch": ^2.6.3
     dataloader: ^2.2.2
     graphql: ^16.6.0
     typescript: ^5.0.4
@@ -1528,8 +1526,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@taql/context@workspace:packages/context"
   dependencies:
-    "@envelop/core": ^3.0.6
     "@types/node-fetch": ^2.6.3
+    graphql-yoga: ^3.9.1
     koa: ^2.14.2
     node-fetch: ^2.6.11
     typescript: ^5.0.4
@@ -1575,17 +1573,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@taql/plugins@workspace:^, @taql/plugins@workspace:packages/plugins":
-  version: 0.0.0-use.local
-  resolution: "@taql/plugins@workspace:packages/plugins"
-  dependencies:
-    "@envelop/core": ^3.0.6
-    "@types/koa": ^2.13.6
-    graphql-yoga: ^3.9.1
-    typescript: ^5.0.4
-  languageName: unknown
-  linkType: soft
-
 "@taql/prereg@workspace:^, @taql/prereg@workspace:packages/prereg":
   version: 0.0.0-use.local
   resolution: "@taql/prereg@workspace:packages/prereg"
@@ -1607,7 +1594,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@taql/schema@workspace:packages/schema"
   dependencies:
-    "@envelop/core": ^3.0.6
     "@graphql-tools/delegate": 9.0.10
     "@graphql-tools/load": ^7.8.14
     "@graphql-tools/stitch": ^8.7.15
@@ -1615,6 +1601,7 @@ __metadata:
     "@taql/batching": "workspace:^"
     "@taql/batching-config": "workspace:^"
     "@taql/config": "workspace:^"
+    "@taql/context": "workspace:^"
     "@taql/debug": "workspace:^"
     "@taql/httpAgent": "workspace:^"
     "@types/deep-equal": ^1.0.1
@@ -1639,11 +1626,9 @@ __metadata:
     "@graphql-yoga/plugin-prometheus": ^1.9.1
     "@opentelemetry/exporter-zipkin": ^1.12.0
     "@opentelemetry/sdk-trace-base": ^1.12.0
-    "@taql/batching": "workspace:^"
     "@taql/config": "workspace:^"
     "@taql/context": "workspace:^"
     "@taql/debug": "workspace:^"
-    "@taql/plugins": "workspace:^"
     "@taql/prereg": "workspace:^"
     "@taql/schema": "workspace:^"
     "@taql/ssl": "workspace:^"
