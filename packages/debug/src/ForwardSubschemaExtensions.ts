@@ -19,7 +19,7 @@ export class ForwardSubschemaExtensions<T = Record<string, unknown>>
 
   public transformResult(
     result: ExecutionResult,
-    delegationCtx: DelegationContext<SubschemaExtensionsContext>,
+    delegationCtx: DelegationContext<SubschemaExtensionsContext>
   ): ExecutionResult {
     if (result.extensions && delegationCtx.context) {
       const forwardedExtensions = this.transformExtensions
@@ -30,11 +30,14 @@ export class ForwardSubschemaExtensions<T = Record<string, unknown>>
         // if this object is missing, it means the plugin is not enabled
         throw new Error('subschemaExtensionsPlugin is not present');
       }
-      Object.assign(delegationCtx.context[SUBSCHEMA_RESPONSE_EXTENSIONS_SYMBOL], {
-        [this.subschemaKey]: {
-          ...forwardedExtensions,
-        },
-      });
+      Object.assign(
+        delegationCtx.context[SUBSCHEMA_RESPONSE_EXTENSIONS_SYMBOL],
+        {
+          [this.subschemaKey]: {
+            ...forwardedExtensions,
+          },
+        }
+      );
     }
     return result;
   }
