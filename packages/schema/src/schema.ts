@@ -1,4 +1,5 @@
 import { LegacyDebugResponseExtensions, makeLegacySchema } from './legacy';
+import { SubschemaConfig, Transform } from '@graphql-tools/delegate';
 import { ENABLE_FEATURES } from '@taql/config';
 import { EventEmitter } from 'events';
 import { ForwardSubschemaExtensions } from '@taql/debug';
@@ -27,7 +28,7 @@ export async function makeSchema({
   previous?: TASchema;
   legacySVCO?: string;
 } = {}): Promise<TASchema | undefined> {
-  const subschemas = [];
+  const subschemas: SubschemaConfig[] = [];
   let legacyHash = '';
   const manifest = '';
 
@@ -52,7 +53,7 @@ export async function makeSchema({
               ),
             ]
           : []),
-      ],
+      ] as Transform[],
     });
   }
 
@@ -70,7 +71,7 @@ export async function makeSchema({
   // TODO load schemas from schema repository, add to subschemas.
 
   try {
-    let schema = stitchSchemas<Record<string, unknown>>({
+    let schema = stitchSchemas({
       subschemas,
       mergeDirectives: true,
       typeDefs: queryDirectives.map((directive) => directive.typeDefs),

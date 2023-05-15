@@ -46,12 +46,17 @@ export const serverHostExtensionPlugin: Plugin = {
  * Envelop plugin which forwards subschema extensions
  */
 export const subschemaExtensionsPlugin: Plugin<SubschemaExtensionsContext> = {
+  onContextBuilding({ extendContext }) {
+    // set forwarded extensions to an empty object so that we don't lose a
+    // reference to it once subsequent extendContext calls update the context
+    extendContext({ [SUBSCHEMA_RESPONSE_EXTENSIONS_SYMBOL]: {} });
+  },
   onExecute() {
     return {
       onExecuteDone(payload) {
         const extensions =
           payload.args.contextValue[SUBSCHEMA_RESPONSE_EXTENSIONS_SYMBOL];
-        if (!extensions) {
+        if (!extensions || Object.keys(extensions).length === 0) {
           return;
         }
         return handleStreamOrSingleExecutionResult(
