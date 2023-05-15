@@ -1,4 +1,4 @@
-import { LegacyDebugResponseExtensions, makeLegacySchema } from './legacy';
+import { LegacyDebugResponseExtensions, fetchLegacySchema } from './legacy';
 import { SubschemaConfig, Transform } from '@graphql-tools/delegate';
 import { ENABLE_FEATURES } from '@taql/config';
 import { EventEmitter } from 'events';
@@ -21,6 +21,11 @@ export type TASchema = {
   digest: SchemaDigest;
 };
 
+const queryDirectives = [
+  obfuscateDirective('encode'),
+  obfuscateDirective('obfuscate'),
+];
+
 export async function makeSchema({
   previous,
   legacySVCO,
@@ -29,20 +34,20 @@ export async function makeSchema({
   legacySVCO?: string;
 } = {}): Promise<TASchema | undefined> {
   const subschemas: SubschemaConfig[] = [];
-  let legacyHash = '';
-  const manifest = '';
 
-  const queryDirectives = [
-    obfuscateDirective('encode'),
-    obfuscateDirective('obfuscate'),
-  ];
+  // TODO load manifest from schema repository
 
-  const legacy = await makeLegacySchema(legacySVCO).catch(() => undefined);
+  const legacy = await fetchLegacySchema(legacySVCO).catch(() => undefined);
+  const digest: SchemaDigest = { manifest: '', legacyHash: legacy?.hash || '' };
+
+  if (previous != undefined && deepEqual(digest, previous.digest)) {
+    return previous;
+  }
+
   if (legacy != undefined) {
-    legacyHash = legacy.hash;
     subschemas.push({
-      schema: legacy.schema,
-      executor: legacy.executor,
+      schema: await legacy.makeSchema(),
+      executor: legacy.makeExecutor(),
       transforms: [
         ...queryDirectives.map((directive) => directive.queryTransformer),
         ...(ENABLE_FEATURES.debugExtensions
@@ -55,17 +60,6 @@ export async function makeSchema({
           : []),
       ] as Transform[],
     });
-  }
-
-  // TODO load manifest from schema repository
-
-  const digest: SchemaDigest = {
-    manifest,
-    legacyHash,
-  };
-
-  if (previous != undefined && deepEqual(digest, previous.digest)) {
-    return previous;
   }
 
   // TODO load schemas from schema repository, add to subschemas.
