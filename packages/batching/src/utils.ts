@@ -38,9 +38,27 @@ export type BatchingOptions<
    * different series id than the previous val, all prior batches are _frozen_,
    * and subsequently vals can only be added to new batches. Suppose inputs [a,
    * b, c, d], with batch ids [1,1,2,1] and series ids [1,2,2,2]; they will be
-   * batched into [[a],[b,d],[c]]
+   * batched into [[a],[b,d],[c]].
    */
   seriesIdFn?: (val: T) => U;
+  /**
+   * Cluster items in batches, potentially breaking them down into
+   * sub-batches if items in batches cannot be clustered together.
+   *
+   * Prefer using series ids to clusters when possible; clustering is
+   * always a more expensive operation.
+   */
+  clustering?: {
+    /**
+     * Use this comparator to order items in the batch to prepare for clustering
+     */
+    comparator?: (lhs: T, rhs: T) => number;
+    /**
+     * Compare a potential update to a cluster to the first item in a cluster; if false,
+     * the update is rejected from the cluster and put into a new cluster.
+     */
+    clusterable: (base: T, update: T) => boolean;
+  };
   /**
    * The maximum size of a batch. If unset, there will be no limit.
    */
@@ -142,6 +160,37 @@ export const batchByKey = <
       batch.push({ val, idx: idx++ });
     });
 
+  const clusteringConfig = args[1]?.clustering;
+  if (clusteringConfig) {
+    // break the batch into clusters
+
+    // Iterate over the results batches backwards so we can add to results
+    // behind our index _without breaking our index_.
+    for (let i = results.length - 1; i >= 0; i--) {
+      const batch = [...results[i]];
+      const comparator = clusteringConfig.comparator;
+      if (comparator != undefined) {
+        batch.sort((lhs, rhs) => comparator(lhs.val, rhs.val));
+      }
+      const clusters: BatchEntry<T>[][] = [];
+      let cluster: BatchEntry<T>[] = [];
+      batch.forEach((item) => {
+        if (
+          cluster.length != 0 &&
+          !clusteringConfig.clusterable(cluster[0].val, item.val)
+        ) {
+          // If the item can't be added to the current cluster, start a new cluster.
+          clusters.push(cluster);
+          cluster = [];
+        }
+        cluster.push(item);
+      });
+      // replace the batch with the clusters
+      if (clusters.length > 1) {
+        results.splice(i, 1, ...clusters);
+      }
+    }
+  }
   return results;
 };
 

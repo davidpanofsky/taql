@@ -1,10 +1,15 @@
+import {
+  EXECUTION_TIMEOUT_PARAMS,
+  UPSTREAM_TIMEOUT_PARAMS,
+  logger,
+} from '@taql/config';
 import { ExecutionRequest, ExecutionResult } from '@graphql-tools/utils';
 import fetch, { Headers } from 'node-fetch';
 import { httpAgent, httpsAgent } from '@taql/httpAgent';
 import type { Agent } from 'http';
 import { ForwardableHeaders } from '@taql/context';
 import type { TaqlState } from '@taql/context';
-import { logger } from '@taql/config';
+import { getDeadline } from '@taql/deadlines';
 import { print } from 'graphql';
 
 export type TaqlRequest = ExecutionRequest<Record<string, unknown>, TaqlState>;
@@ -18,6 +23,7 @@ export const formatRequest = (request: TaqlRequest) => {
 type ConstantLoadParams = {
   url: string;
   agent: Agent;
+  timeout: number;
 };
 
 type LoadParams<T> = {
@@ -39,7 +45,20 @@ type Transform<T_1, R_1, T_2 = T_1, R_2 = R_1> =
 
 type Load<T, R> = (args: LoadParams<T>) => Promise<R>;
 
+const computeTimeout = (maxTimeout: number, deadline?: number): number => {
+  if (deadline == undefined) {
+    return maxTimeout;
+  } else {
+    // Pad so we have time to work with the results.
+    return Math.min(
+      maxTimeout,
+      deadline - Date.now() - EXECUTION_TIMEOUT_PARAMS.executionPaddingMillis
+    );
+  }
+};
+
 const load = async <T, R>({
+  timeout,
   url,
   agent,
   forwardHeaders,
@@ -52,12 +71,24 @@ const load = async <T, R>({
     );
   }
 
+  if (timeout < 0) {
+    throw new Error(`Aborting request to ${url}. No time remaining`);
+  }
+
+  // pad timeout to give the upstream time for network overhead.
+  const paddedTimeout = Math.max(
+    UPSTREAM_TIMEOUT_PARAMS.upstreamTimeoutPaddingThreshold,
+    timeout - UPSTREAM_TIMEOUT_PARAMS.upstreamTimeoutPaddingMillis
+  );
+
+  headers.set('x-timeout', `${paddedTimeout}`);
   headers.set('content-type', 'application/json');
   logger.debug('Fetching from remote: ', url);
   const response = await fetch(url, {
     method: 'POST',
     headers,
     agent,
+    timeout,
     body: JSON.stringify(request),
   });
   return <R>response.json();
@@ -65,6 +96,8 @@ const load = async <T, R>({
 
 export const bindLoad = <T_1, R_1, T_2 = unknown, R_2 = unknown>(
   url: string,
+  getDeadline: (req: T_1) => number | undefined,
+  requestedMaxTimeout: number | undefined,
   transform?: Transform<T_1, R_1, T_2, R_2>
 ): Load<T_1, R_1> => {
   const agent = url.startsWith('https://') ? httpsAgent : httpAgent;
@@ -73,17 +106,33 @@ export const bindLoad = <T_1, R_1, T_2 = unknown, R_2 = unknown>(
       `Cannot create agent for requests to ${url}. (This probably happened because you are trying to use https, but don't have ssl configured. See @taql/config or the project README for more information)`
     );
   }
+
+  const maxTimeout = Math.min(
+    UPSTREAM_TIMEOUT_PARAMS.hardMaxUpstreamTimeoutMillis,
+    requestedMaxTimeout ?? UPSTREAM_TIMEOUT_PARAMS.softMaxUpstreamTimeoutMillis
+  );
+
+  const requestTimeout = (req: T_1) =>
+    computeTimeout(maxTimeout, getDeadline(req));
+
   if (transform == undefined) {
-    return (args: LoadParams<T_1>) => load({ url, agent, ...args });
+    return (args: LoadParams<T_1>) =>
+      load({ url, timeout: requestTimeout(args.request), agent, ...args });
   } else if (!('response' in transform)) {
     // this is a request transformation without a response transformation:
     return (args: LoadParams<T_1>) =>
-      load({ url, agent, ...args, request: transform.request(args.request) });
+      load({
+        url,
+        agent,
+        ...args,
+        timeout: requestTimeout(args.request),
+        request: transform.request(args.request),
+      });
   } else if (!('request' in transform)) {
     // the response is transformed but the request is not
     return (args: LoadParams<T_1>) =>
-      load({ url, agent, ...args }).then((response) =>
-        transform.response(<R_2>response)
+      load({ url, agent, timeout: requestTimeout(args.request), ...args }).then(
+        (response) => transform.response(<R_2>response)
       );
   } else {
     //both request and response are transformed.
@@ -91,16 +140,25 @@ export const bindLoad = <T_1, R_1, T_2 = unknown, R_2 = unknown>(
       load({
         url,
         agent,
+        timeout: requestTimeout(args.request),
         ...args,
         request: transform.request(args.request),
       }).then((response) => transform.response(<R_2>response));
   }
 };
 
-export const makeRemoteExecutor = (url: string) => {
-  const load = bindLoad<TaqlRequest, ExecutionResult>(url, {
-    request: formatRequest,
-  });
+export const makeRemoteExecutor = (
+  url: string,
+  requestedMaxTimeout: number | undefined
+): ((req: ExecutionRequest) => Promise<ExecutionResult>) => {
+  const load = bindLoad<TaqlRequest, ExecutionResult>(
+    url,
+    getDeadline,
+    requestedMaxTimeout,
+    {
+      request: formatRequest,
+    }
+  );
   return async (request: TaqlRequest): Promise<ExecutionResult> =>
     load({
       forwardHeaders: request.context?.state.taql.forwardHeaders,

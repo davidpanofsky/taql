@@ -15,6 +15,7 @@ export type LegacyContext = Readonly<{
 
 export type TaqlContext = Readonly<{
   forwardHeaders: ForwardableHeaders;
+  deadline: number;
   legacyContext: LegacyContext;
 }>;
 

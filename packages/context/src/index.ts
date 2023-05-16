@@ -1,5 +1,6 @@
 import { LegacyContext, TaqlContext, TaqlMiddleware } from './types';
 import { forwardableHeaders, getHeaderOrDefault } from './headers';
+import { EXECUTION_TIMEOUT_PARAMS } from '@taql/config';
 import { Headers as FetchHeaders } from 'node-fetch';
 import type { IncomingHttpHeaders } from 'http';
 
@@ -38,8 +39,25 @@ const legacyContextFromHeaders = (headers: InputHeaders): LegacyContext => ({
   SVCO: getHeaderOrDefault(headers, 'x-service-overrides', undefined),
 });
 
+const deadline = (headers: InputHeaders): number =>
+  Date.now() +
+  Math.min(
+    parseInt(
+      getHeaderOrDefault(
+        headers,
+        'x-timeout',
+        `${EXECUTION_TIMEOUT_PARAMS.defaultExecutionTimeoutMillis}`
+      )
+    ),
+    EXECUTION_TIMEOUT_PARAMS.maxExecutionTimeoutMillis
+  );
+
+export const timeRemaining = (context: TaqlContext): number =>
+  context.deadline - Date.now();
+
 const buildContext = (headers: InputHeaders): TaqlContext => ({
   forwardHeaders: forwardableHeaders(headers),
+  deadline: deadline(headers),
   legacyContext: legacyContextFromHeaders(headers),
 });
 

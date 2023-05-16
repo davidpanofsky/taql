@@ -1,5 +1,5 @@
 {
-  "name": "@taql/executors",
+  "name": "@taql/deadlines",
   "version": "1.0.0",
   "main": "build/index.js",
   "scripts": {
@@ -12,11 +12,6 @@
   },
   "dependencies": {
     "@graphql-tools/utils": "^8.13.1",
-    "@taql/config": "workspace:^",
-    "@taql/context": "workspace:^",
-    "@taql/deadlines": "workspace:^",
-    "@taql/httpAgent": "workspace:^",
-    "graphql": "^16.6.0",
-    "node-fetch": "^2.6.11"
+    "@taql/context": "workspace:^"
   }
 }
