@@ -1,5 +1,5 @@
 {
-  "exclude": ["**/build"],
+  "exclude": ["**/build", "**/*.test.ts", "**/*.spec.ts"],
   "compilerOptions": {
     "outDir": "build",
     "target": "ES2022",

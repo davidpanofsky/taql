@@ -1,10 +1,13 @@
+import { LegacyDebugResponseExtensions, makeLegacySchema } from './legacy';
+import { SubschemaConfig, Transform } from '@graphql-tools/delegate';
+import { ENABLE_FEATURES } from '@taql/config';
 import { EventEmitter } from 'events';
+import { ForwardSubschemaExtensions } from '@taql/debug';
 import { GraphQLSchema } from 'graphql';
 import { Plugin } from '@envelop/core';
 import TypedEmitter from 'typed-emitter';
 import deepEqual from 'deep-equal';
 import { logger } from '@taql/config';
-import { makeLegacySchema } from './legacy';
 import { obfuscateDirective } from './directives';
 import { stitchSchemas } from '@graphql-tools/stitch';
 
@@ -25,7 +28,7 @@ export async function makeSchema({
   previous?: TASchema;
   legacySVCO?: string;
 } = {}): Promise<TASchema | undefined> {
-  const subschemas = [];
+  const subschemas: SubschemaConfig[] = [];
   let legacyHash = '';
   const manifest = '';
 
@@ -39,9 +42,18 @@ export async function makeSchema({
     legacyHash = legacy.hash;
     subschemas.push({
       schema: legacy.schema,
-      transforms: queryDirectives.map(
-        (directive) => directive.queryTransformer
-      ),
+      executor: legacy.executor,
+      transforms: [
+        ...queryDirectives.map((directive) => directive.queryTransformer),
+        ...(ENABLE_FEATURES.debugExtensions
+          ? [
+              new ForwardSubschemaExtensions<LegacyDebugResponseExtensions>(
+                'legacy-graphql',
+                ({ serviceTimings }) => ({ serviceTimings })
+              ),
+            ]
+          : []),
+      ] as Transform[],
     });
   }
 

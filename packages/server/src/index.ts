@@ -22,6 +22,10 @@ import {
   mutatedFieldsExtensionPlugin,
   usePreregisteredQueries,
 } from '@taql/prereg';
+import {
+  serverHostExtensionPlugin,
+  subschemaExtensionsPlugin,
+} from '@taql/debug';
 import Koa from 'koa';
 import { LRUCache } from 'lru-cache';
 import { SSL_CONFIG } from '@taql/ssl';
@@ -31,7 +35,6 @@ import { plugins as batchingPlugins } from '@taql/batching';
 import { createServer as httpsServer } from 'https';
 import { ioRedisStore } from '@tirke/node-cache-manager-ioredis';
 import promClient from 'prom-client';
-import { serverHostExtensionPlugin } from '@taql/debug';
 import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspection';
 import { useOpenTelemetry } from '@envelop/opentelemetry';
 import { usePrometheus } from '@graphql-yoga/plugin-prometheus';
@@ -189,7 +192,9 @@ export async function main() {
       },
       tracerProvider
     ),
-    ...(ENABLE_FEATURES.debugExtensions ? [serverHostExtensionPlugin] : []),
+    ...(ENABLE_FEATURES.debugExtensions
+      ? [serverHostExtensionPlugin, subschemaExtensionsPlugin]
+      : []),
   ];
 
   const plugins: TaqlPlugins = new TaqlPlugins(

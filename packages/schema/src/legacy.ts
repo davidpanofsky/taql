@@ -5,7 +5,10 @@ import { createExecutor } from '@taql/batching';
 import crypto from 'crypto';
 import fetch from 'node-fetch';
 import { loadSchema } from '@graphql-tools/load';
-import { wrapSchema } from '@graphql-tools/wrap';
+
+export type LegacyDebugResponseExtensions = {
+  serviceTimings: Record<string, unknown>;
+};
 
 export async function makeLegacySchema(legacySVCO?: string) {
   const {
@@ -41,9 +44,8 @@ export async function makeLegacySchema(legacySVCO?: string) {
       },
     });
 
-    const wrappedSchema = wrapSchema({ schema, executor });
     const hash = crypto.createHash('md5').update(rawSchema).digest('hex');
-    return { schema: wrappedSchema, hash };
+    return { schema, executor, hash };
   } catch (e) {
     logger.error(`error loading legacy schema: ${e}`);
     throw e;

@@ -76,6 +76,10 @@ export const resolve = <T extends { [property: string]: EnvVal }>(
 
 const logLevel = (level: string | undefined): LogLevel => {
   if (level == undefined) {
+    if (process.env.NODE_ENV === 'test') {
+      // make tests silent
+      return 'error';
+    }
     return 'info' as LogLevel;
   }
   return level as LogLevel;

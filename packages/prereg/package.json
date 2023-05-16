@@ -8,6 +8,7 @@
   },
   "license": "UNLICENSED",
   "devDependencies": {
+    "@taql/testing": "workspace:^",
     "@types/pg": "^8.6.6",
     "typescript": "^5.0.4"
   },
