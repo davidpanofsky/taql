@@ -10,7 +10,7 @@ export type LegacyDebugResponseExtensions = {
   serviceTimings: Record<string, unknown>;
 };
 
-export async function makeLegacySchema(legacySVCO?: string) {
+export async function fetchLegacySchema(legacySVCO?: string) {
   const {
     host,
     httpPort,
@@ -33,19 +33,21 @@ export async function makeLegacySchema(legacySVCO?: string) {
           : { 'X-Service-Overrides': legacySVCO },
     });
     const rawSchema = await rawSchemaResponse.text();
-    const schema = await loadSchema(rawSchema, { loaders: [] });
-    const executor = createExecutor(batchUrl, {
-      style: BatchStyle.Legacy,
-      strategy: BatchingStrategy.BatchByUpstreamHeaders,
-      maxSize: batchMaxSize,
-      wait: {
-        queries: batchWaitQueries,
-        millis: batchWaitMillis,
-      },
-    });
-
     const hash = crypto.createHash('md5').update(rawSchema).digest('hex');
-    return { schema, executor, hash };
+
+    const makeSchema = () => loadSchema(rawSchema, { loaders: [] });
+    const makeExecutor = () =>
+      createExecutor(batchUrl, {
+        style: BatchStyle.Legacy,
+        strategy: BatchingStrategy.BatchByUpstreamHeaders,
+        maxSize: batchMaxSize,
+        wait: {
+          queries: batchWaitQueries,
+          millis: batchWaitMillis,
+        },
+      });
+
+    return { makeSchema, makeExecutor, hash };
   } catch (e) {
     logger.error(`error loading legacy schema: ${e}`);
     throw e;
