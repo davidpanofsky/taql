@@ -90,7 +90,12 @@ async function updateSchemaDigest(
 
 // For testing
 async function dummyDigest(): Promise<Digest> {
-  return { digest: { legacyHash: 'asdasdasd', manifest: '' } };
+  return {
+    digest: {
+      legacyHash: Math.random().toString(36).substr(2, 10),
+      manifest: '',
+    },
+  };
 }
 
 function main() {
@@ -103,7 +108,13 @@ function main() {
     );
   }
 
-  updateSchemaDigest(GITOPS_PARAMS.patchFilePath, dummyDigest).then(function (
+  let digester: () => Promise<Digest | undefined> = makeSchemaWithDigest;
+  if (GITOPS_PARAMS.useDummyDigest) {
+    console.log('RUNNING IN TEST MODE, USING DUMMY DIGEST');
+    digester = dummyDigest;
+  }
+
+  updateSchemaDigest(GITOPS_PARAMS.patchFilePath, digester).then(function (
     result
   ) {
     console.log(`Digest (base64 encoded): ${result.encoded}`);

@@ -38,7 +38,7 @@ function gitops::updateSchema() {
     popd
 
     # Perform the update
-    "${UPDATE_COMMAND[@]}" || fail "Failed to update schema with ${UPDATE_COMMAND[@]}"
+    "${UPDATE_COMMAND[@]}" "$@" || fail "Failed to update schema with ${UPDATE_COMMAND[@]}"
 
     cd "${clone}"
     if ! git diff --quiet; then
