@@ -37,6 +37,9 @@ type Digest = {
   digest: SchemaDigest;
 };
 
+/**
+ * Encode a SchemaDigest into a base64 string that can be injected into deployment manifests
+ */
 function encodeDigest(digest: SchemaDigest): string {
   return Buffer.from(`${digest.legacyHash}_${digest.manifest}`).toString(
     'base64'
@@ -48,14 +51,6 @@ async function updateSchemaDigest(
   digestProvider: () => Promise<Digest | undefined> = makeSchemaWithDigest,
   envVarToInject = 'SCHEMA_DIGEST'
 ): Promise<{ digest: SchemaDigest; encoded: string }> {
-  // Important env arg(s) for schema generation:
-  // LEGACY_GQL_HOST
-  // CLIENT_CERT_PATH
-  // CLIENT_KEY_PATH
-  // CLIENT_CERT_CA_PATH
-  // For us:
-  // GITOPS_PATCH_FILE_PATH
-
   const result = await digestProvider();
   if (!result) {
     throw new Error('Failed to build schema');
