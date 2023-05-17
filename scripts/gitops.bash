@@ -32,17 +32,22 @@ function gitops::updateSchema() {
         "https://${GITOPS_USER}:${GITOPS_AUTH_TOKEN}@${GITOPS_GIT_HOST}/${GITOPS_REPO_GROUP}/${GITOPS_REPO_NAME}.git" \
         "${clone}" || fail "Failed to clone https://${GITOPS_USER}@{GITOPS_GIT_HOST}/${GITOPS_REPO_GROUP}/${GITOPS_REPO_NAME}.git"
     export GITOPS_PATCH_FILE_PATH="${clone}/${GITOPS_PATCH_FILE}"
+
+    pushd "${clone}"
+    git checkout "${GITOPS_REPO_BRANCH}" || fail "Could not checkout branch ${GITOPS_REPO_BRANCH}"
+    popd
+
+    # Perform the update
     "${UPDATE_COMMAND[@]}" || fail "Failed to update schema with ${UPDATE_COMMAND[@]}"
 
     cd "${clone}"
-    git checkout "${GITOPS_BRANCH}"
     if ! git diff --quiet; then
         # Print the diff for inspection
         git diff
         # Add only the file we expect to have modified
         git add "${GITOPS_PATCH_FILE}" || fail "Could not add ${GITOPS_PATCH_FILE}"
         git -c "user.name=${GITOPS_USER}" -c "user.email=${GITOPS_USER}@${GITOPS_GIT_HOST}" commit -m "$(date): Update schema digest" || fail "Could not commit changes"
-        git push origin "${GITOPS_BRANCH}" || fail "Could not push changes"
+        git push origin "${GITOPS_REPO_BRANCH}" || fail "Could not push changes"
     else
         echo "No schema changes to commit"
     fi
