@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -eo pipefail
-IMAGE=siteops-docker.maven.dev.tripadvisor.com/taql
+IMAGE=graphql-docker.maven.dev.tripadvisor.com/taql
 : "${VERSION:=1.2-test}"
 echo "VERSION = ${VERSION}"
 
