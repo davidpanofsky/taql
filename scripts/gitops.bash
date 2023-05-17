@@ -29,8 +29,8 @@ function gitops::updateSchema() {
     local clone
     clone="$(mktemp -d)/deployment-repo"
     git clone \
-        "https://${GITOPS_USER}:${GITOPS_AUTH_TOKEN}@${GITOPS_GIT_HOST}/${GITOPS_REPO_GROUP}/${GITOPS_REPO_NAME}" \
-        "${clone}" || fail "Failed to clone https://${GITOPS_USER}@{GITOPS_GIT_HOST}/${GITOPS_REPO_GROUP}/${GITOPS_REPO_NAME}"
+        "https://${GITOPS_USER}:${GITOPS_AUTH_TOKEN}@${GITOPS_GIT_HOST}/${GITOPS_REPO_GROUP}/${GITOPS_REPO_NAME}.git" \
+        "${clone}" || fail "Failed to clone https://${GITOPS_USER}@{GITOPS_GIT_HOST}/${GITOPS_REPO_GROUP}/${GITOPS_REPO_NAME}.git"
     export GITOPS_PATCH_FILE_PATH="${clone}/${GITOPS_PATCH_FILE}"
     "${UPDATE_COMMAND[@]}" || fail "Failed to update schema with ${UPDATE_COMMAND[@]}"
 
