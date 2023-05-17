@@ -46,7 +46,8 @@ function gitops::updateSchema() {
         git diff
         # Add only the file we expect to have modified
         git add "${GITOPS_PATCH_FILE}" || fail "Could not add ${GITOPS_PATCH_FILE}"
-        git -c "user.name=${GITOPS_USER}" -c "user.email=${GITOPS_USER}@${GITOPS_GIT_HOST}" commit -m "$(date): Update schema digest" || fail "Could not commit changes"
+        git -c "user.name=${GITOPS_USER}" -c "user.email=${GITOPS_USER}@${GITOPS_GIT_HOST}" \
+            commit -m "$(date): Update schema digest" || fail "Could not commit changes"
         git push origin "${GITOPS_REPO_BRANCH}" || fail "Could not push changes"
     else
         echo "No schema changes to commit"
