@@ -8,6 +8,7 @@
     "depcheck": "depcheck && yarn workspaces foreach -pv exec depcheck",
     "server": "./scripts/server.bash",
     "start": "echo \"deprecated; use 'yarn run server start'\" >/dev/stderr ; yarn run server start",
+    "deploy-schema": "./scripts/gitops.bash",
     "build": "yarn workspaces foreach -tpv run build",
     "test": "jest"
   },
