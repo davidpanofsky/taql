@@ -155,5 +155,5 @@ export const GITOPS_PARAMS = resolve({
   patchFilePath: {
     property: 'GITOPS_PATCH_FILE_PATH',
     defaultTo: undefined,
-  }
+  },
 });

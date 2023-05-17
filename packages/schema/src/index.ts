@@ -5,4 +5,4 @@ export const makeSchema = (legacySVCO?: string) =>
   _makeSchema({ legacySVCO }).then((s) => s?.schema);
 
 export const makeSchemaWithDigest = (legacySVCO?: string) =>
-  _makeSchema({ legacySVCO })
+  _makeSchema({ legacySVCO });

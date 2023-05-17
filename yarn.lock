@@ -1568,6 +1568,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@taql/gitops@workspace:packages/gitops"
   dependencies:
+    "@taql/config": "workspace:^"
     "@taql/schema": "workspace:^"
     "@types/js-yaml": ^4.0.5
     js-yaml: ^4.1.0
