@@ -106,8 +106,7 @@ export class SchemaPoller extends (EventEmitter as new () => TypedEmitter<Schema
     super();
     const { interval } = args;
     this._schema = makeSchema();
-    // Disable polling
-    // setInterval(this.tryUpdate.bind(this), interval);
+    setInterval(this.tryUpdate.bind(this), interval);
   }
 
   private async tryUpdate() {

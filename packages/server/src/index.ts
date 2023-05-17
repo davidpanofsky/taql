@@ -13,7 +13,6 @@ import {
   SimpleSpanProcessor,
 } from '@opentelemetry/sdk-trace-base';
 import { DocumentNode, GraphQLError, GraphQLSchema } from 'graphql';
-import { SchemaPoller, makeSchema } from '@taql/schema';
 import { Server, createServer as httpServer } from 'http';
 import { TaqlContext, plugins as contextPlugins } from '@taql/context';
 import { caching, multiCaching } from 'cache-manager';
@@ -34,14 +33,13 @@ import { ZipkinExporter } from '@opentelemetry/exporter-zipkin';
 import { plugins as batchingPlugins } from '@taql/batching';
 import { createServer as httpsServer } from 'https';
 import { ioRedisStore } from '@tirke/node-cache-manager-ioredis';
+import { makeSchema } from '@taql/schema';
 import promClient from 'prom-client';
 import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspection';
 import { useOpenTelemetry } from '@envelop/opentelemetry';
 import { usePrometheus } from '@graphql-yoga/plugin-prometheus';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const koaLogger = require('koa-logger');
-
-const TEN_MINUTES_MILLIS = 1000 * 60 * 10;
 
 export async function main() {
   // Set up memory monitoring
@@ -87,11 +85,16 @@ export async function main() {
     legacySse: false,
   } as const;
 
+  /*
+  // Example use of SchemaPoller, currently not in use due to it binding the CPU too aggressively
   const schemaPoller = new SchemaPoller({
     interval: TEN_MINUTES_MILLIS,
   });
 
   const schema = await schemaPoller.schema;
+  */
+  const schema = await makeSchema();
+
   if (schema == undefined) {
     throw new Error('failed to load initial schema');
   }
@@ -198,7 +201,7 @@ export async function main() {
   ];
 
   const plugins: TaqlPlugins = new TaqlPlugins(
-    schemaPoller.asPlugin(),
+    // schemaPoller.asPlugin(),
     contextPlugins,
     batchingPlugins,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

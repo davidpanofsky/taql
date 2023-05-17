@@ -56,7 +56,6 @@ async function updateSchemaDigest(
   // For us:
   // GITOPS_PATCH_FILE_PATH
 
-
   const result = await digestProvider();
   if (!result) {
     throw new Error('Failed to build schema');
