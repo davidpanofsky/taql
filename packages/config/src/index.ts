@@ -145,3 +145,15 @@ export const TRACING_PARAMS = resolve({
     defaultTo: false,
   },
 });
+
+export const GITOPS_PARAMS = resolve({
+  // This isn't really used, since we handle git operations outside of nodejs/typescript, but it helpfully prints the value used for us
+  deploymentRepo: {
+    property: 'GITOPS_DEPLOYMENT_REPO',
+    defaultTo: 'https://gitlab.dev.tripadvisor.com/dplat/taql-deployment.git',
+  },
+  patchFilePath: {
+    property: 'GITOPS_PATCH_FILE_PATH',
+    defaultTo: undefined,
+  }
+});

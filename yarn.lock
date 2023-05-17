@@ -1564,6 +1564,17 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@taql/gitops@workspace:packages/gitops":
+  version: 0.0.0-use.local
+  resolution: "@taql/gitops@workspace:packages/gitops"
+  dependencies:
+    "@taql/schema": "workspace:^"
+    "@types/js-yaml": ^4.0.5
+    js-yaml: ^4.1.0
+    typescript: ^5.0.4
+  languageName: unknown
+  linkType: soft
+
 "@taql/httpAgent@workspace:^, @taql/httpAgent@workspace:packages/httpAgent":
   version: 0.0.0-use.local
   resolution: "@taql/httpAgent@workspace:packages/httpAgent"
@@ -1885,6 +1896,13 @@ __metadata:
     expect: ^29.0.0
     pretty-format: ^29.0.0
   checksum: 0a22491dec86333c0e92b897be2c809c922a7b2b0aa5604ac369810d6b2360908b4a3f2c6892e8a237a54fa1f10ecefe0e823ec5fcb7915195af4dfe88d2197e
+  languageName: node
+  linkType: hard
+
+"@types/js-yaml@npm:^4.0.5":
+  version: 4.0.5
+  resolution: "@types/js-yaml@npm:4.0.5::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40types%2Fjs-yaml%2F-%2Fjs-yaml-4.0.5.tgz"
+  checksum: 7dcac8c50fec31643cc9d6444b5503239a861414cdfaa7ae9a38bc22597c4d850c4b8cec3d82d73b3fbca408348ce223b0408d598b32e094470dfffc6d486b4d
   languageName: node
   linkType: hard
 
