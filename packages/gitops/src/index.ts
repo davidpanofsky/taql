@@ -53,8 +53,10 @@ async function updateSchemaDigest(
   // CLIENT_CERT_PATH
   // CLIENT_KEY_PATH
   // CLIENT_CERT_CA_PATH
+  // For us:
+  // GITOPS_PATCH_FILE_PATH
 
-  // TODO: use this
+
   const result = await digestProvider();
   if (!result) {
     throw new Error('Failed to build schema');
