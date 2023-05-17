@@ -103,17 +103,17 @@ function main() {
     );
   }
 
-  let digester: () => Promise<Digest | undefined> = makeSchemaWithDigest;
+  let digestProvider: () => Promise<Digest | undefined> = makeSchemaWithDigest;
   if (GITOPS_PARAMS.useDummyDigest) {
     console.log('RUNNING IN TEST MODE, USING DUMMY DIGEST');
-    digester = dummyDigest;
+    digestProvider = dummyDigest;
   }
 
-  updateSchemaDigest(GITOPS_PARAMS.patchFilePath, digester).then(function (
-    result
-  ) {
-    console.log(`Digest (base64 encoded): ${result.encoded}`);
-  });
+  updateSchemaDigest(GITOPS_PARAMS.patchFilePath, digestProvider).then(
+    function (result) {
+      console.log(`Digest (base64 encoded): ${result.encoded}`);
+    }
+  );
 }
 
 main();
