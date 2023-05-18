@@ -14,7 +14,7 @@ import {
 } from '@opentelemetry/sdk-trace-base';
 import { DocumentNode, GraphQLError, GraphQLSchema } from 'graphql';
 import { Server, createServer as httpServer } from 'http';
-import { TaqlContext, plugins as contextPlugins } from '@taql/context';
+import { TaqlContext, useTaqlContext } from '@taql/context';
 import { caching, multiCaching } from 'cache-manager';
 import { createYoga, useReadinessCheck } from 'graphql-yoga';
 import {
@@ -28,9 +28,8 @@ import {
 import Koa from 'koa';
 import { LRUCache } from 'lru-cache';
 import { SSL_CONFIG } from '@taql/ssl';
-import { TaqlPlugins } from '@taql/plugins';
+import { TaqlState } from '@taql/context';
 import { ZipkinExporter } from '@opentelemetry/exporter-zipkin';
-import { plugins as batchingPlugins } from '@taql/batching';
 import { createServer as httpsServer } from 'https';
 import { ioRedisStore } from '@tirke/node-cache-manager-ioredis';
 import { makeSchema } from '@taql/schema';
@@ -131,7 +130,31 @@ export async function main() {
     : [];
   const apqStore: APQStore = multiCaching([memoryCache, ...redisCache]);
 
+  const zipkinExporter = new ZipkinExporter({
+    serviceName: 'taql',
+    url: TRACING_PARAMS.zipkinUrl,
+  });
+
+  const tracerProvider = new BasicTracerProvider();
+  tracerProvider.addSpanProcessor(
+    TRACING_PARAMS.useBatchingProcessor
+      ? new BatchSpanProcessor(zipkinExporter)
+      : new SimpleSpanProcessor(zipkinExporter)
+  );
+  tracerProvider.register();
   const yogaPlugins = [
+    mutatedFieldsExtensionPlugin,
+    useOpenTelemetry(
+      {
+        resolvers: true, // Tracks resolvers calls, and tracks resolvers thrown errors
+        variables: true, // Includes the operation variables values as part of the metadata collected
+        result: true, // Includes execution result object as part of the metadata collected
+      },
+      tracerProvider
+    ),
+    ...(ENABLE_FEATURES.debugExtensions
+      ? [serverHostExtensionPlugin, subschemaExtensionsPlugin]
+      : []),
     useAPQ({ store: apqStore }),
     usePreregisteredQueries({
       maxCacheSize: PREREGISTERED_QUERY_PARAMS.maxCacheSize,
@@ -169,45 +192,10 @@ export async function main() {
         }
       },
     }),
+    schemaPoller.asPlugin(),
   ];
 
   ENABLE_FEATURES.introspection || yogaPlugins.push(useDisableIntrospection());
-
-  const zipkinExporter = new ZipkinExporter({
-    serviceName: 'taql',
-    url: TRACING_PARAMS.zipkinUrl,
-  });
-  const tracerProvider = new BasicTracerProvider();
-  tracerProvider.addSpanProcessor(
-    TRACING_PARAMS.useBatchingProcessor
-      ? new BatchSpanProcessor(zipkinExporter)
-      : new SimpleSpanProcessor(zipkinExporter)
-  );
-  tracerProvider.register();
-
-  const envelopPlugins = [
-    mutatedFieldsExtensionPlugin,
-    useOpenTelemetry(
-      {
-        resolvers: true, // Tracks resolvers calls, and tracks resolvers thrown errors
-        variables: true, // Includes the operation variables values as part of the metadata collected
-        result: true, // Includes execution result object as part of the metadata collected
-      },
-      tracerProvider
-    ),
-    ...(ENABLE_FEATURES.debugExtensions
-      ? [serverHostExtensionPlugin, subschemaExtensionsPlugin]
-      : []),
-  ];
-
-  const plugins: TaqlPlugins = new TaqlPlugins(
-    // schemaPoller.asPlugin(),
-    contextPlugins,
-    batchingPlugins,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    { envelop: <any>envelopPlugins },
-    { yoga: yogaPlugins }
-  );
 
   const schemaForContextCache = ENABLE_FEATURES.serviceOverrides
     ? new LRUCache<string, GraphQLSchema>({ max: 32, ttl: 1000 * 60 * 2 })
@@ -215,7 +203,7 @@ export async function main() {
   async function getSchemaForContext(
     context: TaqlContext
   ): Promise<GraphQLSchema | undefined> {
-    const legacySVCO = context.state.legacyContext.SVCO;
+    const legacySVCO = context.legacyContext.SVCO;
     let schemaForContext: GraphQLSchema | undefined;
     if (legacySVCO) {
       if (schemaForContextCache?.has(legacySVCO)) {
@@ -230,19 +218,28 @@ export async function main() {
     }
     return schemaForContext;
   }
-  const yoga = createYoga<TaqlContext>({
+  const yoga = createYoga<TaqlState>({
     schema: ENABLE_FEATURES.serviceOverrides
-      ? async (context) => (await getSchemaForContext(context)) ?? schema
+      ? async (context) =>
+          (await getSchemaForContext(context.state.taql)) ?? schema
       : schema,
     ...yogaOptions,
-    plugins: [...plugins.yoga(), ...plugins.envelop()],
+    plugins: yogaPlugins,
   });
 
   const koa = new Koa();
   koa.use(koaLogger());
-  plugins.koa().forEach((mw) => koa.use(mw));
 
-  koa.use(async (ctx) => {
+  koa.use(async (_ctx, next) => {
+    koaConcurrency.inc();
+    await next();
+    koaConcurrency.dec();
+  });
+
+  //Initialize taql state.
+  koa.use(useTaqlContext);
+
+  koa.use(async (ctx: TaqlState) => {
     logger.debug(`Koa Request: ${ctx.request.method} ${ctx.request.url}`);
     // Second parameter adds Koa's context into GraphQL Context
     const response = await yoga.handleNodeRequest(ctx.req, ctx);
@@ -270,12 +267,6 @@ export async function main() {
   const koaConcurrency = new promClient.Gauge({
     name: 'taql_koa_concurrency',
     help: 'concurrent requests inside of the koa context',
-  });
-
-  koa.use(async (ctx, next) => {
-    koaConcurrency.inc();
-    await next();
-    koaConcurrency.dec();
   });
 
   const server: Server =

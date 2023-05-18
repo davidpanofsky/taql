@@ -1,3 +1,4 @@
+import { BatchHeaders, loadState } from './context';
 import { BatchingConfig, BatchingStrategy } from '@taql/batching-config';
 import {
   ExecutionResult,
@@ -10,7 +11,6 @@ import {
   restoreOrder,
 } from './utils';
 
-import type { BatchHeaders } from './context';
 import type { BatchLoadFn } from 'dataloader';
 
 type Strategy = (
@@ -34,7 +34,9 @@ const byRequestStrategy: Strategy = (executor, config) => async (requests) => {
   const batches = batchByKey(requests, {
     subBatchIdFn: (req) =>
       // Fall back to a symbol (which will never match another value)
-      req.context?.state._batching.requestUnique || Symbol(),
+      (req.context != undefined &&
+        loadState(req.context.state.taql).requestUnique) ||
+      Symbol(),
     seriesIdFn,
     maxSize: config.maxSize,
   });
@@ -42,7 +44,7 @@ const byRequestStrategy: Strategy = (executor, config) => async (requests) => {
     batches.map((subBatch) =>
       executor({
         request: subBatch.map((sub) => sub.val),
-        forwardHeaders: subBatch[0]?.val?.context?.state.forwardHeaders,
+        forwardHeaders: subBatch[0]?.val?.context?.state.taql.forwardHeaders,
       })
     )
   );
@@ -73,11 +75,13 @@ const byHeadersStrategy: Strategy =
     const batches = batchByKey(requests, {
       subBatchIdFn: (req) =>
         // Fall back to a symbol (which will never match another value)
-        req.context?.state._batching.batchByHeadersHash || Symbol(),
+        (req.context && loadState(req.context.state.taql).batchByHeadersHash) ||
+        Symbol(),
       subBatchEqFn: (lhs, rhs) =>
+        lhs === rhs ||
         headersEqual(
-          lhs.context?.state?._batching.batchByHeaders,
-          rhs.context?.state?._batching.batchByHeaders
+          lhs.context && loadState(lhs.context.state.taql).batchByHeaders,
+          rhs.context && loadState(rhs.context.state.taql).batchByHeaders
         ),
       seriesIdFn,
       maxSize: config.maxSize,
@@ -87,7 +91,7 @@ const byHeadersStrategy: Strategy =
       batches.map((subBatch) =>
         executor({
           request: subBatch.map((sub) => sub.val),
-          forwardHeaders: subBatch[0]?.val?.context?.state.forwardHeaders,
+          forwardHeaders: subBatch[0]?.val?.context?.state.taql.forwardHeaders,
         })
       )
     );
@@ -97,7 +101,7 @@ const byHeadersStrategy: Strategy =
 const insecureStrategy: Strategy = (executor: TaqlBatchLoader) => (request) =>
   executor({
     request,
-    forwardHeaders: request[0]?.context?.state.forwardHeaders,
+    forwardHeaders: request[0]?.context?.state.taql.forwardHeaders,
   });
 
 export const STRATEGIES: Record<BatchingStrategy, Strategy> = {

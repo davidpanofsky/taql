@@ -7,8 +7,8 @@ import {
 import { TaqlRequest, translateConfigToLoaderOptions } from './utils';
 import { bindLoad, formatRequest, makeRemoteExecutor } from '@taql/executors';
 import DataLoader from 'dataloader';
-import type { PrivateContext } from './context';
 import { STRATEGIES } from './strategies';
+import type { TaqlState } from '@taql/context';
 import { createLoadFn } from '@graphql-tools/batch-execute';
 
 export const createBatchingExecutor = (
@@ -17,16 +17,15 @@ export const createBatchingExecutor = (
   /** A fallback executor for single requests, to be used when batching
    * cannot safely be used (e.g., for subscriptions)
    */
-  executor: Executor<PrivateContext>,
+  executor: Executor<TaqlState>,
   /**
    * Data loader configuration
    */
   dataLoaderOptions?: DataLoader.Options<TaqlRequest, ExecutionResult>
-): Executor<PrivateContext> => {
+): Executor<TaqlState> => {
   const loader = new DataLoader(loadFn, { cache: false, ...dataLoaderOptions });
   return (request: TaqlRequest) => {
     const operationAst = getOperationASTFromRequest(request);
-    operationAst.operation;
     return operationAst.operation !== 'subscription'
       ? loader.load(request)
       : executor(request);
@@ -36,7 +35,7 @@ export const createBatchingExecutor = (
 function makeSingleQueryBatchingExecutor(
   url: string,
   config: BatchingConfig
-): Executor<PrivateContext> {
+): Executor<TaqlRequest> {
   const executor = makeRemoteExecutor(url);
   // Use a loader graphql-tools helpfully defines, which goes through the
   // effort of merging queries for us.
@@ -51,7 +50,7 @@ function makeSingleQueryBatchingExecutor(
 function makeArrayBatchingExecutor(
   url: string,
   config: BatchingConfig
-): Executor<PrivateContext> {
+): Executor<TaqlRequest> {
   const arrayLoader = bindLoad<ReadonlyArray<TaqlRequest>, ExecutionResult[]>(
     url,
     {
@@ -76,7 +75,7 @@ function makeLegacyGqlExecutor(url: string, config: BatchingConfig): Executor {
     request(requests) {
       // Since we generate the legacy RequestContext from headers we assume that if those headers are considered batch-compatible,
       // we can just select any request in the batch from which to use the derived context.
-      const legacyContext = requests?.find((i) => i)?.context?.state
+      const legacyContext = requests?.find((i) => i)?.context?.state.taql
         .legacyContext;
       const formatted: {
         requests: unknown[];
@@ -103,7 +102,7 @@ function makeLegacyGqlExecutor(url: string, config: BatchingConfig): Executor {
     // speak the typical graphql API.
     (req: TaqlRequest) =>
       load({
-        forwardHeaders: req.context?.state.forwardHeaders,
+        forwardHeaders: req.context?.state.taql.forwardHeaders,
         request: [req],
       }).then((results) => results[0]),
     translateConfigToLoaderOptions(config)

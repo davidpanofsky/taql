@@ -4,7 +4,7 @@ import { ENABLE_FEATURES } from '@taql/config';
 import { EventEmitter } from 'events';
 import { ForwardSubschemaExtensions } from '@taql/debug';
 import { GraphQLSchema } from 'graphql';
-import { Plugin } from '@envelop/core';
+import type { TaqlYogaPlugin } from '@taql/context';
 import TypedEmitter from 'typed-emitter';
 import deepEqual from 'deep-equal';
 import { logger } from '@taql/config';
@@ -124,16 +124,12 @@ export class SchemaPoller extends (EventEmitter as new () => TypedEmitter<Schema
     }
   }
 
-  public asPlugin(): { envelop: [Plugin] } {
+  public asPlugin(): TaqlYogaPlugin {
     const onSchema = this.on.bind(this, 'schema');
     return {
-      envelop: [
-        {
-          onPluginInit({ setSchema }) {
-            onSchema((schema) => setSchema(schema));
-          },
-        },
-      ],
+      onPluginInit({ setSchema }) {
+        onSchema((schema) => setSchema(schema));
+      },
     };
   }
 

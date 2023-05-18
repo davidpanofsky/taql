@@ -9,11 +9,11 @@
   "license": "UNLICENSED",
   "devDependencies": {
     "@types/node-fetch": "^2.6.3",
+    "graphql-yoga": "^3.9.1",
     "koa": "^2.14.2",
     "typescript": "^5.0.4"
   },
   "dependencies": {
-    "@envelop/core": "^3.0.6",
     "node-fetch": "^2.6.11"
   }
 }

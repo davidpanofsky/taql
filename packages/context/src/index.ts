@@ -1,21 +1,51 @@
-import { HeadersState, headerMiddleware } from './headers';
-import type { Middleware, ParameterizedContext } from 'koa';
-import type { Plugin } from '@envelop/core';
+import { LegacyContext, TaqlContext, TaqlMiddleware } from './types';
+import { forwardableHeaders, getHeaderOrDefault } from './headers';
+import { Headers as FetchHeaders } from 'node-fetch';
+import type { IncomingHttpHeaders } from 'http';
 
-export { ForwardHeader, ForwardHeaderName, copyHeaders } from './headers';
+export {
+  TaqlMiddleware,
+  TaqlState,
+  LegacyContext,
+  TaqlContext,
+  ForwardHeader,
+  ForwardHeaderName,
+  ForwardableHeaders,
+  TaqlYogaPlugin,
+} from './types';
 
-export type KoaState = HeadersState;
-export type EnvelopContext = Record<string, never>; //for now
+type InputHeaders = FetchHeaders | Headers | IncomingHttpHeaders;
 
-export type TaqlContext = ParameterizedContext<KoaState> & EnvelopContext;
+/**
+ * pull the first client from a value of the 'x-forwarded-for' header
+ * https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Forwarded-For
+ */
+const clientFromXff = (xff: string | undefined): string | undefined =>
+  xff?.split(',').shift()?.trim();
 
-/** Envelop plugins required to set up the context. Apply before any other plugins. */
-const envelop: (Plugin<TaqlContext> | (() => Plugin<TaqlContext>))[] = [];
+/**
+ * build a "LegacyContext" i.e a RequestContext in the terms of legacy "stitched" graphql's api using http headers
+ */
+const legacyContextFromHeaders = (headers: InputHeaders): LegacyContext => ({
+  locale: getHeaderOrDefault(headers, 'x-tripadvisor-locale', 'en-US'),
+  debugToolEnabled:
+    getHeaderOrDefault(headers, 'x-tripadvisor-graphql-debug', 'false') ===
+    'true',
+  uniqueId: getHeaderOrDefault(headers, 'x-request-id', undefined),
+  userClientIP: clientFromXff(
+    getHeaderOrDefault(headers, 'x-forwarded-for', undefined)
+  ),
+  SVCO: getHeaderOrDefault(headers, 'x-service-overrides', undefined),
+});
 
-/** Koa middlewares used to set up the context. Apply before any other middlewares. */
-const middleware: Middleware<KoaState>[] = [headerMiddleware];
+const buildContext = (headers: InputHeaders): TaqlContext => ({
+  forwardHeaders: forwardableHeaders(headers),
+  legacyContext: legacyContextFromHeaders(headers),
+});
 
-export const plugins = {
-  envelop,
-  koa: middleware,
-} as const;
+export const useTaqlContext: TaqlMiddleware = async (ctx, next) => {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore assign state anyhow here.
+  ctx.state.taql = buildContext(ctx.headers);
+  await next();
+};
