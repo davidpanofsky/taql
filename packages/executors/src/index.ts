@@ -1,16 +1,13 @@
 import { ExecutionRequest, ExecutionResult } from '@graphql-tools/utils';
-
-import { TaqlContext, copyHeaders } from '@taql/context';
 import fetch, { Headers } from 'node-fetch';
 import { httpAgent, httpsAgent } from '@taql/httpAgent';
 import type { Agent } from 'http';
+import { ForwardableHeaders } from '@taql/context';
+import type { TaqlState } from '@taql/context';
 import { logger } from '@taql/config';
 import { print } from 'graphql';
 
-export type TaqlRequest = ExecutionRequest<
-  Record<string, unknown>,
-  TaqlContext
->;
+export type TaqlRequest = ExecutionRequest<Record<string, unknown>, TaqlState>;
 
 export const formatRequest = (request: TaqlRequest) => {
   const { document, variables } = request;
@@ -24,7 +21,7 @@ type ConstantLoadParams = {
 };
 
 type LoadParams<T> = {
-  forwardHeaders: Headers | undefined;
+  forwardHeaders?: ForwardableHeaders;
   request: T;
 };
 
@@ -48,7 +45,13 @@ const load = async <T, R>({
   forwardHeaders,
   request,
 }: ConstantLoadParams & LoadParams<T>): Promise<R> => {
-  const headers = copyHeaders(forwardHeaders);
+  const headers = new Headers();
+  if (forwardHeaders) {
+    Object.entries(forwardHeaders).forEach((entry) =>
+      entry[1].forEach((val) => headers.append(entry[0], val))
+    );
+  }
+
   headers.set('content-type', 'application/json');
   logger.debug('Fetching from remote: ', url);
   const response = await fetch(url, {
@@ -100,7 +103,7 @@ export const makeRemoteExecutor = (url: string) => {
   });
   return async (request: TaqlRequest): Promise<ExecutionResult> =>
     load({
-      forwardHeaders: request.context?.state.forwardHeaders,
+      forwardHeaders: request.context?.state.taql.forwardHeaders,
       request,
     });
 };
