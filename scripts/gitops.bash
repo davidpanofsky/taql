@@ -34,6 +34,8 @@ function gitops::updateSchema() {
 
     export GITOPS_PATCH_FILE_PATH="${clone}/${GITOPS_PATCH_FILE}"
 
+    # checkout the target branch
+    echo "Using branch ${GITOPS_REPO_BRANCH} of ${GITOPS_REPO_GROUP}/${GITOPS_REPO_NAME}"
     pushd "${clone}"
     git checkout "${GITOPS_REPO_BRANCH}" || fail "Could not checkout branch ${GITOPS_REPO_BRANCH}"
     popd
