@@ -62,23 +62,28 @@ async function updateSchemaDigest(
   const patch = yaml.load(
     readFileSync(patchFilePath, 'utf-8')
   ) as Array<PatchItem>;
-  // Update digest
+
+  let changed = false;
+  // Update digest if necessary
   patch.forEach((item: PatchItem) => {
     if (
       item.value.name == envVarToInject &&
       item.value.value != encodedDigest
     ) {
       item.value.value = encodedDigest;
+      changed = true;
     }
   });
 
-  // Write patch
-  writeFileSync(
-    patchFilePath,
-    yaml.dump(patch, {
-      indent: 2,
-    })
-  );
+  // Write patch if changes were made
+  if (changed) {
+    writeFileSync(
+      patchFilePath,
+      yaml.dump(patch, {
+        indent: 2,
+      })
+    );
+  }
 
   return { digest: result.digest, encoded: encodedDigest };
 }
