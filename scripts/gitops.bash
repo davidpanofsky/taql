@@ -44,9 +44,7 @@ function gitops::updateSchema() {
     "${UPDATE_COMMAND[@]}" "$@" || fail "Failed to update schema with ${UPDATE_COMMAND[@]}"
 
     cd "${clone}"
-    if ! git diff --quiet; then
-        # Print the diff for inspection
-        git diff
+    if ! git diff --exit-code; then
         # Add only the file we expect to have modified
         git add "${GITOPS_PATCH_FILE}" || fail "Could not add ${GITOPS_PATCH_FILE}"
         git -c "user.name=${GITOPS_USER}" -c "user.email=${GITOPS_USER}@${GITOPS_GIT_HOST}" \
