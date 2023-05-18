@@ -31,6 +31,7 @@ function gitops::updateSchema() {
     git clone \
         "https://${GITOPS_USER}:${GITOPS_AUTH_TOKEN}@${GITOPS_GIT_HOST}/${GITOPS_REPO_GROUP}/${GITOPS_REPO_NAME}.git" \
         "${clone}" || fail "Failed to clone https://${GITOPS_USER}@${GITOPS_GIT_HOST}/${GITOPS_REPO_GROUP}/${GITOPS_REPO_NAME}.git"
+
     export GITOPS_PATCH_FILE_PATH="${clone}/${GITOPS_PATCH_FILE}"
 
     pushd "${clone}"
