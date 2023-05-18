@@ -192,7 +192,7 @@ export async function main() {
         }
       },
     }),
-    schemaPoller.asPlugin(),
+    //schemaPoller.asPlugin(),
   ];
 
   ENABLE_FEATURES.introspection || yogaPlugins.push(useDisableIntrospection());
