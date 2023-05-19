@@ -198,8 +198,8 @@ export async function main() {
   ENABLE_FEATURES.introspection || yogaPlugins.push(useDisableIntrospection());
 
   const svcoSchemaBuilds = new promClient.Counter({
-    name: "taql_svco_schema_builds",
-    help: "Total number of times the taql instance has needed to build a new schema to serve an SVCO cookie/header"
+    name: 'taql_svco_schema_builds',
+    help: 'Total number of times the taql instance has needed to build a new schema to serve an SVCO cookie/header',
   });
   const schemaForContextCache = ENABLE_FEATURES.serviceOverrides
     ? new LRUCache<string, GraphQLSchema>({ max: 32, ttl: 1000 * 60 * 2 })
