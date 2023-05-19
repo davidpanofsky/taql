@@ -215,7 +215,7 @@ export async function main() {
         schemaForContext = schemaForContextCache.get(legacySVCO);
       } else {
         logger.debug('Fetching schema for SVCO: ', legacySVCO);
-        svcoSchemaBuilds.inc();
+        svcoSchemaBuilds.inc(); // We're probably about to hang the event loop, inc before building schema
         schemaForContext = await makeSchema(legacySVCO);
         schemaForContext != undefined &&
           schemaForContextCache?.set(legacySVCO, schemaForContext);
