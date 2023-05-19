@@ -50,7 +50,9 @@ function gitops::updateSchema() {
         git -c "user.name=${GITOPS_USER}" -c "user.email=${GITOPS_USER}@${GITOPS_GIT_HOST}" \
             commit -m "$(date): Update schema digest" || fail "Could not commit changes"
         if ! git push origin "${GITOPS_REPO_BRANCH}"; then
-            # Test comment
+            # We failed to push, hopefully because of a commit to a different file.
+            # Try to pull and rebase and push again.  If we fail again, kubernetes will give us one more try
+            # starting from the top before marking the job run as a failure
             echo "Push failed due to concurrent changes, attempting pull"
             git pull --rebase || fail "Failed to rebase"
             git push origin "${GITOPS_REPO_BRANCH}" || fail "Could not push changes"
