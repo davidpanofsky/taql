@@ -1646,6 +1646,7 @@ __metadata:
     "@taql/ssl": "workspace:^"
     "@tirke/node-cache-manager-ioredis": ^3.2.0
     "@types/koa": ^2.13.6
+    "@types/koa-logger": ^3.1.2
     cache-manager: ^5.2.1
     graphql: ^16.6.0
     graphql-yoga: ^3.9.1
@@ -1912,6 +1913,15 @@ __metadata:
   dependencies:
     "@types/koa": "*"
   checksum: 5d1147c4b057eb158195f442f0384f06503f3e69dba99fb517b30a05261a9f92928945c12bb1cfc17a5b7d60db003f38b455a3a9b125f12e4fc81fffa396b3cf
+  languageName: node
+  linkType: hard
+
+"@types/koa-logger@npm:^3.1.2":
+  version: 3.1.2
+  resolution: "@types/koa-logger@npm:3.1.2::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40types%2Fkoa-logger%2F-%2Fkoa-logger-3.1.2.tgz"
+  dependencies:
+    "@types/koa": "*"
+  checksum: 8e4cfcdb2491052bbff35c8f0a1f0bf839e966c3903afcf39656bf21bd3089b1a50945ce6a92bea430a83c9341d714c968360953d3a52a5cc10cdb3fb0af4218
   languageName: node
   linkType: hard
 

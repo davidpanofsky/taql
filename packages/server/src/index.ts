@@ -32,13 +32,12 @@ import { TaqlState } from '@taql/context';
 import { ZipkinExporter } from '@opentelemetry/exporter-zipkin';
 import { createServer as httpsServer } from 'https';
 import { ioRedisStore } from '@tirke/node-cache-manager-ioredis';
+import koaLogger from 'koa-logger';
 import { makeSchema } from '@taql/schema';
 import promClient from 'prom-client';
 import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspection';
 import { useOpenTelemetry } from '@envelop/opentelemetry';
 import { usePrometheus } from '@graphql-yoga/plugin-prometheus';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const koaLogger = require('koa-logger');
 
 export async function main() {
   // Set up memory monitoring
