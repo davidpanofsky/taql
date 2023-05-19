@@ -50,6 +50,7 @@ function gitops::updateSchema() {
         git -c "user.name=${GITOPS_USER}" -c "user.email=${GITOPS_USER}@${GITOPS_GIT_HOST}" \
             commit -m "$(date): Update schema digest" || fail "Could not commit changes"
         if ! git push origin "${GITOPS_REPO_BRANCH}"; then
+            # Test comment
             echo "Push failed due to concurrent changes, attempting pull"
             git pull --rebase || fail "Failed to rebase"
             git push origin "${GITOPS_REPO_BRANCH}" || fail "Could not push changes"
