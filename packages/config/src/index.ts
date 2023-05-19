@@ -145,3 +145,15 @@ export const TRACING_PARAMS = resolve({
     defaultTo: false,
   },
 });
+
+export const GITOPS_PARAMS = resolve({
+  patchFilePath: {
+    property: 'GITOPS_PATCH_FILE_PATH',
+    defaultTo: undefined,
+  },
+  useDummyDigest: {
+    property: 'GITOPS_USE_DUMMY_DIGEST',
+    resolver: resolvers.booleanFromString,
+    defaultTo: false,
+  },
+});

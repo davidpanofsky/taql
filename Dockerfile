@@ -20,15 +20,11 @@ WORKDIR /opt/taql
 # Install non-application packages
 RUN apk update && \
     apk upgrade && \
-    apk add --no-cache g++ make python3 openssl postgresql-libs bash
-
-# Install the application (split from non-application for caching)
-RUN apk add --no-cache --virtual .build-deps gcc musl-dev postgresql-dev
+    apk add --no-cache git bash
 
 # Copy in a project skeleton, containing only what yarn needs to know to install
 COPY --from=0 /opt/taql /opt/taql
-RUN yarn install --immutable && \
-    apk --purg del .build-deps
+RUN yarn install --immutable
 
 # Copy in the rest of the project to be built
 COPY . /opt/taql/
