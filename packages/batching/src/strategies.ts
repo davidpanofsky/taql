@@ -4,6 +4,7 @@ import {
   ExecutionResult,
   getOperationASTFromRequest,
 } from '@graphql-tools/utils';
+import { ForwardHeaderName, ForwardableHeaders } from '@taql/context';
 import {
   TaqlBatchLoader,
   TaqlRequest,
@@ -130,6 +131,51 @@ const byHeadersStrategy: Strategy =
     return restoreOrder(batches, resultBatches);
   };
 
+// Don't haphazardly forward headers when batching indiscriminately. If the headers
+// matter, the requests shouldn't be batched together.
+// Exceptions are the ones we'd use for debugging, etc:
+const insecureAllowedHeaders: Set<ForwardHeaderName> = new Set([
+  'x-guid',
+  'x-request-id',
+  'x-unique-id',
+  'x-ta-unique-dec',
+  // service overrides get to go because all requests to this resolver will
+  // have the same service overrides no matter how we batch; requests with
+  // different overrides will be handled by entirely different schemas and go
+  // to different resolvers.
+  'x-service-overrides',
+
+  // tracing headers
+  'x-b3-traceid',
+  'x-b3-spanid',
+  'x-b3-parentspanid',
+  'x-b3-flags',
+  'x-b3-sampled',
+  'b3',
+]);
+
+const mergeInsecureHeaders = (requests: TaqlRequest[]) => {
+  const collectedHeaders = requests
+    .map((req) => req.context?.state.taql.forwardHeaders)
+    .map((headers) => Object.entries(headers ?? <ForwardableHeaders>{}))
+    .flat()
+    .filter(([key]) => insecureAllowedHeaders.has(<ForwardHeaderName>key))
+    .reduce((acc: { [key: string]: Set<string> }, next: [string, string[]]) => {
+      const set = (acc[next[0]] = acc[next[0]] ?? new Set());
+      next[1].forEach((val) => set.add(val));
+      return acc;
+    }, {});
+
+  return <ForwardableHeaders>(
+    Object.fromEntries(
+      Object.entries(collectedHeaders).map(([header, vals]) => [
+        header,
+        [...vals],
+      ])
+    )
+  );
+};
+
 const insecureStrategy: Strategy = (executor, config) => async (requests) => {
   const clustering = makeDeadlineClustering(config);
   const batches = batchByKey(requests, {
@@ -138,12 +184,13 @@ const insecureStrategy: Strategy = (executor, config) => async (requests) => {
     maxSize: config.maxSize,
   });
   const resultBatches = await Promise.all(
-    batches.map((subBatch) =>
-      executor({
-        request: subBatch.map((sub) => sub.val),
-        forwardHeaders: subBatch[0]?.val?.context?.state.taql.forwardHeaders,
-      })
-    )
+    batches.map((subBatch) => {
+      const request = subBatch.map((sub) => sub.val);
+      return executor({
+        request,
+        forwardHeaders: mergeInsecureHeaders(request),
+      });
+    })
   );
   return restoreOrder(batches, resultBatches);
 };
