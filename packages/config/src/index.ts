@@ -30,8 +30,8 @@ export const LEGACY_GQL_PARAMS = resolve({
     defaultTo: 443,
   },
   batchMaxSize: {
-    /* Matches MAX_MERGED_STEPS in legacy graphql
-     * https://gitlab.dev.tripadvisor.com/dplat/graphql/-/blob/master/src/main/params/common.ini#L555
+    /* Matches MAX_BATCH_SIZE in legacy graphql
+     * https://gitlab.dev.tripadvisor.com/dplat/graphql/-/blob/9f963cca39936c6ba53421a2063bcc5a92d1990a/src/main/java/com/tripadvisor/service/graphql/GraphQlEndpoint.java#L56
      */
     property: 'LEGACY_GQL_BATCH_MAX_SIZE',
     resolver: resolvers.nonNegativeInteger,
