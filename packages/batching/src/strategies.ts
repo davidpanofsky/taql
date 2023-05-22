@@ -1,5 +1,5 @@
 import { BatchHeaders, loadState } from './context';
-import { BatchingConfig, BatchingStrategy } from '@taql/batching-config';
+import { BatchingConfig, BatchingStrategy } from '@ta-graphql-utils/stitch';
 import {
   ExecutionResult,
   getOperationASTFromRequest,
