@@ -85,7 +85,7 @@ function start_background { (
     if is_running_pid $PID; then
       # obviously rereading the file constantly is dumb, but it's easy to write
       # for now, when performance doesn't matter.
-      if grep -q '^server running$' $LOGFILE; then
+      if grep -q 'server running$' $LOGFILE; then
         echo "server started after $SECONDS seconds"
         return 0
       fi
