@@ -812,7 +812,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphql-tools/load@npm:7.8.14, @graphql-tools/load@npm:^7.8.14":
+"@graphql-tools/load@npm:7.8.14":
   version: 7.8.14
   resolution: "@graphql-tools/load@npm:7.8.14::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-tools%2Fload%2F-%2Fload-7.8.14.tgz"
   dependencies:
@@ -1720,8 +1720,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@taql/schema@workspace:packages/schema"
   dependencies:
-    "@graphql-tools/delegate": 9.0.10
-    "@graphql-tools/load": ^7.8.14
     "@graphql-tools/utils": ^8.13.1
     "@ta-graphql-utils/stitch": "*"
     "@taql/batching": "workspace:^"
