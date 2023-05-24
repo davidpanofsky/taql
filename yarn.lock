@@ -704,20 +704,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphql-tools/batch-execute@npm:^9.0.0":
-  version: 9.0.0
-  resolution: "@graphql-tools/batch-execute@npm:9.0.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-tools%2Fbatch-execute%2F-%2Fbatch-execute-9.0.0.tgz"
-  dependencies:
-    "@graphql-tools/utils": ^10.0.0
-    dataloader: ^2.2.2
-    tslib: ^2.4.0
-    value-or-promise: ^1.0.12
-  peerDependencies:
-    graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
-  checksum: 328063ab1119e1665faee98d96a4bfda27b4c01644bb599db6d5f0ace48c3974f67fad0c5ac356eb866092bce60d4455b2e163772d2d56568ad1c8249d6721fa
-  languageName: node
-  linkType: hard
-
 "@graphql-tools/batch-execute@patch:@graphql-tools/batch-execute@^8.5.11#./.yarn/patches/@graphql-tools-batch-execute-npm-8.5.11-c0fd4ea03c.patch::locator=%40taql%40workspace%3A.":
   version: 8.5.12
   resolution: "@graphql-tools/batch-execute@patch:@graphql-tools/batch-execute@npm%3A8.5.12%3A%3A__archiveUrl=https%253A%252F%252Fmaven.dev.tripadvisor.com%253A443%252Fartifactory%252Fapi%252Fnpm%252Fyarn%252F%2540graphql-tools%252Fbatch-execute%252F-%252Fbatch-execute-8.5.12.tgz#./.yarn/patches/@graphql-tools-batch-execute-npm-8.5.11-c0fd4ea03c.patch::version=8.5.12&hash=58d2fb&locator=%40taql%40workspace%3A."
@@ -763,23 +749,6 @@ __metadata:
   peerDependencies:
     graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
   checksum: 4edd827d1767dc33ea1e28f8ceb30f82e1cdb47a9390cecc0a45f51594c6df28d11b2c2eec083e27fa45a76451c8490f2f826effc2dff9977de3fe1b66b2aadb
-  languageName: node
-  linkType: hard
-
-"@graphql-tools/delegate@npm:^10.0.0":
-  version: 10.0.0
-  resolution: "@graphql-tools/delegate@npm:10.0.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-tools%2Fdelegate%2F-%2Fdelegate-10.0.0.tgz"
-  dependencies:
-    "@graphql-tools/batch-execute": ^9.0.0
-    "@graphql-tools/executor": ^1.0.0
-    "@graphql-tools/schema": ^10.0.0
-    "@graphql-tools/utils": ^10.0.0
-    dataloader: ^2.2.2
-    tslib: ^2.5.0
-    value-or-promise: ^1.0.12
-  peerDependencies:
-    graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
-  checksum: ef2708e6f11594158dd7ab08e8595ee21719bdbb2ef9d9570a0be5905ee40a1c5fb231d09924823851ad43da99e97d39e95725e1ee4bcd223896d8d85eecb881
   languageName: node
   linkType: hard
 
@@ -843,21 +812,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphql-tools/executor@npm:^1.0.0":
-  version: 1.1.0
-  resolution: "@graphql-tools/executor@npm:1.1.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-tools%2Fexecutor%2F-%2Fexecutor-1.1.0.tgz"
-  dependencies:
-    "@graphql-tools/utils": ^10.0.0
-    "@graphql-typed-document-node/core": 3.2.0
-    "@repeaterjs/repeater": ^3.0.4
-    tslib: ^2.4.0
-    value-or-promise: ^1.0.12
-  peerDependencies:
-    graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
-  checksum: f088a18181da1303eba8b4bea3ad39de43037f16475a105101e5b7f467760812f2d80d9f70c6bae21ad5f5d197308778e78cfd622080143b28398426307ef389
-  languageName: node
-  linkType: hard
-
 "@graphql-tools/load@npm:7.8.14":
   version: 7.8.14
   resolution: "@graphql-tools/load@npm:7.8.14::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-tools%2Fload%2F-%2Fload-7.8.14.tgz"
@@ -896,18 +850,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphql-tools/merge@npm:^9.0.0":
-  version: 9.0.0
-  resolution: "@graphql-tools/merge@npm:9.0.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-tools%2Fmerge%2F-%2Fmerge-9.0.0.tgz"
-  dependencies:
-    "@graphql-tools/utils": ^10.0.0
-    tslib: ^2.4.0
-  peerDependencies:
-    graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
-  checksum: e93794260faa477979bdc22f05da26c0eff02bd82c11565a1197152b70b5ab1c73dc6f8a05caf06737bcb18cb244bd19ee99d62bfc41af3bffb3c17eddb70edf
-  languageName: node
-  linkType: hard
-
 "@graphql-tools/schema@npm:9.0.6":
   version: 9.0.6
   resolution: "@graphql-tools/schema@npm:9.0.6::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-tools%2Fschema%2F-%2Fschema-9.0.6.tgz"
@@ -919,20 +861,6 @@ __metadata:
   peerDependencies:
     graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
   checksum: 317b8ba62b1dfcf957f5a1de91d2687f9854834d421514ac0dbb8e4fe4703c11160df32871da59a127fe8fd73ba531971aadfff52adce67077932e5f81685bf6
-  languageName: node
-  linkType: hard
-
-"@graphql-tools/schema@npm:^10.0.0":
-  version: 10.0.0
-  resolution: "@graphql-tools/schema@npm:10.0.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-tools%2Fschema%2F-%2Fschema-10.0.0.tgz"
-  dependencies:
-    "@graphql-tools/merge": ^9.0.0
-    "@graphql-tools/utils": ^10.0.0
-    tslib: ^2.4.0
-    value-or-promise: ^1.0.12
-  peerDependencies:
-    graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
-  checksum: 550e9a4528584a4d108892f1553fb5b2590e63e88b9a9d3c1ad80b01c974ca9947adb9d1448a6969230d90c15dc96e8e84d62f32ef0fde804c389b43ac5bd739
   languageName: node
   linkType: hard
 
@@ -1030,18 +958,6 @@ __metadata:
   peerDependencies:
     graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
   checksum: 94ed12df5f49e5c338322ffd931236a687a3d5c443bf499f9baab5d4fcd9792234111142be8aa506a01ca2e82732996c4e1d8f6159ff9cc7fdc5c97f63e55226
-  languageName: node
-  linkType: hard
-
-"@graphql-tools/utils@npm:^10.0.0":
-  version: 10.0.0
-  resolution: "@graphql-tools/utils@npm:10.0.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-tools%2Futils%2F-%2Futils-10.0.0.tgz"
-  dependencies:
-    "@graphql-typed-document-node/core": ^3.1.1
-    tslib: ^2.4.0
-  peerDependencies:
-    graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
-  checksum: 641910970627ce711b8bb709161111ee9acd3003b5e4fd388a7125f6a18a47d556c3e14f229807481af82a25ac0bb420ce540e5c185bfc6bd49ac2efad5da9d3
   languageName: node
   linkType: hard
 
@@ -1820,7 +1736,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@taql/schema@workspace:packages/schema"
   dependencies:
-    "@graphql-tools/delegate": ^10.0.0
     "@graphql-tools/utils": ^8.13.1
     "@ta-graphql-utils/stitch": "*"
     "@taql/batching": "workspace:^"
