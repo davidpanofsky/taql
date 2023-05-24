@@ -13,7 +13,7 @@
   "dependencies": {
     "@graphql-tools/batch-execute": "^8.5.11",
     "@graphql-tools/utils": "^8.13.1",
-    "@taql/batching-config": "workspace:^",
+    "@ta-graphql-utils/stitch": "*",
     "@taql/context": "workspace:^",
     "@taql/executors": "workspace:^",
     "dataloader": "^2.2.2",

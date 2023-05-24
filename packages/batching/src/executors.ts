@@ -1,4 +1,9 @@
-import { BatchStyle, BatchingConfig } from '@taql/batching-config';
+import {
+  BatchStyle,
+  BatchingConfig,
+  BatchingStrategy,
+  ExecutorConfig,
+} from '@ta-graphql-utils/stitch';
 import {
   ExecutionResult,
   Executor,
@@ -109,10 +114,18 @@ function makeLegacyGqlExecutor(url: string, config: BatchingConfig): Executor {
   );
 }
 
+const defaultBatchingConfig: BatchingConfig = {
+  style: BatchStyle.Single,
+  strategy: BatchingStrategy.BatchByInboundRequest,
+};
+
 /**
  * Create an executor that will call the given url according to the provided configuration
  */
-export const createExecutor = (url: string, config: BatchingConfig) => {
+export const createExecutor = ({
+  url,
+  batching: config = defaultBatchingConfig,
+}: ExecutorConfig) => {
   switch (config.style) {
     case BatchStyle.Single:
       return makeSingleQueryBatchingExecutor(url, config);

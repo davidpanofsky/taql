@@ -1,15 +1,13 @@
-import { LegacyDebugResponseExtensions, fetchLegacySchema } from './legacy';
-import { SubschemaConfig, Transform } from '@graphql-tools/delegate';
-import { ENABLE_FEATURES } from '@taql/config';
+import { Subgraph, stitch } from '@ta-graphql-utils/stitch';
 import { EventEmitter } from 'events';
-import { ForwardSubschemaExtensions } from '@taql/debug';
+import { Executor } from '@graphql-tools/utils';
 import { GraphQLSchema } from 'graphql';
 import type { TaqlYogaPlugin } from '@taql/context';
 import TypedEmitter from 'typed-emitter';
+import { createExecutor } from '@taql/batching';
 import deepEqual from 'deep-equal';
+import { getLegacySubgraph } from './legacy';
 import { logger } from '@taql/config';
-import { obfuscateDirective } from './directives';
-import { stitchSchemas } from '@graphql-tools/stitch';
 
 export type SchemaDigest = {
   legacyHash: string;
@@ -21,11 +19,6 @@ export type TASchema = {
   digest: SchemaDigest;
 };
 
-const queryDirectives = [
-  obfuscateDirective('encode'),
-  obfuscateDirective('obfuscate'),
-];
-
 export async function makeSchema({
   previous,
   legacySVCO,
@@ -33,62 +26,41 @@ export async function makeSchema({
   previous?: TASchema;
   legacySVCO?: string;
 } = {}): Promise<TASchema | undefined> {
-  const subschemas: SubschemaConfig[] = [];
+  const subgraphs: Subgraph[] = [];
 
   // TODO load manifest from schema repository
 
-  const legacy = await fetchLegacySchema(legacySVCO).catch(() => undefined);
+  const legacy = await getLegacySubgraph(legacySVCO).catch(() => undefined);
   const digest: SchemaDigest = { manifest: '', legacyHash: legacy?.hash || '' };
 
   if (previous != undefined && deepEqual(digest, previous.digest)) {
     return previous;
   }
 
-  if (legacy != undefined) {
-    subschemas.push({
-      schema: await legacy.makeSchema(),
-      executor: legacy.makeExecutor(),
-      transforms: [
-        ...queryDirectives.map((directive) => directive.queryTransformer),
-        ...(ENABLE_FEATURES.debugExtensions
-          ? [
-              new ForwardSubschemaExtensions<LegacyDebugResponseExtensions>(
-                'legacy-graphql',
-                ({ serviceTimings }) => ({ serviceTimings })
-              ),
-            ]
-          : []),
-      ] as Transform[],
-    });
+  if (legacy == undefined) {
+    return previous;
+  } else {
+    subgraphs.push(legacy.subgraph);
   }
 
   // TODO load schemas from schema repository, add to subschemas.
 
   try {
-    let schema = stitchSchemas({
-      subschemas,
-      mergeDirectives: true,
-      typeDefs: queryDirectives.map((directive) => directive.typeDefs),
-    });
-
-    // Apply directive transformations to the schema
-    schema = queryDirectives.reduce(
-      (curSchema, directive) => directive.schemaTransformer(curSchema),
-      schema
+    const stitchResult = await stitch(
+      subgraphs,
+      createExecutor as () => Executor
     );
 
-    if (
-      schema.__validationErrors == undefined ||
-      schema.__validationErrors.length === 0
-    ) {
-      return {
-        schema,
-        digest,
-      };
+    if ('errors' in stitchResult) {
+      logger.error(
+        `Schema failed to validate: ${stitchResult.errors.toString()}`
+      );
     }
-    logger.error(
-      `Schema failed to validate: [${schema.__validationErrors?.join('; ')}]`
-    );
+
+    if ('schema' in stitchResult) {
+      const { schema } = stitchResult;
+      return { schema, digest };
+    }
   } catch (err: unknown) {
     logger.error(`Error stitching schemas: ${err}`);
   }

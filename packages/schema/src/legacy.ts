@@ -1,16 +1,24 @@
-import { BatchStyle, BatchingStrategy } from '@taql/batching-config';
+import {
+  BatchStyle,
+  BatchingStrategy,
+  Subgraph,
+} from '@ta-graphql-utils/stitch';
 import { LEGACY_GQL_PARAMS, logger } from '@taql/config';
 import { httpAgent, httpsAgent } from '@taql/httpAgent';
-import { createExecutor } from '@taql/batching';
+import { ENABLE_FEATURES } from '@taql/config';
+import { ForwardSubschemaExtensions } from '@taql/debug';
 import crypto from 'crypto';
 import fetch from 'node-fetch';
-import { loadSchema } from '@graphql-tools/load';
+
+const subgraphName = 'legacy-graphql';
 
 export type LegacyDebugResponseExtensions = {
   serviceTimings: Record<string, unknown>;
 };
 
-export async function fetchLegacySchema(legacySVCO?: string) {
+export async function getLegacySubgraph(
+  legacySVCO?: string
+): Promise<{ subgraph: Subgraph; hash: string }> {
   const {
     host,
     httpPort,
@@ -34,20 +42,34 @@ export async function fetchLegacySchema(legacySVCO?: string) {
     });
     const rawSchema = await rawSchemaResponse.text();
     const hash = crypto.createHash('md5').update(rawSchema).digest('hex');
-
-    const makeSchema = () => loadSchema(rawSchema, { loaders: [] });
-    const makeExecutor = () =>
-      createExecutor(batchUrl, {
-        style: BatchStyle.Legacy,
-        strategy: BatchingStrategy.BatchByUpstreamHeaders,
-        maxSize: batchMaxSize,
-        wait: {
-          queries: batchWaitQueries,
-          millis: batchWaitMillis,
+    const subgraph: Subgraph = {
+      name: subgraphName,
+      namespace: 'Global',
+      sdl: rawSchema,
+      executorConfig: {
+        url: batchUrl,
+        batching: {
+          style: BatchStyle.Legacy,
+          strategy: BatchingStrategy.BatchByUpstreamHeaders,
+          maxSize: batchMaxSize,
+          wait: {
+            queries: batchWaitQueries,
+            millis: batchWaitMillis,
+          },
         },
-      });
+      },
+      transforms: ENABLE_FEATURES.debugExtensions
+        ? [
+            new ForwardSubschemaExtensions<LegacyDebugResponseExtensions>(
+              subgraphName,
+              ({ serviceTimings }) => ({ serviceTimings })
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            ) as any, // FIXME(jdujic): Fix types
+          ]
+        : undefined,
+    };
 
-    return { makeSchema, makeExecutor, hash };
+    return { subgraph, hash };
   } catch (e) {
     logger.error(`error loading legacy schema: ${e}`);
     throw e;

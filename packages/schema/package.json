@@ -16,12 +16,9 @@
     "typescript": "^5.0.4"
   },
   "dependencies": {
-    "@graphql-tools/delegate": "9.0.10",
-    "@graphql-tools/load": "^7.8.14",
-    "@graphql-tools/stitch": "^8.7.15",
     "@graphql-tools/utils": "^8.13.1",
+    "@ta-graphql-utils/stitch": "*",
     "@taql/batching": "workspace:^",
-    "@taql/batching-config": "workspace:^",
     "@taql/config": "workspace:^",
     "@taql/debug": "workspace:^",
     "@taql/httpAgent": "workspace:^",
