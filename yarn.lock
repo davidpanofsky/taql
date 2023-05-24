@@ -1581,6 +1581,7 @@ __metadata:
     "@taql/config": "workspace:^"
     "@taql/ssl": "workspace:^"
     "@types/node": ^18.16.7
+    cacheable-lookup: ^7.0.0
     typescript: ^5.0.4
   languageName: unknown
   linkType: soft
@@ -2772,6 +2773,13 @@ __metadata:
     lodash.clonedeep: ^4.5.0
     lru-cache: ~9.1.1
   checksum: 8e4c4bb3ae9f6a0cb109dc7327167c58db5789af97050f55e956b2a3ae8220759bcc0ceeae83f6606d22ac92b4a9b77ac59198deea3d6026398abf814ba4c7ce
+  languageName: node
+  linkType: hard
+
+"cacheable-lookup@npm:^7.0.0":
+  version: 7.0.0
+  resolution: "cacheable-lookup@npm:7.0.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fcacheable-lookup%2F-%2Fcacheable-lookup-7.0.0.tgz"
+  checksum: 9e2856763fc0a7347ab34d704c010440b819d4bb5e3593b664381b7433e942dd22e67ee5581f12256f908e79b82d30b86ebbacf40a081bfe10ee93fbfbc2d6a9
   languageName: node
   linkType: hard
 
