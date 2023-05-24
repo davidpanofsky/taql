@@ -29,9 +29,14 @@ export const LEGACY_GQL_PARAMS = resolve({
     resolver: resolvers.nonNegativeInteger,
     defaultTo: 443,
   },
+  maxTimeout: {
+    property: 'LEGACY_GQL_TIMEOUT',
+    resolver: resolvers.nonNegativeInteger,
+    defaultTo: 3000,
+  },
   batchMaxSize: {
-    /* Matches MAX_MERGED_STEPS in legacy graphql
-     * https://gitlab.dev.tripadvisor.com/dplat/graphql/-/blob/master/src/main/params/common.ini#L555
+    /* Matches MAX_BATCH_SIZE in legacy graphql
+     * https://gitlab.dev.tripadvisor.com/dplat/graphql/-/blob/9f963cca39936c6ba53421a2063bcc5a92d1990a/src/main/java/com/tripadvisor/service/graphql/GraphQlEndpoint.java#L56
      */
     property: 'LEGACY_GQL_BATCH_MAX_SIZE',
     resolver: resolvers.nonNegativeInteger,
@@ -46,6 +51,64 @@ export const LEGACY_GQL_PARAMS = resolve({
     property: 'LEGACY_GQL_BATCH_WAIT_MILLIS',
     resolver: resolvers.nonNegativeInteger,
     defaultTo: 20,
+  },
+});
+
+export const EXECUTION_TIMEOUT_PARAMS = resolve({
+  // When serving a request with no timeout specified (via x-timeout header),
+  // apply this timeout to request processing
+  defaultExecutionTimeoutMillis: {
+    property: 'DEFAULT_EXECUTION_TIMEOUT_MILLIS',
+    resolver: resolvers.nonNegativeInteger,
+    defaultTo: 1000,
+  },
+  // The maximum timeout to apply to request processing, regardless timeouts
+  // specified by the request.
+  maxExecutionTimeoutMillis: {
+    property: 'DEFAULT_EXECUTION_TIMEOUT_MILLIS',
+    resolver: resolvers.nonNegativeInteger,
+    defaultTo: 3500,
+  },
+  // When computing timeouts for upstream calls, subtract this amount from the
+  // timeout active on the current request to ensure we have time to assemble
+  // our response.
+  executionPaddingMillis: {
+    property: 'EXECUTION_PADDING_MILLIS',
+    resolver: resolvers.nonNegativeInteger,
+    defaultTo: 25,
+  },
+});
+
+export const UPSTREAM_TIMEOUT_PARAMS = resolve({
+  // When setting the x-timeout header on upstream calls, subtract this amount
+  // of time from the time remaining in the current request (to pad for network
+  // overhead)
+  upstreamTimeoutPaddingMillis: {
+    property: 'UPSTREAM_TIMEOUT_PADDING_MILLIS',
+    resolver: resolvers.nonNegativeInteger,
+    defaultTo: 25,
+  },
+  // Below this threshold, do not pad the x-timeout header, just hope the
+  // request completes in time.
+  upstreamTimeoutPaddingThreshold: {
+    property: 'UPSTREAM_TIMEOUT_PADDING_THRESHOLD',
+    resolver: resolvers.nonNegativeInteger,
+    defaultTo: 25,
+  },
+  // Default maximum time to allot upstream calls, no matter how much time is
+  // left to serve the current request, unless the upstream is configured
+  // differently.
+  softMaxUpstreamTimeoutMillis: {
+    property: 'SOFT_MAX_UPSTREAM_TIMEOUT_MILLIS',
+    resolver: resolvers.nonNegativeInteger,
+    defaultTo: 350,
+  },
+  // Maximum time to allot upstream calls, no matter how much time is left to
+  // serve the current request or how the upstream is configured.
+  hardMaxUpstreamTimeoutMillis: {
+    property: 'HARD_MAX_UPSTREAM_TIMEOUT_MILLIS',
+    resolver: resolvers.nonNegativeInteger,
+    defaultTo: 2500,
   },
 });
 

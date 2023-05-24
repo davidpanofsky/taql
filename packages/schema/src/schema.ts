@@ -1,13 +1,15 @@
-import { Subgraph, stitch } from '@ta-graphql-utils/stitch';
+import { ExecutorConfig, Subgraph, stitch } from '@ta-graphql-utils/stitch';
 import { EventEmitter } from 'events';
 import { Executor } from '@graphql-tools/utils';
 import { GraphQLSchema } from 'graphql';
+import { LEGACY_GQL_PARAMS } from '@taql/config';
 import type { TaqlYogaPlugin } from '@taql/context';
 import TypedEmitter from 'typed-emitter';
-import { createExecutor } from '@taql/batching';
+import { createExecutor as batchingExecutorFactory } from '@taql/batching';
 import deepEqual from 'deep-equal';
 import { getLegacySubgraph } from './legacy';
 import { logger } from '@taql/config';
+import { makeRemoteExecutor } from '@taql/executors';
 
 export type SchemaDigest = {
   legacyHash: string;
@@ -18,6 +20,13 @@ export type TASchema = {
   schema: GraphQLSchema;
   digest: SchemaDigest;
 };
+
+const requestedMaxTimeout = LEGACY_GQL_PARAMS.maxTimeout;
+
+const executorFactory = (config: ExecutorConfig): Executor =>
+  config.batching != undefined
+    ? batchingExecutorFactory(requestedMaxTimeout, config)
+    : makeRemoteExecutor(config.url, requestedMaxTimeout);
 
 export async function makeSchema({
   previous,
@@ -46,10 +55,7 @@ export async function makeSchema({
   // TODO load schemas from schema repository, add to subschemas.
 
   try {
-    const stitchResult = await stitch(
-      subgraphs,
-      createExecutor as () => Executor
-    );
+    const stitchResult = await stitch(subgraphs, executorFactory);
 
     if ('errors' in stitchResult) {
       logger.error(

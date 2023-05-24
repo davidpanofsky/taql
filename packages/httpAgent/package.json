@@ -13,7 +13,6 @@
   },
   "dependencies": {
     "@taql/config": "workspace:^",
-    "@taql/ssl": "workspace:^",
-    "cacheable-lookup": "^7.0.0"
+    "@taql/ssl": "workspace:^"
   }
 }

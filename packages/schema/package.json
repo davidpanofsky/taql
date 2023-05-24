@@ -21,6 +21,7 @@
     "@taql/batching": "workspace:^",
     "@taql/config": "workspace:^",
     "@taql/debug": "workspace:^",
+    "@taql/executors": "workspace:^",
     "@taql/httpAgent": "workspace:^",
     "deep-equal": "^2.2.1",
     "graphql": "^16.6.0",
