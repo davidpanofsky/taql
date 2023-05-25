@@ -32,7 +32,7 @@ export const LEGACY_GQL_PARAMS = resolve({
   maxTimeout: {
     property: 'LEGACY_GQL_TIMEOUT',
     resolver: resolvers.nonNegativeInteger,
-    defaultTo: 3000,
+    defaultTo: 5000,
   },
   batchMaxSize: {
     /* Matches MAX_BATCH_SIZE in legacy graphql
