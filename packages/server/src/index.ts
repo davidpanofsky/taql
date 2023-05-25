@@ -184,7 +184,8 @@ export async function main() {
           // Todo: Add checks for other things like database connection, etc.
           //redisCache[0].store.client.status
           logger.debug('Responding Readiness Check');
-          return new fetchAPI.Response('<NotImplemented/>');
+          // The trailing newline is important for unblacklisting, apparently.
+          return new fetchAPI.Response('<NotImplemented/>\n');
         } catch (err) {
           logger.error(err);
           return false;
