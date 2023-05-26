@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@envelop/core": "^3.0.6",
-    "@taql/config": "workspace:^"
+    "@taql/config": "workspace:^",
+    "graphql": "^16.6.0"
   }
 }

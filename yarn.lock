@@ -1467,7 +1467,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@opentelemetry/api@npm:^1.0.0":
+"@opentelemetry/api@npm:^1.0.0, @opentelemetry/api@npm:^1.4.1":
   version: 1.4.1
   resolution: "@opentelemetry/api@npm:1.4.1::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40opentelemetry%2Fapi%2F-%2Fapi-1.4.1.tgz"
   checksum: e783c40d1a518abf9c4c5d65223237c1392cd9a6c53ac6e2c3ef0c05ff7266e3dfc4fd9874316dae0dcb7a97950878deb513bcbadfaad653d48f0215f2a0911b
@@ -1643,6 +1643,7 @@ __metadata:
   dependencies:
     "@taql/config": "workspace:^"
     "@types/node-fetch": ^2.6.3
+    graphql: ^16.6.0
     graphql-yoga: ^3.9.1
     koa: ^2.14.2
     node-fetch: ^2.6.11
@@ -1656,6 +1657,7 @@ __metadata:
   dependencies:
     "@graphql-tools/utils": ^8.13.1
     "@taql/context": "workspace:^"
+    graphql: ^16.6.0
     typescript: ^5.0.4
   languageName: unknown
   linkType: soft
@@ -1670,6 +1672,7 @@ __metadata:
     "@graphql-tools/utils": ^8.13.1
     "@taql/config": "workspace:^"
     "@taql/testing": "workspace:^"
+    graphql: ^16.6.0
     typescript: ^5.0.4
   languageName: unknown
   linkType: soft
@@ -1758,9 +1761,11 @@ __metadata:
   dependencies:
     "@envelop/core": ^3.0.6
     "@envelop/opentelemetry": ^4.1.0
+    "@graphql-tools/utils": ^9.2.1
     "@graphql-yoga/plugin-apq": ^1.9.1
     "@graphql-yoga/plugin-disable-introspection": ^0.8.1
     "@graphql-yoga/plugin-prometheus": ^1.9.1
+    "@opentelemetry/api": ^1.4.1
     "@opentelemetry/exporter-zipkin": ^1.12.0
     "@opentelemetry/sdk-trace-base": ^1.12.0
     "@taql/config": "workspace:^"
@@ -1816,6 +1821,7 @@ __metadata:
     jest: ^29.5.0
     prettier: ^2.8.8
     ts-jest: ^29.1.0
+    typescript: ^5.0.4
   languageName: unknown
   linkType: soft
 
