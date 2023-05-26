@@ -14,7 +14,6 @@ import {
 } from '@opentelemetry/sdk-trace-base';
 import { DocumentNode, GraphQLError, GraphQLSchema } from 'graphql';
 import { Server, createServer as httpServer } from 'http';
-import { TaqlContext, useTaqlContext } from '@taql/context';
 import { caching, multiCaching } from 'cache-manager';
 import { createYoga, useReadinessCheck } from 'graphql-yoga';
 import {
@@ -38,6 +37,7 @@ import promClient from 'prom-client';
 import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspection';
 import { useOpenTelemetry } from '@envelop/opentelemetry';
 import { usePrometheus } from '@graphql-yoga/plugin-prometheus';
+import { useTaqlContext } from '@taql/context';
 
 export async function main() {
   // Set up memory monitoring
@@ -224,12 +224,13 @@ export async function main() {
           allowStale: true,
         })) ?? undefined;
     }
-    return schemaForContext;
   }
   const yoga = createYoga<TaqlState>({
     schema: ENABLE_FEATURES.serviceOverrides
       ? async (context) =>
-          (await getSchemaForContext(context.state.taql)) ?? schema
+          context.state.taql.SVCO != undefined
+            ? await getSchemaForContext(context.state.taql.SVCO)
+            : schema
       : schema,
     ...yogaOptions,
     plugins: yogaPlugins,
