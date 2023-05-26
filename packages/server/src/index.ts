@@ -201,36 +201,33 @@ export async function main() {
     name: 'taql_svco_schema_builds',
     help: 'Total number of times the taql instance has needed to build a new schema to serve an SVCO cookie/header',
   });
-  const schemaForContextCache = ENABLE_FEATURES.serviceOverrides
+  const schemaForSVCOCache = ENABLE_FEATURES.serviceOverrides
     ? new LRUCache<string, GraphQLSchema>({
         max: 128,
         ttl: 1000 * 60 * 2,
-        async fetchMethod(key) {
+        async fetchMethod(key): Promise<GraphQLSchema> {
           logger.debug(`Fetching and building schema for SVCO: ${key}`);
           svcoSchemaBuilds.inc(); // We're probably about to hang the event loop, inc before building schema
           return makeSchema(key);
         },
       })
     : null;
-  async function getSchemaForContext(
-    context: TaqlContext
-  ): Promise<GraphQLSchema | undefined> {
-    const legacySVCO = context.legacyContext.SVCO;
-    let schemaForContext: GraphQLSchema | undefined;
-    if (legacySVCO) {
-      logger.debug(`Using schema for SVCO: ${legacySVCO}`);
-      schemaForContext =
-        (await schemaForContextCache?.fetch(legacySVCO, {
-          allowStale: true,
-        })) ?? undefined;
-    }
-  }
   const yoga = createYoga<TaqlState>({
     schema: ENABLE_FEATURES.serviceOverrides
-      ? async (context) =>
-          context.state.taql.SVCO != undefined
-            ? await getSchemaForContext(context.state.taql.SVCO)
-            : schema
+      ? async (context) => {
+          if (context.state.taql.legacyContext.SVCO == undefined) {
+            return schema;
+          } else {
+            logger.debug(
+              `Using schema for SVCO: ${context.state.taql.legacyContext.SVCO}`
+            );
+            const schemaForSVCO = await schemaForSVCOCache?.fetch(
+              context.state.taql.legacyContext.SVCO,
+              { allowStale: true }
+            );
+            return schemaForSVCO == undefined ? schema : schemaForSVCO;
+          }
+        }
       : schema,
     ...yogaOptions,
     plugins: yogaPlugins,
