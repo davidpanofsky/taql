@@ -202,7 +202,15 @@ export async function main() {
     help: 'Total number of times the taql instance has needed to build a new schema to serve an SVCO cookie/header',
   });
   const schemaForContextCache = ENABLE_FEATURES.serviceOverrides
-    ? new LRUCache<string, GraphQLSchema>({ max: 32, ttl: 1000 * 60 * 2 })
+    ? new LRUCache<string, GraphQLSchema>({
+        max: 128,
+        ttl: 1000 * 60 * 2,
+        async fetchMethod(key) {
+          logger.debug(`Fetching and building schema for SVCO: ${key}`);
+          svcoSchemaBuilds.inc(); // We're probably about to hang the event loop, inc before building schema
+          return makeSchema(key);
+        },
+      })
     : null;
   async function getSchemaForContext(
     context: TaqlContext
@@ -210,16 +218,11 @@ export async function main() {
     const legacySVCO = context.legacyContext.SVCO;
     let schemaForContext: GraphQLSchema | undefined;
     if (legacySVCO) {
-      if (schemaForContextCache?.has(legacySVCO)) {
-        logger.debug('Using cached schema for SVCO: ', legacySVCO);
-        schemaForContext = schemaForContextCache.get(legacySVCO);
-      } else {
-        logger.debug('Fetching schema for SVCO: ', legacySVCO);
-        svcoSchemaBuilds.inc(); // We're probably about to hang the event loop, inc before building schema
-        schemaForContext = await makeSchema(legacySVCO);
-        schemaForContext != undefined &&
-          schemaForContextCache?.set(legacySVCO, schemaForContext);
-      }
+      logger.debug(`Using schema for SVCO: ${legacySVCO}`);
+      schemaForContext =
+        (await schemaForContextCache?.fetch(legacySVCO, {
+          allowStale: true,
+        })) ?? undefined;
     }
     return schemaForContext;
   }
