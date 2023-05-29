@@ -16,6 +16,10 @@ import { DocumentNode, GraphQLError, GraphQLSchema } from 'graphql';
 import { Server, createServer as httpServer } from 'http';
 import { caching, multiCaching } from 'cache-manager';
 import { createYoga, useReadinessCheck } from 'graphql-yoga';
+import fetch, {
+  Headers as FetchHeaders,
+  Response as FetchResponse,
+} from 'node-fetch';
 import {
   mutatedFieldsExtensionPlugin,
   usePreregisteredQueries,
@@ -25,12 +29,14 @@ import {
   subschemaExtensionsPlugin,
 } from '@taql/debug';
 import { AggregatorRegistry } from 'prom-client';
+import type { IncomingHttpHeaders } from 'http';
 import Koa from 'koa';
 import { LRUCache } from 'lru-cache';
 import { SSL_CONFIG } from '@taql/ssl';
 import { TaqlState } from '@taql/context';
 import { ZipkinExporter } from '@opentelemetry/exporter-zipkin';
 import cluster from 'node:cluster';
+import { httpsAgent } from '@taql/httpAgent';
 import { createServer as httpsServer } from 'https';
 import { ioRedisStore } from '@tirke/node-cache-manager-ioredis';
 import koaLogger from 'koa-logger';
@@ -53,7 +59,10 @@ const workerStartup = async () => {
   // taql_nodejs_gc_duration_seconds_sum{kind="..."}
   promClient.collectDefaultMetrics({ prefix });
   // end: memory monitoring
-  const { port, batchLimit } = SERVER_PARAMS;
+  const batchLimit = SERVER_PARAMS.batchLimit;
+  const port = SERVER_PARAMS.svcoWorker
+    ? SERVER_PARAMS.port - 1
+    : SERVER_PARAMS.port;
 
   const yogaOptions = {
     graphiql: ENABLE_FEATURES.graphiql,
@@ -210,6 +219,7 @@ const workerStartup = async () => {
     name: 'taql_svco_schema_builds',
     help: 'Total number of times the taql instance has needed to build a new schema to serve an SVCO cookie/header',
   });
+
   const schemaForSVCOCache = ENABLE_FEATURES.serviceOverrides
     ? new LRUCache<string, GraphQLSchema>({
         max: 128,
@@ -259,8 +269,38 @@ const workerStartup = async () => {
     logger.debug(
       `worker=${cluster.worker?.id} Koa Request: ${ctx.request.method} ${ctx.request.url}`
     );
-    // Second parameter adds Koa's context into GraphQL Context
-    const response = await yoga.handleNodeRequest(ctx.req, ctx);
+    const legacySVCO = ctx.state.taql.SVCO;
+    let response: Response | FetchResponse;
+    if (
+      ENABLE_FEATURES.serviceOverrides &&
+      !SERVER_PARAMS.svcoWorker &&
+      legacySVCO
+    ) {
+      logger.debug(
+        `worker=${cluster.worker?.id} SVCO cookie set, but I'm not the SVCO worker... forwarding request. SVCO: ${legacySVCO}`
+      );
+      const requestHeaders: FetchHeaders = new FetchHeaders();
+      for (const key in ctx.request.headers) {
+        [(<IncomingHttpHeaders>ctx.request.headers)[key]]
+          .flat()
+          .forEach((val) => {
+            val != undefined && requestHeaders.set(key, val);
+          });
+      }
+      response = await fetch(
+        `${ctx.request.protocol}://localhost:${port - 1}${ctx.request.url}`,
+        {
+          method: ctx.request.method,
+          headers: requestHeaders,
+          body: ctx.req,
+          agent: ctx.request.protocol == 'https' ? httpsAgent : undefined,
+        }
+      );
+    } else {
+      // Second parameter adds Koa's context into GraphQL Context
+      response = await yoga.handleNodeRequest(ctx.req, ctx);
+    }
+
     logger.debug(
       `worker=${cluster.worker?.id} Yoga Response: ${response.status} ${response.statusText}`
     );
@@ -337,7 +377,7 @@ const primaryStartup = async () => {
   });
   // end: memory monitoring
 
-  const { port, clusterParallelism } = SERVER_PARAMS;
+  const { port } = SERVER_PARAMS;
 
   const koa = new Koa();
   koa.use(koaLogger());
@@ -370,8 +410,13 @@ const primaryStartup = async () => {
 
   logger.info(`Primary process (${process.pid}) is running`);
 
+  // create one worker for svco on port - 1 if enabled.
+  ENABLE_FEATURES.serviceOverrides && cluster.fork({ SVCO_WORKER: true });
+  const clusterParallelism = ENABLE_FEATURES.serviceOverrides
+    ? Math.max(SERVER_PARAMS.clusterParallelism - 1, 1)
+    : SERVER_PARAMS.clusterParallelism;
   for (let i = 0; i < clusterParallelism; i++) {
-    cluster.fork();
+    cluster.fork({ SVCO_WORKER: false });
     // A small delay between forks seems to help keep external dependencies happy.
     await new Promise<void>((resolve) => setTimeout(resolve, 100));
   }
