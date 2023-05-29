@@ -145,6 +145,11 @@ export const SERVER_PARAMS = resolve({
       availableParallelism instanceof Function ? availableParallelism() : 1,
     resolver: resolvers.nonNegativeInteger,
   },
+  svcoWorker: {
+    property: 'SVCO_WORKER',
+    resolver: resolvers.booleanFromString,
+    defaultTo: false,
+  },
 });
 
 export const ENABLE_FEATURES = resolve({
