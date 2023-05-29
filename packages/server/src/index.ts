@@ -225,7 +225,7 @@ const workerStartup = async () => {
         max: 128,
         ttl: 1000 * 60 * 2,
         async fetchMethod(key): Promise<GraphQLSchema> {
-          logger.debug(`Fetching and building schema for SVCO: ${key}`);
+          logger.debug(`worker=${cluster.worker?.id} Fetching and building schema for SVCO: ${key}`);
           svcoSchemaBuilds.inc(); // We're probably about to hang the event loop, inc before building schema
           return makeSchema(key);
         },
@@ -235,14 +235,14 @@ const workerStartup = async () => {
   const yoga = createYoga<TaqlState>({
     schema: ENABLE_FEATURES.serviceOverrides
       ? async (context) => {
-          if (context.state.taql.legacyContext.SVCO == undefined) {
+          if (context.state.taql.SVCO == undefined) {
             return schema;
           } else {
             logger.debug(
-              `Using schema for SVCO: ${context.state.taql.legacyContext.SVCO}`
+              `worker=${cluster.worker?.id} Using schema for SVCO: ${context.state.taql.SVCO}`
             );
             const schemaForSVCO = await schemaForSVCOCache?.fetch(
-              context.state.taql.legacyContext.SVCO,
+              context.state.taql.SVCO,
               { allowStale: true }
             );
             return schemaForSVCO == undefined ? schema : schemaForSVCO;
