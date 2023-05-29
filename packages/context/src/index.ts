@@ -1,21 +1,53 @@
-import { LegacyContext, TaqlContext, TaqlMiddleware } from './types';
-import { forwardableHeaders, getHeaderOrDefault } from './headers';
+import {
+  ForwardableHeaders,
+  forwardableHeaders,
+  getHeaderOrDefault,
+} from './headers';
+import type { Middleware, ParameterizedContext } from 'koa';
 import { EXECUTION_TIMEOUT_PARAMS } from '@taql/config';
 import { Headers as FetchHeaders } from 'node-fetch';
 import type { IncomingHttpHeaders } from 'http';
+import type { Plugin as Yoga } from 'graphql-yoga';
 
 export {
-  TaqlMiddleware,
-  TaqlState,
-  LegacyContext,
-  TaqlContext,
   ForwardHeader,
   ForwardHeaderName,
   ForwardableHeaders,
-  TaqlYogaPlugin,
-} from './types';
+} from './headers';
 
 type InputHeaders = FetchHeaders | Headers | IncomingHttpHeaders;
+
+/*
+ * See:
+ * https://grok.dev.tripadvisor.com/xref/dplat__graphql/src/main/resources/exports/com/tripadvisor/service/graphql/graphql.swagger?r=279bef78#188
+ *
+ * This is actually sent to legacy graphql on every request and should conform
+ * to the RequestContext legacy graphql defines for itself.
+ * https://jira.tamg.io/browse/DM-459 identified the locale, debugToolEnabled,
+ * uniqueId, and userClientIP fields as the only ones actually consumed by
+ * legacy graphql, so they are the only ones we'll send.
+ */
+export type LegacyContext = Readonly<{
+  locale: string;
+  debugToolEnabled: boolean;
+  uniqueId: string | undefined;
+  userClientIP: string | undefined;
+}>;
+
+export type TaqlContext = Readonly<{
+  forwardHeaders: ForwardableHeaders;
+  deadline: number;
+  legacyContext: LegacyContext;
+  SVCO: string | undefined;
+}>;
+
+type RawState = Readonly<{ taql: TaqlContext }>;
+export type TaqlState = ParameterizedContext<RawState>;
+
+type MaybeSupplier<T> = T | (() => T);
+
+export type TaqlMiddleware = Middleware<RawState>;
+export type TaqlYogaPlugin = MaybeSupplier<Yoga<TaqlState>>;
 
 /**
  * pull the first client from a value of the 'x-forwarded-for' header
@@ -36,7 +68,6 @@ const legacyContextFromHeaders = (headers: InputHeaders): LegacyContext => ({
   userClientIP: clientFromXff(
     getHeaderOrDefault(headers, 'x-forwarded-for', undefined)
   ),
-  SVCO: getHeaderOrDefault(headers, 'x-service-overrides', undefined),
 });
 
 const deadline = (headers: InputHeaders): number =>
@@ -59,6 +90,7 @@ const buildContext = (headers: InputHeaders): TaqlContext => ({
   forwardHeaders: forwardableHeaders(headers),
   deadline: deadline(headers),
   legacyContext: legacyContextFromHeaders(headers),
+  SVCO: getHeaderOrDefault(headers, 'x-service-overrides', undefined),
 });
 
 export const useTaqlContext: TaqlMiddleware = async (ctx, next) => {
