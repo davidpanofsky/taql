@@ -1,5 +1,6 @@
 import { LogLevel, createLogger } from '@graphql-yoga/logger';
 import { resolve, resolvers } from './resolution';
+import { availableParallelism } from 'node:os';
 import { config } from 'dotenv';
 import { hostname } from 'os';
 
@@ -137,6 +138,12 @@ export const SERVER_PARAMS = resolve({
   hostname: {
     property: 'HOSTNAME',
     defaultTo: hostname(),
+  },
+  clusterParallelism: {
+    property: 'CLUSTER_PARALLELISM',
+    defaultTo:
+      availableParallelism instanceof Function ? availableParallelism() : 1,
+    resolver: resolvers.nonNegativeInteger,
   },
 });
 
