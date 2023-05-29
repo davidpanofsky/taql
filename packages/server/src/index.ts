@@ -225,7 +225,9 @@ const workerStartup = async () => {
         max: 128,
         ttl: 1000 * 60 * 2,
         async fetchMethod(key): Promise<GraphQLSchema> {
-          logger.debug(`worker=${cluster.worker?.id} Fetching and building schema for SVCO: ${key}`);
+          logger.debug(
+            `worker=${cluster.worker?.id} Fetching and building schema for SVCO: ${key}`
+          );
           svcoSchemaBuilds.inc(); // We're probably about to hang the event loop, inc before building schema
           return makeSchema(key);
         },
