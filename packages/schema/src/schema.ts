@@ -8,7 +8,6 @@ import TypedEmitter from 'typed-emitter';
 import { createExecutor as batchingExecutorFactory } from '@taql/batching';
 import deepEqual from 'deep-equal';
 import { getLegacySubgraph } from './legacy';
-import { logger } from '@taql/config';
 import { makeRemoteExecutor } from '@taql/executors';
 
 export type SchemaDigest = {
@@ -34,23 +33,19 @@ export async function makeSchema({
 }: {
   previous?: TASchema;
   legacySVCO?: string;
-} = {}): Promise<TASchema | undefined> {
+} = {}): Promise<TASchema> {
   const subgraphs: Subgraph[] = [];
 
   // TODO load manifest from schema repository
 
-  const legacy = await getLegacySubgraph(legacySVCO).catch(() => undefined);
+  const legacy = await getLegacySubgraph(legacySVCO);
   const digest: SchemaDigest = { manifest: '', legacyHash: legacy?.hash || '' };
 
   if (previous != undefined && deepEqual(digest, previous.digest)) {
     return previous;
   }
 
-  if (legacy == undefined) {
-    return previous;
-  } else {
-    subgraphs.push(legacy.subgraph);
-  }
+  subgraphs.push(legacy.subgraph);
 
   // TODO load schemas from schema repository, add to subschemas.
 
@@ -58,7 +53,7 @@ export async function makeSchema({
     const stitchResult = await stitch(subgraphs, executorFactory);
 
     if ('errors' in stitchResult) {
-      logger.error(
+      throw new Error(
         `Schema failed to validate: ${stitchResult.errors.toString()}`
       );
     }
@@ -66,11 +61,12 @@ export async function makeSchema({
     if ('schema' in stitchResult) {
       const { schema } = stitchResult;
       return { schema, digest };
+    } else {
+      throw new Error('No schema in stitch result');
     }
   } catch (err: unknown) {
-    logger.error(`Error stitching schemas: ${err}`);
+    throw new Error(`Error stitching schemas: ${err}`);
   }
-  return undefined;
 }
 
 type SchemaEvents = {

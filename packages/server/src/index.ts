@@ -14,7 +14,6 @@ import {
 } from '@opentelemetry/sdk-trace-base';
 import { DocumentNode, GraphQLError, GraphQLSchema } from 'graphql';
 import { Server, createServer as httpServer } from 'http';
-import { TaqlContext, useTaqlContext } from '@taql/context';
 import { caching, multiCaching } from 'cache-manager';
 import { createYoga, useReadinessCheck } from 'graphql-yoga';
 import fetch, {
@@ -47,6 +46,7 @@ import promClient from 'prom-client';
 import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspection';
 import { useOpenTelemetry } from '@envelop/opentelemetry';
 import { usePrometheus } from '@graphql-yoga/plugin-prometheus';
+import { useTaqlContext } from '@taql/context';
 
 const prometheusRegistry = new AggregatorRegistry();
 const workerStartup = async () => {
@@ -219,39 +219,38 @@ const workerStartup = async () => {
     name: 'taql_svco_schema_builds',
     help: 'Total number of times the taql instance has needed to build a new schema to serve an SVCO cookie/header',
   });
-  const schemaForContextCache =
-    ENABLE_FEATURES.serviceOverrides && SERVER_PARAMS.svcoWorker
-      ? new LRUCache<string, GraphQLSchema>({ max: 128, ttl: 1000 * 60 * 2 })
-      : null;
-  async function getSchemaForContext(
-    context: TaqlContext
-  ): Promise<GraphQLSchema | undefined> {
-    const legacySVCO = context.SVCO;
-    let schemaForContext: GraphQLSchema | undefined;
-    if (legacySVCO) {
-      if (schemaForContextCache?.has(legacySVCO)) {
-        logger.debug(
-          `worker=${cluster.worker?.id} Using cached schema for SVCO: ${legacySVCO}`
-        );
-        schemaForContext = schemaForContextCache.get(legacySVCO);
-      } else {
-        logger.debug(
-          `worker=${cluster.worker?.id} Fetching schema for SVCO: ${legacySVCO}`
-        );
-        svcoSchemaBuilds.inc(); // We're probably about to hang the event loop, inc before building schema
-        schemaForContext = await makeSchema(legacySVCO);
-        schemaForContext != undefined &&
-          schemaForContextCache?.set(legacySVCO, schemaForContext);
-      }
-    }
-    return schemaForContext;
-  }
+
+  const schemaForSVCOCache = ENABLE_FEATURES.serviceOverrides
+    ? new LRUCache<string, GraphQLSchema>({
+        max: 128,
+        ttl: 1000 * 60 * 2,
+        async fetchMethod(key): Promise<GraphQLSchema> {
+          logger.debug(
+            `worker=${cluster.worker?.id} Fetching and building schema for SVCO: ${key}`
+          );
+          svcoSchemaBuilds.inc(); // We're probably about to hang the event loop, inc before building schema
+          return makeSchema(key);
+        },
+      })
+    : null;
+
   const yoga = createYoga<TaqlState>({
-    schema:
-      ENABLE_FEATURES.serviceOverrides && SERVER_PARAMS.svcoWorker
-        ? async (context) =>
-            (await getSchemaForContext(context.state.taql)) ?? schema
-        : schema,
+    schema: ENABLE_FEATURES.serviceOverrides
+      ? async (context) => {
+          if (context.state.taql.SVCO == undefined) {
+            return schema;
+          } else {
+            logger.debug(
+              `worker=${cluster.worker?.id} Using schema for SVCO: ${context.state.taql.SVCO}`
+            );
+            const schemaForSVCO = await schemaForSVCOCache?.fetch(
+              context.state.taql.SVCO,
+              { allowStale: true }
+            );
+            return schemaForSVCO == undefined ? schema : schemaForSVCO;
+          }
+        }
+      : schema,
     ...yogaOptions,
     plugins: yogaPlugins,
   });
