@@ -25,21 +25,25 @@ import {
   serverHostExtensionPlugin,
   subschemaExtensionsPlugin,
 } from '@taql/debug';
+import { AggregatorRegistry } from 'prom-client';
 import Koa from 'koa';
 import { LRUCache } from 'lru-cache';
 import { SSL_CONFIG } from '@taql/ssl';
 import { TaqlState } from '@taql/context';
 import { ZipkinExporter } from '@opentelemetry/exporter-zipkin';
+import cluster from 'node:cluster';
 import { createServer as httpsServer } from 'https';
 import { ioRedisStore } from '@tirke/node-cache-manager-ioredis';
 import koaLogger from 'koa-logger';
 import { makeSchema } from '@taql/schema';
+import process from 'node:process';
 import promClient from 'prom-client';
 import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspection';
 import { useOpenTelemetry } from '@envelop/opentelemetry';
 import { usePrometheus } from '@graphql-yoga/plugin-prometheus';
 
-export async function main() {
+const prometheusRegistry = new AggregatorRegistry();
+const workerStartup = async () => {
   // Set up memory monitoring
   const prefix = 'taql_';
   // The defaults includes valuable metrics including heap allocation, available memory.
@@ -94,9 +98,11 @@ export async function main() {
   const schema = await makeSchema();
 
   if (schema == undefined) {
-    throw new Error('failed to load initial schema');
+    throw new Error(
+      `worker=${cluster.worker?.id} failed to load initial schema`
+    );
   }
-  logger.info('created initial schema');
+  logger.info(`worker=${cluster.worker?.id} created initial schema`);
 
   // Two tier store for automatic persisted queries
   const memoryCache = await caching('memory', {
@@ -174,20 +180,23 @@ export async function main() {
       errors: true,
       resolvers: true, // requires "execute" to be `true` as well
       deprecatedFields: true,
+      endpoint: '/worker_metrics',
     }),
     useReadinessCheck({
       endpoint: '/NotImplemented',
       async check({ fetchAPI }) {
-        logger.debug('Requested Readiness Check');
+        logger.debug(`worker=${cluster.worker?.id} Requested Readiness Check`);
         try {
           // For now, readiness check is same as healthcheck, but with a different response body.
           // Todo: Add checks for other things like database connection, etc.
           //redisCache[0].store.client.status
-          logger.debug('Responding Readiness Check');
+          logger.debug(
+            `worker=${cluster.worker?.id} Responding Readiness Check`
+          );
           // The trailing newline is important for unblacklisting, apparently.
           return new fetchAPI.Response('<NotImplemented/>\n');
         } catch (err) {
-          logger.error(err);
+          logger.error(`worker=${cluster.worker?.id} ${err}`);
           return false;
         }
       },
@@ -211,10 +220,14 @@ export async function main() {
     let schemaForContext: GraphQLSchema | undefined;
     if (legacySVCO) {
       if (schemaForContextCache?.has(legacySVCO)) {
-        logger.debug('Using cached schema for SVCO: ', legacySVCO);
+        logger.debug(
+          `worker=${cluster.worker?.id} Using cached schema for SVCO: ${legacySVCO}`
+        );
         schemaForContext = schemaForContextCache.get(legacySVCO);
       } else {
-        logger.debug('Fetching schema for SVCO: ', legacySVCO);
+        logger.debug(
+          `worker=${cluster.worker?.id} Fetching schema for SVCO: ${legacySVCO}`
+        );
         svcoSchemaBuilds.inc(); // We're probably about to hang the event loop, inc before building schema
         schemaForContext = await makeSchema(legacySVCO);
         schemaForContext != undefined &&
@@ -245,10 +258,14 @@ export async function main() {
   koa.use(useTaqlContext);
 
   koa.use(async (ctx: TaqlState) => {
-    logger.debug(`Koa Request: ${ctx.request.method} ${ctx.request.url}`);
+    logger.debug(
+      `worker=${cluster.worker?.id} Koa Request: ${ctx.request.method} ${ctx.request.url}`
+    );
     // Second parameter adds Koa's context into GraphQL Context
     const response = await yoga.handleNodeRequest(ctx.req, ctx);
-    logger.debug(`Yoga Response: ${response.status} ${response.statusText}`);
+    logger.debug(
+      `worker=${cluster.worker?.id} Yoga Response: ${response.status} ${response.statusText}`
+    );
 
     // Set status code
     ctx.status = response.status;
@@ -265,7 +282,7 @@ export async function main() {
     // Converts ReadableStream to a NodeJS Stream
     ctx.body = response.body;
     logger.debug(
-      `Koa Response: ${ctx.response.status} ${ctx.response.message} ${ctx.response.length} bytes`
+      `worker=${cluster.worker?.id} Koa Response: ${ctx.response.status} ${ctx.response.message} ${ctx.response.length} bytes`
     );
   });
 
@@ -274,16 +291,116 @@ export async function main() {
     help: 'concurrent requests inside of the koa context',
   });
 
+  /**
+   * This is just to prove that aggregation is working.
+   * 
+   const workerCounter = new promClient.Counter({
+     name: 'taql_worker',
+     help: 'worker',
+     labelNames: ['worker'],
+   });
+
+   setInterval(() => {
+     workerCounter.inc({ worker: cluster.worker?.id });
+   }, 1000);
+   */
+
   const server: Server =
     SSL_CONFIG == undefined ? httpServer() : httpsServer(SSL_CONFIG);
 
   server.addListener('request', koa.callback());
-  logger.info('created server');
+  logger.info(`worker=${cluster.worker?.id} created server`);
 
-  logger.info(`launching server on port ${port}`);
+  logger.info(`worker=${cluster.worker?.id} launching server on port ${port}`);
   server.listen(port, () => {
-    logger.info('server running');
+    logger.info(`worker=${cluster.worker?.id} server running`);
   });
-}
 
-main();
+  // a long http keepalive timeout should help keep SVCO on same worker.
+  //server.keepAliveTimeout = 60_000;
+
+  cluster.worker?.on('disconnect', () => {
+    server.removeAllListeners();
+    server.closeAllConnections();
+  });
+};
+
+const primaryStartup = async () => {
+  // Set up memory monitoring
+  const prefix = 'taql_primary_';
+  // The defaults includes valuable metrics including heap allocation, available memory.
+  // ex:
+  // taql_nodejs_heap_space_size_available_bytes{space="..."}
+  // taql_nodejs_heap_space_size_used_bytes{space="..."}
+  // taql_nodejs_gc_duration_seconds_sum{kind="..."}
+  promClient.collectDefaultMetrics({
+    register: prometheusRegistry,
+    prefix,
+  });
+  // end: memory monitoring
+
+  const { port, clusterParallelism } = SERVER_PARAMS;
+
+  const koa = new Koa();
+  koa.use(koaLogger());
+
+  koa.use(async (ctx) => {
+    if (ctx.request.method === 'GET' && ctx.request.url === '/metrics') {
+      try {
+        const primaryMetrics = await prometheusRegistry.metrics();
+        const clusterMetrics = await prometheusRegistry.clusterMetrics();
+        ctx.set('Content-Type', prometheusRegistry.contentType);
+        ctx.body = [primaryMetrics, clusterMetrics].join('\n');
+        ctx.status = 200;
+      } catch (err) {
+        ctx.status = 500;
+        ctx.body = err;
+      }
+    }
+  });
+
+  const server: Server =
+    SSL_CONFIG == undefined ? httpServer() : httpsServer(SSL_CONFIG);
+
+  server.addListener('request', koa.callback());
+  logger.info('worker=0 created server');
+
+  logger.info(`worker=0 launching server on port ${port + 1}`);
+  server.listen(port + 1, () => {
+    logger.info('worker=0 server running');
+  });
+
+  logger.info(`Primary process (${process.pid}) is running`);
+
+  for (let i = 0; i < clusterParallelism; i++) {
+    cluster.fork();
+    // A small delay between forks seems to help keep external dependencies happy.
+    await new Promise<void>((resolve) => setTimeout(resolve, 100));
+  }
+
+  cluster.on('online', (worker) => {
+    logger.info(`worker=${worker.id} pid=${worker.process.pid} online`);
+  });
+
+  cluster.on('exit', (worker, code, signal) => {
+    if (worker.exitedAfterDisconnect === true) {
+      logger.info(
+        `worker=${worker.id} pid=${worker.process.pid} shutdown gracefully`
+      );
+    } else {
+      if (signal) {
+        logger.warn(
+          `worker=${worker.id} pid=${worker.process.pid} was killed by signal: ${signal}`
+        );
+      } else if (code !== 0) {
+        logger.warn(
+          `worker=${worker.id} pid=${worker.process.pid} exited with error code: ${code}`
+        );
+      }
+      logger.info(`replacing worker ${worker.id}...`);
+      cluster.fork();
+    }
+  });
+};
+
+cluster.isPrimary ? primaryStartup() : workerStartup();
