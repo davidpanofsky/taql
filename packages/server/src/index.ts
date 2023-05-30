@@ -35,7 +35,7 @@ import { LRUCache } from 'lru-cache';
 import { SSL_CONFIG } from '@taql/ssl';
 import { TaqlState } from '@taql/context';
 import { ZipkinExporter } from '@opentelemetry/exporter-zipkin';
-import cluster from 'node:cluster';
+import cluster, { Worker } from 'node:cluster';
 import { httpsAgent } from '@taql/httpAgent';
 import { createServer as httpsServer } from 'https';
 import { ioRedisStore } from '@tirke/node-cache-manager-ioredis';
@@ -453,13 +453,20 @@ const primaryStartup = async () => {
 
   logger.info(`Primary process (${process.pid}) is running`);
 
+  const environments = new WeakMap<
+    Worker,
+    Record<string, string> | undefined
+  >();
+  const fork = (env?: Record<string, string>) =>
+    environments.set(cluster.fork(env), env);
+
   // create one worker for svco on port - 1 if enabled.
-  ENABLE_FEATURES.serviceOverrides && cluster.fork({ SVCO_WORKER: true });
+  ENABLE_FEATURES.serviceOverrides && fork({ SVCO_WORKER: 'true' });
   const clusterParallelism = ENABLE_FEATURES.serviceOverrides
     ? Math.max(SERVER_PARAMS.clusterParallelism - 1, 1)
     : SERVER_PARAMS.clusterParallelism;
   for (let i = 0; i < clusterParallelism; i++) {
-    cluster.fork({ SVCO_WORKER: false });
+    fork({ SVCO_WORKER: 'false' });
     // A small delay between forks seems to help keep external dependencies happy.
     await new Promise<void>((resolve) => setTimeout(resolve, 100));
   }
@@ -484,7 +491,7 @@ const primaryStartup = async () => {
         );
       }
       logger.info(`replacing worker ${worker.id}...`);
-      cluster.fork();
+      fork(environments.get(worker));
     }
   });
 };
