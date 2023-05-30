@@ -287,6 +287,7 @@ const workerStartup = async () => {
     logger.debug(
       `worker=${cluster.worker?.id} Koa Request: ${ctx.request.method} ${ctx.request.url}`
     );
+    logger.debug(ctx.request.headers);
     const legacySVCO = ctx.state.taql.SVCO;
     let response: Response | FetchResponse;
     if (
