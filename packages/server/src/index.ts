@@ -416,7 +416,6 @@ const primaryStartup = async () => {
   // taql_nodejs_heap_space_size_used_bytes{space="..."}
   // taql_nodejs_gc_duration_seconds_sum{kind="..."}
   promClient.collectDefaultMetrics({
-    register: prometheusRegistry,
     prefix,
   });
   // end: memory monitoring
@@ -429,7 +428,7 @@ const primaryStartup = async () => {
   koa.use(async (ctx) => {
     if (ctx.request.method === 'GET' && ctx.request.url === '/metrics') {
       try {
-        const primaryMetrics = await prometheusRegistry.metrics();
+        const primaryMetrics = await promClient.register.metrics();
         const clusterMetrics = await prometheusRegistry.clusterMetrics();
         ctx.set('Content-Type', prometheusRegistry.contentType);
         ctx.body = [primaryMetrics, clusterMetrics].join('\n');
