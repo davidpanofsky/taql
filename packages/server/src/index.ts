@@ -362,6 +362,31 @@ const workerStartup = async () => {
    }, 1000);
    */
 
+  new promClient.Gauge({
+    name: 'taql_validation_cache_size',
+    help: 'validation cache entries',
+    async collect() {
+      const size = yogaOptions.validationCache.size;
+      this.set(size);
+    },
+  });
+  new promClient.Gauge({
+    name: 'taql_document_cache_size',
+    help: 'document cache entries',
+    async collect() {
+      const size = yogaOptions.parserCache.documentCache.size;
+      this.set(size);
+    },
+  });
+  new promClient.Gauge({
+    name: 'taql_error_cache_size',
+    help: 'error cache entries',
+    async collect() {
+      const size = yogaOptions.parserCache.errorCache.size;
+      this.set(size);
+    },
+  });
+
   const server: Server =
     SSL_CONFIG == undefined ? httpServer() : httpsServer(SSL_CONFIG);
 
