@@ -186,6 +186,28 @@ export const PREREGISTERED_QUERY_PARAMS = resolve({
     defaultTo:
       'postgres://graphql_operations_ros@graphql-operations-ros.db.var.ml.tripadvisor.com',
   },
+  pgUseSsl: {
+    property: 'PREREGISTERED_QUERY_USE_SSL',
+    resolver: resolvers.booleanFromString,
+    defaultTo: false,
+  },
+  pgSslKeyPath: {
+    property: 'PGSSLKEY',
+    defaultTo: '/etc/certs/cert.key',
+  },
+  pgSslCertPath: {
+    property: 'PGSSLCERT',
+    defaultTo: '/etc/certs/cert.pem',
+  },
+  pgSslCaCertPath: {
+    property: 'PGSSLROOTCERT',
+    defaultTo: '/etc/certs/root.pem',
+  },
+  sslRejectUnauthorized: {
+    property: 'PREREGISTERED_QUERY_REJECT_UNAUTHORIZED',
+    resolver: resolvers.booleanFromString,
+    defaultTo: true,
+  },
 });
 
 export const AUTOMATIC_PERSISTED_QUERY_PARAMS = resolve({

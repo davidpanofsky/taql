@@ -100,12 +100,19 @@ export function usePreregisteredQueries(options: {
   postgresConnectionString?: string;
   maxPoolSize?: number;
   poolConnectionTimeoutMillis?: number;
+  ssl?: {
+    ca: string;
+    cert: string;
+    key: string;
+    rejectUnauthorized: boolean;
+  };
 }): YogaPlugin {
   const {
     maxCacheSize,
     postgresConnectionString = 'postgres://graphql_operations_ros@localhost',
     maxPoolSize = 10,
     poolConnectionTimeoutMillis = 0,
+    ssl = undefined,
   } = options;
 
   logger.info(
@@ -122,6 +129,7 @@ export function usePreregisteredQueries(options: {
     connectionString: postgresConnectionString,
     max: maxPoolSize,
     connectionTimeoutMillis: poolConnectionTimeoutMillis,
+    ssl,
   });
 
   return {
