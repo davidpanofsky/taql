@@ -72,7 +72,7 @@ const load = async <T, R>({
   }
 
   if (timeout < 0) {
-    throw new Error(`Aborting request to ${url}. No time remaining`);
+    throw new Error(`Skipping upstream request to ${url}. No time remaining.`);
   }
 
   // pad timeout to give the upstream time for network overhead.
