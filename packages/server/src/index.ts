@@ -43,6 +43,7 @@ import koaLogger from 'koa-logger';
 import { makeSchema } from '@taql/schema';
 import process from 'node:process';
 import promClient from 'prom-client';
+import { readFileSync } from 'fs';
 import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspection';
 import { useOpenTelemetry } from '@envelop/opentelemetry';
 import { usePrometheus } from '@graphql-yoga/plugin-prometheus';
@@ -173,6 +174,12 @@ const workerStartup = async () => {
     usePreregisteredQueries({
       maxCacheSize: PREREGISTERED_QUERY_PARAMS.maxCacheSize,
       postgresConnectionString: PREREGISTERED_QUERY_PARAMS.databaseUri,
+      ssl: {
+        ca: readFileSync(PREREGISTERED_QUERY_PARAMS.pgSslCaCertPath).toString(),
+        cert: readFileSync(PREREGISTERED_QUERY_PARAMS.pgSslCertPath).toString(),
+        key: readFileSync(PREREGISTERED_QUERY_PARAMS.pgSslKeyPath).toString(),
+        rejectUnauthorized: PREREGISTERED_QUERY_PARAMS.sslRejectUnauthorized,
+      },
     }),
     usePrometheus({
       // Options specified by @graphql-yoga/plugin-prometheus
