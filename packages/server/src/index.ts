@@ -174,12 +174,21 @@ const workerStartup = async () => {
     usePreregisteredQueries({
       maxCacheSize: PREREGISTERED_QUERY_PARAMS.maxCacheSize,
       postgresConnectionString: PREREGISTERED_QUERY_PARAMS.databaseUri,
-      ssl: {
-        ca: readFileSync(PREREGISTERED_QUERY_PARAMS.pgSslCaCertPath).toString(),
-        cert: readFileSync(PREREGISTERED_QUERY_PARAMS.pgSslCertPath).toString(),
-        key: readFileSync(PREREGISTERED_QUERY_PARAMS.pgSslKeyPath).toString(),
-        rejectUnauthorized: PREREGISTERED_QUERY_PARAMS.sslRejectUnauthorized,
-      },
+      ssl: PREREGISTERED_QUERY_PARAMS.pgUseSsl
+        ? {
+            ca: readFileSync(
+              PREREGISTERED_QUERY_PARAMS.pgSslCaCertPath
+            ).toString(),
+            cert: readFileSync(
+              PREREGISTERED_QUERY_PARAMS.pgSslCertPath
+            ).toString(),
+            key: readFileSync(
+              PREREGISTERED_QUERY_PARAMS.pgSslKeyPath
+            ).toString(),
+            rejectUnauthorized:
+              PREREGISTERED_QUERY_PARAMS.sslRejectUnauthorized,
+          }
+        : undefined,
     }),
     usePrometheus({
       // Options specified by @graphql-yoga/plugin-prometheus
