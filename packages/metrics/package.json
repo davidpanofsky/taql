@@ -1,5 +1,5 @@
 {
-  "name": "@taql/prereg",
+  "name": "@taql/metrics",
   "version": "1.0.0",
   "main": "build/index.js",
   "scripts": {
@@ -8,17 +8,11 @@
   },
   "license": "UNLICENSED",
   "devDependencies": {
-    "@taql/testing": "workspace:^",
-    "@types/pg": "^8.6.6",
     "typescript": "^5.0.4"
   },
   "dependencies": {
-    "@envelop/core": "^3.0.6",
     "@taql/config": "workspace:^",
-    "@taql/metrics": "workspace:^",
-    "graphql": "^16.6.0",
-    "graphql-yoga": "^3.9.1",
-    "pg": "^8.10.0",
+    "lru-cache": "^9.1.2",
     "prom-client": "^14.2.0"
   }
 }
