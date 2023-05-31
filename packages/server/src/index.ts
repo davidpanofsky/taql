@@ -81,12 +81,29 @@ const primaryStartup = async () => {
 
   logger.info(`Primary process (${process.pid}) is running`);
 
+  const forkCount = new promClient.Counter({
+    name: 'taql_worker_forks',
+    help: 'Count of workers forked with clustering',
+  });
+
+  const workersStarted = new promClient.Counter({
+    name: 'taql_workers_started',
+    help: 'Count of workers started cleanly',
+  });
+
+  const workersExited = new promClient.Counter({
+    name: 'taql_workers_exited',
+    help: 'count of workers exited',
+  });
+
   const environments = new WeakMap<
     Worker,
     Record<string, string> | undefined
   >();
-  const fork = (env?: Record<string, string>) =>
+  const fork = (env?: Record<string, string>) => {
+    forkCount.inc();
     environments.set(cluster.fork(env), env);
+  };
 
   // Override prom prefix for workers.
   const workerEnv = { PROM_PREFIX: PROM_PARAMS.workerPrefix };
@@ -103,6 +120,7 @@ const primaryStartup = async () => {
   }
 
   cluster.on('online', (worker) => {
+    workersStarted.inc();
     logger.info(`worker=${worker.id} pid=${worker.process.pid} online`);
   });
 
@@ -111,15 +129,18 @@ const primaryStartup = async () => {
       logger.info(
         `worker=${worker.id} pid=${worker.process.pid} shutdown gracefully`
       );
+      workersExited.inc({ kind: 'graceful' });
     } else {
       if (signal) {
         logger.warn(
           `worker=${worker.id} pid=${worker.process.pid} was killed by signal: ${signal}`
         );
+        workersExited.inc({ kind: 'killed' });
       } else if (code !== 0) {
         logger.warn(
           `worker=${worker.id} pid=${worker.process.pid} exited with error code: ${code}`
         );
+        workersExited.inc({ kind: 'error' });
       }
       logger.info(`replacing worker ${worker.id}...`);
       fork(environments.get(worker));
