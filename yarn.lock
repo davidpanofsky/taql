@@ -1382,7 +1382,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@opentelemetry/api@npm:^1.0.0, @opentelemetry/api@npm:^1.4.1":
+"@opentelemetry/api@npm:^1.0.0":
   version: 1.4.1
   resolution: "@opentelemetry/api@npm:1.4.1::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40opentelemetry%2Fapi%2F-%2Fapi-1.4.1.tgz"
   checksum: e783c40d1a518abf9c4c5d65223237c1392cd9a6c53ac6e2c3ef0c05ff7266e3dfc4fd9874316dae0dcb7a97950878deb513bcbadfaad653d48f0215f2a0911b
@@ -1400,6 +1400,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@opentelemetry/core@npm:1.13.0":
+  version: 1.13.0
+  resolution: "@opentelemetry/core@npm:1.13.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40opentelemetry%2Fcore%2F-%2Fcore-1.13.0.tgz"
+  dependencies:
+    "@opentelemetry/semantic-conventions": 1.13.0
+  peerDependencies:
+    "@opentelemetry/api": ">=1.0.0 <1.5.0"
+  checksum: a69916bcb710f1241e98a58ac5f5dfbc3372fdcd6cb2a4b2d33cdeb941765ecbdeea029f60f650a5743a56f583b0f06b672566467b89db84a24f1304bf2e5205
+  languageName: node
+  linkType: hard
+
 "@opentelemetry/exporter-zipkin@npm:^1.12.0":
   version: 1.12.0
   resolution: "@opentelemetry/exporter-zipkin@npm:1.12.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40opentelemetry%2Fexporter-zipkin%2F-%2Fexporter-zipkin-1.12.0.tgz"
@@ -1411,6 +1422,17 @@ __metadata:
   peerDependencies:
     "@opentelemetry/api": ^1.0.0
   checksum: 4c2b4bfd3fe65d8391b70b71130a67de601cc7c35b11dcc899dd6b1893c76148b650fa10f3ddbfc57a9788349590c758a10558eec6ef8466cc746273e1a534ed
+  languageName: node
+  linkType: hard
+
+"@opentelemetry/propagator-b3@npm:^1.13.0":
+  version: 1.13.0
+  resolution: "@opentelemetry/propagator-b3@npm:1.13.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40opentelemetry%2Fpropagator-b3%2F-%2Fpropagator-b3-1.13.0.tgz"
+  dependencies:
+    "@opentelemetry/core": 1.13.0
+  peerDependencies:
+    "@opentelemetry/api": ">=1.0.0 <1.5.0"
+  checksum: 8ee0db7d47efe21c5c8128621a816221a8e94831b410d60b02d7859d373d55521b3574c288014ffbb9916aaad00b259fe4d92dfeab7c06398e96f94e2b2bea63
   languageName: node
   linkType: hard
 
@@ -1443,6 +1465,13 @@ __metadata:
   version: 1.12.0
   resolution: "@opentelemetry/semantic-conventions@npm:1.12.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40opentelemetry%2Fsemantic-conventions%2F-%2Fsemantic-conventions-1.12.0.tgz"
   checksum: 211fa2fffa82706f641cc785c4bef6ac03ef4cedeacb81972e832d09070e9cf7007867d87776af5c6baa9fddaabced476536962fd9ca1dc0487c9fb5f3f538b8
+  languageName: node
+  linkType: hard
+
+"@opentelemetry/semantic-conventions@npm:1.13.0":
+  version: 1.13.0
+  resolution: "@opentelemetry/semantic-conventions@npm:1.13.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40opentelemetry%2Fsemantic-conventions%2F-%2Fsemantic-conventions-1.13.0.tgz"
+  checksum: 9cccf1d73315fed3920bb2201c0e82f66e58dddfa475314b6613780c2804570d6f657be3894eb8b84a2a543c9b8cd520587f5d6cd4b62bc6731d7299b4c5ee69
   languageName: node
   linkType: hard
 
@@ -1680,8 +1709,8 @@ __metadata:
     "@graphql-yoga/plugin-apq": ^1.9.1
     "@graphql-yoga/plugin-disable-introspection": ^0.8.1
     "@graphql-yoga/plugin-prometheus": ^1.9.1
-    "@opentelemetry/api": ^1.4.1
     "@opentelemetry/exporter-zipkin": ^1.12.0
+    "@opentelemetry/propagator-b3": ^1.13.0
     "@opentelemetry/sdk-trace-base": ^1.12.0
     "@taql/config": "workspace:^"
     "@taql/context": "workspace:^"

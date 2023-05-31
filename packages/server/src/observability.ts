@@ -1,8 +1,12 @@
 import {
+  AlwaysOffSampler,
   BasicTracerProvider,
   BatchSpanProcessor,
+  ConsoleSpanExporter,
+  ParentBasedSampler,
   SimpleSpanProcessor,
 } from '@opentelemetry/sdk-trace-base';
+import { B3InjectEncoding, B3Propagator } from '@opentelemetry/propagator-b3';
 import { PROM_PARAMS, TRACING_PARAMS } from '@taql/config';
 import promClient, { AggregatorRegistry } from 'prom-client';
 import type { ParameterizedContext } from 'koa';
@@ -34,15 +38,26 @@ export const useMetricsEndpoint = async (ctx: ParameterizedContext) => {
   }
 };
 
+export const tracerProvider = new BasicTracerProvider({
+  sampler: new ParentBasedSampler({
+    root: new AlwaysOffSampler(),
+  }),
+});
 const zipkinExporter = new ZipkinExporter({
   serviceName: 'taql',
   url: TRACING_PARAMS.zipkinUrl,
 });
-
-export const tracerProvider = new BasicTracerProvider();
 tracerProvider.addSpanProcessor(
   TRACING_PARAMS.useBatchingProcessor
     ? new BatchSpanProcessor(zipkinExporter)
     : new SimpleSpanProcessor(zipkinExporter)
 );
-tracerProvider.register();
+// Console exporter for debugging
+tracerProvider.addSpanProcessor(
+  new SimpleSpanProcessor(new ConsoleSpanExporter())
+);
+tracerProvider.register({
+  propagator: new B3Propagator({
+    injectEncoding: B3InjectEncoding.MULTI_HEADER,
+  }),
+});
