@@ -12,10 +12,6 @@ import fetch from 'node-fetch';
 
 const subgraphName = 'legacy-graphql';
 
-export type LegacyDebugResponseExtensions = {
-  serviceTimings: Record<string, unknown>;
-};
-
 const defaultLegacyScheme = httpsAgent == undefined ? 'http' : 'https';
 const defaultLegacyPort =
   defaultLegacyScheme == 'http'
@@ -90,11 +86,11 @@ export async function getLegacySubgraph(
       },
       transforms: ENABLE_FEATURES.debugExtensions
         ? [
-            new ForwardSubschemaExtensions<LegacyDebugResponseExtensions>(
+            new ForwardSubschemaExtensions(
               subgraphName,
-              ({ serviceTimings }) => ({ serviceTimings })
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            ) as any, // FIXME(jdujic): Fix types
+              // Omit mutatedFields since TAQL already provides that
+              ({ mutatedFields, ...extensions }) => extensions
+            ),
           ]
         : undefined,
     };
