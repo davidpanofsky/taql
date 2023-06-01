@@ -12,9 +12,9 @@ import { Pool } from 'pg';
 import { logger } from '@taql/config';
 import promClient from 'prom-client';
 
-interface Cache<K,V> {
-  get(key: K): V | undefined
-  set(key: K, value: V): void
+interface Cache<K, V> {
+  get(key: K): V | undefined;
+  set(key: K, value: V): void;
 }
 
 // metrics
