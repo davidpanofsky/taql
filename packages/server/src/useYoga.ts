@@ -41,6 +41,11 @@ export const useYoga = async () => {
     ? SERVER_PARAMS.port - 1
     : SERVER_PARAMS.port;
 
+  const documentCache = new LRUCache<string, DocumentNode>({
+    max: 1024,
+    ttl: 3_600_000,
+  });
+
   const yogaOptions = {
     graphiql: ENABLE_FEATURES.graphiql,
     multipart: false,
@@ -57,10 +62,7 @@ export const useYoga = async () => {
     healthCheckEndpoint: '/health',
     landingPage: true,
     parserCache: {
-      documentCache: new LRUCache<string, DocumentNode>({
-        max: 1024,
-        ttl: 3_600_000,
-      }),
+      documentCache,
       errorCache: new LRUCache<string, Error>({ max: 1024, ttl: 3_600_000 }),
     },
     validationCache: new LRUCache<string, readonly GraphQLError[]>({
@@ -138,6 +140,7 @@ export const useYoga = async () => {
     usePreregisteredQueries({
       maxCacheSize: PREREGISTERED_QUERY_PARAMS.maxCacheSize,
       postgresConnectionString: PREREGISTERED_QUERY_PARAMS.databaseUri,
+      documentCacheForWarming: documentCache,
       ssl: PREREGISTERED_QUERY_PARAMS.pgUseSsl
         ? {
             ca: readFileSync(

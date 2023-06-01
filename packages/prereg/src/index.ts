@@ -1,4 +1,10 @@
-import { Kind, OperationDefinitionNode, OperationTypeNode } from 'graphql';
+import {
+  DocumentNode,
+  Kind,
+  OperationDefinitionNode,
+  OperationTypeNode,
+  parse,
+} from 'graphql';
 import { Plugin, handleStreamOrSingleExecutionResult } from '@envelop/core';
 import { Plugin as YogaPlugin, createGraphQLError } from 'graphql-yoga';
 import { LRUCache } from 'lru-cache';
@@ -95,6 +101,30 @@ async function preloadCache(
     });
 }
 
+/**
+ * Prewarm a given cache with known preregistered queries.
+ * Allows for a function to be applied to the raw query text, but as it stands the full document is used as the
+ * cache key.
+ * See:
+ * https://github.com/dotansimha/graphql-yoga/blob/main/packages/graphql-yoga/src/plugins/use-parser-and-validation-cache.ts#L50
+ */
+async function prewarmDocumentCache(
+  cache: LRUCache<string, DocumentNode>,
+  db: Pool,
+  keyFn: (query: string) => string = (query) => query
+): Promise<number> {
+  return db
+    .query(
+      'SELECT code, updated FROM t_graphql_operations ORDER BY updated ASC'
+    )
+    .then((res) => {
+      res.rows.forEach((o: { code: string }) =>
+        cache.set(keyFn(o.code), parse(o.code))
+      );
+      return res.rows.length;
+    });
+}
+
 export function usePreregisteredQueries(options: {
   maxCacheSize: number;
   postgresConnectionString?: string;
@@ -106,13 +136,15 @@ export function usePreregisteredQueries(options: {
     key: string;
     rejectUnauthorized: boolean;
   };
+  documentCacheForWarming?: LRUCache<string, DocumentNode>;
 }): YogaPlugin {
   const {
     maxCacheSize,
     postgresConnectionString = 'postgres://graphql_operations_ros@localhost',
     maxPoolSize = 10,
     poolConnectionTimeoutMillis = 0,
-    ssl = undefined,
+    ssl,
+    documentCacheForWarming,
   } = options;
 
   logger.info(
@@ -160,6 +192,16 @@ export function usePreregisteredQueries(options: {
             ),
         10000
       );
+
+      if (documentCacheForWarming) {
+        await prewarmDocumentCache(documentCacheForWarming, pool)
+          .then((count) =>
+            logger.info(
+              `Prewarmed document cache with ${count} preregistered queries`
+            )
+          )
+          .catch((e) => logger.error(`Failed prewarming document cache: ${e}`));
+      }
     },
 
     // Check extensions for a potential preregistered query id, and resolve it to the query text, parsed
