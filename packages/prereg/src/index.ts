@@ -47,11 +47,7 @@ async function populateKnownQueries(
       [MOST_RECENT_KNOWN]
     );
     const previousKnown = known.size;
-    known_queries_res.rows.forEach(
-      (
-        o: any // eslint-disable-line @typescript-eslint/no-explicit-any
-      ) => known.add(o.id)
-    );
+    known_queries_res.rows.forEach((o: { id: string }) => known.add(o.id));
     // Small fudge factor to avoid any concern about updated times falling between query execution
     // and updating the most recently known.  A bit of overlap is fine.
     const now = Date.now();
@@ -96,7 +92,9 @@ async function preloadCache(
       [limit]
     )
     .then((res) => {
-      res.rows.forEach((o: any) => cache.set(o.id, o.code)); // eslint-disable-line @typescript-eslint/no-explicit-any
+      res.rows.forEach((o: { id: string; code: string }) =>
+        cache.set(o.id, o.code)
+      );
       return res.rows.length;
     });
 }
