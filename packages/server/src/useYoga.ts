@@ -42,7 +42,7 @@ export const useYoga = async () => {
     : SERVER_PARAMS.port;
 
   const documentCache = new LRUCache<string, DocumentNode>({
-    max: 1024,
+    max: 4096,
     ttl: 3_600_000,
   });
 
