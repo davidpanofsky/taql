@@ -112,7 +112,7 @@ async function preloadCache(
  * https://github.com/dotansimha/graphql-yoga/blob/main/packages/graphql-yoga/src/plugins/use-parser-and-validation-cache.ts#L50
  */
 async function prewarmDocumentCache(
-  cache: LRUCache<string, DocumentNode>,
+  cache: Cache<string, DocumentNode>,
   db: Pool,
   keyFn: (query: string) => string = (query) => query
 ): Promise<number> {
@@ -139,7 +139,7 @@ export function usePreregisteredQueries(options: {
     key: string;
     rejectUnauthorized: boolean;
   };
-  documentCacheForWarming?: LRUCache<string, DocumentNode>;
+  documentCacheForWarming?: Cache<string, DocumentNode>;
 }): YogaPlugin {
   const {
     maxCacheSize,
