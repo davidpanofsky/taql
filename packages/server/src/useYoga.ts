@@ -174,14 +174,10 @@ export const useYoga = async () => {
     useReadinessCheck({
       endpoint: '/NotImplemented',
       async check({ fetchAPI }) {
-        logger.debug(`worker=${cluster.worker?.id} Requested Readiness Check`);
         try {
           // For now, readiness check is same as healthcheck, but with a different response body.
           // Todo: Add checks for other things like database connection, etc.
           //redisCache[0].store.client.status
-          logger.debug(
-            `worker=${cluster.worker?.id} Responding Readiness Check`
-          );
           // The trailing newline is important for unblacklisting, apparently.
           return new fetchAPI.Response('<NotImplemented/>\n');
         } catch (err) {
@@ -261,10 +257,6 @@ export const useYoga = async () => {
   });
 
   return async (ctx: TaqlState) => {
-    logger.debug(
-      `worker=${cluster.worker?.id} Koa Request: ${ctx.request.method} ${ctx.request.url}`
-    );
-    logger.debug(ctx.request.headers);
     const legacySVCO = ctx.state.taql.SVCO;
     let response: Response | FetchResponse;
     if (
@@ -297,10 +289,6 @@ export const useYoga = async () => {
       response = await yoga.handleNodeRequest(ctx.req, ctx);
     }
 
-    logger.debug(
-      `worker=${cluster.worker?.id} Yoga Response: ${response.status} ${response.statusText}`
-    );
-
     // Set status code
     ctx.status = response.status;
 
@@ -316,7 +304,7 @@ export const useYoga = async () => {
     // Converts ReadableStream to a NodeJS Stream
     ctx.body = response.body;
     logger.debug(
-      `worker=${cluster.worker?.id} Koa Response: ${ctx.response.status} ${ctx.response.message} ${ctx.response.length} bytes`
+      `worker=${cluster.worker?.id} status=${response.status} status_text=${response.statusText} message=${ctx.response.message} length=${ctx.response.length}`
     );
   };
 };
