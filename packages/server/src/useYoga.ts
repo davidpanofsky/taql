@@ -44,7 +44,8 @@ export const useYoga = async () => {
   const documentCache = new LRUCache<string, DocumentNode>({
     max: 4096,
     maxSize: 1024 ** 3, // 1G in bytes
-    // We approximate the size of the cache in bytes, so a utf-16 character is 2 bytes
+    // We approximate the size of the cache in bytes, and node strings are utf-16.
+    // It's possible that the in-memory footprint will be smaller, but be pessimistic.
     // Keys are the full query string.  We can approximate that the parsed document is _at least_ that heavy, so *2
     sizeCalculation: (value, key) => Buffer.byteLength(key, 'utf16le') * 2,
     ttl: 3_600_000,
