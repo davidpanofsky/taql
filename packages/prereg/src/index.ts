@@ -12,6 +12,11 @@ import { Pool } from 'pg';
 import { logger } from '@taql/config';
 import promClient from 'prom-client';
 
+interface Cache<K,V> {
+  get(key: K): V | undefined
+  set(key: K, value: V): void
+}
+
 // metrics
 const PREREG_UNK = new promClient.Counter({
   name: 'preregistered_query_unknown',
@@ -81,7 +86,7 @@ async function lookupQuery(
 }
 
 async function preloadCache(
-  cache: LRUCache<string, string>,
+  cache: Cache<string, string>,
   db: Pool,
   limit: number
 ): Promise<number> {
