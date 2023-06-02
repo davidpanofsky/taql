@@ -173,7 +173,6 @@ export const useYoga = async () => {
       contextBuilding: true,
       execute: true,
       errors: true,
-      resolvers: true, // requires "execute" to be `true` as well
       deprecatedFields: true,
       endpoint: '/worker_metrics',
     }),
