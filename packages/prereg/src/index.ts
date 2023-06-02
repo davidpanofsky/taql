@@ -199,6 +199,7 @@ export function usePreregisteredQueries(options: {
       );
 
       if (documentCacheForWarming) {
+        logger.info("Starting to prewarm the document cache...");
         await prewarmDocumentCache(documentCacheForWarming, pool)
           .then((count) =>
             logger.info(
