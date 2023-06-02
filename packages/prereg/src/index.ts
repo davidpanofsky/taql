@@ -1,10 +1,21 @@
-import { Kind, OperationDefinitionNode, OperationTypeNode } from 'graphql';
+import {
+  DocumentNode,
+  Kind,
+  OperationDefinitionNode,
+  OperationTypeNode,
+  parse,
+} from 'graphql';
 import { Plugin, handleStreamOrSingleExecutionResult } from '@envelop/core';
 import { Plugin as YogaPlugin, createGraphQLError } from 'graphql-yoga';
 import { LRUCache } from 'lru-cache';
 import { Pool } from 'pg';
 import { logger } from '@taql/config';
 import promClient from 'prom-client';
+
+interface Cache<K, V> {
+  get(key: K): V | undefined;
+  set(key: K, value: V): void;
+}
 
 // metrics
 const PREREG_UNK = new promClient.Counter({
@@ -41,11 +52,7 @@ async function populateKnownQueries(
       [MOST_RECENT_KNOWN]
     );
     const previousKnown = known.size;
-    known_queries_res.rows.forEach(
-      (
-        o: any // eslint-disable-line @typescript-eslint/no-explicit-any
-      ) => known.add(o.id)
-    );
+    known_queries_res.rows.forEach((o: { id: string }) => known.add(o.id));
     // Small fudge factor to avoid any concern about updated times falling between query execution
     // and updating the most recently known.  A bit of overlap is fine.
     const now = Date.now();
@@ -79,7 +86,7 @@ async function lookupQuery(
 }
 
 async function preloadCache(
-  cache: LRUCache<string, string>,
+  cache: Cache<string, string>,
   db: Pool,
   limit: number
 ): Promise<number> {
@@ -90,7 +97,35 @@ async function preloadCache(
       [limit]
     )
     .then((res) => {
-      res.rows.forEach((o: any) => cache.set(o.id, o.code)); // eslint-disable-line @typescript-eslint/no-explicit-any
+      res.rows.forEach((o: { id: string; code: string }) =>
+        cache.set(o.id, o.code)
+      );
+      return res.rows.length;
+    });
+}
+
+/**
+ * Prewarm a given cache with known preregistered queries.
+ * Allows for a function to be applied to the raw query text, but as it stands the full document is used as the
+ * cache key.
+ * See:
+ * https://github.com/dotansimha/graphql-yoga/blob/main/packages/graphql-yoga/src/plugins/use-parser-and-validation-cache.ts#L50
+ */
+async function prewarmDocumentCache(
+  cache: Cache<string, DocumentNode>,
+  db: Pool,
+  keyFn: (query: string) => string = (query) => query
+): Promise<number> {
+  return db
+    .query(
+      // Here we make an assumption that 'cache' might be LRU, so sort with ascending 'updated'-ness such that
+      // the most recently updated queries hit the cache last.
+      'SELECT code, updated FROM t_graphql_operations ORDER BY updated ASC'
+    )
+    .then((res) => {
+      res.rows.forEach((o: { code: string }) =>
+        cache.set(keyFn(o.code), parse(o.code))
+      );
       return res.rows.length;
     });
 }
@@ -106,13 +141,15 @@ export function usePreregisteredQueries(options: {
     key: string;
     rejectUnauthorized: boolean;
   };
+  documentCacheForWarming?: Cache<string, DocumentNode>;
 }): YogaPlugin {
   const {
     maxCacheSize,
     postgresConnectionString = 'postgres://graphql_operations_ros@localhost',
     maxPoolSize = 10,
     poolConnectionTimeoutMillis = 0,
-    ssl = undefined,
+    ssl,
+    documentCacheForWarming,
   } = options;
 
   logger.info(
@@ -160,6 +197,16 @@ export function usePreregisteredQueries(options: {
             ),
         10000
       );
+
+      if (documentCacheForWarming) {
+        await prewarmDocumentCache(documentCacheForWarming, pool)
+          .then((count) =>
+            logger.info(
+              `Prewarmed document cache with ${count} preregistered queries`
+            )
+          )
+          .catch((e) => logger.error(`Failed prewarming document cache: ${e}`));
+      }
     },
 
     // Check extensions for a potential preregistered query id, and resolve it to the query text, parsed
