@@ -94,6 +94,7 @@ const primaryStartup = async () => {
   const workersExited = new promClient.Counter({
     name: 'taql_workers_exited',
     help: 'count of workers exited',
+    labelNames: ['kind'] as const,
   });
 
   const environments = new WeakMap<
