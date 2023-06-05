@@ -106,6 +106,11 @@ const primaryStartup = async () => {
     environments.set(cluster.fork(env), env);
   };
 
+  let sucessfulInitialization = false;
+  cluster.on('listening', () => {
+    sucessfulInitialization = true;
+  });
+
   // Override prom prefix for workers.
   const workerEnv = { PROM_PREFIX: PROM_PARAMS.workerPrefix };
   // create one worker for svco on port - 1 if enabled.
@@ -143,8 +148,15 @@ const primaryStartup = async () => {
         );
         workersExited.inc({ kind: 'error' });
       }
-      logger.info(`replacing worker ${worker.id}...`);
-      fork(environments.get(worker));
+      if (sucessfulInitialization) {
+        logger.info(`replacing worker ${worker.id}...`);
+        fork(environments.get(worker));
+      } else {
+        logger.warn(
+          'worker died before any sucessfull initialization. Shutting down cluster to prevent crashlooping'
+        );
+        cluster.disconnect(process.exit(1));
+      }
     }
   });
 };
