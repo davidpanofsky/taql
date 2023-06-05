@@ -1,18 +1,68 @@
-import { LogLevel, createLogger } from '@graphql-yoga/logger';
+import { format, loggers, transports } from 'winston';
 import { resolve, resolvers } from './resolution';
 import { availableParallelism } from 'node:os';
+import cluster from 'node:cluster';
 import { config } from 'dotenv';
 import { hostname } from 'os';
+import { logFmtFormat } from 'winston-logfmt';
 
 config();
 
-const logLevel = resolve({
+const loggerConfig = resolve({
+  console: {
+    property: 'LOG_CONSOLE',
+    resolver: resolvers.booleanFromString,
+    defaultTo: true,
+  },
   level: {
     property: 'LOG_LEVEL',
-    resolver: resolvers.logLevel,
+    defaultTo: process.env.NODE_ENV === 'test' ? 'error' : 'info',
   },
 });
-export const logger = createLogger(logLevel.level as LogLevel);
+
+//export const logger = createLogger({
+loggers.add('access', {
+  defaultMeta: { worker: cluster.worker ? cluster.worker.id : 0 },
+  exitOnError: true,
+  transports: new transports.Console({
+    handleExceptions: false,
+    handleRejections: false,
+    level: 'info',
+    stderrLevels: [],
+    format: format.combine(
+      loggerConfig.console
+        ? format.combine(format.colorize(), format.simple())
+        : format.combine(
+            format.timestamp(),
+            format.uncolorize(),
+            logFmtFormat()
+          )
+    ),
+  }),
+});
+loggers.add('app', {
+  defaultMeta: { worker: cluster.worker ? cluster.worker.id : 0 },
+  exitOnError: true,
+  transports: new transports.Console({
+    handleExceptions: !loggerConfig.console,
+    handleRejections: !loggerConfig.console,
+    level: loggerConfig.level,
+    stderrLevels: ['debug', 'info', 'warn', 'error', 'critical'],
+    format: format.combine(
+      format.errors({ stack: true }),
+      loggerConfig.console
+        ? format.combine(format.colorize(), format.simple())
+        : format.combine(
+            format.timestamp(),
+            format.uncolorize(),
+            logFmtFormat()
+          )
+    ),
+  }),
+});
+export const logger = loggers.get('app');
+export const accessLogger = loggers.get('access');
+
 // TODO: Remove all this one day. Legacy gql is just something we'll find in the schema
 // repo and use a custom executor for.
 export const LEGACY_GQL_PARAMS = resolve({

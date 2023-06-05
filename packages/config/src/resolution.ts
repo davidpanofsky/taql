@@ -1,4 +1,3 @@
-import { LogLevel } from '@graphql-yoga/logger';
 import { logger } from './index';
 import { readFileSync } from 'fs';
 
@@ -45,9 +44,11 @@ function resolveSingle<T extends EnvVal>(decl: T): Resolved<T> {
       .find((x) => x != undefined);
 
     if ('defaultTo' in decl && resolved == undefined) {
-      logger.info(
-        `Using default value "${decl.defaultTo}" for environment variable "${decl.property}"`
-      );
+      // Cannot log while still setting up logger.
+      logger &&
+        logger.debug(
+          `Using default value "${decl.defaultTo}" for environment variable "${decl.property}"`
+        );
       resolved = <Resolved<T>>decl.defaultTo;
     }
 
@@ -73,17 +74,6 @@ export const resolve = <T extends { [property: string]: EnvVal }>(
       Object.entries(conf).map(([k, v]) => [k, resolveSingle(<EnvVal>v)])
     )
   );
-
-const logLevel = (level: string | undefined): LogLevel => {
-  if (level == undefined) {
-    if (process.env.NODE_ENV === 'test') {
-      // make tests silent
-      return 'error';
-    }
-    return 'info' as LogLevel;
-  }
-  return level as LogLevel;
-};
 
 const fileContents = (file?: string | undefined): string | undefined => {
   if (file == undefined) {
@@ -113,7 +103,6 @@ const booleanFromString = (value: string | undefined): boolean | undefined =>
   value == undefined ? undefined : value.toLowerCase() === 'true';
 
 export const resolvers = {
-  logLevel,
   fileContents,
   nonNegativeInteger,
   booleanFromString,

@@ -4,6 +4,7 @@ import {
   ENABLE_FEATURES,
   PREREGISTERED_QUERY_PARAMS,
   SERVER_PARAMS,
+  accessLogger,
   logger,
 } from '@taql/config';
 import { DocumentNode, GraphQLError, GraphQLSchema } from 'graphql';
@@ -24,7 +25,6 @@ import {
 import type { IncomingHttpHeaders } from 'http';
 import { LRUCache } from 'lru-cache';
 import { TaqlState } from '@taql/context';
-import cluster from 'node:cluster';
 import { httpsAgent } from '@taql/httpAgent';
 import { ioRedisStore } from '@tirke/node-cache-manager-ioredis';
 import { makeSchema } from '@taql/schema';
@@ -86,11 +86,9 @@ export const useYoga = async () => {
   const schema = await makeSchema();
 
   if (schema == undefined) {
-    throw new Error(
-      `worker=${cluster.worker?.id} failed to load initial schema`
-    );
+    throw new Error('failed to load initial schema');
   }
-  logger.info(`worker=${cluster.worker?.id} created initial schema`);
+  logger.info('created initial schema');
 
   // Two tier store for automatic persisted queries
   const memoryCache = await caching('memory', {
@@ -184,7 +182,7 @@ export const useYoga = async () => {
           // The trailing newline is important for unblacklisting, apparently.
           return new fetchAPI.Response('<NotImplemented/>\n');
         } catch (err) {
-          logger.error(`worker=${cluster.worker?.id} ${err}`);
+          logger.error(err);
           return false;
         }
       },
@@ -204,9 +202,7 @@ export const useYoga = async () => {
         max: 128,
         ttl: 1000 * 60 * 2,
         async fetchMethod(key): Promise<GraphQLSchema> {
-          logger.debug(
-            `worker=${cluster.worker?.id} Fetching and building schema for SVCO: ${key}`
-          );
+          logger.debug(`Fetching and building schema for SVCO: ${key}`);
           svcoSchemaBuilds.inc(); // We're probably about to hang the event loop, inc before building schema
           return makeSchema(key);
         },
@@ -219,9 +215,7 @@ export const useYoga = async () => {
           if (context.state.taql.SVCO == undefined) {
             return schema;
           } else {
-            logger.debug(
-              `worker=${cluster.worker?.id} Using schema for SVCO: ${context.state.taql.SVCO}`
-            );
+            logger.debug(`Using schema for SVCO: ${context.state.taql.SVCO}`);
             const schemaForSVCO = await schemaForSVCOCache?.fetch(
               context.state.taql.SVCO,
               { allowStale: true }
@@ -260,6 +254,7 @@ export const useYoga = async () => {
   });
 
   return async (ctx: TaqlState) => {
+    const accessTimer = accessLogger.startTimer();
     const legacySVCO = ctx.state.taql.SVCO;
     let response: Response | FetchResponse;
     if (
@@ -268,7 +263,7 @@ export const useYoga = async () => {
       legacySVCO
     ) {
       logger.debug(
-        `worker=${cluster.worker?.id} SVCO cookie set, but I'm not the SVCO worker... forwarding request. SVCO: ${legacySVCO}`
+        `SVCO cookie set, but I'm not the SVCO worker... forwarding request. SVCO: ${legacySVCO}`
       );
       const requestHeaders: FetchHeaders = new FetchHeaders();
       for (const key in ctx.request.headers) {
@@ -306,8 +301,17 @@ export const useYoga = async () => {
 
     // Converts ReadableStream to a NodeJS Stream
     ctx.body = response.body;
-    logger.debug(
-      `worker=${cluster.worker?.id} status=${response.status} status_text=${response.statusText} message=${ctx.response.message} length=${ctx.response.length}`
-    );
+    accessTimer.done({
+      method: ctx.request.method,
+      url: ctx.request.url,
+      query: ctx.request.query,
+      http_version: ctx.req.httpVersion,
+      remote_addr: ctx.request.ip,
+      status: ctx.response.status,
+      message: ctx.response.message,
+      content_length: ctx.response.length,
+      user_agent: ctx.request.headers['user-agent'],
+      logger: 'access_log',
+    });
   };
 };
