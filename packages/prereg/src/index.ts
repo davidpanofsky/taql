@@ -118,9 +118,8 @@ async function prewarmDocumentCache(
 ): Promise<number> {
   return db
     .query(
-      // Here we make an assumption that 'cache' might be LRU, so sort with ascending 'updated'-ness such that
-      // the most recently updated queries hit the cache last.
-      'SELECT code, updated FROM t_graphql_operations ORDER BY updated ASC'
+      'WITH most_recent AS (SELECT max(updated) AS updated FROM t_graphql_operations) ' +
+        'SELECT code FROM t_graphql_operations WHERE updated = (select updated from most_recent)'
     )
     .then((res) => {
       res.rows.forEach((o: { code: string }) =>
