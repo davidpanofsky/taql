@@ -12,6 +12,7 @@
     "typescript": "^5.0.4"
   },
   "dependencies": {
-    "@graphql-yoga/logger": "^0.0.1"
+    "winston": "^3.9.0",
+    "winston-logfmt": "^1.0.0"
   }
 }
