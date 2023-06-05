@@ -199,12 +199,15 @@ export function usePreregisteredQueries(options: {
       );
 
       if (documentCacheForWarming) {
+        logger.info('Starting to prewarm the document cache...');
+        const prewarmStart = new Date().getTime();
         await prewarmDocumentCache(documentCacheForWarming, pool)
-          .then((count) =>
+          .then((count) => {
+            const durationMs = new Date().getTime() - prewarmStart;
             logger.info(
-              `Prewarmed document cache with ${count} preregistered queries`
-            )
-          )
+              `Prewarmed document cache with ${count} preregistered queries after ${durationMs} ms`
+            );
+          })
           .catch((e) => logger.error(`Failed prewarming document cache: ${e}`));
       }
     },
