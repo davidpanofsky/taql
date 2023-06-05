@@ -33,6 +33,7 @@ import promClient from 'prom-client';
 import { readFileSync } from 'fs';
 import { tracerProvider } from './observability';
 import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspection';
+import { useGraphQlJit } from '@envelop/graphql-jit';
 import { useOpenTelemetry } from '@envelop/opentelemetry';
 
 export const useYoga = async () => {
@@ -185,6 +186,7 @@ export const useYoga = async () => {
       },
     }),
     //schemaPoller.asPlugin(),
+    useGraphQlJit(),
   ];
 
   ENABLE_FEATURES.introspection || yogaPlugins.push(useDisableIntrospection());

@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@envelop/core": "4.0.0",
+    "@envelop/graphql-jit": "^6.0.0",
     "@envelop/opentelemetry": "^5.0.0",
     "@graphql-tools/utils": "^9.2.1",
     "@graphql-yoga/plugin-apq": "^2.0.0",
