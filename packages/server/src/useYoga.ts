@@ -7,7 +7,7 @@ import {
   accessLogger,
   logger,
 } from '@taql/config';
-import { DocumentNode, GraphQLError, GraphQLSchema } from 'graphql';
+import { DocumentNode, GraphQLSchema, validate } from 'graphql';
 import { caching, multiCaching } from 'cache-manager';
 import { createYoga, useReadinessCheck } from 'graphql-yoga';
 import fetch, {
@@ -69,20 +69,20 @@ export const useYoga = async () => {
     graphqlEndpoint: '/graphql',
     healthCheckEndpoint: '/health',
     landingPage: true,
-    parserCache: {
+    parserAndValidationCache: {
       documentCache,
       errorCache: new InstrumentedCache<string, Error>('parse_error', {
         max: 1024,
         ttl: 3_600_000,
       }),
+      validationCache: new InstrumentedCache<string, typeof validate>(
+        'validation',
+        {
+          max: 1024,
+          ttl: 3_600_000,
+        }
+      ),
     },
-    validationCache: new InstrumentedCache<string, readonly GraphQLError[]>(
-      'validation',
-      {
-        max: 1024,
-        ttl: 3_600_000,
-      }
-    ),
 
     // Setting this to false as legacy Yoga Server-Sent Events are deprecated:
     // https://github.com/dotansimha/graphql-yoga/blob/b309ca0db1c45264878c3cec0137c3fdbd22fc97/packages/graphql-yoga/src/server.ts#L184

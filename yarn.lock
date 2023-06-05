@@ -530,75 +530,61 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@envelop/core@npm:^3.0.4, @envelop/core@npm:^3.0.6":
-  version: 3.0.6
-  resolution: "@envelop/core@npm:3.0.6::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40envelop%2Fcore%2F-%2Fcore-3.0.6.tgz"
+"@envelop/core@npm:4.0.0, @envelop/core@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "@envelop/core@npm:4.0.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40envelop%2Fcore%2F-%2Fcore-4.0.0.tgz"
   dependencies:
-    "@envelop/types": 3.0.2
+    "@envelop/types": 4.0.0
     tslib: ^2.5.0
-  checksum: ccc1d1964875a7be0771ad76f057689699ae398e74a6526c2f70d37a3770fb1cacb1356aaeaef3d17084042331161273c8e2d8e4713cc62fd7f4f770d8f8a5d3
+  checksum: 575039dfebeadaac3ea61fd700dcc806e26f04f045dc4457052b7cc1ca7c9c37bf9a98a8e4d377d20c69a4e7dc62c11b8884b70f2a218944736ee58c588d498b
   languageName: node
   linkType: hard
 
-"@envelop/on-resolve@npm:^2.0.6":
-  version: 2.0.6
-  resolution: "@envelop/on-resolve@npm:2.0.6::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40envelop%2Fon-resolve%2F-%2Fon-resolve-2.0.6.tgz"
+"@envelop/on-resolve@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "@envelop/on-resolve@npm:3.0.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40envelop%2Fon-resolve%2F-%2Fon-resolve-3.0.0.tgz"
   peerDependencies:
-    "@envelop/core": ^3.0.6
+    "@envelop/core": ^4.0.0
     graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
-  checksum: 299c9282e8ab4acda136a689702e1bd6cfd1e036b96e0ae7cc0a0265da82456d2460eab3f89f21654514a51ee07aa7b5e2e15e93039514586d6b9799e133dcd5
+  checksum: 14515ee221a3f92c0230704b191d907e8143cac113328675d7c2b56baa030a6a8bd95865d12ac132c211b96673708d7ce45f3397e6879e5ecac59b3eb107ef19
   languageName: node
   linkType: hard
 
-"@envelop/opentelemetry@npm:^4.1.0":
-  version: 4.1.0
-  resolution: "@envelop/opentelemetry@npm:4.1.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40envelop%2Fopentelemetry%2F-%2Fopentelemetry-4.1.0.tgz"
+"@envelop/opentelemetry@npm:^5.0.0":
+  version: 5.0.0
+  resolution: "@envelop/opentelemetry@npm:5.0.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40envelop%2Fopentelemetry%2F-%2Fopentelemetry-5.0.0.tgz"
   dependencies:
-    "@envelop/on-resolve": ^2.0.6
+    "@envelop/on-resolve": ^3.0.0
     "@opentelemetry/api": ^1.0.0
     "@opentelemetry/sdk-trace-base": ^1.11.0
     tslib: ^2.5.0
   peerDependencies:
-    "@envelop/core": ^3.0.6
+    "@envelop/core": ^4.0.0
     graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
-  checksum: 441b6fef2811c242fca222ab5bd5acfeb7f01a366fb88633f2b32a509b4b60dfbfebcbc07706e8417b3fc29e60767edc50b6f48f6bf717a93541c4690495ff5e
+  checksum: 3894feb2fd42a198dbe4c9a1ab8c431d0cfe0d3cf390fed9897a1e8962d94e02f143f41f399d318960001dfe99a3aca82970effff116eefced8a8ffe0705c84b
   languageName: node
   linkType: hard
 
-"@envelop/prometheus@npm:7.0.6":
-  version: 7.0.6
-  resolution: "@envelop/prometheus@npm:7.0.6::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40envelop%2Fprometheus%2F-%2Fprometheus-7.0.6.tgz"
+"@envelop/prometheus@npm:8.0.0":
+  version: 8.0.0
+  resolution: "@envelop/prometheus@npm:8.0.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40envelop%2Fprometheus%2F-%2Fprometheus-8.0.0.tgz"
   dependencies:
-    "@envelop/on-resolve": ^2.0.6
+    "@envelop/on-resolve": ^3.0.0
     tslib: ^2.5.0
   peerDependencies:
-    "@envelop/core": ^3.0.6
+    "@envelop/core": ^4.0.0
     graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
     prom-client: ^13 || ^14.0.0
-  checksum: fe32cfe6078b02f576194b0ec1aeedb9ac8b103c7673f762c2bdf6b6427c22e2082a006560c8b971684e08e505e7ee23302284697d95766c516c5f5e82f90c98
+  checksum: 071fe697e136fc46e295b88627bcacd2b0328dcbc15b66badd4c11d6bab236753942a4d89fcaf65f4f657cfbc7e69550d6a7cc280cb3b969bd517f6f186083cb
   languageName: node
   linkType: hard
 
-"@envelop/types@npm:3.0.2":
-  version: 3.0.2
-  resolution: "@envelop/types@npm:3.0.2::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40envelop%2Ftypes%2F-%2Ftypes-3.0.2.tgz"
+"@envelop/types@npm:4.0.0":
+  version: 4.0.0
+  resolution: "@envelop/types@npm:4.0.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40envelop%2Ftypes%2F-%2Ftypes-4.0.0.tgz"
   dependencies:
     tslib: ^2.5.0
-  checksum: 605e63bd3a0be3ec0f465735531b8575151f508d02c02e07213e5a30a740e74d0bf5827dcac86432ecf95b782f7bc82de806188dda5ba24407680c495012ebb9
-  languageName: node
-  linkType: hard
-
-"@envelop/validation-cache@npm:^5.1.2":
-  version: 5.1.3
-  resolution: "@envelop/validation-cache@npm:5.1.3::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40envelop%2Fvalidation-cache%2F-%2Fvalidation-cache-5.1.3.tgz"
-  dependencies:
-    hash-it: ^6.0.0
-    lru-cache: ^6.0.0
-    tslib: ^2.5.0
-  peerDependencies:
-    "@envelop/core": ^3.0.6
-    graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
-  checksum: a73b31a988e04ce3db2b4149ef57059aaeae934d70acbf070815315cbcffbe07743707ce544b1cce95f9ab2e173af87678ba43bea3b362f0a308f13f9f3543fe
+  checksum: cd8bad3ef7d9ee6015e3befbd27a1fb66a560d1397111b0fe22d8a107c7509ab48f183752d514321e35e9c27e9e970e004579867d64105768fce69ccca411ac7
   languageName: node
   linkType: hard
 
@@ -743,21 +729,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphql-tools/executor@npm:^0.0.18":
-  version: 0.0.18
-  resolution: "@graphql-tools/executor@npm:0.0.18::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-tools%2Fexecutor%2F-%2Fexecutor-0.0.18.tgz"
-  dependencies:
-    "@graphql-tools/utils": ^9.2.1
-    "@graphql-typed-document-node/core": 3.2.0
-    "@repeaterjs/repeater": 3.0.4
-    tslib: ^2.4.0
-    value-or-promise: 1.0.12
-  peerDependencies:
-    graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
-  checksum: 7387155d6736455ad0c40c263ff964d734cdd79cdc8a5ddb43c805cabfa3d381d8ea21605a1ec0b0242898d248a909e370433849ffed92a2721aa27f73caf0ab
-  languageName: node
-  linkType: hard
-
 "@graphql-tools/executor@npm:^0.0.20":
   version: 0.0.20
   resolution: "@graphql-tools/executor@npm:0.0.20::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-tools%2Fexecutor%2F-%2Fexecutor-0.0.20.tgz"
@@ -770,6 +741,21 @@ __metadata:
   peerDependencies:
     graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
   checksum: 5390800be4a346eb7d37d51458cd9cf4a24e01014fe1b392682ea4bce2b27fc1d5c7aebcb3dafaeefcb0a89e5b307fc2060816533b61d6796e0fa0e5e1f10959
+  languageName: node
+  linkType: hard
+
+"@graphql-tools/executor@npm:^1.0.0":
+  version: 1.1.0
+  resolution: "@graphql-tools/executor@npm:1.1.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-tools%2Fexecutor%2F-%2Fexecutor-1.1.0.tgz"
+  dependencies:
+    "@graphql-tools/utils": ^10.0.0
+    "@graphql-typed-document-node/core": 3.2.0
+    "@repeaterjs/repeater": ^3.0.4
+    tslib: ^2.4.0
+    value-or-promise: ^1.0.12
+  peerDependencies:
+    graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
+  checksum: f088a18181da1303eba8b4bea3ad39de43037f16475a105101e5b7f467760812f2d80d9f70c6bae21ad5f5d197308778e78cfd622080143b28398426307ef389
   languageName: node
   linkType: hard
 
@@ -808,6 +794,32 @@ __metadata:
   peerDependencies:
     graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
   checksum: 96d57a3e810055a2883bf9d3450e88082da207ffb1406222c9fa954e47bac4a328696785fdb7eec95a030d5f75504f7b4c6484c94f248cee13e6ad25aca70c75
+  languageName: node
+  linkType: hard
+
+"@graphql-tools/merge@npm:^9.0.0":
+  version: 9.0.0
+  resolution: "@graphql-tools/merge@npm:9.0.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-tools%2Fmerge%2F-%2Fmerge-9.0.0.tgz"
+  dependencies:
+    "@graphql-tools/utils": ^10.0.0
+    tslib: ^2.4.0
+  peerDependencies:
+    graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
+  checksum: e93794260faa477979bdc22f05da26c0eff02bd82c11565a1197152b70b5ab1c73dc6f8a05caf06737bcb18cb244bd19ee99d62bfc41af3bffb3c17eddb70edf
+  languageName: node
+  linkType: hard
+
+"@graphql-tools/schema@npm:^10.0.0":
+  version: 10.0.0
+  resolution: "@graphql-tools/schema@npm:10.0.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-tools%2Fschema%2F-%2Fschema-10.0.0.tgz"
+  dependencies:
+    "@graphql-tools/merge": ^9.0.0
+    "@graphql-tools/utils": ^10.0.0
+    tslib: ^2.4.0
+    value-or-promise: ^1.0.12
+  peerDependencies:
+    graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
+  checksum: 550e9a4528584a4d108892f1553fb5b2590e63e88b9a9d3c1ad80b01c974ca9947adb9d1448a6969230d90c15dc96e8e84d62f32ef0fde804c389b43ac5bd739
   languageName: node
   linkType: hard
 
@@ -898,6 +910,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@graphql-tools/utils@npm:^10.0.0":
+  version: 10.0.0
+  resolution: "@graphql-tools/utils@npm:10.0.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-tools%2Futils%2F-%2Futils-10.0.0.tgz"
+  dependencies:
+    "@graphql-typed-document-node/core": ^3.1.1
+    tslib: ^2.4.0
+  peerDependencies:
+    graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
+  checksum: 641910970627ce711b8bb709161111ee9acd3003b5e4fd388a7125f6a18a47d556c3e14f229807481af82a25ac0bb420ce540e5c185bfc6bd49ac2efad5da9d3
+  languageName: node
+  linkType: hard
+
 "@graphql-tools/utils@npm:^8.13.1":
   version: 8.13.1
   resolution: "@graphql-tools/utils@npm:8.13.1::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-tools%2Futils%2F-%2Futils-8.13.1.tgz"
@@ -942,69 +966,67 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphql-yoga/logger@npm:^0.0.1":
-  version: 0.0.1
-  resolution: "@graphql-yoga/logger@npm:0.0.1::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-yoga%2Flogger%2F-%2Flogger-0.0.1.tgz"
-  dependencies:
-    tslib: ^2.3.1
-  checksum: 56de91d03d6c163187bfacbdea4b3317b69d789cc2374f5d1ef3c058a0c98d8540088bd0e4435177f2afd074429e18e45182f3854247e7ec92c769432a74a7d4
-  languageName: node
-  linkType: hard
-
-"@graphql-yoga/plugin-apq@npm:^1.9.1":
-  version: 1.9.1
-  resolution: "@graphql-yoga/plugin-apq@npm:1.9.1::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-yoga%2Fplugin-apq%2F-%2Fplugin-apq-1.9.1.tgz"
-  dependencies:
-    lru-cache: ^7.14.1
-  peerDependencies:
-    "@graphql-tools/utils": ^9.2.1
-    graphql-yoga: ^3.9.1
-  checksum: 801db71b41e26d90ea80d236c3490212fe6a2c7b8fe8f83db34430fb8cfcd03f938342ac926debe92090dde052c9c8275d96abd8796722710bd8745242a1c484
-  languageName: node
-  linkType: hard
-
-"@graphql-yoga/plugin-disable-introspection@npm:^0.8.1":
-  version: 0.8.1
-  resolution: "@graphql-yoga/plugin-disable-introspection@npm:0.8.1::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-yoga%2Fplugin-disable-introspection%2F-%2Fplugin-disable-introspection-0.8.1.tgz"
-  peerDependencies:
-    graphql: ^15.2.0 || ^16.0.0
-    graphql-yoga: ^3.9.1
-  checksum: 066c584d9eef0d8e18654e9bddf9ed9ca40728bd1077b198d20b754c54e9295aa698667ff9c7a5fca33cccf48512e308b8ca237e8e7cb1844746babf4278df9e
-  languageName: node
-  linkType: hard
-
-"@graphql-yoga/plugin-prometheus@npm:^1.9.1":
-  version: 1.9.1
-  resolution: "@graphql-yoga/plugin-prometheus@npm:1.9.1::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-yoga%2Fplugin-prometheus%2F-%2Fplugin-prometheus-1.9.1.tgz"
-  dependencies:
-    "@envelop/prometheus": 7.0.6
-  peerDependencies:
-    graphql: ^15.2.0 || ^16.0.0
-    graphql-yoga: ^3.9.1
-    prom-client: ^13 || ^14.0.0
-  checksum: 21d6818288109a66a3adf202edca381fed279fbffdee1f3f68cabbcea8b6b9ecea3e6d3b24f1c494d96ebea7c8cae0548a3b47f0e86d0105b9e614406ed9daec
-  languageName: node
-  linkType: hard
-
-"@graphql-yoga/subscription@npm:^3.1.0":
-  version: 3.1.0
-  resolution: "@graphql-yoga/subscription@npm:3.1.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-yoga%2Fsubscription%2F-%2Fsubscription-3.1.0.tgz"
-  dependencies:
-    "@graphql-yoga/typed-event-target": ^1.0.0
-    "@repeaterjs/repeater": ^3.0.4
-    "@whatwg-node/events": 0.0.2
-    tslib: ^2.3.1
-  checksum: 0496d20bcd6a5630bdd87c8dfa87de53e4be3fa1b5b7ecb114d5329ff93a46e188ae50069f47c7423d1fabe3baf6fbe61a1f3b87e0e2fe20f41c4d9b18e14ff6
-  languageName: node
-  linkType: hard
-
-"@graphql-yoga/typed-event-target@npm:^1.0.0":
+"@graphql-yoga/logger@npm:^1.0.0":
   version: 1.0.0
-  resolution: "@graphql-yoga/typed-event-target@npm:1.0.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-yoga%2Ftyped-event-target%2F-%2Ftyped-event-target-1.0.0.tgz"
+  resolution: "@graphql-yoga/logger@npm:1.0.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-yoga%2Flogger%2F-%2Flogger-1.0.0.tgz"
+  dependencies:
+    tslib: ^2.5.2
+  checksum: 6d4e963b1386fbb68716d8b8192533337998e86d7c013e58816d42392a287d2b3b63f92c2cd89155edd936d51c2c1e44fb2d6487359879a85f113e6be7b838a1
+  languageName: node
+  linkType: hard
+
+"@graphql-yoga/plugin-apq@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "@graphql-yoga/plugin-apq@npm:2.0.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-yoga%2Fplugin-apq%2F-%2Fplugin-apq-2.0.0.tgz"
+  peerDependencies:
+    "@graphql-tools/utils": ^10.0.0
+    graphql-yoga: ^4.0.0
+  checksum: de7d4d332d86cd6d1e72c98a45bf64978da8a1094eac90831ee2dfd847874923ba6f7059260172d23a6028c692242bbecfe89394f4a1f951adcf4cbc148ef272
+  languageName: node
+  linkType: hard
+
+"@graphql-yoga/plugin-disable-introspection@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "@graphql-yoga/plugin-disable-introspection@npm:1.0.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-yoga%2Fplugin-disable-introspection%2F-%2Fplugin-disable-introspection-1.0.0.tgz"
+  peerDependencies:
+    graphql: ^15.2.0 || ^16.0.0
+    graphql-yoga: ^4.0.0
+  checksum: 1720a309b3cf8c1a2bf6a1a7d82e27b5fea330643dd6503dd030f04cbd31bfea474a97383708e60e9ffd73cb7b199ff16e9211a46baa038eb552ae66b13f7b6e
+  languageName: node
+  linkType: hard
+
+"@graphql-yoga/plugin-prometheus@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "@graphql-yoga/plugin-prometheus@npm:2.0.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-yoga%2Fplugin-prometheus%2F-%2Fplugin-prometheus-2.0.0.tgz"
+  dependencies:
+    "@envelop/prometheus": 8.0.0
+  peerDependencies:
+    graphql: ^15.2.0 || ^16.0.0
+    graphql-yoga: ^4.0.0
+    prom-client: ^13 || ^14.0.0
+  checksum: c6a0986c2eafcd3a90a4429814aa1502c44c1af9bb93a42db3e9d58d058e2576ae034ed710ab0eda0d522fa8a87b2ad43572bc9e362cba348ab374074d5f6dd7
+  languageName: node
+  linkType: hard
+
+"@graphql-yoga/subscription@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "@graphql-yoga/subscription@npm:4.0.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-yoga%2Fsubscription%2F-%2Fsubscription-4.0.0.tgz"
+  dependencies:
+    "@graphql-yoga/typed-event-target": ^2.0.0
+    "@repeaterjs/repeater": ^3.0.4
+    "@whatwg-node/events": ^0.1.0
+    tslib: ^2.5.2
+  checksum: b0ead0a5e07d8087322b0d426bd8c45218b13e5e7b476a664304ad7836c9eff0f2f71a1698effd6bd3d4703f9d69b7c1e06c89eb892645693dc0ac8dd8f13cc1
+  languageName: node
+  linkType: hard
+
+"@graphql-yoga/typed-event-target@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "@graphql-yoga/typed-event-target@npm:2.0.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-yoga%2Ftyped-event-target%2F-%2Ftyped-event-target-2.0.0.tgz"
   dependencies:
     "@repeaterjs/repeater": ^3.0.4
-    tslib: ^2.3.1
-  checksum: fc194c3e7f8ed00447c53ead4b2ac72948a53052866464e531b09880b2a017bd303e5171134848a5bed8c11a841b9817685bf6b445b4c0e622305a090d0a014e
+    tslib: ^2.5.2
+  checksum: 1d6be24b71892714a1e4894da09d64739db2c817997068c09483b6e42b02a7655ffce8938d252711da7b076057c3ea25a021f8d9ad68fd30811f5e0a0941bf1b
   languageName: node
   linkType: hard
 
@@ -1429,17 +1451,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@opentelemetry/exporter-zipkin@npm:^1.12.0":
-  version: 1.12.0
-  resolution: "@opentelemetry/exporter-zipkin@npm:1.12.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40opentelemetry%2Fexporter-zipkin%2F-%2Fexporter-zipkin-1.12.0.tgz"
+"@opentelemetry/exporter-zipkin@npm:^1.13.0":
+  version: 1.13.0
+  resolution: "@opentelemetry/exporter-zipkin@npm:1.13.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40opentelemetry%2Fexporter-zipkin%2F-%2Fexporter-zipkin-1.13.0.tgz"
   dependencies:
-    "@opentelemetry/core": 1.12.0
-    "@opentelemetry/resources": 1.12.0
-    "@opentelemetry/sdk-trace-base": 1.12.0
-    "@opentelemetry/semantic-conventions": 1.12.0
+    "@opentelemetry/core": 1.13.0
+    "@opentelemetry/resources": 1.13.0
+    "@opentelemetry/sdk-trace-base": 1.13.0
+    "@opentelemetry/semantic-conventions": 1.13.0
   peerDependencies:
     "@opentelemetry/api": ^1.0.0
-  checksum: 4c2b4bfd3fe65d8391b70b71130a67de601cc7c35b11dcc899dd6b1893c76148b650fa10f3ddbfc57a9788349590c758a10558eec6ef8466cc746273e1a534ed
+  checksum: 3745ef5e941ffd6b3a880ceb865c4b4c6d1980d60f9b00db96562b4c301d671ce78abf8b616d8df851cc3dddc2a8edab162eb41ce9264f8335e1d74e53e8069f
   languageName: node
   linkType: hard
 
@@ -1466,7 +1488,32 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@opentelemetry/sdk-trace-base@npm:1.12.0, @opentelemetry/sdk-trace-base@npm:^1.11.0, @opentelemetry/sdk-trace-base@npm:^1.12.0":
+"@opentelemetry/resources@npm:1.13.0":
+  version: 1.13.0
+  resolution: "@opentelemetry/resources@npm:1.13.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40opentelemetry%2Fresources%2F-%2Fresources-1.13.0.tgz"
+  dependencies:
+    "@opentelemetry/core": 1.13.0
+    "@opentelemetry/semantic-conventions": 1.13.0
+  peerDependencies:
+    "@opentelemetry/api": ">=1.0.0 <1.5.0"
+  checksum: ef0a11596f27b5e1c13b74357da06c5c2725a1056df0a583562dbcc739927ad85bb8bdec4e01f4b43f348b448c0146c033b135840a7d388b75cc751a33a6364e
+  languageName: node
+  linkType: hard
+
+"@opentelemetry/sdk-trace-base@npm:1.13.0, @opentelemetry/sdk-trace-base@npm:^1.13.0":
+  version: 1.13.0
+  resolution: "@opentelemetry/sdk-trace-base@npm:1.13.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40opentelemetry%2Fsdk-trace-base%2F-%2Fsdk-trace-base-1.13.0.tgz"
+  dependencies:
+    "@opentelemetry/core": 1.13.0
+    "@opentelemetry/resources": 1.13.0
+    "@opentelemetry/semantic-conventions": 1.13.0
+  peerDependencies:
+    "@opentelemetry/api": ">=1.0.0 <1.5.0"
+  checksum: bfe95d56de998cf4219fa9293c9d2ebbd90d93391bbb8360a1806465983b6665cef58bc2938a8e318ae0712e2482ebed7a9db5d9e8bb6fc010199f5fa8f1592e
+  languageName: node
+  linkType: hard
+
+"@opentelemetry/sdk-trace-base@npm:^1.11.0":
   version: 1.12.0
   resolution: "@opentelemetry/sdk-trace-base@npm:1.12.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40opentelemetry%2Fsdk-trace-base%2F-%2Fsdk-trace-base-1.12.0.tgz"
   dependencies:
@@ -1526,7 +1573,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@repeaterjs/repeater@npm:3.0.4, @repeaterjs/repeater@npm:^3.0.4":
+"@repeaterjs/repeater@npm:^3.0.4":
   version: 3.0.4
   resolution: "@repeaterjs/repeater@npm:3.0.4::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40repeaterjs%2Frepeater%2F-%2Frepeater-3.0.4.tgz"
   checksum: cca0db3e802bc26fcce0b4a574074d9956da53bf43094de03c0e4732d05e13441279a92f0b96e2a7a39da50933684947a138c1213406eaafe39cfd4683d6c0df
@@ -1607,7 +1654,7 @@ __metadata:
     "@taql/config": "workspace:^"
     "@types/node-fetch": ^2.6.3
     graphql: ^16.6.0
-    graphql-yoga: ^3.9.1
+    graphql-yoga: ^4.0.0
     koa: ^2.14.2
     node-fetch: ^2.6.11
     typescript: ^5.0.4
@@ -1629,7 +1676,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@taql/debug@workspace:packages/debug"
   dependencies:
-    "@envelop/core": ^3.0.6
+    "@envelop/core": 4.0.0
     "@graphql-tools/delegate": 9.0.35
     "@graphql-tools/stitch": ^8.7.49
     "@graphql-tools/utils": ^8.13.1
@@ -1693,13 +1740,13 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@taql/prereg@workspace:packages/prereg"
   dependencies:
-    "@envelop/core": ^3.0.6
+    "@envelop/core": 4.0.0
     "@taql/config": "workspace:^"
     "@taql/metrics": "workspace:^"
     "@taql/testing": "workspace:^"
     "@types/pg": ^8.6.6
     graphql: ^16.6.0
-    graphql-yoga: ^3.9.1
+    graphql-yoga: ^4.0.0
     pg: ^8.10.0
     prom-client: ^14.2.0
     typescript: ^5.0.4
@@ -1733,15 +1780,15 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@taql/server@workspace:packages/server"
   dependencies:
-    "@envelop/core": ^3.0.6
-    "@envelop/opentelemetry": ^4.1.0
+    "@envelop/core": 4.0.0
+    "@envelop/opentelemetry": ^5.0.0
     "@graphql-tools/utils": ^9.2.1
-    "@graphql-yoga/plugin-apq": ^1.9.1
-    "@graphql-yoga/plugin-disable-introspection": ^0.8.1
-    "@graphql-yoga/plugin-prometheus": ^1.9.1
-    "@opentelemetry/exporter-zipkin": ^1.12.0
+    "@graphql-yoga/plugin-apq": ^2.0.0
+    "@graphql-yoga/plugin-disable-introspection": ^1.0.0
+    "@graphql-yoga/plugin-prometheus": ^2.0.0
+    "@opentelemetry/exporter-zipkin": ^1.13.0
     "@opentelemetry/propagator-b3": ^1.13.0
-    "@opentelemetry/sdk-trace-base": ^1.12.0
+    "@opentelemetry/sdk-trace-base": ^1.13.0
     "@taql/config": "workspace:^"
     "@taql/context": "workspace:^"
     "@taql/debug": "workspace:^"
@@ -1754,7 +1801,7 @@ __metadata:
     "@types/koa": ^2.13.6
     cache-manager: ^5.2.1
     graphql: ^16.6.0
-    graphql-yoga: ^3.9.1
+    graphql-yoga: ^4.0.0
     koa: ^2.14.2
     node-fetch: ^2.6.11
     prom-client: ^14.2.0
@@ -1778,7 +1825,7 @@ __metadata:
     "@graphql-tools/executor-http": ^0.1.10
     "@graphql-tools/utils": ^8.13.1
     graphql: ^16.6.0
-    graphql-yoga: ^3.9.1
+    graphql-yoga: ^4.0.0
   languageName: unknown
   linkType: soft
 
@@ -2368,13 +2415,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@whatwg-node/events@npm:0.0.2":
-  version: 0.0.2
-  resolution: "@whatwg-node/events@npm:0.0.2::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40whatwg-node%2Fevents%2F-%2Fevents-0.0.2.tgz"
-  checksum: 6d491801d36967d5d62443cca6ef39d41cf882d575839d2e9d1a5f394722cd24ef84fe9e897bb72c01bd198871fda9ff0e8b1ac5aa6f3f814f87d92b7f28fdcc
-  languageName: node
-  linkType: hard
-
 "@whatwg-node/events@npm:^0.0.3":
   version: 0.0.3
   resolution: "@whatwg-node/events@npm:0.0.3::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40whatwg-node%2Fevents%2F-%2Fevents-0.0.3.tgz"
@@ -2382,7 +2422,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@whatwg-node/fetch@npm:^0.8.1, @whatwg-node/fetch@npm:^0.8.3, @whatwg-node/fetch@npm:^0.8.4":
+"@whatwg-node/events@npm:^0.1.0":
+  version: 0.1.1
+  resolution: "@whatwg-node/events@npm:0.1.1::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40whatwg-node%2Fevents%2F-%2Fevents-0.1.1.tgz"
+  checksum: 3a356ca23522190201e27446cfd7ebf1cf96815ddb9d1ba5da0a00bbe6c1d28b4094862104411101fbedd47c758b25fe3683033f6a3e80933029efd664c33567
+  languageName: node
+  linkType: hard
+
+"@whatwg-node/fetch@npm:^0.8.1":
   version: 0.8.8
   resolution: "@whatwg-node/fetch@npm:0.8.8::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40whatwg-node%2Ffetch%2F-%2Ffetch-0.8.8.tgz"
   dependencies:
@@ -2392,6 +2439,16 @@ __metadata:
     urlpattern-polyfill: ^8.0.0
     web-streams-polyfill: ^3.2.1
   checksum: 891407ba57e32e5af70a3b0a86980c4466dcf2ba8581b6927475c85400280b163085519e98821dd94776da9aa1b0b1e221e718009e2abed9c8a0d4721025b2ab
+  languageName: node
+  linkType: hard
+
+"@whatwg-node/fetch@npm:^0.9.0, @whatwg-node/fetch@npm:^0.9.3":
+  version: 0.9.3
+  resolution: "@whatwg-node/fetch@npm:0.9.3::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40whatwg-node%2Ffetch%2F-%2Ffetch-0.9.3.tgz"
+  dependencies:
+    "@whatwg-node/node-fetch": ^0.4.2
+    urlpattern-polyfill: ^9.0.0
+  checksum: 3486aa85a2071e2fa8e8744a7a21cc96b972de39891b6d486f085be1e520387a48a0c94b5b595085f13bdd71f80f0c5130fa1808f4dc86003914fd3a94715af4
   languageName: node
   linkType: hard
 
@@ -2408,13 +2465,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@whatwg-node/server@npm:^0.7.3":
-  version: 0.7.5
-  resolution: "@whatwg-node/server@npm:0.7.5::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40whatwg-node%2Fserver%2F-%2Fserver-0.7.5.tgz"
+"@whatwg-node/node-fetch@npm:^0.4.2":
+  version: 0.4.2
+  resolution: "@whatwg-node/node-fetch@npm:0.4.2::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40whatwg-node%2Fnode-fetch%2F-%2Fnode-fetch-0.4.2.tgz"
   dependencies:
-    "@whatwg-node/fetch": ^0.8.3
+    "@whatwg-node/events": ^0.1.0
+    busboy: ^1.6.0
+    fast-querystring: ^1.1.1
+    fast-url-parser: ^1.1.3
     tslib: ^2.3.1
-  checksum: eaf67dc6c7988629abac9b11d7f95d267d9b83bb430192ab4af90f1c58950842148dd0b337a6e7d1930d061d6c404b7081a2cf0e64dbbc00029728fa035fb2ab
+  checksum: 41edb1a9a8306451266cff0ec17aab4ba2172bcc4c636c7572fe19c5c38e577489ce4596d96ce8d06f623349e9b5f3dedd4c34d363bf609a3080380b4e96c8e0
+  languageName: node
+  linkType: hard
+
+"@whatwg-node/server@npm:^0.8.1":
+  version: 0.8.4
+  resolution: "@whatwg-node/server@npm:0.8.4::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40whatwg-node%2Fserver%2F-%2Fserver-0.8.4.tgz"
+  dependencies:
+    "@repeaterjs/repeater": ^3.0.4
+    "@whatwg-node/fetch": ^0.9.3
+    tslib: ^2.3.1
+  checksum: 70eb55994dc913db1caa9281fff87dcfc9fd4804357850dffea989b60734491705cd11fc4447ba9d7c2b4834f3e5d8f1d2cb74a7fe9f99abdb3a8faf8e1c7f45
   languageName: node
   linkType: hard
 
@@ -4145,25 +4216,24 @@ __metadata:
   languageName: node
   linkType: hard
 
-"graphql-yoga@npm:^3.9.1":
-  version: 3.9.1
-  resolution: "graphql-yoga@npm:3.9.1::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fgraphql-yoga%2F-%2Fgraphql-yoga-3.9.1.tgz"
+"graphql-yoga@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "graphql-yoga@npm:4.0.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fgraphql-yoga%2F-%2Fgraphql-yoga-4.0.0.tgz"
   dependencies:
-    "@envelop/core": ^3.0.4
-    "@envelop/validation-cache": ^5.1.2
-    "@graphql-tools/executor": ^0.0.18
-    "@graphql-tools/schema": ^9.0.18
-    "@graphql-tools/utils": ^9.2.1
-    "@graphql-yoga/logger": ^0.0.1
-    "@graphql-yoga/subscription": ^3.1.0
-    "@whatwg-node/fetch": ^0.8.4
-    "@whatwg-node/server": ^0.7.3
+    "@envelop/core": ^4.0.0
+    "@graphql-tools/executor": ^1.0.0
+    "@graphql-tools/schema": ^10.0.0
+    "@graphql-tools/utils": ^10.0.0
+    "@graphql-yoga/logger": ^1.0.0
+    "@graphql-yoga/subscription": ^4.0.0
+    "@whatwg-node/fetch": ^0.9.0
+    "@whatwg-node/server": ^0.8.1
     dset: ^3.1.1
-    lru-cache: ^7.14.1
-    tslib: ^2.3.1
+    lru-cache: ^9.0.0
+    tslib: ^2.5.2
   peerDependencies:
     graphql: ^15.2.0 || ^16.0.0
-  checksum: 7a1e6cd6d40d5b011c472217a0ec860c72c38656a03b209da1d4b0cc8eb7fab1b5576f88fe5d0657f5b935fb1dd588154c21878c932132095ad63c7ae3d55a21
+  checksum: 609aec002bf52b874ed4eb1a4e28f7ea2dd137e142bc5573d0be2fe5f385d52abe70fc02cc5880d4001f99ad00215f1e942785f60bfc3070f1f6f3590be99e00
   languageName: node
   linkType: hard
 
@@ -4233,13 +4303,6 @@ __metadata:
   dependencies:
     function-bind: ^1.1.1
   checksum: b9ad53d53be4af90ce5d1c38331e712522417d017d5ef1ebd0507e07c2fbad8686fffb8e12ddecd4c39ca9b9b47431afbb975b8abf7f3c3b82c98e9aad052792
-  languageName: node
-  linkType: hard
-
-"hash-it@npm:^6.0.0":
-  version: 6.0.0
-  resolution: "hash-it@npm:6.0.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fhash-it%2F-%2Fhash-it-6.0.0.tgz"
-  checksum: 10ca948ff7902a752344c3975c1a5c76ba9e4aa0363032f347a7235cce98473dce60fe4399b05979596aedf649adaf5b3f792a55b9b64ad59ae686e43300c2d1
   languageName: node
   linkType: hard
 
@@ -5489,13 +5552,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lru-cache@npm:^7.14.1":
-  version: 7.18.3
-  resolution: "lru-cache@npm:7.18.3::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Flru-cache%2F-%2Flru-cache-7.18.3.tgz"
-  checksum: e550d772384709deea3f141af34b6d4fa392e2e418c1498c078de0ee63670f1f46f5eee746e8ef7e69e1c895af0d4224e62ee33e66a543a14763b0f2e74c1356
-  languageName: node
-  linkType: hard
-
 "lru-cache@npm:^7.7.1":
   version: 7.14.1
   resolution: "lru-cache@npm:7.14.1::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Flru-cache%2F-%2Flru-cache-7.14.1.tgz"
@@ -5503,7 +5559,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lru-cache@npm:^9.1.2":
+"lru-cache@npm:^9.0.0, lru-cache@npm:^9.1.2":
   version: 9.1.2
   resolution: "lru-cache@npm:9.1.2::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Flru-cache%2F-%2Flru-cache-9.1.2.tgz"
   checksum: d3415634be3908909081fc4c56371a8d562d9081eba70543d86871b978702fffd0e9e362b83921b27a29ae2b37b90f55675aad770a54ac83bb3e4de5049d4b15
@@ -7096,6 +7152,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"tslib@npm:^2.5.2":
+  version: 2.5.3
+  resolution: "tslib@npm:2.5.3::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Ftslib%2F-%2Ftslib-2.5.3.tgz"
+  checksum: 88902b309afaf83259131c1e13da1dceb0ad1682a213143a1346a649143924d78cf3760c448b84d796938fd76127183894f8d85cbb3bf9c4fddbfcc140c0003c
+  languageName: node
+  linkType: hard
+
 "tsscmp@npm:1.0.6":
   version: 1.0.6
   resolution: "tsscmp@npm:1.0.6::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Ftsscmp%2F-%2Ftsscmp-1.0.6.tgz"
@@ -7234,6 +7297,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"urlpattern-polyfill@npm:^9.0.0":
+  version: 9.0.0
+  resolution: "urlpattern-polyfill@npm:9.0.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Furlpattern-polyfill%2F-%2Furlpattern-polyfill-9.0.0.tgz"
+  checksum: d3658b78a10eaee514c464f5a4336c408c70cf01e9b915cb1df5892b3c49003d1ed4042dc72d1b18493b8b847883e84fbf2bf358abb5dff84b2725d5e8463bcb
+  languageName: node
+  linkType: hard
+
 "util-deprecate@npm:^1.0.1":
   version: 1.0.2
   resolution: "util-deprecate@npm:1.0.2::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Futil-deprecate%2F-%2Futil-deprecate-1.0.2.tgz"
@@ -7259,7 +7329,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"value-or-promise@npm:1.0.12, value-or-promise@npm:^1.0.12":
+"value-or-promise@npm:^1.0.12":
   version: 1.0.12
   resolution: "value-or-promise@npm:1.0.12::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fvalue-or-promise%2F-%2Fvalue-or-promise-1.0.12.tgz"
   checksum: f53a66c75b7447c90bbaf946a757ca09c094629cb80ba742f59c980ec3a69be0a385a0e75505dedb4e757862f1a994ca4beaf083a831f24d3ffb3d4bb18cd1e1

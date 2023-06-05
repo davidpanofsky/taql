@@ -15,7 +15,7 @@
     "typescript": "^5.0.4"
   },
   "dependencies": {
-    "@envelop/core": "^3.0.6",
+    "@envelop/core": "4.0.0",
     "@taql/config": "workspace:^",
     "graphql": "^16.6.0"
   }
