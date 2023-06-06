@@ -48,6 +48,7 @@ export const preconfiguredUsePrometheus = usePrometheus({
       name: 'taql_http_duration',
       help: 'Time spent on HTTP connection',
       buckets: [1, 5, 25, 125, 625, 3125],
+      labelNames: ['operationType', 'operationName', 'statusCode'],
     }),
     fillLabelsFn: (params, { response }) => ({
       operationType: params.operationType ?? 'unknown',
