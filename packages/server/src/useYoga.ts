@@ -28,12 +28,12 @@ import { TaqlState } from '@taql/context';
 import { httpsAgent } from '@taql/httpAgent';
 import { ioRedisStore } from '@tirke/node-cache-manager-ioredis';
 import { makeSchema } from '@taql/schema';
+import { preconfiguredUsePrometheus } from './usePrometheus';
 import promClient from 'prom-client';
 import { readFileSync } from 'fs';
 import { tracerProvider } from './observability';
 import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspection';
 import { useOpenTelemetry } from '@envelop/opentelemetry';
-import { usePrometheus } from '@graphql-yoga/plugin-prometheus';
 
 export const useYoga = async () => {
   const batchLimit = SERVER_PARAMS.batchLimit;
@@ -160,23 +160,7 @@ export const useYoga = async () => {
           }
         : undefined,
     }),
-    usePrometheus({
-      // Options specified by @graphql-yoga/plugin-prometheus
-      http: true,
-      // Options passed on to @envelop/prometheus
-      // https://the-guild.dev/graphql/envelop/plugins/use-prometheus
-      // all optional, and by default, all set to false
-      requestCount: true, // requries `execute` to be true as well
-      requestSummary: true, // requries `execute` to be true as well
-      parse: true,
-      validate: true,
-      contextBuilding: true,
-      execute: true,
-      errors: true,
-      resolvers: true, // requires "execute" to be `true` as well
-      deprecatedFields: true,
-      endpoint: '/worker_metrics',
-    }),
+    preconfiguredUsePrometheus,
     useReadinessCheck({
       endpoint: '/NotImplemented',
       async check({ fetchAPI }) {
