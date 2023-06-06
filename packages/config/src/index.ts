@@ -8,6 +8,12 @@ import { logFmtFormat } from 'winston-logfmt';
 
 config();
 
+/**
+ * A consistent identifier for any given process, for example 'primary' for the
+ * main process, or 'worker_n' for the nth worker if clustering is enabled.
+ */
+export const WORKER = cluster.isPrimary ? 'primary' : `${cluster.worker?.id}`;
+
 const loggerConfig = resolve({
   console: {
     property: 'LOG_CONSOLE',
@@ -22,7 +28,7 @@ const loggerConfig = resolve({
 
 //export const logger = createLogger({
 loggers.add('access', {
-  defaultMeta: { worker: cluster.worker ? cluster.worker.id : 0 },
+  defaultMeta: { worker: WORKER },
   exitOnError: true,
   transports: new transports.Console({
     handleExceptions: false,
@@ -41,7 +47,7 @@ loggers.add('access', {
   }),
 });
 loggers.add('app', {
-  defaultMeta: { worker: cluster.worker ? cluster.worker.id : 0 },
+  defaultMeta: { worker: WORKER },
   exitOnError: true,
   transports: new transports.Console({
     handleExceptions: !loggerConfig.console,
@@ -298,7 +304,7 @@ export const TRACING_PARAMS = resolve({
     defaultTo: undefined,
   },
   useBatchingProcessor: {
-    property: 'TRACING_USE_BATCHING_PROCESSOR',
+    property: 'TRACING_USE_BATCHING_WORKEROR',
     resolver: resolvers.booleanFromString,
     defaultTo: false,
   },

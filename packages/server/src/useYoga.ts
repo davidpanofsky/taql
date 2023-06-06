@@ -23,7 +23,7 @@ import {
   subschemaExtensionsPlugin,
 } from '@taql/debug';
 import type { IncomingHttpHeaders } from 'http';
-import { LRUCache } from 'lru-cache';
+import { InstrumentedCache } from '@taql/metrics';
 import { TaqlState } from '@taql/context';
 import { httpsAgent } from '@taql/httpAgent';
 import { ioRedisStore } from '@tirke/node-cache-manager-ioredis';
@@ -41,15 +41,18 @@ export const useYoga = async () => {
     ? SERVER_PARAMS.port - 1
     : SERVER_PARAMS.port;
 
-  const documentCache = new LRUCache<string, DocumentNode>({
-    max: 4096,
-    maxSize: 1024 ** 3, // 1G in bytes
-    // We approximate the size of the cache in bytes, and node strings are utf-16.
-    // It's possible that the in-memory footprint will be smaller, but be pessimistic.
-    // Keys are the full query string.  We can approximate that the parsed document is _at least_ that heavy, so *2
-    sizeCalculation: (value, key) => Buffer.byteLength(key, 'utf16le') * 2,
-    ttl: 3_600_000,
-  });
+  const documentCache = new InstrumentedCache<string, DocumentNode>(
+    'document_parser',
+    {
+      max: 4096,
+      maxSize: 1024 ** 3, // 1G in bytes
+      // We approximate the size of the cache in bytes, and node strings are utf-16.
+      // It's possible that the in-memory footprint will be smaller, but be pessimistic.
+      // Keys are the full query string.  We can approximate that the parsed document is _at least_ that heavy, so *2
+      sizeCalculation: (value, key) => Buffer.byteLength(key, 'utf16le') * 2,
+      ttl: 3_600_000,
+    }
+  );
 
   const yogaOptions = {
     graphiql: ENABLE_FEATURES.graphiql,
@@ -68,12 +71,18 @@ export const useYoga = async () => {
     landingPage: true,
     parserCache: {
       documentCache,
-      errorCache: new LRUCache<string, Error>({ max: 1024, ttl: 3_600_000 }),
+      errorCache: new InstrumentedCache<string, Error>('parse_error', {
+        max: 1024,
+        ttl: 3_600_000,
+      }),
     },
-    validationCache: new LRUCache<string, readonly GraphQLError[]>({
-      max: 1024,
-      ttl: 3_600_000,
-    }),
+    validationCache: new InstrumentedCache<string, readonly GraphQLError[]>(
+      'validation',
+      {
+        max: 1024,
+        ttl: 3_600_000,
+      }
+    ),
 
     // Setting this to false as legacy Yoga Server-Sent Events are deprecated:
     // https://github.com/dotansimha/graphql-yoga/blob/b309ca0db1c45264878c3cec0137c3fdbd22fc97/packages/graphql-yoga/src/server.ts#L184
@@ -125,7 +134,6 @@ export const useYoga = async () => {
       ]
     : [];
   const apqStore: APQStore = multiCaching([memoryCache, ...redisCache]);
-
   const yogaPlugins = [
     mutatedFieldsExtensionPlugin,
     useOpenTelemetry(
@@ -187,7 +195,7 @@ export const useYoga = async () => {
   });
 
   const schemaForSVCOCache = ENABLE_FEATURES.serviceOverrides
-    ? new LRUCache<string, GraphQLSchema>({
+    ? new InstrumentedCache<string, GraphQLSchema>('svco_schemas', {
         max: 128,
         ttl: 1000 * 60 * 2,
         async fetchMethod(key): Promise<GraphQLSchema> {
@@ -215,31 +223,6 @@ export const useYoga = async () => {
       : schema,
     ...yogaOptions,
     plugins: yogaPlugins,
-  });
-
-  new promClient.Gauge({
-    name: 'taql_validation_cache_size',
-    help: 'validation cache entries',
-    async collect() {
-      const size = yogaOptions.validationCache.size;
-      this.set(size);
-    },
-  });
-  new promClient.Gauge({
-    name: 'taql_document_cache_size',
-    help: 'document cache entries',
-    async collect() {
-      const size = yogaOptions.parserCache.documentCache.size;
-      this.set(size);
-    },
-  });
-  new promClient.Gauge({
-    name: 'taql_error_cache_size',
-    help: 'error cache entries',
-    async collect() {
-      const size = yogaOptions.parserCache.errorCache.size;
-      this.set(size);
-    },
   });
 
   return async (ctx: TaqlState) => {

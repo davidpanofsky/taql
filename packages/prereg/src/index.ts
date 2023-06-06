@@ -7,7 +7,7 @@ import {
 } from 'graphql';
 import { Plugin, handleStreamOrSingleExecutionResult } from '@envelop/core';
 import { Plugin as YogaPlugin, createGraphQLError } from 'graphql-yoga';
-import { LRUCache } from 'lru-cache';
+import { InstrumentedCache } from '@taql/metrics';
 import { Pool } from 'pg';
 import { logger } from '@taql/config';
 import promClient from 'prom-client';
@@ -21,16 +21,6 @@ interface Cache<K, V> {
 const PREREG_UNK = new promClient.Counter({
   name: 'preregistered_query_unknown',
   help: 'Count of preregistered query IDs encountered which were unknown/unresolved',
-});
-
-const PREREG_MISS = new promClient.Counter({
-  name: 'preregistered_query_cache_miss',
-  help: 'Count of preregistered query IDs encountered which were resolved not from cache',
-});
-
-const PREREG_HIT = new promClient.Counter({
-  name: 'pregegistered_query_cache_hit',
-  help: 'Count of preregistered query IDs that were resolved from cache',
 });
 
 const PREREG_UPDATED_AT = new promClient.Gauge({
@@ -86,7 +76,7 @@ async function lookupQuery(
 }
 
 async function preloadCache(
-  cache: Cache<string, string>,
+  cache: InstrumentedCache<string, string>,
   db: Pool,
   limit: number
 ): Promise<number> {
@@ -157,7 +147,7 @@ export function usePreregisteredQueries(options: {
 
   const knownQueries = new Set<string>();
 
-  const cache = new LRUCache<string, string>({
+  const cache = new InstrumentedCache<string, string>('preregistered_query', {
     max: maxCacheSize,
   });
 
@@ -224,7 +214,6 @@ export function usePreregisteredQueries(options: {
         if (cache.has(maybePreregisteredId)) {
           logger.debug('preregistered query cache hit: ', maybePreregisteredId);
           preregisteredQuery = cache.get(maybePreregisteredId);
-          PREREG_HIT.inc();
         } else if (
           (preregisteredQuery = await lookupQuery(maybePreregisteredId, pool))
         ) {
@@ -232,7 +221,6 @@ export function usePreregisteredQueries(options: {
             'preregistered query cache miss: ',
             maybePreregisteredId
           );
-          PREREG_MISS.inc();
           cache.set(maybePreregisteredId, preregisteredQuery);
         }
 
