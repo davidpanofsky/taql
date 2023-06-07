@@ -9,11 +9,11 @@
   "license": "UNLICENSED",
   "devDependencies": {
     "@types/koa": "^2.13.6",
+    "ioredis": "^5.3.2",
     "typescript": "^5.0.4"
   },
   "dependencies": {
     "@envelop/core": "4.0.0",
-    "@envelop/graphql-jit": "^6.0.0",
     "@envelop/opentelemetry": "^5.0.0",
     "@graphql-tools/utils": "^9.2.1",
     "@graphql-yoga/plugin-apq": "^2.0.0",
@@ -30,6 +30,7 @@
     "@taql/prereg": "workspace:^",
     "@taql/schema": "workspace:^",
     "@taql/ssl": "workspace:^",
+    "@taql/unifiedCaching": "workspace:^",
     "@tirke/node-cache-manager-ioredis": "^3.2.0",
     "cache-manager": "^5.2.1",
     "graphql": "^16.6.0",

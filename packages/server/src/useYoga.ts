@@ -1,15 +1,10 @@
-import { APQStore, useAPQ } from '@graphql-yoga/plugin-apq';
 import {
-  AUTOMATIC_PERSISTED_QUERY_PARAMS,
   ENABLE_FEATURES,
   PREREGISTERED_QUERY_PARAMS,
   SERVER_PARAMS,
   accessLogger,
   logger,
 } from '@taql/config';
-import { DocumentNode, GraphQLSchema, validate } from 'graphql';
-import { JITCache, useGraphQlJit } from '@envelop/graphql-jit';
-import { caching, multiCaching } from 'cache-manager';
 import { createYoga, useReadinessCheck } from 'graphql-yoga';
 import fetch, {
   Headers as FetchHeaders,
@@ -23,11 +18,12 @@ import {
   serverHostExtensionPlugin,
   subschemaExtensionsPlugin,
 } from '@taql/debug';
+import { GraphQLSchema } from 'graphql';
 import type { IncomingHttpHeaders } from 'http';
 import { InstrumentedCache } from '@taql/metrics';
+import { TaqlAPQ } from './apq';
 import { TaqlState } from '@taql/context';
 import { httpsAgent } from '@taql/httpAgent';
-import { ioRedisStore } from '@tirke/node-cache-manager-ioredis';
 import { makeSchema } from '@taql/schema';
 import { preconfiguredUsePrometheus } from './usePrometheus';
 import promClient from 'prom-client';
@@ -35,6 +31,86 @@ import { readFileSync } from 'fs';
 import { tracerProvider } from './observability';
 import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspection';
 import { useOpenTelemetry } from '@envelop/opentelemetry';
+import { useUnifiedCaching } from '@taql/unifiedCaching';
+
+const makePlugins = async (defaultSchema: GraphQLSchema) => {
+  const apq = new TaqlAPQ();
+
+  const preregPlugin = usePreregisteredQueries({
+    maxCacheSize: PREREGISTERED_QUERY_PARAMS.maxCacheSize,
+    postgresConnectionString: PREREGISTERED_QUERY_PARAMS.databaseUri,
+    ssl: PREREGISTERED_QUERY_PARAMS.pgUseSsl
+      ? {
+          ca: readFileSync(
+            PREREGISTERED_QUERY_PARAMS.pgSslCaCertPath
+          ).toString(),
+          cert: readFileSync(
+            PREREGISTERED_QUERY_PARAMS.pgSslCertPath
+          ).toString(),
+          key: readFileSync(PREREGISTERED_QUERY_PARAMS.pgSslKeyPath).toString(),
+          rejectUnauthorized: PREREGISTERED_QUERY_PARAMS.sslRejectUnauthorized,
+        }
+      : undefined,
+  });
+
+  const unifiedCachingPlugin = await useUnifiedCaching({
+    maxCacheSize: 2048,
+    useJit: ENABLE_FEATURES.graphqlJIT && {
+      jitOptions: {
+        // Use fast-json-stringify instead of standard json stringification.
+        customJSONSerializer: true,
+        // Don't verify enum or scalar inputs - if a client wants to stuff a
+        // string into an int, or pass an invalid enum value, that's their
+        // problem; moreover, if a subgraph wants to misbehave when bad data is
+        // passed, that's their problem. We're in the transport, muxing &
+        // demuxing business, not the security business.
+        disableLeafSerialization: true,
+      },
+    },
+    prewarm: {
+      schema: defaultSchema,
+      preregistered: await preregPlugin.loadCurrentQueries(),
+      persisted: await apq.loadPersistedQueries(),
+    },
+  });
+
+  const yogaPlugins = [
+    mutatedFieldsExtensionPlugin,
+    useOpenTelemetry(
+      {
+        resolvers: true, // Tracks resolvers calls, and tracks resolvers thrown errors
+        variables: true, // Includes the operation variables values as part of the metadata collected
+        result: true, // Includes execution result object as part of the metadata collected
+      },
+      tracerProvider
+    ),
+    ...(ENABLE_FEATURES.debugExtensions
+      ? [serverHostExtensionPlugin, subschemaExtensionsPlugin]
+      : []),
+    await apq.makePlugin(),
+    unifiedCachingPlugin,
+    preregPlugin,
+    preconfiguredUsePrometheus,
+    useReadinessCheck({
+      endpoint: '/NotImplemented',
+      async check({ fetchAPI }) {
+        try {
+          // For now, readiness check is same as healthcheck, but with a different response body.
+          // Todo: Add checks for other things like database connection, etc.
+          //redisCache[0].store.client.status
+          // The trailing newline is important for unblacklisting, apparently.
+          return new fetchAPI.Response('<NotImplemented/>\n');
+        } catch (err) {
+          logger.error(err);
+          return false;
+        }
+      },
+    }),
+  ];
+
+  ENABLE_FEATURES.introspection || yogaPlugins.push(useDisableIntrospection());
+  return yogaPlugins;
+};
 
 const SVCO_SCHEMA_BUILD_COUNTER = new promClient.Counter({
   name: 'taql_svco_schema_builds',
@@ -80,25 +156,6 @@ export const useYoga = async () => {
     ? SERVER_PARAMS.port - 1
     : SERVER_PARAMS.port;
 
-  const documentCacheSpecs = {
-    max: 4096,
-    maxSize: 512 * 1024 ** 2, // 512MB in bytes
-    // We approximate the size of the cache in bytes, and node strings are utf-16.
-    // It's possible that the in-memory footprint will be smaller, but be pessimistic.
-    // Keys are the full query string.  We can approximate that the parsed result is _at least_ that heavy, so *2
-    //
-    // TODO compute this max size from some config/env value to allow the
-    // container to configure taql's caches based on the amount of memory it
-    // has access to.
-    sizeCalculation: (_value: unknown, key: string) =>
-      Buffer.byteLength(key, 'utf16le') * 2,
-  } as const;
-
-  const documentCache = new InstrumentedCache<string, DocumentNode>(
-    'document_parser',
-    documentCacheSpecs
-  );
-
   const yogaOptions = {
     graphiql: ENABLE_FEATURES.graphiql,
     multipart: false,
@@ -114,19 +171,6 @@ export const useYoga = async () => {
     graphqlEndpoint: '/graphql',
     healthCheckEndpoint: '/health',
     landingPage: ENABLE_FEATURES.graphiql,
-    parserAndValidationCache: {
-      documentCache,
-      errorCache: new InstrumentedCache<string, Error>('parse_error', {
-        max: 1024,
-      }),
-      validationCache: new InstrumentedCache<string, typeof validate>(
-        'validation',
-        {
-          max: 1024,
-        }
-      ),
-    },
-
     // Setting this to false as legacy Yoga Server-Sent Events are deprecated:
     // https://github.com/dotansimha/graphql-yoga/blob/b309ca0db1c45264878c3cec0137c3fdbd22fc97/packages/graphql-yoga/src/server.ts#L184
     legacySse: false,
@@ -147,113 +191,10 @@ export const useYoga = async () => {
   }
   logger.info('created initial schema');
 
-  // Two tier store for automatic persisted queries
-  const memoryCache = await caching('memory', {
-    max: AUTOMATIC_PERSISTED_QUERY_PARAMS.memCacheSize,
-    ttl: AUTOMATIC_PERSISTED_QUERY_PARAMS.redisTTL,
-  });
-
-  const redisCache = AUTOMATIC_PERSISTED_QUERY_PARAMS.redisInstance
-    ? [
-        await caching(ioRedisStore, {
-          ttl: AUTOMATIC_PERSISTED_QUERY_PARAMS.redisTTL,
-          host: AUTOMATIC_PERSISTED_QUERY_PARAMS.redisInstance,
-          port: 6379,
-        }),
-      ]
-    : AUTOMATIC_PERSISTED_QUERY_PARAMS.redisCluster
-    ? [
-        await caching(ioRedisStore, {
-          ttl: AUTOMATIC_PERSISTED_QUERY_PARAMS.redisTTL,
-          clusterConfig: {
-            nodes: [
-              {
-                host: AUTOMATIC_PERSISTED_QUERY_PARAMS.redisCluster,
-                port: 6379,
-              },
-            ],
-          },
-        }),
-      ]
-    : [];
-  const apqStore: APQStore = multiCaching([memoryCache, ...redisCache]);
-  const yogaPlugins = [
-    mutatedFieldsExtensionPlugin,
-    useOpenTelemetry(
-      {
-        resolvers: true, // Tracks resolvers calls, and tracks resolvers thrown errors
-        variables: true, // Includes the operation variables values as part of the metadata collected
-        result: true, // Includes execution result object as part of the metadata collected
-      },
-      tracerProvider
-    ),
-    ...(ENABLE_FEATURES.debugExtensions
-      ? [serverHostExtensionPlugin, subschemaExtensionsPlugin]
-      : []),
-    useAPQ({ store: apqStore }),
-    usePreregisteredQueries({
-      maxCacheSize: PREREGISTERED_QUERY_PARAMS.maxCacheSize,
-      postgresConnectionString: PREREGISTERED_QUERY_PARAMS.databaseUri,
-      documentCacheForWarming: documentCache,
-      ssl: PREREGISTERED_QUERY_PARAMS.pgUseSsl
-        ? {
-            ca: readFileSync(
-              PREREGISTERED_QUERY_PARAMS.pgSslCaCertPath
-            ).toString(),
-            cert: readFileSync(
-              PREREGISTERED_QUERY_PARAMS.pgSslCertPath
-            ).toString(),
-            key: readFileSync(
-              PREREGISTERED_QUERY_PARAMS.pgSslKeyPath
-            ).toString(),
-            rejectUnauthorized:
-              PREREGISTERED_QUERY_PARAMS.sslRejectUnauthorized,
-          }
-        : undefined,
-    }),
-    preconfiguredUsePrometheus,
-    useReadinessCheck({
-      endpoint: '/NotImplemented',
-      async check({ fetchAPI }) {
-        try {
-          // For now, readiness check is same as healthcheck, but with a different response body.
-          // Todo: Add checks for other things like database connection, etc.
-          //redisCache[0].store.client.status
-          // The trailing newline is important for unblacklisting, apparently.
-          return new fetchAPI.Response('<NotImplemented/>\n');
-        } catch (err) {
-          logger.error(err);
-          return false;
-        }
-      },
-    }),
-    //schemaPoller.asPlugin(),
-  ];
-
-  ENABLE_FEATURES.introspection || yogaPlugins.push(useDisableIntrospection());
-  ENABLE_FEATURES.graphqlJIT &&
-    yogaPlugins.push(
-      useGraphQlJit(
-        {
-          // Use fast-json-stringify instead of standard json stringification.
-          customJSONSerializer: true,
-          // Don't verify enum or scalar inputs - if a client wants to stuff a
-          // string into an int, or pass an invalid enum value, that's their
-          // problem; moreover, if a subgraph wants to misbehave when bad data is
-          // passed, that's their problem. We're in the transport, muxing &
-          // demuxing business, not the security business.
-          disableLeafSerialization: true,
-        },
-        {
-          cache: <JITCache>new InstrumentedCache('jit', documentCacheSpecs),
-        }
-      )
-    );
-
   const yoga = createYoga<TaqlState>({
     schema: makeSchemaProvider(schema),
     ...yogaOptions,
-    plugins: yogaPlugins,
+    plugins: await makePlugins(schema),
   });
   logger.info('Created yoga server');
 

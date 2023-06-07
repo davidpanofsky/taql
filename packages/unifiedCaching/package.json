@@ -1,0 +1,23 @@
+{
+  "name": "@taql/unifiedCaching",
+  "version": "1.0.0",
+  "main": "build/index.js",
+  "scripts": {
+    "build": "tsc --build",
+    "start": "node build/index.js"
+  },
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "typescript": "^5.0.4"
+  },
+  "dependencies": {
+    "@envelop/core": "4.0.0",
+    "@taql/config": "workspace:^",
+    "@taql/metrics": "workspace:^",
+    "graphql": "^16.6.0",
+    "graphql-jit": "^0.8.2",
+    "graphql-yoga": "^4.0.0",
+    "lru-cache": "^9.1.2",
+    "prom-client": "^14.2.0"
+  }
+}

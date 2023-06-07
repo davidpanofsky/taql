@@ -540,20 +540,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@envelop/graphql-jit@npm:^6.0.0":
-  version: 6.0.0
-  resolution: "@envelop/graphql-jit@npm:6.0.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40envelop%2Fgraphql-jit%2F-%2Fgraphql-jit-6.0.0.tgz"
-  dependencies:
-    graphql-jit: ^0.8.0
-    lru-cache: ^9.1.1
-    tslib: ^2.5.0
-  peerDependencies:
-    "@envelop/core": ^4.0.0
-    graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
-  checksum: fa3fcf76b26a1495d8a64e1fc43819c61e2444a573608b17335120ae17899f9f54df13ec32ba5eb6a113dc2e02de36d976b9c278d6b48b5e67cae68baff13570
-  languageName: node
-  linkType: hard
-
 "@envelop/on-resolve@npm:^3.0.0":
   version: 3.0.0
   resolution: "@envelop/on-resolve@npm:3.0.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40envelop%2Fon-resolve%2F-%2Fon-resolve-3.0.0.tgz"
@@ -1795,7 +1781,6 @@ __metadata:
   resolution: "@taql/server@workspace:packages/server"
   dependencies:
     "@envelop/core": 4.0.0
-    "@envelop/graphql-jit": ^6.0.0
     "@envelop/opentelemetry": ^5.0.0
     "@graphql-tools/utils": ^9.2.1
     "@graphql-yoga/plugin-apq": ^2.0.0
@@ -1812,11 +1797,13 @@ __metadata:
     "@taql/prereg": "workspace:^"
     "@taql/schema": "workspace:^"
     "@taql/ssl": "workspace:^"
+    "@taql/unifiedCaching": "workspace:^"
     "@tirke/node-cache-manager-ioredis": ^3.2.0
     "@types/koa": ^2.13.6
     cache-manager: ^5.2.1
     graphql: ^16.6.0
     graphql-yoga: ^4.0.0
+    ioredis: ^5.3.2
     koa: ^2.14.2
     node-fetch: ^2.6.11
     prom-client: ^14.2.0
@@ -1841,6 +1828,22 @@ __metadata:
     "@graphql-tools/utils": ^8.13.1
     graphql: ^16.6.0
     graphql-yoga: ^4.0.0
+  languageName: unknown
+  linkType: soft
+
+"@taql/unifiedCaching@workspace:^, @taql/unifiedCaching@workspace:packages/unifiedCaching":
+  version: 0.0.0-use.local
+  resolution: "@taql/unifiedCaching@workspace:packages/unifiedCaching"
+  dependencies:
+    "@envelop/core": 4.0.0
+    "@taql/config": "workspace:^"
+    "@taql/metrics": "workspace:^"
+    graphql: ^16.6.0
+    graphql-jit: ^0.8.2
+    graphql-yoga: ^4.0.0
+    lru-cache: ^9.1.2
+    prom-client: ^14.2.0
+    typescript: ^5.0.4
   languageName: unknown
   linkType: soft
 
@@ -4251,7 +4254,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"graphql-jit@npm:^0.8.0":
+"graphql-jit@npm:^0.8.2":
   version: 0.8.2
   resolution: "graphql-jit@npm:0.8.2::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fgraphql-jit%2F-%2Fgraphql-jit-0.8.2.tgz"
   dependencies:
@@ -4535,7 +4538,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ioredis@npm:^5.2.2":
+"ioredis@npm:^5.2.2, ioredis@npm:^5.3.2":
   version: 5.3.2
   resolution: "ioredis@npm:5.3.2::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fioredis%2F-%2Fioredis-5.3.2.tgz"
   dependencies:
@@ -5632,7 +5635,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lru-cache@npm:^9.0.0, lru-cache@npm:^9.1.1, lru-cache@npm:^9.1.2":
+"lru-cache@npm:^9.0.0, lru-cache@npm:^9.1.2":
   version: 9.1.2
   resolution: "lru-cache@npm:9.1.2::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Flru-cache%2F-%2Flru-cache-9.1.2.tgz"
   checksum: d3415634be3908909081fc4c56371a8d562d9081eba70543d86871b978702fffd0e9e362b83921b27a29ae2b37b90f55675aad770a54ac83bb3e4de5049d4b15
