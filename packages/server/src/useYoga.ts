@@ -54,7 +54,6 @@ export const useYoga = async () => {
     // has access to.
     sizeCalculation: (_value: unknown, key: string) =>
       Buffer.byteLength(key, 'utf16le') * 2,
-    ttl: 3_600_000,
   } as const;
 
   const documentCache = new InstrumentedCache<string, DocumentNode>(
@@ -81,13 +80,11 @@ export const useYoga = async () => {
       documentCache,
       errorCache: new InstrumentedCache<string, Error>('parse_error', {
         max: 1024,
-        ttl: 3_600_000,
       }),
       validationCache: new InstrumentedCache<string, typeof validate>(
         'validation',
         {
           max: 1024,
-          ttl: 3_600_000,
         }
       ),
     },
