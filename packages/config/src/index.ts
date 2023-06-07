@@ -219,6 +219,11 @@ export const ENABLE_FEATURES = resolve({
     resolver: resolvers.booleanFromString,
     defaultTo: process.env.NODE_ENV === 'production' ? false : true,
   },
+  graphqlJIT: {
+    property: 'ENABLE_GRAPHQL_JIT',
+    resolver: resolvers.booleanFromString,
+    defaultTo: true,
+  },
   introspection: {
     property: 'ENABLE_INTROSPECTION',
     resolver: resolvers.booleanFromString,

@@ -8,6 +8,7 @@ import {
   logger,
 } from '@taql/config';
 import { DocumentNode, GraphQLSchema, validate } from 'graphql';
+import { JITCache, useGraphQlJit } from '@envelop/graphql-jit';
 import { caching, multiCaching } from 'cache-manager';
 import { createYoga, useReadinessCheck } from 'graphql-yoga';
 import fetch, {
@@ -33,7 +34,6 @@ import promClient from 'prom-client';
 import { readFileSync } from 'fs';
 import { tracerProvider } from './observability';
 import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspection';
-import { useGraphQlJit } from '@envelop/graphql-jit';
 import { useOpenTelemetry } from '@envelop/opentelemetry';
 
 export const useYoga = async () => {
@@ -42,17 +42,20 @@ export const useYoga = async () => {
     ? SERVER_PARAMS.port - 1
     : SERVER_PARAMS.port;
 
+  const documentCacheSpecs = {
+    max: 4096,
+    maxSize: 1024 ** 3, // 1G in bytes
+    // We approximate the size of the cache in bytes, and node strings are utf-16.
+    // It's possible that the in-memory footprint will be smaller, but be pessimistic.
+    // Keys are the full query string.  We can approximate that the parsed result is _at least_ that heavy, so *2
+    sizeCalculation: (_value: unknown, key: string) =>
+      Buffer.byteLength(key, 'utf16le') * 2,
+    ttl: 3_600_000,
+  } as const;
+
   const documentCache = new InstrumentedCache<string, DocumentNode>(
     'document_parser',
-    {
-      max: 4096,
-      maxSize: 1024 ** 3, // 1G in bytes
-      // We approximate the size of the cache in bytes, and node strings are utf-16.
-      // It's possible that the in-memory footprint will be smaller, but be pessimistic.
-      // Keys are the full query string.  We can approximate that the parsed document is _at least_ that heavy, so *2
-      sizeCalculation: (value, key) => Buffer.byteLength(key, 'utf16le') * 2,
-      ttl: 3_600_000,
-    }
+    documentCacheSpecs
   );
 
   const yogaOptions = {
@@ -186,10 +189,27 @@ export const useYoga = async () => {
       },
     }),
     //schemaPoller.asPlugin(),
-    useGraphQlJit(),
   ];
 
   ENABLE_FEATURES.introspection || yogaPlugins.push(useDisableIntrospection());
+  ENABLE_FEATURES.graphqlJIT &&
+    yogaPlugins.push(
+      useGraphQlJit(
+        {
+          // Use fast-json-stringify instead of standard json stringification.
+          customJSONSerializer: true,
+          // Don't verify enum or scalar inputs - if a client wants to stuff a
+          // string into an int, or pass an invalid enum value, that's their
+          // problem; moreover, if a subgraph wants to misbehave when bad data is
+          // passed, that's their problem. We're in the transport, muxing &
+          // demuxing business, not the security business.
+          disableLeafSerialization: true,
+        },
+        {
+          cache: <JITCache>new InstrumentedCache('jit', documentCacheSpecs),
+        }
+      )
+    );
 
   const svcoSchemaBuilds = new promClient.Counter({
     name: 'taql_svco_schema_builds',
