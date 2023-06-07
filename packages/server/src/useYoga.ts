@@ -44,13 +44,16 @@ export const useYoga = async () => {
 
   const documentCacheSpecs = {
     max: 4096,
-    maxSize: 1024 ** 3, // 1G in bytes
+    maxSize: 512 * 1024 ** 2, // 512MB in bytes
     // We approximate the size of the cache in bytes, and node strings are utf-16.
     // It's possible that the in-memory footprint will be smaller, but be pessimistic.
     // Keys are the full query string.  We can approximate that the parsed result is _at least_ that heavy, so *2
+    //
+    // TODO compute this max size from some config/env value to allow the
+    // container to configure taql's caches based on the amount of memory it
+    // has access to.
     sizeCalculation: (_value: unknown, key: string) =>
       Buffer.byteLength(key, 'utf16le') * 2,
-    ttl: 3_600_000,
   } as const;
 
   const documentCache = new InstrumentedCache<string, DocumentNode>(
@@ -77,13 +80,11 @@ export const useYoga = async () => {
       documentCache,
       errorCache: new InstrumentedCache<string, Error>('parse_error', {
         max: 1024,
-        ttl: 3_600_000,
       }),
       validationCache: new InstrumentedCache<string, typeof validate>(
         'validation',
         {
           max: 1024,
-          ttl: 3_600_000,
         }
       ),
     },
