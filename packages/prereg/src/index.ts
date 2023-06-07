@@ -211,9 +211,10 @@ export function usePreregisteredQueries(options: {
         (knownQueries.has(maybePreregisteredId) || knownQueries.size == 0)
       ) {
         let preregisteredQuery: string | undefined;
-        if (cache.has(maybePreregisteredId)) {
+        const cached = cache.get(maybePreregisteredId);
+        if (cached) {
           logger.debug('preregistered query cache hit: ', maybePreregisteredId);
-          preregisteredQuery = cache.get(maybePreregisteredId);
+          preregisteredQuery = cached;
         } else if (
           (preregisteredQuery = await lookupQuery(maybePreregisteredId, pool))
         ) {
