@@ -66,7 +66,7 @@ export const EXECUTION_TIMEOUT_PARAMS = resolve({
   // The maximum timeout to apply to request processing, regardless timeouts
   // specified by the request.
   maxExecutionTimeoutMillis: {
-    property: 'DEFAULT_EXECUTION_TIMEOUT_MILLIS',
+    property: 'MAX_EXECUTION_TIMEOUT_MILLIS',
     resolver: resolvers.nonNegativeInteger,
     defaultTo: 3500,
   },

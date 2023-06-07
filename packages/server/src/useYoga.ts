@@ -60,7 +60,7 @@ export const useYoga = async () => {
     cors: undefined,
     graphqlEndpoint: '/graphql',
     healthCheckEndpoint: '/health',
-    landingPage: true,
+    landingPage: ENABLE_FEATURES.graphiql,
     parserCache: {
       documentCache,
       errorCache: new LRUCache<string, Error>({ max: 1024, ttl: 3_600_000 }),
@@ -216,7 +216,7 @@ export const useYoga = async () => {
   const yoga = createYoga<TaqlState>({
     schema: ENABLE_FEATURES.serviceOverrides
       ? async (context) => {
-          if (context.state.taql.SVCO == undefined) {
+          if (context.state?.taql.SVCO == undefined) {
             return schema;
           } else {
             logger.debug(
@@ -233,6 +233,19 @@ export const useYoga = async () => {
     ...yogaOptions,
     plugins: yogaPlugins,
   });
+  logger.info('Created yoga server');
+
+  await yoga.fetch(yoga.graphqlEndpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify({
+      query: 'query prewarm { __typename }',
+    }),
+  });
+  logger.info('Prewarmed yoga server');
 
   new promClient.Gauge({
     name: 'taql_validation_cache_size',
