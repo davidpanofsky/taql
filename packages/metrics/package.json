@@ -1,5 +1,5 @@
 {
-  "name": "@taql/config",
+  "name": "@taql/metrics",
   "version": "1.0.0",
   "main": "build/index.js",
   "scripts": {
@@ -8,11 +8,11 @@
   },
   "license": "UNLICENSED",
   "devDependencies": {
-    "dotenv": "^16.0.3",
     "typescript": "^5.0.4"
   },
   "dependencies": {
-    "winston": "^3.9.0",
-    "winston-logfmt": "^1.0.0"
+    "@taql/config": "workspace:^",
+    "lru-cache": "^9.1.2",
+    "prom-client": "^14.2.0"
   }
 }

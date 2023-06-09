@@ -9,7 +9,7 @@
   "license": "UNLICENSED",
   "devDependencies": {
     "@types/node-fetch": "^2.6.3",
-    "graphql-yoga": "^3.9.1",
+    "graphql-yoga": "^4.0.0",
     "koa": "^2.14.2",
     "typescript": "^5.0.4"
   },

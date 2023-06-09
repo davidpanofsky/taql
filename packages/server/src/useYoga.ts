@@ -4,9 +4,11 @@ import {
   ENABLE_FEATURES,
   PREREGISTERED_QUERY_PARAMS,
   SERVER_PARAMS,
+  accessLogger,
   logger,
 } from '@taql/config';
-import { DocumentNode, GraphQLError, GraphQLSchema } from 'graphql';
+import { DocumentNode, GraphQLSchema, validate } from 'graphql';
+import { JITCache, useGraphQlJit } from '@envelop/graphql-jit';
 import { caching, multiCaching } from 'cache-manager';
 import { createYoga, useReadinessCheck } from 'graphql-yoga';
 import fetch, {
@@ -22,18 +24,17 @@ import {
   subschemaExtensionsPlugin,
 } from '@taql/debug';
 import type { IncomingHttpHeaders } from 'http';
-import { LRUCache } from 'lru-cache';
+import { InstrumentedCache } from '@taql/metrics';
 import { TaqlState } from '@taql/context';
-import cluster from 'node:cluster';
 import { httpsAgent } from '@taql/httpAgent';
 import { ioRedisStore } from '@tirke/node-cache-manager-ioredis';
 import { makeSchema } from '@taql/schema';
+import { preconfiguredUsePrometheus } from './usePrometheus';
 import promClient from 'prom-client';
 import { readFileSync } from 'fs';
 import { tracerProvider } from './observability';
 import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspection';
 import { useOpenTelemetry } from '@envelop/opentelemetry';
-import { usePrometheus } from '@graphql-yoga/plugin-prometheus';
 
 export const useYoga = async () => {
   const batchLimit = SERVER_PARAMS.batchLimit;
@@ -41,10 +42,24 @@ export const useYoga = async () => {
     ? SERVER_PARAMS.port - 1
     : SERVER_PARAMS.port;
 
-  const documentCache = new LRUCache<string, DocumentNode>({
+  const documentCacheSpecs = {
     max: 4096,
-    ttl: 3_600_000,
-  });
+    maxSize: 512 * 1024 ** 2, // 512MB in bytes
+    // We approximate the size of the cache in bytes, and node strings are utf-16.
+    // It's possible that the in-memory footprint will be smaller, but be pessimistic.
+    // Keys are the full query string.  We can approximate that the parsed result is _at least_ that heavy, so *2
+    //
+    // TODO compute this max size from some config/env value to allow the
+    // container to configure taql's caches based on the amount of memory it
+    // has access to.
+    sizeCalculation: (_value: unknown, key: string) =>
+      Buffer.byteLength(key, 'utf16le') * 2,
+  } as const;
+
+  const documentCache = new InstrumentedCache<string, DocumentNode>(
+    'document_parser',
+    documentCacheSpecs
+  );
 
   const yogaOptions = {
     graphiql: ENABLE_FEATURES.graphiql,
@@ -61,14 +76,18 @@ export const useYoga = async () => {
     graphqlEndpoint: '/graphql',
     healthCheckEndpoint: '/health',
     landingPage: ENABLE_FEATURES.graphiql,
-    parserCache: {
+    parserAndValidationCache: {
       documentCache,
-      errorCache: new LRUCache<string, Error>({ max: 1024, ttl: 3_600_000 }),
+      errorCache: new InstrumentedCache<string, Error>('parse_error', {
+        max: 1024,
+      }),
+      validationCache: new InstrumentedCache<string, typeof validate>(
+        'validation',
+        {
+          max: 1024,
+        }
+      ),
     },
-    validationCache: new LRUCache<string, readonly GraphQLError[]>({
-      max: 1024,
-      ttl: 3_600_000,
-    }),
 
     // Setting this to false as legacy Yoga Server-Sent Events are deprecated:
     // https://github.com/dotansimha/graphql-yoga/blob/b309ca0db1c45264878c3cec0137c3fdbd22fc97/packages/graphql-yoga/src/server.ts#L184
@@ -86,11 +105,9 @@ export const useYoga = async () => {
   const schema = await makeSchema();
 
   if (schema == undefined) {
-    throw new Error(
-      `worker=${cluster.worker?.id} failed to load initial schema`
-    );
+    throw new Error('failed to load initial schema');
   }
-  logger.info(`worker=${cluster.worker?.id} created initial schema`);
+  logger.info('created initial schema');
 
   // Two tier store for automatic persisted queries
   const memoryCache = await caching('memory', {
@@ -122,7 +139,6 @@ export const useYoga = async () => {
       ]
     : [];
   const apqStore: APQStore = multiCaching([memoryCache, ...redisCache]);
-
   const yogaPlugins = [
     mutatedFieldsExtensionPlugin,
     useOpenTelemetry(
@@ -157,23 +173,7 @@ export const useYoga = async () => {
           }
         : undefined,
     }),
-    usePrometheus({
-      // Options specified by @graphql-yoga/plugin-prometheus
-      http: true,
-      // Options passed on to @envelop/prometheus
-      // https://the-guild.dev/graphql/envelop/plugins/use-prometheus
-      // all optional, and by default, all set to false
-      requestCount: true, // requries `execute` to be true as well
-      requestSummary: true, // requries `execute` to be true as well
-      parse: true,
-      validate: true,
-      contextBuilding: true,
-      execute: true,
-      errors: true,
-      resolvers: true, // requires "execute" to be `true` as well
-      deprecatedFields: true,
-      endpoint: '/worker_metrics',
-    }),
+    preconfiguredUsePrometheus,
     useReadinessCheck({
       endpoint: '/NotImplemented',
       async check({ fetchAPI }) {
@@ -184,7 +184,7 @@ export const useYoga = async () => {
           // The trailing newline is important for unblacklisting, apparently.
           return new fetchAPI.Response('<NotImplemented/>\n');
         } catch (err) {
-          logger.error(`worker=${cluster.worker?.id} ${err}`);
+          logger.error(err);
           return false;
         }
       },
@@ -193,6 +193,24 @@ export const useYoga = async () => {
   ];
 
   ENABLE_FEATURES.introspection || yogaPlugins.push(useDisableIntrospection());
+  ENABLE_FEATURES.graphqlJIT &&
+    yogaPlugins.push(
+      useGraphQlJit(
+        {
+          // Use fast-json-stringify instead of standard json stringification.
+          customJSONSerializer: true,
+          // Don't verify enum or scalar inputs - if a client wants to stuff a
+          // string into an int, or pass an invalid enum value, that's their
+          // problem; moreover, if a subgraph wants to misbehave when bad data is
+          // passed, that's their problem. We're in the transport, muxing &
+          // demuxing business, not the security business.
+          disableLeafSerialization: true,
+        },
+        {
+          cache: <JITCache>new InstrumentedCache('jit', documentCacheSpecs),
+        }
+      )
+    );
 
   const svcoSchemaBuilds = new promClient.Counter({
     name: 'taql_svco_schema_builds',
@@ -200,13 +218,11 @@ export const useYoga = async () => {
   });
 
   const schemaForSVCOCache = ENABLE_FEATURES.serviceOverrides
-    ? new LRUCache<string, GraphQLSchema>({
+    ? new InstrumentedCache<string, GraphQLSchema>('svco_schemas', {
         max: 128,
         ttl: 1000 * 60 * 2,
         async fetchMethod(key): Promise<GraphQLSchema> {
-          logger.debug(
-            `worker=${cluster.worker?.id} Fetching and building schema for SVCO: ${key}`
-          );
+          logger.debug(`Fetching and building schema for SVCO: ${key}`);
           svcoSchemaBuilds.inc(); // We're probably about to hang the event loop, inc before building schema
           return makeSchema(key);
         },
@@ -219,9 +235,7 @@ export const useYoga = async () => {
           if (context.state?.taql.SVCO == undefined) {
             return schema;
           } else {
-            logger.debug(
-              `worker=${cluster.worker?.id} Using schema for SVCO: ${context.state.taql.SVCO}`
-            );
+            logger.debug(`Using schema for SVCO: ${context.state.taql.SVCO}`);
             const schemaForSVCO = await schemaForSVCOCache?.fetch(
               context.state.taql.SVCO,
               { allowStale: true }
@@ -247,32 +261,8 @@ export const useYoga = async () => {
   });
   logger.info('Prewarmed yoga server');
 
-  new promClient.Gauge({
-    name: 'taql_validation_cache_size',
-    help: 'validation cache entries',
-    async collect() {
-      const size = yogaOptions.validationCache.size;
-      this.set(size);
-    },
-  });
-  new promClient.Gauge({
-    name: 'taql_document_cache_size',
-    help: 'document cache entries',
-    async collect() {
-      const size = yogaOptions.parserCache.documentCache.size;
-      this.set(size);
-    },
-  });
-  new promClient.Gauge({
-    name: 'taql_error_cache_size',
-    help: 'error cache entries',
-    async collect() {
-      const size = yogaOptions.parserCache.errorCache.size;
-      this.set(size);
-    },
-  });
-
   return async (ctx: TaqlState) => {
+    const accessTimer = accessLogger.startTimer();
     const legacySVCO = ctx.state.taql.SVCO;
     let response: Response | FetchResponse;
     if (
@@ -281,7 +271,7 @@ export const useYoga = async () => {
       legacySVCO
     ) {
       logger.debug(
-        `worker=${cluster.worker?.id} SVCO cookie set, but I'm not the SVCO worker... forwarding request. SVCO: ${legacySVCO}`
+        `SVCO cookie set, but I'm not the SVCO worker... forwarding request. SVCO: ${legacySVCO}`
       );
       const requestHeaders: FetchHeaders = new FetchHeaders();
       for (const key in ctx.request.headers) {
@@ -319,8 +309,17 @@ export const useYoga = async () => {
 
     // Converts ReadableStream to a NodeJS Stream
     ctx.body = response.body;
-    logger.debug(
-      `worker=${cluster.worker?.id} status=${response.status} status_text=${response.statusText} message=${ctx.response.message} length=${ctx.response.length}`
-    );
+    accessTimer.done({
+      method: ctx.request.method,
+      url: ctx.request.url,
+      query: ctx.request.query,
+      http_version: ctx.req.httpVersion,
+      remote_addr: ctx.request.ip,
+      status: ctx.response.status,
+      message: ctx.response.message,
+      content_length: ctx.response.length,
+      user_agent: ctx.request.headers['user-agent'],
+      logger: 'access_log',
+    });
   };
 };

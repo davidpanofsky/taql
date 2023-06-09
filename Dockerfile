@@ -20,7 +20,7 @@ WORKDIR /opt/taql
 # Install non-application packages
 RUN apk update && \
     apk upgrade && \
-    apk add --no-cache git bash
+    apk add --no-cache git bash strace
 
 # Copy in a project skeleton, containing only what yarn needs to know to install
 COPY --from=0 /opt/taql /opt/taql

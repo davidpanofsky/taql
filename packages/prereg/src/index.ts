@@ -7,7 +7,7 @@ import {
 } from 'graphql';
 import { Plugin, handleStreamOrSingleExecutionResult } from '@envelop/core';
 import { Plugin as YogaPlugin, createGraphQLError } from 'graphql-yoga';
-import { LRUCache } from 'lru-cache';
+import { InstrumentedCache } from '@taql/metrics';
 import { Pool } from 'pg';
 import { logger } from '@taql/config';
 import promClient from 'prom-client';
@@ -21,16 +21,6 @@ interface Cache<K, V> {
 const PREREG_UNK = new promClient.Counter({
   name: 'preregistered_query_unknown',
   help: 'Count of preregistered query IDs encountered which were unknown/unresolved',
-});
-
-const PREREG_MISS = new promClient.Counter({
-  name: 'preregistered_query_cache_miss',
-  help: 'Count of preregistered query IDs encountered which were resolved not from cache',
-});
-
-const PREREG_HIT = new promClient.Counter({
-  name: 'pregegistered_query_cache_hit',
-  help: 'Count of preregistered query IDs that were resolved from cache',
 });
 
 const PREREG_UPDATED_AT = new promClient.Gauge({
@@ -86,7 +76,7 @@ async function lookupQuery(
 }
 
 async function preloadCache(
-  cache: Cache<string, string>,
+  cache: InstrumentedCache<string, string>,
   db: Pool,
   limit: number
 ): Promise<number> {
@@ -118,9 +108,8 @@ async function prewarmDocumentCache(
 ): Promise<number> {
   return db
     .query(
-      // Here we make an assumption that 'cache' might be LRU, so sort with ascending 'updated'-ness such that
-      // the most recently updated queries hit the cache last.
-      'SELECT code, updated FROM t_graphql_operations ORDER BY updated ASC'
+      'WITH most_recent AS (SELECT max(updated) AS updated FROM t_graphql_operations) ' +
+        'SELECT code FROM t_graphql_operations WHERE updated = (select updated from most_recent)'
     )
     .then((res) => {
       res.rows.forEach((o: { code: string }) =>
@@ -158,7 +147,7 @@ export function usePreregisteredQueries(options: {
 
   const knownQueries = new Set<string>();
 
-  const cache = new LRUCache<string, string>({
+  const cache = new InstrumentedCache<string, string>('preregistered_query', {
     max: maxCacheSize,
   });
 
@@ -199,12 +188,15 @@ export function usePreregisteredQueries(options: {
       );
 
       if (documentCacheForWarming) {
+        logger.info('Starting to prewarm the document cache...');
+        const prewarmStart = new Date().getTime();
         await prewarmDocumentCache(documentCacheForWarming, pool)
-          .then((count) =>
+          .then((count) => {
+            const durationMs = new Date().getTime() - prewarmStart;
             logger.info(
-              `Prewarmed document cache with ${count} preregistered queries`
-            )
-          )
+              `Prewarmed document cache with ${count} preregistered queries after ${durationMs} ms`
+            );
+          })
           .catch((e) => logger.error(`Failed prewarming document cache: ${e}`));
       }
     },
@@ -222,7 +214,6 @@ export function usePreregisteredQueries(options: {
         if (cache.has(maybePreregisteredId)) {
           logger.debug('preregistered query cache hit: ', maybePreregisteredId);
           preregisteredQuery = cache.get(maybePreregisteredId);
-          PREREG_HIT.inc();
         } else if (
           (preregisteredQuery = await lookupQuery(maybePreregisteredId, pool))
         ) {
@@ -230,7 +221,6 @@ export function usePreregisteredQueries(options: {
             'preregistered query cache miss: ',
             maybePreregisteredId
           );
-          PREREG_MISS.inc();
           cache.set(maybePreregisteredId, preregisteredQuery);
         }
 

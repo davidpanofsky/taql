@@ -81,11 +81,17 @@ function start_background { (
   PID=$(running_pid $!)
   SECONDS=0
   THRESH=5
+
+  if [ -n "${CLIENT_CERT_PATH}" ]; then
+    PROTO="https"
+  else
+    PROTO="http"
+  fi
+  PORT="${SERVER_PORT:-4000}"
+
   while [ $SECONDS -lt 120 ]; do
     if is_running_pid $PID; then
-      # obviously rereading the file constantly is dumb, but it's easy to write
-      # for now, when performance doesn't matter.
-      if grep -q 'server running$' $LOGFILE; then
+      if curl -qk "${PROTO}://localhost:${PORT}/health"; then
         echo "server started after $SECONDS seconds"
         return 0
       fi

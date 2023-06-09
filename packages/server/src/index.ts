@@ -9,7 +9,6 @@ import cluster, { Worker } from 'node:cluster';
 import Koa from 'koa';
 import { SSL_CONFIG } from '@taql/ssl';
 import { createServer as httpsServer } from 'https';
-import koaLogger from 'koa-logger';
 import process from 'node:process';
 import promClient from 'prom-client';
 import { useMetricsEndpoint } from './observability';
@@ -22,7 +21,6 @@ const workerStartup = async () => {
     : SERVER_PARAMS.port;
 
   const koa = new Koa();
-  koa.use(koaLogger());
 
   koa.use(async (_ctx, next) => {
     koaConcurrency.inc();
@@ -44,11 +42,11 @@ const workerStartup = async () => {
     SSL_CONFIG == undefined ? httpServer() : httpsServer(SSL_CONFIG);
 
   server.addListener('request', koa.callback());
-  logger.info(`worker=${cluster.worker?.id} created server`);
+  logger.info('created server');
 
-  logger.info(`worker=${cluster.worker?.id} launching server on port ${port}`);
+  logger.info(`launching server on port ${port}`);
   server.listen(port, () => {
-    logger.info(`worker=${cluster.worker?.id} server running`);
+    logger.info('server running');
   });
 
   // a long http keepalive timeout should help keep SVCO on same worker.
@@ -64,7 +62,6 @@ const primaryStartup = async () => {
   const { port } = SERVER_PARAMS;
 
   const koa = new Koa();
-  koa.use(koaLogger());
 
   // add prom metrics endpoint
   koa.use(useMetricsEndpoint);
@@ -72,11 +69,11 @@ const primaryStartup = async () => {
     SSL_CONFIG == undefined ? httpServer() : httpsServer(SSL_CONFIG);
 
   server.addListener('request', koa.callback());
-  logger.info('worker=0 created server');
+  logger.info('created server');
 
-  logger.info(`worker=0 launching server on port ${port + 1}`);
+  logger.info(`launching server on port ${port + 1}`);
   server.listen(port + 1, () => {
-    logger.info('worker=0 server running');
+    logger.info('server running');
   });
 
   logger.info(`Primary process (${process.pid}) is running`);
@@ -106,6 +103,11 @@ const primaryStartup = async () => {
     environments.set(cluster.fork(env), env);
   };
 
+  let sucessfulInitialization = false;
+  cluster.on('listening', () => {
+    sucessfulInitialization = true;
+  });
+
   // Override prom prefix for workers.
   const workerEnv = { PROM_PREFIX: PROM_PARAMS.workerPrefix };
   // create one worker for svco on port - 1 if enabled.
@@ -122,29 +124,34 @@ const primaryStartup = async () => {
 
   cluster.on('online', (worker) => {
     workersStarted.inc();
-    logger.info(`worker=${worker.id} pid=${worker.process.pid} online`);
+    logger.info('online', { pid: worker.process.pid });
   });
 
   cluster.on('exit', (worker, code, signal) => {
     if (worker.exitedAfterDisconnect === true) {
-      logger.info(
-        `worker=${worker.id} pid=${worker.process.pid} shutdown gracefully`
-      );
+      logger.info('worker shutdown gracefully', { pid: worker.process.pid });
       workersExited.inc({ kind: 'graceful' });
     } else {
       if (signal) {
-        logger.warn(
-          `worker=${worker.id} pid=${worker.process.pid} was killed by signal: ${signal}`
-        );
+        logger.warn(`worker was killed by signal: ${signal}`, {
+          pid: worker.process.pid,
+        });
         workersExited.inc({ kind: 'killed' });
       } else if (code !== 0) {
-        logger.warn(
-          `worker=${worker.id} pid=${worker.process.pid} exited with error code: ${code}`
-        );
+        logger.warn(`worker exited with error code: ${code}`, {
+          pid: worker.process.pid,
+        });
         workersExited.inc({ kind: 'error' });
       }
-      logger.info(`replacing worker ${worker.id}...`);
-      fork(environments.get(worker));
+      if (sucessfulInitialization) {
+        logger.info(`replacing worker ${worker.id}...`);
+        fork(environments.get(worker));
+      } else {
+        logger.warn(
+          'worker died before any sucessfull initialization. Shutting down cluster to prevent crashlooping'
+        );
+        cluster.disconnect(process.exit(1));
+      }
     }
   });
 };
