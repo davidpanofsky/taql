@@ -222,7 +222,7 @@ export const ENABLE_FEATURES = resolve({
   graphqlJIT: {
     property: 'ENABLE_GRAPHQL_JIT',
     resolver: resolvers.booleanFromString,
-    defaultTo: true,
+    defaultTo: false,
   },
   introspection: {
     property: 'ENABLE_INTROSPECTION',
