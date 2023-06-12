@@ -122,7 +122,7 @@ export const EXECUTION_TIMEOUT_PARAMS = resolve({
   // The maximum timeout to apply to request processing, regardless timeouts
   // specified by the request.
   maxExecutionTimeoutMillis: {
-    property: 'DEFAULT_EXECUTION_TIMEOUT_MILLIS',
+    property: 'MAX_EXECUTION_TIMEOUT_MILLIS',
     resolver: resolvers.nonNegativeInteger,
     defaultTo: 3500,
   },
@@ -222,7 +222,7 @@ export const ENABLE_FEATURES = resolve({
   graphqlJIT: {
     property: 'ENABLE_GRAPHQL_JIT',
     resolver: resolvers.booleanFromString,
-    defaultTo: true,
+    defaultTo: false,
   },
   introspection: {
     property: 'ENABLE_INTROSPECTION',

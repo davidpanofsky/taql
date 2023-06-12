@@ -75,7 +75,7 @@ export const useYoga = async () => {
     cors: undefined,
     graphqlEndpoint: '/graphql',
     healthCheckEndpoint: '/health',
-    landingPage: true,
+    landingPage: ENABLE_FEATURES.graphiql,
     parserAndValidationCache: {
       documentCache,
       errorCache: new InstrumentedCache<string, Error>('parse_error', {
@@ -232,7 +232,7 @@ export const useYoga = async () => {
   const yoga = createYoga<TaqlState>({
     schema: ENABLE_FEATURES.serviceOverrides
       ? async (context) => {
-          if (context.state.taql.SVCO == undefined) {
+          if (context.state?.taql.SVCO == undefined) {
             return schema;
           } else {
             logger.debug(`Using schema for SVCO: ${context.state.taql.SVCO}`);
@@ -247,6 +247,19 @@ export const useYoga = async () => {
     ...yogaOptions,
     plugins: yogaPlugins,
   });
+  logger.info('Created yoga server');
+
+  await yoga.fetch(yoga.graphqlEndpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify({
+      query: 'query prewarm { __typename }',
+    }),
+  });
+  logger.info('Prewarmed yoga server');
 
   return async (ctx: TaqlState) => {
     const accessTimer = accessLogger.startTimer();
