@@ -217,7 +217,7 @@ export const useYoga = async () => {
     help: 'Total number of times the taql instance has needed to build a new schema to serve an SVCO cookie/header',
   });
 
-  const schemaForSVCOCache = ENABLE_FEATURES.serviceOverrides
+  const schemaForSVCOCache = SERVER_PARAMS.svcoWorker
     ? new InstrumentedCache<string, GraphQLSchema>('svco_schemas', {
         max: 128,
         ttl: 1000 * 60 * 2,
@@ -230,7 +230,7 @@ export const useYoga = async () => {
     : null;
 
   const yoga = createYoga<TaqlState>({
-    schema: ENABLE_FEATURES.serviceOverrides
+    schema: SERVER_PARAMS.svcoWorker
       ? async (context) => {
           if (context.state?.taql.SVCO == undefined) {
             return schema;
