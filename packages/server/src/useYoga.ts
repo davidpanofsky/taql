@@ -36,6 +36,44 @@ import { tracerProvider } from './observability';
 import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspection';
 import { useOpenTelemetry } from '@envelop/opentelemetry';
 
+const SVCO_SCHEMA_BUILD_COUNTER = new promClient.Counter({
+  name: 'taql_svco_schema_builds',
+  help: 'Total number of times the taql instance has needed to build a new schema to serve an SVCO cookie/header',
+});
+
+const makeSchemaProvider = (
+  defaultSchema: GraphQLSchema
+): GraphQLSchema | ((context: TaqlState) => Promise<GraphQLSchema>) => {
+  if (!SERVER_PARAMS.svcoWorker) {
+    return defaultSchema;
+  }
+
+  const schemaForSVCOCache = new InstrumentedCache<string, GraphQLSchema>(
+    'svco_schemas',
+    {
+      max: 128,
+      ttl: 1000 * 60 * 2,
+      async fetchMethod(key): Promise<GraphQLSchema> {
+        logger.debug(`Fetching and building schema for SVCO: ${key}`);
+        SVCO_SCHEMA_BUILD_COUNTER.inc(); // We're probably about to hang the event loop, inc before building schema
+        return makeSchema(key);
+      },
+    }
+  );
+  return async (context) => {
+    if (context.state?.taql.SVCO?.hasStitchedRoles) {
+      logger.debug(`Using schema for SVCO: ${context.state.taql.SVCO}`);
+      const schemaForSVCO = await schemaForSVCOCache?.fetch(
+        context.state.taql.SVCO.value,
+        { allowStale: true }
+      );
+      return schemaForSVCO == undefined ? defaultSchema : schemaForSVCO;
+    } else {
+      return defaultSchema;
+    }
+  };
+};
+
 export const useYoga = async () => {
   const batchLimit = SERVER_PARAMS.batchLimit;
   const port = SERVER_PARAMS.svcoWorker
@@ -212,38 +250,8 @@ export const useYoga = async () => {
       )
     );
 
-  const svcoSchemaBuilds = new promClient.Counter({
-    name: 'taql_svco_schema_builds',
-    help: 'Total number of times the taql instance has needed to build a new schema to serve an SVCO cookie/header',
-  });
-
-  const schemaForSVCOCache = SERVER_PARAMS.svcoWorker
-    ? new InstrumentedCache<string, GraphQLSchema>('svco_schemas', {
-        max: 128,
-        ttl: 1000 * 60 * 2,
-        async fetchMethod(key): Promise<GraphQLSchema> {
-          logger.debug(`Fetching and building schema for SVCO: ${key}`);
-          svcoSchemaBuilds.inc(); // We're probably about to hang the event loop, inc before building schema
-          return makeSchema(key);
-        },
-      })
-    : null;
-
   const yoga = createYoga<TaqlState>({
-    schema: SERVER_PARAMS.svcoWorker
-      ? async (context) => {
-          if (context.state?.taql.SVCO == undefined) {
-            return schema;
-          } else {
-            logger.debug(`Using schema for SVCO: ${context.state.taql.SVCO}`);
-            const schemaForSVCO = await schemaForSVCOCache?.fetch(
-              context.state.taql.SVCO,
-              { allowStale: true }
-            );
-            return schemaForSVCO == undefined ? schema : schemaForSVCO;
-          }
-        }
-      : schema,
+    schema: makeSchemaProvider(schema),
     ...yogaOptions,
     plugins: yogaPlugins,
   });
@@ -263,15 +271,15 @@ export const useYoga = async () => {
 
   return async (ctx: TaqlState) => {
     const accessTimer = accessLogger.startTimer();
-    const legacySVCO = ctx.state.taql.SVCO;
+    const svco = ctx.state.taql.SVCO;
     let response: Response | FetchResponse;
     if (
       ENABLE_FEATURES.serviceOverrides &&
       !SERVER_PARAMS.svcoWorker &&
-      legacySVCO
+      svco?.hasStitchedRoles
     ) {
       logger.debug(
-        `SVCO cookie set, but I'm not the SVCO worker... forwarding request. SVCO: ${legacySVCO}`
+        `SVCO cookie set, but I'm not the SVCO worker... forwarding request. SVCO: ${svco.value}`
       );
       const requestHeaders: FetchHeaders = new FetchHeaders();
       for (const key in ctx.request.headers) {
@@ -286,7 +294,10 @@ export const useYoga = async () => {
         {
           method: ctx.request.method,
           headers: requestHeaders,
-          body: ctx.req,
+          body:
+            ctx.request.method != 'GET' && ctx.requestMethod != 'FETCH'
+              ? ctx.req
+              : undefined,
           agent: ctx.request.protocol == 'https' ? httpsAgent : undefined,
         }
       );

@@ -33,12 +33,17 @@ export type LegacyContext = Readonly<{
   uniqueId: string | undefined;
   userClientIP: string | undefined;
 }>;
+type Mutable<Type> = {
+  -readonly [Key in keyof Type]: Type[Key];
+};
+
+type SVCO = Readonly<{ value: string; hasStitchedRoles: boolean }>;
 
 export type TaqlContext = Readonly<{
   forwardHeaders: ForwardableHeaders;
   deadline: number;
   legacyContext: LegacyContext;
-  SVCO: string | undefined;
+  SVCO?: SVCO;
 }>;
 
 type RawState = Readonly<{ taql: TaqlContext }>;
@@ -86,11 +91,49 @@ const deadline = (headers: InputHeaders): number =>
 export const timeRemaining = (context: TaqlContext): number =>
   context.deadline - Date.now();
 
+// We know these roles do not affect the stitched schema. This list is not
+// intended to be exhaustive, and an exhaustive list is not desirable: services
+// may _become_ stitched, unless there is some special property or use case
+// around the service that makes that extremely unlikely.
+const nonStitchedRoles = [
+  // the components svc only consumes the schema - it's probably what called us
+  'components',
+  // taql _is_ us
+  'taql',
+].map((role) => `${role}*`);
+
+/**
+ * return true if the svco string has overrides for stitched roles in it, i.e. roles that
+ * impact the stitched schema
+ */
+const hasStitchedRoles = (svco: string): boolean =>
+  svco.split('|').find(
+    (role) =>
+      // The role is not non-stitched, so it _may_ be stitched.
+      nonStitchedRoles.find((nonStitched) => role.startsWith(nonStitched)) ==
+      undefined
+  ) != undefined;
+
+const svco = (headers: InputHeaders): undefined | SVCO => {
+  const value = getHeaderOrDefault(headers, 'x-service-overrides', undefined);
+  return value == undefined
+    ? value
+    : {
+        value,
+        get hasStitchedRoles() {
+          //memoize.
+          delete (<Mutable<Partial<SVCO>>>this).hasStitchedRoles;
+          return ((<Mutable<SVCO>>this).hasStitchedRoles =
+            hasStitchedRoles(value));
+        },
+      };
+};
+
 const buildContext = (headers: InputHeaders): TaqlContext => ({
   forwardHeaders: forwardableHeaders(headers),
   deadline: deadline(headers),
   legacyContext: legacyContextFromHeaders(headers),
-  SVCO: getHeaderOrDefault(headers, 'x-service-overrides', undefined),
+  SVCO: svco(headers),
 });
 
 export const useTaqlContext: TaqlMiddleware = async (ctx, next) => {
