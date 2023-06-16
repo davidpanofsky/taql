@@ -13,7 +13,7 @@ export class ValidationCache {
     schema: GraphQLSchema,
     documents: DocumentNode[]
   ): Promise<void> =>
-    logPrewarm('jit', documents, (document) => {
+    logPrewarm('validation', documents, (document) => {
       this.validationCache.set(schema, document, validate(schema, document));
     });
 
