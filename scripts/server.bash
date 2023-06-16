@@ -89,9 +89,9 @@ function start_background { (
   fi
   PORT="${SERVER_PORT:-4000}"
 
-  while [ $SECONDS -lt 120 ]; do
+  while [ $SECONDS -lt 600 ]; do
     if is_running_pid $PID; then
-      if curl -qk "${PROTO}://localhost:${PORT}/health"; then
+      if curl -qk "${PROTO}://localhost:${PORT}/health" 2>/dev/null; then
         echo "server started after $SECONDS seconds"
         return 0
       fi
@@ -121,6 +121,8 @@ function main {
     exit 1
   fi
 
+  export AUTOMATIC_PERSISTED_QUERY_REDIS_CLUSTER=redis.taql-query-cache.svc.kub.n.tripadvisor.com
+  export NODE_OPTIONS="--max-old-space-size=6144"
   case $1 in
     start )
       assert_not_running && start

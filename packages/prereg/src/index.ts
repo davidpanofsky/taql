@@ -1,21 +1,10 @@
-import {
-  DocumentNode,
-  Kind,
-  OperationDefinitionNode,
-  OperationTypeNode,
-  parse,
-} from 'graphql';
+import { Kind, OperationDefinitionNode, OperationTypeNode } from 'graphql';
 import { Plugin, handleStreamOrSingleExecutionResult } from '@envelop/core';
 import { Plugin as YogaPlugin, createGraphQLError } from 'graphql-yoga';
 import { InstrumentedCache } from '@taql/metrics';
 import { Pool } from 'pg';
 import { logger } from '@taql/config';
 import promClient from 'prom-client';
-
-interface Cache<K, V> {
-  get(key: K): V | undefined;
-  set(key: K, value: V): void;
-}
 
 // metrics
 const PREREG_UNK = new promClient.Counter({
@@ -94,31 +83,6 @@ async function preloadCache(
     });
 }
 
-/**
- * Prewarm a given cache with known preregistered queries.
- * Allows for a function to be applied to the raw query text, but as it stands the full document is used as the
- * cache key.
- * See:
- * https://github.com/dotansimha/graphql-yoga/blob/main/packages/graphql-yoga/src/plugins/use-parser-and-validation-cache.ts#L50
- */
-async function prewarmDocumentCache(
-  cache: Cache<string, DocumentNode>,
-  db: Pool,
-  keyFn: (query: string) => string = (query) => query
-): Promise<number> {
-  return db
-    .query(
-      'WITH most_recent AS (SELECT max(updated) AS updated FROM t_graphql_operations) ' +
-        'SELECT code FROM t_graphql_operations WHERE updated = (select updated from most_recent)'
-    )
-    .then((res) => {
-      res.rows.forEach((o: { code: string }) =>
-        cache.set(keyFn(o.code), parse(o.code))
-      );
-      return res.rows.length;
-    });
-}
-
 export function usePreregisteredQueries(options: {
   maxCacheSize: number;
   postgresConnectionString?: string;
@@ -130,15 +94,16 @@ export function usePreregisteredQueries(options: {
     key: string;
     rejectUnauthorized: boolean;
   };
-  documentCacheForWarming?: Cache<string, DocumentNode>;
-}): YogaPlugin {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+}): YogaPlugin & {
+  loadCurrentQueries(): Promise<{ id: string; query: string }[]>;
+} {
   const {
     maxCacheSize,
     postgresConnectionString = 'postgres://graphql_operations_ros@localhost',
     maxPoolSize = 10,
     poolConnectionTimeoutMillis = 0,
     ssl,
-    documentCacheForWarming,
   } = options;
 
   logger.info(
@@ -159,6 +124,14 @@ export function usePreregisteredQueries(options: {
   });
 
   return {
+    async loadCurrentQueries(): Promise<{ id: string; query: string }[]> {
+      return pool
+        .query(
+          'WITH most_recent AS (SELECT max(updated) AS updated FROM t_graphql_operations) ' +
+            'SELECT id, code AS query FROM t_graphql_operations WHERE updated = (select updated from most_recent)'
+        )
+        .then((res) => res.rows.map((o: { id: string; query: string }) => o));
+    },
     async onPluginInit(_) {
       try {
         const { count, asOf } = await populateKnownQueries(knownQueries, pool);
@@ -186,34 +159,22 @@ export function usePreregisteredQueries(options: {
             ),
         10000
       );
-
-      if (documentCacheForWarming) {
-        logger.info('Starting to prewarm the document cache...');
-        const prewarmStart = new Date().getTime();
-        await prewarmDocumentCache(documentCacheForWarming, pool)
-          .then((count) => {
-            const durationMs = new Date().getTime() - prewarmStart;
-            logger.info(
-              `Prewarmed document cache with ${count} preregistered queries after ${durationMs} ms`
-            );
-          })
-          .catch((e) => logger.error(`Failed prewarming document cache: ${e}`));
-      }
     },
 
     // Check extensions for a potential preregistered query id, and resolve it to the query text, parsed
     async onParams({ params, setParams }) {
       const extensions = params.extensions;
-      const maybePreregisteredId: string | null =
+      const maybePreregisteredId: string | undefined =
         extensions && extensions['preRegisteredQueryId'];
       if (
         maybePreregisteredId &&
         (knownQueries.has(maybePreregisteredId) || knownQueries.size == 0)
       ) {
         let preregisteredQuery: string | undefined;
-        if (cache.has(maybePreregisteredId)) {
+        const cached = cache.get(maybePreregisteredId);
+        if (cached) {
           logger.debug('preregistered query cache hit: ', maybePreregisteredId);
-          preregisteredQuery = cache.get(maybePreregisteredId);
+          preregisteredQuery = cached;
         } else if (
           (preregisteredQuery = await lookupQuery(maybePreregisteredId, pool))
         ) {
