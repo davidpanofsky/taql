@@ -17,6 +17,7 @@ export enum ForwardHeader {
 
   // testing & debug headers
   'lt',
+  'x-test-fields',
   'x-loadtest',
   'x-swedwig-feed-viewer',
   'x-tripadvisor-graphql-debug',
