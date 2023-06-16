@@ -6,7 +6,7 @@ import {
 } from '@graphql-yoga/plugin-prometheus';
 import promClient from 'prom-client';
 
-const operationLabelNames = ['operationName', 'operationType'];
+const operationLabelNames = ['operationName', 'operationType', 'phase'];
 const operationLabels = (params: FillLabelsFnParams) => ({
   operationName: params.operationName ?? 'unknown',
   operationType: params.operationType ?? 'unknown',
