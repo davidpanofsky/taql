@@ -1,20 +1,22 @@
 import { Kind, OperationDefinitionNode, OperationTypeNode } from 'graphql';
 import { Plugin, handleStreamOrSingleExecutionResult } from '@envelop/core';
 import { Plugin as YogaPlugin, createGraphQLError } from 'graphql-yoga';
+import { logger, WORKER as worker } from '@taql/config';
 import { InstrumentedCache } from '@taql/metrics';
 import { Pool } from 'pg';
-import { logger } from '@taql/config';
 import promClient from 'prom-client';
 
 // metrics
 const PREREG_UNK = new promClient.Counter({
   name: 'preregistered_query_unknown',
   help: 'Count of preregistered query IDs encountered which were unknown/unresolved',
+  labelNames: ['worker'],
 });
 
 const PREREG_UPDATED_AT = new promClient.Gauge({
   name: 'preregistered_query_last_load',
   help: 'epoch of last load of preregistered queries',
+  labelNames: ['worker'],
 });
 
 // epoch
@@ -33,8 +35,8 @@ async function populateKnownQueries(
     const previousKnown = known.size;
     known_queries_res.rows.forEach((o: { id: string }) => known.add(o.id));
     // Small fudge factor to avoid any concern about updated times falling between query execution
-    // and updating the most recently known.  A bit of overlap is fine.
-    const now = Date.now();
+    // and updating the most recently known. A bit of overlap is fine.
+    const now = Math.floor(Date.now() / 1000);
     MOST_RECENT_KNOWN = now - 5000;
     return {
       count: known.size - previousKnown,
@@ -137,7 +139,7 @@ export function usePreregisteredQueries(options: {
         const { count, asOf } = await populateKnownQueries(knownQueries, pool);
         logger.info(`Loaded ${count} known preregistered query ids`);
         if (asOf) {
-          PREREG_UPDATED_AT.set(asOf);
+          PREREG_UPDATED_AT.labels({ worker }).set(asOf);
         }
       } catch (e) {
         logger.error(`Failed to load known preregistered queries: ${e}`);
@@ -150,14 +152,15 @@ export function usePreregisteredQueries(options: {
         () =>
           populateKnownQueries(knownQueries, pool)
             .then(({ count, asOf }) => {
-              if (count > 0 && asOf) {
-                PREREG_UPDATED_AT.set(asOf);
+              if (count != 0 && asOf) {
+                logger.debug(`prereg change: ${count} preregistered queries`);
+                PREREG_UPDATED_AT.labels({ worker }).set(asOf);
               }
             })
             .catch((e) =>
               logger.error(`Failed to update known query ids: ${e}`)
             ),
-        10000
+        30000
       );
     },
 
@@ -195,7 +198,7 @@ export function usePreregisteredQueries(options: {
             'preregistered query unresolved warning: ',
             maybePreregisteredId
           );
-          PREREG_UNK.inc();
+          PREREG_UNK.labels({ worker }).inc();
           throw createGraphQLError('PreregisteredQueryNotResolved', {
             extensions: {
               http: {
@@ -206,7 +209,7 @@ export function usePreregisteredQueries(options: {
         }
       } else if (maybePreregisteredId) {
         logger.debug('preregistered query unresolved: ', maybePreregisteredId);
-        PREREG_UNK.inc();
+        PREREG_UNK.labels({ worker }).inc();
         throw createGraphQLError('PreregisteredQueryNotFound', {
           extensions: {
             http: {
