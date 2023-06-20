@@ -24,15 +24,21 @@ let MOST_RECENT_KNOWN = 0;
 
 async function populateKnownQueries(
   known: Set<string>,
-  db: Pool
+  db: Pool,
+  refresh = false
 ): Promise<{ count: number; asOf?: number }> {
-  logger.debug('Populating preregistered queries');
+  logger.debug(
+    `Populating preregistered queries${refresh ? ' (full refresh)' : ''}`
+  );
   try {
     const known_queries_res = await db.query(
       'SELECT id FROM t_graphql_operations WHERE extract(epoch from updated) > $1',
-      [MOST_RECENT_KNOWN]
+      [refresh ? 0 : MOST_RECENT_KNOWN]
     );
     const previousKnown = known.size;
+    if (refresh) {
+      known.clear();
+    }
     known_queries_res.rows.forEach((o: { id: string }) => known.add(o.id));
     // Small fudge factor to avoid any concern about updated times falling between query execution
     // and updating the most recently known. A bit of overlap is fine.
@@ -148,20 +154,27 @@ export function usePreregisteredQueries(options: {
       await preloadCache(cache, pool, maxCacheSize).catch((err) =>
         logger.error(`Failed to preload preregisterd queries cache: ${err}`)
       );
-      setInterval(
-        () =>
-          populateKnownQueries(knownQueries, pool)
-            .then(({ count, asOf }) => {
-              if (count != 0 && asOf) {
-                logger.debug(`prereg change: ${count} preregistered queries`);
-                PREREG_UPDATED_AT.labels({ worker }).set(asOf);
-              }
-            })
-            .catch((e) =>
-              logger.error(`Failed to update known query ids: ${e}`)
-            ),
-        30000
-      );
+      const refreshEvery = 100;
+      let untilRefresh = refreshEvery;
+      setInterval(() => {
+        // Periodically execute a full refresh of the knownQueries set to allow
+        // removals to be effective. The infrequency reflects our expectation
+        // that this will be rare.
+        let refresh = false;
+        if (untilRefresh-- <= 0) {
+          refresh = true;
+          untilRefresh = refreshEvery;
+        }
+
+        populateKnownQueries(knownQueries, pool, refresh)
+          .then(({ count, asOf }) => {
+            if (count != 0 && asOf) {
+              logger.debug(`prereg change: ${count} preregistered queries`);
+              PREREG_UPDATED_AT.labels({ worker }).set(asOf);
+            }
+          })
+          .catch((e) => logger.error(`Failed to update known query ids: ${e}`));
+      }, 30000);
     },
 
     // Check extensions for a potential preregistered query id, and resolve it to the query text, parsed
