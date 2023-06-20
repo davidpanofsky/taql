@@ -1787,6 +1787,17 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@taql/security@workspace:^, @taql/security@workspace:packages/security":
+  version: 0.0.0-use.local
+  resolution: "@taql/security@workspace:packages/security"
+  dependencies:
+    "@taql/config": "workspace:^"
+    "@taql/headers": "workspace:^"
+    graphql-yoga: ^4.0.0
+    typescript: ^5.0.4
+  languageName: unknown
+  linkType: soft
+
 "@taql/server@workspace:packages/server":
   version: 0.0.0-use.local
   resolution: "@taql/server@workspace:packages/server"
@@ -1807,6 +1818,7 @@ __metadata:
     "@taql/metrics": "workspace:^"
     "@taql/prereg": "workspace:^"
     "@taql/schema": "workspace:^"
+    "@taql/security": "workspace:^"
     "@taql/ssl": "workspace:^"
     "@taql/unifiedCaching": "workspace:^"
     "@tirke/node-cache-manager-ioredis": ^3.2.0

@@ -181,7 +181,7 @@ export function usePreregisteredQueries(options: {
     async onParams({ params, setParams }) {
       const extensions = params.extensions;
       const maybePreregisteredId: string | undefined =
-        extensions && extensions['preRegisteredQueryId'];
+        extensions?.['preRegisteredQueryId'];
       if (
         maybePreregisteredId &&
         (knownQueries.has(maybePreregisteredId) || knownQueries.size == 0)

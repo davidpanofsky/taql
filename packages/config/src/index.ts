@@ -326,3 +326,11 @@ export const GITOPS_PARAMS = resolve({
     defaultTo: false,
   },
 });
+
+export const SECURITY = resolve({
+  runUntrustedOperations: {
+    property: 'RUN_UNTRUSTED_OPERATIONS',
+    resolver: resolvers.booleanFromString,
+    defaultTo: true,
+  },
+});
