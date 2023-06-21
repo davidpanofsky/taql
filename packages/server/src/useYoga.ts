@@ -30,6 +30,7 @@ import promClient from 'prom-client';
 import { readFileSync } from 'fs';
 import { tracerProvider } from './observability';
 import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspection';
+import { useErrorLogging } from './logging';
 import { useOpenTelemetry } from '@envelop/opentelemetry';
 import { useUnifiedCaching } from '@taql/unifiedCaching';
 
@@ -75,6 +76,7 @@ const makePlugins = async (defaultSchema: GraphQLSchema) => {
   });
 
   const yogaPlugins = [
+    useErrorLogging,
     mutatedFieldsExtensionPlugin,
     useOpenTelemetry(
       {
