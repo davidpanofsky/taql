@@ -41,6 +41,22 @@ const evtCounter = ({ name, help }: { name: string; help: string }) =>
     fillLabelsFn: operationLabels,
   });
 
+const errorCounter = ({ name, help }: { name: string; help: string }) =>
+  createCounter({
+    counter: new promClient.Counter({
+      name,
+      help,
+      labelNames: ['operationName', 'operationType', 'errorPhase'],
+    }),
+    fillLabelsFn: (params: FillLabelsFnParams) => ({
+      operationName: params.operationName ?? 'unknown',
+      operationType: params.operationType ?? 'unknown',
+      errorPhase: params.error?.message?.startsWith('Variable')
+        ? 'validate'
+        : params.errorPhase ?? 'unknown',
+    }),
+  });
+
 export const preconfiguredUsePrometheus = usePrometheus({
   // Options specified by @graphql-yoga/plugin-prometheus
   http: createHistogram({
@@ -87,7 +103,7 @@ export const preconfiguredUsePrometheus = usePrometheus({
     }),
     fillLabelsFn: () => ({}),
   }),
-  errors: evtCounter({
+  errors: errorCounter({
     name: 'taql_envelop_error_result',
     help: 'Counts the number of errors reported from all phases',
   }),
