@@ -1652,6 +1652,7 @@ __metadata:
   resolution: "@taql/context@workspace:packages/context"
   dependencies:
     "@taql/config": "workspace:^"
+    "@taql/headers": "workspace:^"
     "@types/node-fetch": ^2.6.3
     graphql: ^16.6.0
     graphql-yoga: ^4.0.0
@@ -1710,6 +1711,16 @@ __metadata:
     "@taql/schema": "workspace:^"
     "@types/js-yaml": ^4.0.5
     js-yaml: ^4.1.0
+    typescript: ^5.0.4
+  languageName: unknown
+  linkType: soft
+
+"@taql/headers@workspace:^, @taql/headers@workspace:packages/headers":
+  version: 0.0.0-use.local
+  resolution: "@taql/headers@workspace:packages/headers"
+  dependencies:
+    "@types/node-fetch": ^2.6.3
+    node-fetch: ^2.6.11
     typescript: ^5.0.4
   languageName: unknown
   linkType: soft
