@@ -8,15 +8,33 @@ import fetch, { Headers } from 'node-fetch';
 import { httpAgent, httpsAgent } from '@taql/httpAgent';
 import type { Agent } from 'http';
 import { ForwardableHeaders } from '@taql/context';
+import { InstrumentedCache } from '@taql/metrics';
 import type { TaqlState } from '@taql/context';
 import { getDeadline } from '@taql/deadlines';
 import { print } from 'graphql';
 
 export type TaqlRequest = ExecutionRequest<Record<string, unknown>, TaqlState>;
 
+const printCache = new InstrumentedCache<string, string>('printed_documents', {
+  max: 2000,
+});
+
 export const formatRequest = (request: TaqlRequest) => {
-  const { document, variables } = request;
-  const query = print(document);
+  const { document, variables, context } = request;
+  let query: string | undefined;
+
+  const preregisteredId = context?.params?.extensions?.preRegisteredQueryId;
+  if (preregisteredId) {
+    query = printCache.get(preregisteredId);
+  }
+
+  if (!query) {
+    query = print(document);
+    if (preregisteredId) {
+      printCache.set(preregisteredId, query);
+    }
+  }
+
   return { query, variables } as const;
 };
 
