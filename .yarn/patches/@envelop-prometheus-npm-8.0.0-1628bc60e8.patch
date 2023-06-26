@@ -1,0 +1,72 @@
+diff --git a/cjs/index.js b/cjs/index.js
+index 87948750b6690c290a99369a8291b13ec227912f..e6e71c5b5ada13ff132fe908050b1c2a8e1e26bc 100644
+--- a/cjs/index.js
++++ b/cjs/index.js
+@@ -154,12 +154,10 @@ const usePrometheus = (config = {}) => {
+                     }
+                 }
+             }
+-            else {
++            else if (errorsCounter) {
+                 // means that we got a parse error, report it
+-                errorsCounter?.counter
+-                    .labels({
+-                    phase: 'parse',
+-                })
++                errorsCounter.counter
++                    .labels(errorsCounter.fillLabelsFn({ ...context[promPluginContext], errorPhase: 'parse' }, context))
+                     .inc();
+             }
+         };
+@@ -174,12 +172,9 @@ const usePrometheus = (config = {}) => {
+                 const totalTime = (Date.now() - startTime) / 1000;
+                 const labels = validateHistogram.fillLabelsFn(context[promPluginContext], context);
+                 validateHistogram.histogram.observe(labels, totalTime);
+-                if (!valid) {
+-                    errorsCounter?.counter
+-                        .labels({
+-                        ...labels,
+-                        phase: 'validate',
+-                    })
++                if (!valid && errorsCounter) {
++                    errorsCounter.counter
++                        .labels(errorsCounter.fillLabelsFn({ ...context[promPluginContext], errorPhase: 'validate' }, context))
+                         .inc();
+                 }
+             };
+diff --git a/esm/index.js b/esm/index.js
+index 2b2c0bb523a21545750e2d7a68698413ef974f67..10eb25eee3dafe08269dfec849e44389f57cfbab 100644
+--- a/esm/index.js
++++ b/esm/index.js
+@@ -149,12 +149,10 @@ export const usePrometheus = (config = {}) => {
+                     }
+                 }
+             }
+-            else {
++            else if (errorsCounter) {
+                 // means that we got a parse error, report it
+-                errorsCounter?.counter
+-                    .labels({
+-                    phase: 'parse',
+-                })
++                errorsCounter.counter
++                    .labels(errorsCounter.fillLabelsFn({ ...context[promPluginContext], errorPhase: 'parse' }, context))
+                     .inc();
+             }
+         };
+@@ -169,12 +167,9 @@ export const usePrometheus = (config = {}) => {
+                 const totalTime = (Date.now() - startTime) / 1000;
+                 const labels = validateHistogram.fillLabelsFn(context[promPluginContext], context);
+                 validateHistogram.histogram.observe(labels, totalTime);
+-                if (!valid) {
+-                    errorsCounter?.counter
+-                        .labels({
+-                        ...labels,
+-                        phase: 'validate',
+-                    })
++                if (!valid && errorsCounter) {
++                    errorsCounter.counter
++                        .labels(errorsCounter.fillLabelsFn({ ...context[promPluginContext], errorPhase: 'validate' }, context))
+                         .inc();
+                 }
+             };
