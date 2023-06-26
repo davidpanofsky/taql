@@ -92,45 +92,67 @@ loggers.add('app', {
 export const logger = loggers.get('app');
 export const accessLogger = loggers.get('access');
 
-// TODO: Remove all this one day. Legacy gql is just something we'll find in the schema
-// repo and use a custom executor for.
-export const LEGACY_GQL_PARAMS = resolve({
-  host: {
-    property: 'LEGACY_GQL_HOST',
-    defaultTo: 'graphql.graphql-lapin.svc.kub.n.tripadvisor.com',
+export const GSR = resolve({
+  useGsr: {
+    property: 'GSR_ENABLED',
+    resolver: resolvers.booleanFromString,
+    defaultTo: true,
   },
-  httpPort: {
-    property: 'LEGACY_GQL_HTTP_PORT',
-    resolver: resolvers.nonNegativeInteger,
-    defaultTo: 4723,
+  legacySchemaSource: {
+    property: 'LEGACY_SCHEMA_SOURCE',
+    resolver: (prop) =>
+      prop == 'custom'
+        ? resolve({
+            url: {
+              property: 'LEGACY_GQL_HOST',
+              resolver: resolvers.urlFromString,
+              defaultTo: new URL(
+                'https://graphql.graphql-lapin.svc.kub.n.tripadvisor.com:443'
+              ),
+            },
+            maxTimeout: {
+              property: 'LEGACY_GQL_TIMEOUT',
+              resolver: resolvers.nonNegativeInteger,
+              defaultTo: 5000,
+            },
+            batchMaxSize: {
+              /* Matches MAX_BATCH_SIZE in legacy graphql
+               * https://gitlab.dev.tripadvisor.com/dplat/graphql/-/blob/9f963cca39936c6ba53421a2063bcc5a92d1990a/src/main/java/com/tripadvisor/service/graphql/GraphQlEndpoint.java#L56
+               */
+              property: 'LEGACY_GQL_BATCH_MAX_SIZE',
+              resolver: resolvers.nonNegativeInteger,
+              defaultTo: 250,
+            },
+            batchWaitQueries: {
+              property: 'LEGACY_GQL_BATCH_WAIT_QUERIES',
+              resolver: resolvers.nonNegativeInteger,
+              defaultTo: 200,
+            },
+            batchWaitMillis: {
+              property: 'LEGACY_GQL_BATCH_WAIT_MILLIS',
+              resolver: resolvers.nonNegativeInteger,
+              defaultTo: 20,
+            },
+          })
+        : undefined,
+    defaultTo: <const>'gsr',
   },
-  httpsPort: {
-    property: 'LEGACY_GQL_HTTPS_PORT',
-    resolver: resolvers.nonNegativeInteger,
-    defaultTo: 443,
+  environment: {
+    property: 'GSR_ENVIRONMENT',
+    defaultTo: 'development',
   },
-  maxTimeout: {
-    property: 'LEGACY_GQL_TIMEOUT',
-    resolver: resolvers.nonNegativeInteger,
-    defaultTo: 5000,
+  useIam: {
+    property: 'GSR_USE_IAM',
+    resolver: resolvers.booleanFromString,
+    defaultTo: false,
   },
-  batchMaxSize: {
-    /* Matches MAX_BATCH_SIZE in legacy graphql
-     * https://gitlab.dev.tripadvisor.com/dplat/graphql/-/blob/9f963cca39936c6ba53421a2063bcc5a92d1990a/src/main/java/com/tripadvisor/service/graphql/GraphQlEndpoint.java#L56
-     */
-    property: 'LEGACY_GQL_BATCH_MAX_SIZE',
-    resolver: resolvers.nonNegativeInteger,
-    defaultTo: 250,
+  identityToken: {
+    property: 'GSR_IDENTITY_TOKEN',
+    defaultTo: undefined,
   },
-  batchWaitQueries: {
-    property: 'LEGACY_GQL_BATCH_WAIT_QUERIES',
-    resolver: resolvers.nonNegativeInteger,
-    defaultTo: 200,
-  },
-  batchWaitMillis: {
-    property: 'LEGACY_GQL_BATCH_WAIT_MILLIS',
-    resolver: resolvers.nonNegativeInteger,
-    defaultTo: 20,
+  repositoryUrl: {
+    property: 'GSR_URL',
+    defaultTo: 'https://gsr.domains-platform-dev.tamg.cloud',
   },
 });
 
@@ -371,6 +393,11 @@ export const TRACING_PARAMS = resolve({
 });
 
 export const GITOPS_PARAMS = resolve({
+  allowPartialSchema: {
+    property: 'GITOPS_ALLOW_PARTIAL_SCHEMA',
+    resolver: resolvers.booleanFromString,
+    defaultTo: false,
+  },
   patchFilePath: {
     property: 'GITOPS_PATCH_FILE_PATH',
     defaultTo: undefined,

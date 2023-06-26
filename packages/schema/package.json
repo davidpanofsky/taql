@@ -12,13 +12,12 @@
     "@graphql-tools/delegate": "9.0.35",
     "@graphql-tools/utils": "^8.13.1",
     "@taql/context": "workspace:^",
-    "@types/deep-equal": "^1.0.1",
-    "@types/node": "^18.16.7",
     "@types/node-fetch": "^2.6.3",
-    "typed-emitter": "^2.1.0",
     "typescript": "^5.0.4"
   },
   "dependencies": {
+    "@gsr/client": "^1.0.0",
+    "@ta-graphql-utils/auth-manager": "^2.1.1",
     "@ta-graphql-utils/stitch": "*",
     "@taql/batching": "workspace:^",
     "@taql/caching": "workspace:^",
@@ -27,7 +26,7 @@
     "@taql/executors": "workspace:^",
     "@taql/httpAgent": "workspace:^",
     "cache-manager": "^5.2.1",
-    "deep-equal": "^2.2.1",
+    "graphql": "*",
     "node-fetch": "^2.6.11"
   }
 }

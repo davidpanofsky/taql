@@ -6,7 +6,7 @@
   "devDependencies": {
     "@graphql-tools/executor-http": "^0.1.10",
     "@graphql-tools/utils": "^8.13.1",
-    "graphql": "^16.6.0",
+    "graphql": "*",
     "graphql-yoga": "^4.0.0"
   }
 }

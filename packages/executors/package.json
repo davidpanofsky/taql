@@ -18,7 +18,7 @@
     "@taql/deadlines": "workspace:^",
     "@taql/httpAgent": "workspace:^",
     "cache-manager": "^5.2.1",
-    "graphql": "^16.6.0",
+    "graphql": "*",
     "node-fetch": "^2.6.11",
     "prom-client": "^14.2.0"
   }

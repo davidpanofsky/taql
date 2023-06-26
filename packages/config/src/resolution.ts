@@ -102,8 +102,12 @@ const nonNegativeInteger = (raw: string | undefined): number | undefined => {
 const booleanFromString = (value: string | undefined): boolean | undefined =>
   value == undefined ? undefined : value.toLowerCase() === 'true';
 
+const urlFromString = (value?: string): undefined | URL =>
+  value == undefined ? undefined : new URL(value);
+
 export const resolvers = {
   fileContents,
   nonNegativeInteger,
   booleanFromString,
+  urlFromString,
 };
