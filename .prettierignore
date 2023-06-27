@@ -4,6 +4,8 @@
 *.d.ts
 build
 .gitlab-ci.yml
+*.md
+public
 
 # begin ignores for yarn
 .pnp.*
