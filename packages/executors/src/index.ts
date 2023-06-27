@@ -1,6 +1,6 @@
 import {
   EXECUTION_TIMEOUT_PARAMS,
-  PREREGISTERED_QUERY_PARAMS,
+  PRINT_DOCUMENT_PARAMS,
   UPSTREAM_TIMEOUT_PARAMS,
   logger,
 } from '@taql/config';
@@ -19,21 +19,22 @@ export type TaqlRequest = ExecutionRequest<Record<string, unknown>, TaqlState>;
 /**
  * Converting from DocumentNode to string can take more than 20ms for some of our lagger queries.
  * We'll cache the most common ones to avoid unnecessary work.
- * Currently only works for preregistered queries, as that's the only thing we could use as a cache key.
+ * Currently only works for preregistered/persisted queries, as that's the only thing we could use as a cache key.
  */
 const printCache = new InstrumentedCache<string, string>('printed_documents', {
-  max: PREREGISTERED_QUERY_PARAMS.maxPrintCacheSize,
+  max: PRINT_DOCUMENT_PARAMS.maxCacheSize,
 });
 
 export const formatRequest = (request: TaqlRequest) => {
   const { document, variables, context, info } = request;
   let query: string | undefined;
 
-  const preregisteredId = context?.params?.extensions?.preRegisteredQueryId;
+  const queryId =
+    context?.params?.extensions?.preRegisteredQueryId ||
+    context?.params?.extensions?.persistedQuery?.sha256Hash;
   const fieldName = info?.path.key; // the aliased field name
 
-  const cacheKey =
-    preregisteredId && fieldName && `${preregisteredId}_${fieldName}`;
+  const cacheKey = queryId && fieldName && `${queryId}_${fieldName}`;
 
   if (cacheKey) {
     query = printCache.get(cacheKey);

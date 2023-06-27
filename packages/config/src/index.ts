@@ -242,11 +242,6 @@ export const PREREGISTERED_QUERY_PARAMS = resolve({
     resolver: resolvers.nonNegativeInteger,
     defaultTo: 2000,
   },
-  maxPrintCacheSize: {
-    property: 'PREREGISTERED_QUERY_PRINT_CACHE_SIZE',
-    resolver: resolvers.nonNegativeInteger,
-    defaultTo: 4000,
-  },
   databaseUri: {
     property: 'PREREGISTERED_QUERY_DB_URI',
     defaultTo:
@@ -294,6 +289,14 @@ export const AUTOMATIC_PERSISTED_QUERY_PARAMS = resolve({
     property: 'AUTOMATIC_PERSISTED_QUERY_CACHE_SIZE',
     resolver: resolvers.nonNegativeInteger,
     defaultTo: 1000,
+  },
+});
+
+export const PRINT_DOCUMENT_PARAMS = resolve({
+  maxCacheSize: {
+    property: 'PRINT_DOCUMENT_CACHE_SIZE',
+    resolver: resolvers.nonNegativeInteger,
+    defaultTo: 4000,
   },
 });
 
