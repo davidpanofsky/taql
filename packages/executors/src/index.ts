@@ -26,18 +26,23 @@ const printCache = new InstrumentedCache<string, string>('printed_documents', {
 });
 
 export const formatRequest = (request: TaqlRequest) => {
-  const { document, variables, context } = request;
+  const { document, variables, context, info } = request;
   let query: string | undefined;
 
   const preregisteredId = context?.params?.extensions?.preRegisteredQueryId;
-  if (preregisteredId) {
-    query = printCache.get(preregisteredId);
+  const fieldName = info?.path.key; // the aliased field name
+
+  const cacheKey =
+    preregisteredId && fieldName && `${preregisteredId}_${fieldName}`;
+
+  if (cacheKey) {
+    query = printCache.get(cacheKey);
   }
 
   if (!query) {
     query = print(document);
-    if (preregisteredId) {
-      printCache.set(preregisteredId, query);
+    if (cacheKey) {
+      printCache.set(cacheKey, query);
     }
   }
 
