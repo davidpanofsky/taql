@@ -10,7 +10,7 @@ The following bookmarklets can be used to set the cookie when used while accessi
 
 [Disable TAQL explicitly][1]
 
-[Unset cookie and return to environment default](javascript:(function() { document.cookie = "GraphQLNextGen=true;path=%2F;expires=Thu, 01 Jan 1970 00:00:01 GMT";})())
+<a href='javascript:(function() { document.cookie = "GraphQLNextGen=true;path=%2F;expires=Thu, 01 Jan 1970 00:00:01 GMT";})()'>Unset cookie and return to environment default</a>
 
 [1]: javascript:(function() { document.cookie = "GraphQLNextGen=false;path=%2F";})()
 
