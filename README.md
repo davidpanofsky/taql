@@ -12,7 +12,7 @@ The following bookmarklets can be used to set the cookie when used while accessi
 
 [Unset cookie and return to environment default](javascript:(function() { document.cookie = "GraphQLNextGen=true;path=%2F;expires=Thu, 01 Jan 1970 00:00:01 GMT";})())
 
-[1] :javascript:(function() { document.cookie = "GraphQLNextGen=false;path=%2F";})()
+[1]: javascript:(function() { document.cookie = "GraphQLNextGen=false;path=%2F";})()
 
 ## Commands
 
