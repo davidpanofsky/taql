@@ -7,7 +7,7 @@ The TAQL experience can be enabled or disabled explicitly via the `GraphQLNextGe
 The following bookmarklets can be used to set the cookie when used while accessing a TA minisite.
 - [Enable TAQL explicitly](javascript:(function() { document.cookie = "GraphQLNextGen=true;path=%2F";})())
 - [Disable TAQL explicitly](javascript:(function() { document.cookie = "GraphQLNextGen=false;path=%2F";})())
-- [Unset cookie and return to environment default](javascript:(function() { document.cookie = "GraphQLNextGen=true;path=%2F;expires=Mon Jun 26 2023 10:46:56 GMT-0400 (Eastern Daylight Time)";})())
+- [Unset cookie and return to environment default](javascript:(function() { document.cookie = "GraphQLNextGen=true;path=%2F;expires=Thu, 01 Jan 1970 00:00:01 GMT";})())
 
 
 ## Commands
