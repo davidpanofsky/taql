@@ -1,5 +1,6 @@
 import {
   EXECUTION_TIMEOUT_PARAMS,
+  PREREGISTERED_QUERY_PARAMS,
   UPSTREAM_TIMEOUT_PARAMS,
   logger,
 } from '@taql/config';
@@ -15,8 +16,13 @@ import { print } from 'graphql';
 
 export type TaqlRequest = ExecutionRequest<Record<string, unknown>, TaqlState>;
 
+/**
+ * Converting from DocumentNode to string can take more than 20ms for some of our lagger queries.
+ * We'll cache the most common ones to avoid unnecessary work.
+ * Currently only works for preregistered queries, as that's the only thing we could use as a cache key.
+ */
 const printCache = new InstrumentedCache<string, string>('printed_documents', {
-  max: 2000,
+  max: PREREGISTERED_QUERY_PARAMS.maxCacheSize,
 });
 
 export const formatRequest = (request: TaqlRequest) => {
