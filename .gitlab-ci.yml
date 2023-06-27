@@ -11,6 +11,7 @@ default:
 stages:
   - test
   - docker
+  - pages
 
 test:
   stage: test
@@ -85,3 +86,13 @@ docker-publish:
       --label org.label-schema.vendor=TripAdvisor
       --verbosity=info
 
+pages:
+  image: alpine:latest
+  stage: pages
+  script:
+    - echo 'Deploying pages in public/'
+  artifacts:
+    paths:
+      - public
+  only:
+    - main

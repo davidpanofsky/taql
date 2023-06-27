@@ -1,42 +1,11 @@
 # taql
 
-TA Graphql service
+TA GraphQL service
 
-## Requirements
+## Enabling/Disabling TAQL via Cookie
+The TAQL experience can be enabled or disabled explicitly via the `GraphQLNextGen` cookie in dev/preproduction. 
+Due to gitlab's sanitization of links, bookmarklets for setting/unsetting this cookie can be found in [this project's gitlab pages](https://dplat.pages.tamg.io/taql).
 
-### libpq
-
-For postgres operations (e.g to resolve preregistered queries) we use `pg-native`, which requires `libpq` to build.
-
-On Centos:
-
-```shell
-yum install postgresql-libs
-```
-
-The node `libpq` package might exercise newer g++ features than are supported by your installation. To upgrade on centos systems, use SCL:
-
-```
-# 1. Install a package with repository for your system:
-$ sudo yum install centos-release-scl
-
-# 2. Install the collection:
-$ sudo yum install devtoolset-7
-
-# 3. Start using software collections:
-$ scl enable devtoolset-7 bash
-
-# 4. Install libpq
-$ yarn install
-```
-
-On Mac:
-
-```shell
-brew install libpq
-# brew doesn't link into /usr/local/lib
-ln -s /usr/local/opt/libpq/lib/libpq.5.dylib /usr/local/lib/libpq.5.dylib
-```
 
 ## Commands
 
