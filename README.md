@@ -4,7 +4,7 @@ TA GraphQL service
 
 ## Enabling/Disabling TAQL via Cookie
 The TAQL experience can be enabled or disabled explicitly via the `GraphQLNextGen` cookie in dev/preproduction. 
-Due to gitlab's sanitization of links, bookmarklets for setting/unsetting this cookie can be found in [this project's gitlab pages](dplat.pages.tamg.io/taql).
+Due to gitlab's sanitization of links, bookmarklets for setting/unsetting this cookie can be found in [this project's gitlab pages](https://dplat.pages.tamg.io/taql).
 
 
 ## Commands
