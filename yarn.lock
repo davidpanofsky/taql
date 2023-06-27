@@ -579,6 +579,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@envelop/prometheus@patch:@envelop/prometheus@8.0.0#./.yarn/patches/@envelop-prometheus-npm-8.0.0-1628bc60e8.patch::locator=%40taql%40workspace%3A.":
+  version: 8.0.0
+  resolution: "@envelop/prometheus@patch:@envelop/prometheus@npm%3A8.0.0%3A%3A__archiveUrl=https%253A%252F%252Fmaven.dev.tripadvisor.com%253A443%252Fartifactory%252Fapi%252Fnpm%252Fyarn%252F%2540envelop%252Fprometheus%252F-%252Fprometheus-8.0.0.tgz#./.yarn/patches/@envelop-prometheus-npm-8.0.0-1628bc60e8.patch::version=8.0.0&hash=a5d817&locator=%40taql%40workspace%3A."
+  dependencies:
+    "@envelop/on-resolve": ^3.0.0
+    tslib: ^2.5.0
+  peerDependencies:
+    "@envelop/core": ^4.0.0
+    graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
+    prom-client: ^13 || ^14.0.0
+  checksum: ec7eb974e4575387cdeadc84185a02b9091403267d65a97cc9eeee4ed4ddb69fc4c36a2b299759228bcccba224f9ef26c12c33bb7eae0cda7b5ee6fe0c0e49b2
+  languageName: node
+  linkType: hard
+
 "@envelop/types@npm:4.0.0":
   version: 4.0.0
   resolution: "@envelop/types@npm:4.0.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40envelop%2Ftypes%2F-%2Ftypes-4.0.0.tgz"
@@ -995,7 +1009,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphql-yoga/plugin-prometheus@npm:^2.0.0":
+"@graphql-yoga/plugin-prometheus@npm:2.0.0":
   version: 2.0.0
   resolution: "@graphql-yoga/plugin-prometheus@npm:2.0.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-yoga%2Fplugin-prometheus%2F-%2Fplugin-prometheus-2.0.0.tgz"
   dependencies:

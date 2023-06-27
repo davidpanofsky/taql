@@ -52,7 +52,7 @@ const errorCounter = ({ name, help }: { name: string; help: string }) =>
       operationName: params.operationName ?? 'unknown',
       operationType: params.operationType ?? 'unknown',
       errorPhase: params.error?.message?.startsWith('Variable')
-        ? 'validate'
+        ? 'variables'
         : params.errorPhase ?? 'unknown',
     }),
   });

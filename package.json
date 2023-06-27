@@ -36,7 +36,9 @@
   "private": true,
   "resolutions": {
     "@graphql-tools/batch-execute@^8.5.11": "patch:@graphql-tools/batch-execute@^8.5.11#./.yarn/patches/@graphql-tools-batch-execute-npm-8.5.11-c0fd4ea03c.patch",
-    "@ta-graphql-utils/stitch": "3.1.0"
+    "@ta-graphql-utils/stitch": "3.1.0",
+    "@graphql-yoga/plugin-prometheus": "2.0.0",
+    "@envelop/prometheus@8.0.0": "patch:@envelop/prometheus@8.0.0#./.yarn/patches/@envelop-prometheus-npm-8.0.0-1628bc60e8.patch"
   },
   "dependencies": {
     "typescript": "^5.0.4"
