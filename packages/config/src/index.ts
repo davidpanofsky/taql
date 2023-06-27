@@ -242,6 +242,11 @@ export const PREREGISTERED_QUERY_PARAMS = resolve({
     resolver: resolvers.nonNegativeInteger,
     defaultTo: 2000,
   },
+  maxPrintCacheSize: {
+    property: 'PREREGISTERED_QUERY_PRINT_CACHE_SIZE',
+    resolver: resolvers.nonNegativeInteger,
+    defaultTo: 4000,
+  },
   databaseUri: {
     property: 'PREREGISTERED_QUERY_DB_URI',
     defaultTo:

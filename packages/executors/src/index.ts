@@ -22,7 +22,7 @@ export type TaqlRequest = ExecutionRequest<Record<string, unknown>, TaqlState>;
  * Currently only works for preregistered queries, as that's the only thing we could use as a cache key.
  */
 const printCache = new InstrumentedCache<string, string>('printed_documents', {
-  max: PREREGISTERED_QUERY_PARAMS.maxCacheSize,
+  max: PREREGISTERED_QUERY_PARAMS.maxPrintCacheSize,
 });
 
 export const formatRequest = (request: TaqlRequest) => {
