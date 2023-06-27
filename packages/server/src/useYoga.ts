@@ -152,6 +152,24 @@ const makeSchemaProvider = (
   };
 };
 
+// Buckets for request/response sizes
+const defaultSizeBytesBuckets = promClient.exponentialBuckets(25, 5, 7);
+const metricLabels = ['method', 'path', 'statusCode'];
+
+const requestSizeMetric = new promClient.Histogram({
+  name: 'taql_request_size_bytes',
+  help: 'Size of HTTP requests in bytes',
+  labelNames: metricLabels,
+  buckets: defaultSizeBytesBuckets,
+});
+
+const responseSizeMetric = new promClient.Histogram({
+  name: 'taql_response_size_bytes',
+  help: 'Size of HTTP responses in bytes',
+  labelNames: metricLabels,
+  buckets: defaultSizeBytesBuckets,
+});
+
 export const useYoga = async () => {
   const batchLimit = SERVER_PARAMS.batchLimit;
   const port = SERVER_PARAMS.svcoWorker
@@ -263,6 +281,16 @@ export const useYoga = async () => {
 
     // Converts ReadableStream to a NodeJS Stream
     ctx.body = response.body;
+
+    // Capture metrics for request and response sizes.
+    const labels = {
+      method: ctx.request.method,
+      path: ctx.request.url,
+      statusCode: ctx.status,
+    };
+    requestSizeMetric.observe(labels, ctx.request.length || 0);
+    responseSizeMetric.observe(labels, ctx.response.length || 0);
+
     accessTimer.done({
       method: ctx.request.method,
       url: ctx.request.url,
