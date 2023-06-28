@@ -292,6 +292,14 @@ export const AUTOMATIC_PERSISTED_QUERY_PARAMS = resolve({
   },
 });
 
+export const PRINT_DOCUMENT_PARAMS = resolve({
+  maxCacheSize: {
+    property: 'PRINT_DOCUMENT_CACHE_SIZE',
+    resolver: resolvers.nonNegativeInteger,
+    defaultTo: 4000,
+  },
+});
+
 export const PROM_PARAMS = resolve({
   prefix: {
     property: 'PROM_PREFIX',

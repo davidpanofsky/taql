@@ -1710,6 +1710,7 @@ __metadata:
     "@taql/context": "workspace:^"
     "@taql/deadlines": "workspace:^"
     "@taql/httpAgent": "workspace:^"
+    "@taql/metrics": "workspace:^"
     graphql: ^16.6.0
     node-fetch: ^2.6.11
     typescript: ^5.0.4
