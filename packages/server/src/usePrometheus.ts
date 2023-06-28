@@ -6,16 +6,20 @@ import {
 } from '@graphql-yoga/plugin-prometheus';
 import promClient from 'prom-client';
 
+const histoBucketsSec = [
+  0.0001, 0.0005, 0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1, 5,
+];
 const operationLabelNames = ['operationName', 'operationType', 'phase'];
 const operationLabels = (params: FillLabelsFnParams) => ({
   operationName: params.operationName ?? 'unknown',
   operationType: params.operationType ?? 'unknown',
 });
 
+// Note: all phase histograms are in seconds, not milliseconds.
 const phaseHisto = ({
   name,
   help,
-  buckets = [1, 10, 50, 100],
+  buckets = histoBucketsSec,
 }: {
   name: string;
   help: string;
@@ -59,11 +63,12 @@ const errorCounter = ({ name, help }: { name: string; help: string }) =>
 
 export const preconfiguredUsePrometheus = usePrometheus({
   // Options specified by @graphql-yoga/plugin-prometheus
+  // Note: http histogram metric is in milliseconds, not seconds.
   http: createHistogram({
     histogram: new promClient.Histogram({
-      name: 'taql_http_duration',
+      name: 'taql_http_duration_ms',
       help: 'Time spent on HTTP connection',
-      buckets: [1, 5, 25, 125, 625, 3125],
+      buckets: histoBucketsSec.map((x) => x * 1000),
       labelNames: ['operationType', 'operationName', 'statusCode'],
     }),
     fillLabelsFn: (params, { response }) => ({
@@ -75,6 +80,7 @@ export const preconfiguredUsePrometheus = usePrometheus({
   // Options passed on to @envelop/prometheus
   // https://the-guild.dev/graphql/envelop/plugins/use-prometheus
   // all optional, and by default, all set to false
+  // Note: all phase histograms are in seconds, not milliseconds.
   execute: phaseHisto({
     name: 'taql_envelop_phase_execute',
     help: 'Time spent running the GraphQL execute function',
@@ -99,7 +105,7 @@ export const preconfiguredUsePrometheus = usePrometheus({
     histogram: new promClient.Histogram({
       name: 'taql_envelop_phase_context',
       help: 'Time spent building the GraphQL context',
-      buckets: [0.01, 0.1, 1],
+      buckets: histoBucketsSec,
     }),
     fillLabelsFn: () => ({}),
   }),
