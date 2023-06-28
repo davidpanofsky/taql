@@ -108,16 +108,13 @@ const primaryStartup = async () => {
     sucessfulInitialization = true;
   });
 
-  // Override prom prefix for workers.
-  const workerEnv = { PROM_PREFIX: PROM_PARAMS.workerPrefix };
   // create one worker for svco on port - 1 if enabled.
-  ENABLE_FEATURES.serviceOverrides &&
-    fork({ ...workerEnv, SVCO_WORKER: 'true' });
+  ENABLE_FEATURES.serviceOverrides && fork({ SVCO_WORKER: 'true' });
   const clusterParallelism = ENABLE_FEATURES.serviceOverrides
     ? Math.max(SERVER_PARAMS.clusterParallelism - 1, 1)
     : SERVER_PARAMS.clusterParallelism;
   for (let i = 0; i < clusterParallelism; i++) {
-    fork({ ...workerEnv, SVCO_WORKER: 'false' });
+    fork({ SVCO_WORKER: 'false' });
     // A small delay between forks seems to help keep external dependencies happy.
     await new Promise<void>((resolve) => setTimeout(resolve, 100));
   }
