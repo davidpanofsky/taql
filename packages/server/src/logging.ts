@@ -8,7 +8,13 @@ export const useErrorLogging: Plugin = {
       onExecuteDone(payload) {
         return handleStreamOrSingleExecutionResult(payload, ({ result }) => {
           if (result.errors) {
-            logger.error(result.errors);
+            const uniqueId =
+              payload.args.contextValue.request.headers.get('x-unique-id');
+            const requestId =
+              payload.args.contextValue.request.headers.get('x-request-id');
+            result.errors.forEach((err) => {
+              logger.error(err, { uniqueId, requestId });
+            });
           }
         });
       },
