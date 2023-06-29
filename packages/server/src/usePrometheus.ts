@@ -2,6 +2,7 @@ import {
   FillLabelsFnParams,
   createCounter,
   createHistogram,
+  createSummary,
   usePrometheus,
 } from '@graphql-yoga/plugin-prometheus';
 import promClient from 'prom-client';
@@ -9,9 +10,8 @@ import promClient from 'prom-client';
 const histoBucketsSec = [
   0.0001, 0.0005, 0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1, 5,
 ];
-const operationLabelNames = ['operationName', 'operationType', 'phase'];
+const operationLabelNames = ['operationType', 'phase'];
 const operationLabels = (params: FillLabelsFnParams) => ({
-  operationName: params.operationName ?? 'unknown',
   operationType: params.operationType ?? 'unknown',
 });
 
@@ -40,9 +40,12 @@ const evtCounter = ({ name, help }: { name: string; help: string }) =>
     counter: new promClient.Counter({
       name,
       help,
-      labelNames: operationLabelNames,
+      labelNames: ['operationName', 'operationType'],
     }),
-    fillLabelsFn: operationLabels,
+    fillLabelsFn: (params: FillLabelsFnParams) => ({
+      operationName: params.operationName ?? 'unknown',
+      operationType: params.operationType ?? 'unknown',
+    }),
   });
 
 const errorCounter = ({ name, help }: { name: string; help: string }) =>
@@ -69,11 +72,10 @@ export const preconfiguredUsePrometheus = usePrometheus({
       name: 'taql_http_duration_ms',
       help: 'Time spent on HTTP connection',
       buckets: histoBucketsSec.map((x) => x * 1000),
-      labelNames: ['operationType', 'operationName', 'statusCode'],
+      labelNames: ['operationType', 'statusCode'],
     }),
     fillLabelsFn: (params, { response }) => ({
       operationType: params.operationType ?? 'unknown',
-      operationName: params.operationName ?? 'unknown',
       statusCode: response.status,
     }),
   }),
@@ -91,7 +93,16 @@ export const preconfiguredUsePrometheus = usePrometheus({
     help: 'Counts the amount of GraphQL requests executed through Envelop',
   }),
   // requires `execute` to be enabled
-  requestSummary: true,
+  requestSummary: createSummary({
+    summary: new promClient.Summary({
+      name: 'taql_envelop_request_time_summary',
+      help: 'Summary to measure the time to complete GraphQL operations',
+      labelNames: operationLabelNames,
+    }),
+    fillLabelsFn: (params) => ({
+      operationType: params.operationType ?? 'unknown',
+    }),
+  }),
   parse: phaseHisto({
     name: 'taql_envelop_phase_parse',
     help: 'Time spent running the GraphQL parse function',
