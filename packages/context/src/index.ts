@@ -1,12 +1,7 @@
-import {
-  ForwardableHeaders,
-  forwardableHeaders,
-  getHeaderOrDefault,
-} from './headers';
+import { ForwardableHeaders, forwardableHeaders } from './headers';
+import { GenericHeaders, getHeaderOrDefault } from '@taql/headers';
 import type { Middleware, ParameterizedContext } from 'koa';
 import { EXECUTION_TIMEOUT_PARAMS } from '@taql/config';
-import { Headers as FetchHeaders } from 'node-fetch';
-import type { IncomingHttpHeaders } from 'http';
 import type { Plugin as Yoga } from 'graphql-yoga';
 
 export {
@@ -14,8 +9,6 @@ export {
   ForwardHeaderName,
   ForwardableHeaders,
 } from './headers';
-
-type InputHeaders = FetchHeaders | Headers | IncomingHttpHeaders;
 
 /*
  * See:
@@ -64,7 +57,7 @@ const clientFromXff = (xff: string | undefined): string | undefined =>
 /**
  * build a "LegacyContext" i.e a RequestContext in the terms of legacy "stitched" graphql's api using http headers
  */
-const legacyContextFromHeaders = (headers: InputHeaders): LegacyContext => ({
+const legacyContextFromHeaders = (headers: GenericHeaders): LegacyContext => ({
   locale: getHeaderOrDefault(headers, 'x-tripadvisor-locale', 'en-US'),
   debugToolEnabled:
     getHeaderOrDefault(headers, 'x-tripadvisor-graphql-debug', 'false') ===
@@ -75,7 +68,7 @@ const legacyContextFromHeaders = (headers: InputHeaders): LegacyContext => ({
   ),
 });
 
-const deadline = (headers: InputHeaders): number =>
+const deadline = (headers: GenericHeaders): number =>
   Date.now() +
   Math.min(
     parseInt(
@@ -114,7 +107,7 @@ const hasStitchedRoles = (svco: string): boolean =>
       undefined
   ) != undefined;
 
-const svco = (headers: InputHeaders): undefined | SVCO => {
+const svco = (headers: GenericHeaders): undefined | SVCO => {
   const value = getHeaderOrDefault(headers, 'x-service-overrides', undefined);
   return value == undefined
     ? value
@@ -129,7 +122,7 @@ const svco = (headers: InputHeaders): undefined | SVCO => {
       };
 };
 
-const buildContext = (headers: InputHeaders): TaqlContext => ({
+const buildContext = (headers: GenericHeaders): TaqlContext => ({
   forwardHeaders: forwardableHeaders(headers),
   deadline: deadline(headers),
   legacyContext: legacyContextFromHeaders(headers),

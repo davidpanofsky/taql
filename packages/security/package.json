@@ -1,5 +1,5 @@
 {
-  "name": "@taql/context",
+  "name": "@taql/security",
   "version": "1.0.0",
   "main": "build/index.js",
   "scripts": {
@@ -8,15 +8,11 @@
   },
   "license": "UNLICENSED",
   "devDependencies": {
-    "@types/node-fetch": "^2.6.3",
-    "graphql-yoga": "^4.0.0",
-    "koa": "^2.14.2",
     "typescript": "^5.0.4"
   },
   "dependencies": {
     "@taql/config": "workspace:^",
     "@taql/headers": "workspace:^",
-    "graphql": "^16.6.0",
-    "node-fetch": "^2.6.11"
+    "graphql-yoga": "^4.0.0"
   }
 }

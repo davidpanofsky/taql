@@ -32,6 +32,7 @@ import { tracerProvider } from './observability';
 import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspection';
 import { useErrorLogging } from './logging';
 import { useOpenTelemetry } from '@envelop/opentelemetry';
+import { useTaqlSecurity } from '@taql/security';
 import { useUnifiedCaching } from '@taql/unifiedCaching';
 
 const makePlugins = async (defaultSchema: GraphQLSchema) => {
@@ -75,7 +76,10 @@ const makePlugins = async (defaultSchema: GraphQLSchema) => {
     },
   });
 
+  const securityPlugin = useTaqlSecurity();
+
   const yogaPlugins = [
+    ...((securityPlugin && [securityPlugin]) || []),
     useErrorLogging,
     mutatedFieldsExtensionPlugin,
     useOpenTelemetry(

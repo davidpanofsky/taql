@@ -1666,6 +1666,7 @@ __metadata:
   resolution: "@taql/context@workspace:packages/context"
   dependencies:
     "@taql/config": "workspace:^"
+    "@taql/headers": "workspace:^"
     "@types/node-fetch": ^2.6.3
     graphql: ^16.6.0
     graphql-yoga: ^4.0.0
@@ -1725,6 +1726,16 @@ __metadata:
     "@taql/schema": "workspace:^"
     "@types/js-yaml": ^4.0.5
     js-yaml: ^4.1.0
+    typescript: ^5.0.4
+  languageName: unknown
+  linkType: soft
+
+"@taql/headers@workspace:^, @taql/headers@workspace:packages/headers":
+  version: 0.0.0-use.local
+  resolution: "@taql/headers@workspace:packages/headers"
+  dependencies:
+    "@types/node-fetch": ^2.6.3
+    node-fetch: ^2.6.11
     typescript: ^5.0.4
   languageName: unknown
   linkType: soft
@@ -1791,6 +1802,17 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@taql/security@workspace:^, @taql/security@workspace:packages/security":
+  version: 0.0.0-use.local
+  resolution: "@taql/security@workspace:packages/security"
+  dependencies:
+    "@taql/config": "workspace:^"
+    "@taql/headers": "workspace:^"
+    graphql-yoga: ^4.0.0
+    typescript: ^5.0.4
+  languageName: unknown
+  linkType: soft
+
 "@taql/server@workspace:packages/server":
   version: 0.0.0-use.local
   resolution: "@taql/server@workspace:packages/server"
@@ -1811,6 +1833,7 @@ __metadata:
     "@taql/metrics": "workspace:^"
     "@taql/prereg": "workspace:^"
     "@taql/schema": "workspace:^"
+    "@taql/security": "workspace:^"
     "@taql/ssl": "workspace:^"
     "@taql/unifiedCaching": "workspace:^"
     "@tirke/node-cache-manager-ioredis": ^3.2.0
