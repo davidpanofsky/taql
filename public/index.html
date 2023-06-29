@@ -10,13 +10,13 @@
     <p>TAQL can be enabled/disabled explicitly in TA minisites via the 'GraphQLNextGen' cookie.  The following bookmarklets can be used to set the cookie while visiting hare/lapin. To install the bookmarklets, drag the links to your browser's bookmarks bar. When viewing webml.dev.tripadvisor.com or hare.tripadvisor.com, click the appropriate bookmark(let) to force taql on or off, or to force the default behavior.</p>
     <ul>
       <li>
-        <a href='javascript:(function() { document.cookie = "GraphQLNextGen=true;path=%2F";})()'>TAQL: Enable explicitly</a>        
+        <a href='javascript:(function() { document.cookie = "GraphQLNextGen=true;path=%2F"; location.reload()})()'>TAQL: Enable explicitly</a>        
       </li>
       <li>
-        <a href='javascript:(function() { document.cookie = "GraphQLNextGen=false;path=%2F";})()'>TAQL: Disable explicitly</a>
+        <a href='javascript:(function() { document.cookie = "GraphQLNextGen=false;path=%2F"; location.reload()})()'>TAQL: Disable explicitly</a>
       </li>
       <li>
-        <a href='javascript:(function() { document.cookie = "GraphQLNextGen=false;path=%2F;expires=Thu, 01 Jan 1970 00:00:01 GMT";})()'>TAQL: Use environment default</a>
+        <a href='javascript:(function() { document.cookie = "GraphQLNextGen=false;path=%2F;expires=Thu, 01 Jan 1970 00:00:01 GMT"; location.reload()})()'>TAQL: Use environment default</a>
       </li>
     </ul>
   </body>
