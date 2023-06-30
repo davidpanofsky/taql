@@ -1,9 +1,4 @@
-import {
-  ENABLE_FEATURES,
-  PROM_PARAMS,
-  SERVER_PARAMS,
-  logger,
-} from '@taql/config';
+import { ENABLE_FEATURES, SERVER_PARAMS, logger } from '@taql/config';
 import { Server, createServer as httpServer } from 'http';
 import cluster, { Worker } from 'node:cluster';
 import Koa from 'koa';
