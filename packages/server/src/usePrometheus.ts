@@ -70,7 +70,7 @@ export const preconfiguredUsePrometheus = usePrometheus({
   http: createHistogram({
     histogram: new promClient.Histogram({
       name: 'taql_http_duration_ms',
-      help: 'Time spent on HTTP connection',
+      help: 'Time (ms) spent on HTTP connection',
       buckets: histoBucketsSec.map((x) => x * 1000),
       labelNames: ['operationType', 'statusCode'],
     }),
@@ -85,7 +85,7 @@ export const preconfiguredUsePrometheus = usePrometheus({
   // Note: all phase histograms are in seconds, not milliseconds.
   execute: phaseHisto({
     name: 'taql_envelop_phase_execute',
-    help: 'Time spent running the GraphQL execute function',
+    help: 'Time (sec) spent running the GraphQL execute function',
   }),
   // requires `execute` to be enabled
   requestCount: evtCounter({
@@ -96,7 +96,7 @@ export const preconfiguredUsePrometheus = usePrometheus({
   requestSummary: createSummary({
     summary: new promClient.Summary({
       name: 'taql_envelop_request_time_summary',
-      help: 'Summary to measure the time to complete GraphQL operations',
+      help: 'Summary to measure the time (sec) to complete GraphQL operations',
       labelNames: operationLabelNames,
     }),
     fillLabelsFn: (params) => ({
@@ -105,17 +105,17 @@ export const preconfiguredUsePrometheus = usePrometheus({
   }),
   parse: phaseHisto({
     name: 'taql_envelop_phase_parse',
-    help: 'Time spent running the GraphQL parse function',
+    help: 'Time (sec) spent running the GraphQL parse function',
   }),
   validate: phaseHisto({
     name: 'taql_envelop_phase_validate',
-    help: 'Time spent running the GraphQL validate function',
+    help: 'Time (sec) spent running the GraphQL validate function',
   }),
   // no labels on this one. We don't do appreciable amounts of context buliding and it doesn't vary by operation anyhow.
   contextBuilding: createHistogram({
     histogram: new promClient.Histogram({
       name: 'taql_envelop_phase_context',
-      help: 'Time spent building the GraphQL context',
+      help: 'Time (sec) spent building the GraphQL context',
       buckets: histoBucketsSec,
     }),
     fillLabelsFn: () => ({}),
