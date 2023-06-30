@@ -1,5 +1,6 @@
 import {
   AlwaysOffSampler,
+  AlwaysOnSampler,
   BasicTracerProvider,
   BatchSpanProcessor,
   ConsoleSpanExporter,
@@ -10,6 +11,8 @@ import { B3InjectEncoding, B3Propagator } from '@opentelemetry/propagator-b3';
 import { PROM_PARAMS, TRACING_PARAMS } from '@taql/config';
 import promClient, { AggregatorRegistry } from 'prom-client';
 import type { ParameterizedContext } from 'koa';
+import { Resource } from '@opentelemetry/resources';
+import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import { ZipkinExporter } from '@opentelemetry/exporter-zipkin';
 
 const prometheusRegistry = new AggregatorRegistry();
@@ -39,10 +42,16 @@ export const useMetricsEndpoint = async (ctx: ParameterizedContext) => {
 };
 
 export const tracerProvider = new BasicTracerProvider({
-  sampler: new ParentBasedSampler({
-    root: new AlwaysOffSampler(),
+  resource: new Resource({
+    [SemanticResourceAttributes.SERVICE_NAME]: 'taql',
   }),
+  sampler: TRACING_PARAMS.alwaysSample
+    ? new AlwaysOnSampler()
+    : new ParentBasedSampler({
+        root: new AlwaysOffSampler(),
+      }),
 });
+
 const zipkinExporter = new ZipkinExporter({
   serviceName: 'taql',
   url: TRACING_PARAMS.zipkinUrl,
