@@ -303,10 +303,6 @@ export const PRINT_DOCUMENT_PARAMS = resolve({
 export const PROM_PARAMS = resolve({
   prefix: {
     property: 'PROM_PREFIX',
-    defaultTo: 'taql_primary_',
-  },
-  workerPrefix: {
-    property: 'PROM_WORKER_PREFIX',
     defaultTo: 'taql_',
   },
 });

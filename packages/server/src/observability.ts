@@ -7,20 +7,21 @@ import {
   SimpleSpanProcessor,
 } from '@opentelemetry/sdk-trace-base';
 import { B3InjectEncoding, B3Propagator } from '@opentelemetry/propagator-b3';
-import { PROM_PARAMS, TRACING_PARAMS } from '@taql/config';
+import { PROM_PARAMS, TRACING_PARAMS, WORKER } from '@taql/config';
 import promClient, { AggregatorRegistry } from 'prom-client';
 import type { ParameterizedContext } from 'koa';
 import { ZipkinExporter } from '@opentelemetry/exporter-zipkin';
 
 const prometheusRegistry = new AggregatorRegistry();
 const { prefix } = PROM_PARAMS;
+const labels = { worker: WORKER };
 // Set up memory monitoring
 // The defaults includes valuable metrics including heap allocation, available memory.
 // ex:
 // taql_nodejs_heap_space_size_available_bytes{space="..."}
 // taql_nodejs_heap_space_size_used_bytes{space="..."}
 // taql_nodejs_gc_duration_seconds_sum{kind="..."}
-promClient.collectDefaultMetrics({ prefix });
+promClient.collectDefaultMetrics({ prefix, labels });
 // end: memory monitoring
 
 export const useMetricsEndpoint = async (ctx: ParameterizedContext) => {
