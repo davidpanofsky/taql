@@ -12,8 +12,13 @@ export const useErrorLogging: Plugin = {
               payload.args.contextValue.request.headers.get('x-unique-id');
             const requestId =
               payload.args.contextValue.request.headers.get('x-request-id');
+            const operationName = payload.args.operationName;
             result.errors.forEach((err) => {
-              logger.error(err, { uniqueId, requestId });
+              logger.error(err?.message, {
+                uniqueId,
+                requestId,
+                operationName,
+              });
             });
           }
         });
