@@ -72,7 +72,9 @@ export const useHttpStatusTracking = (options: {
       const statusBucket = status.slice(0, 1);
       HTTP_RESPONSE_SUMMARY_COUNTER.inc({ statusCode: `${statusBucket}xx` });
     } else {
-      logger?.error('useHttpStatusTracking: no status on context! Is this middleware applied properly?');
+      logger?.error(
+        'useHttpStatusTracking: no status on context! Is this middleware applied properly?'
+      );
     }
   };
 };
