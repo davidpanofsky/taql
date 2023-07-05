@@ -40,24 +40,25 @@ export const useMetricsEndpoint = async (ctx: ParameterizedContext) => {
 };
 
 export const useHttpStatusTracking = (options: {
+  promPrefix?: string;
   logger?: {
     error: (msg: string) => void;
     info: (msg: string) => void;
   };
 }) => {
-  const { logger } = options;
+  const { promPrefix = prefix, logger } = options;
   logger?.info('useHttpStatusTracking: Initializing');
 
   const labels = ['statusCode'];
 
   const HTTP_RESPONSE_COUNTER = new promClient.Counter({
-    name: 'taql_http_response',
+    name: `${promPrefix}http_response`,
     help: 'http responses by response code',
     labelNames: labels,
   });
 
   const HTTP_RESPONSE_SUMMARY_COUNTER = new promClient.Counter({
-    name: 'taql_http_response_summary',
+    name: `${promPrefix}http_response_summary`,
     help: 'summary of http responses',
     labelNames: labels,
   });
