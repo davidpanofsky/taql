@@ -6,7 +6,7 @@ import { SSL_CONFIG } from '@taql/ssl';
 import { createServer as httpsServer } from 'https';
 import process from 'node:process';
 import promClient from 'prom-client';
-import { useMetricsEndpoint } from './observability';
+import { useMetricsEndpoint, useHttpStatusTracking } from './observability';
 import { useTaqlContext } from '@taql/context';
 import { useYoga } from './useYoga';
 
@@ -17,21 +17,12 @@ const workerStartup = async () => {
 
   const koa = new Koa();
 
-  koa.use(async (_ctx, next) => {
-    koaConcurrency.inc();
-    await next();
-    koaConcurrency.dec();
-  });
-
   //Initialize taql state.
   koa.use(useTaqlContext);
 
   koa.use(await useYoga());
 
-  const koaConcurrency = new promClient.Gauge({
-    name: 'taql_koa_concurrency',
-    help: 'concurrent requests inside of the koa context',
-  });
+  koa.use(useHttpStatusTracking({ logger: logger }));
 
   const server: Server =
     SSL_CONFIG == undefined ? httpServer() : httpsServer(SSL_CONFIG);
