@@ -64,7 +64,6 @@ export const useHttpStatusTracking = (options: {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return async (ctx: ParameterizedContext, next: () => Promise<any>) => {
-    logger?.info('useHttpStatusTracking: inside context fn');
     await next();
     if (ctx.status) {
       const status = ctx.status.toString();
@@ -73,7 +72,7 @@ export const useHttpStatusTracking = (options: {
       const statusBucket = status.slice(0, 1);
       HTTP_RESPONSE_SUMMARY_COUNTER.inc({ statusCode: `${statusBucket}xx` });
     } else {
-      logger?.error('useHttpStatusTracking: no status on context!');
+      logger?.error('useHttpStatusTracking: no status on context! Is this middleware applied properly?');
     }
   };
 };
