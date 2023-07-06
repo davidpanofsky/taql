@@ -317,6 +317,11 @@ export const TRACING_PARAMS = resolve({
     resolver: resolvers.booleanFromString,
     defaultTo: false,
   },
+  alwaysSample: {
+    property: 'TRACING_ALWAYS_SAMPLE',
+    resolver: resolvers.booleanFromString,
+    defaultTo: false,
+  },
 });
 
 export const GITOPS_PARAMS = resolve({

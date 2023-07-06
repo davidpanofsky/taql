@@ -1,5 +1,6 @@
 import {
   AlwaysOffSampler,
+  AlwaysOnSampler,
   BasicTracerProvider,
   BatchSpanProcessor,
   ConsoleSpanExporter,
@@ -10,6 +11,8 @@ import { B3InjectEncoding, B3Propagator } from '@opentelemetry/propagator-b3';
 import { PROM_PARAMS, TRACING_PARAMS, WORKER } from '@taql/config';
 import promClient, { AggregatorRegistry } from 'prom-client';
 import type { ParameterizedContext } from 'koa';
+import { Resource } from '@opentelemetry/resources';
+import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import { ZipkinExporter } from '@opentelemetry/exporter-zipkin';
 
 const prometheusRegistry = new AggregatorRegistry();
@@ -39,11 +42,62 @@ export const useMetricsEndpoint = async (ctx: ParameterizedContext) => {
   }
 };
 
+export const useHttpStatusTracking = (options: {
+  promPrefix?: string;
+  logger?: {
+    error: (msg: string) => void;
+    info: (msg: string) => void;
+  };
+}) => {
+  const { promPrefix = prefix, logger } = options;
+  logger?.info('useHttpStatusTracking: Initializing');
+
+  const labels = ['statusCode', 'path'];
+
+  const HTTP_RESPONSE_COUNTER = new promClient.Counter({
+    name: `${promPrefix}http_response`,
+    help: 'http responses by response code',
+    labelNames: labels,
+  });
+
+  const HTTP_RESPONSE_SUMMARY_COUNTER = new promClient.Counter({
+    name: `${promPrefix}http_response_summary`,
+    help: 'summary of http responses',
+    labelNames: labels,
+  });
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return async (ctx: ParameterizedContext, next: () => Promise<any>) => {
+    await next();
+    const path = ctx.request.url;
+    if (ctx.status) {
+      const statusCode = ctx.status.toString();
+      HTTP_RESPONSE_COUNTER.inc({ statusCode, path });
+
+      const statusBucket = statusCode.slice(0, 1);
+      HTTP_RESPONSE_SUMMARY_COUNTER.inc({
+        statusCode: `${statusBucket}xx`,
+        path,
+      });
+    } else {
+      logger?.error(
+        'useHttpStatusTracking: no status on context! Is this middleware applied properly?'
+      );
+    }
+  };
+};
+
 export const tracerProvider = new BasicTracerProvider({
-  sampler: new ParentBasedSampler({
-    root: new AlwaysOffSampler(),
+  resource: new Resource({
+    [SemanticResourceAttributes.SERVICE_NAME]: 'taql',
   }),
+  sampler: TRACING_PARAMS.alwaysSample
+    ? new AlwaysOnSampler()
+    : new ParentBasedSampler({
+        root: new AlwaysOffSampler(),
+      }),
 });
+
 const zipkinExporter = new ZipkinExporter({
   serviceName: 'taql',
   url: TRACING_PARAMS.zipkinUrl,
