@@ -52,7 +52,7 @@ export const useHttpStatusTracking = (options: {
   const { promPrefix = prefix, logger } = options;
   logger?.info('useHttpStatusTracking: Initializing');
 
-  const labels = ['statusCode'];
+  const labels = ['statusCode', 'path'];
 
   const HTTP_RESPONSE_COUNTER = new promClient.Counter({
     name: `${promPrefix}http_response`,
@@ -69,12 +69,16 @@ export const useHttpStatusTracking = (options: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return async (ctx: ParameterizedContext, next: () => Promise<any>) => {
     await next();
+    const path = ctx.request.url;
     if (ctx.status) {
-      const status = ctx.status.toString();
-      HTTP_RESPONSE_COUNTER.inc({ statusCode: status });
+      const statusCode = ctx.status.toString();
+      HTTP_RESPONSE_COUNTER.inc({ statusCode, path });
 
-      const statusBucket = status.slice(0, 1);
-      HTTP_RESPONSE_SUMMARY_COUNTER.inc({ statusCode: `${statusBucket}xx` });
+      const statusBucket = statusCode.slice(0, 1);
+      HTTP_RESPONSE_SUMMARY_COUNTER.inc({
+        statusCode: `${statusBucket}xx`,
+        path,
+      });
     } else {
       logger?.error(
         'useHttpStatusTracking: no status on context! Is this middleware applied properly?'
