@@ -9,6 +9,7 @@ import promClient from 'prom-client';
 import { useMetricsEndpoint } from './observability';
 import { useTaqlContext } from '@taql/context';
 import { useYoga } from './useYoga';
+import { useKoaPrometheus } from './useKoaPrometheus';
 
 const workerStartup = async () => {
   const port = SERVER_PARAMS.svcoWorker
@@ -17,21 +18,12 @@ const workerStartup = async () => {
 
   const koa = new Koa();
 
-  koa.use(async (_ctx, next) => {
-    koaConcurrency.inc();
-    await next();
-    koaConcurrency.dec();
-  });
+  koa.use(useKoaPrometheus());
 
   //Initialize taql state.
   koa.use(useTaqlContext);
 
   koa.use(await useYoga());
-
-  const koaConcurrency = new promClient.Gauge({
-    name: 'taql_koa_concurrency',
-    help: 'concurrent requests inside of the koa context',
-  });
 
   const server: Server =
     SSL_CONFIG == undefined ? httpServer() : httpsServer(SSL_CONFIG);
