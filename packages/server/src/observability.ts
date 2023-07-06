@@ -42,6 +42,47 @@ export const useMetricsEndpoint = async (ctx: ParameterizedContext) => {
   }
 };
 
+export const useHttpStatusTracking = (options: {
+  promPrefix?: string;
+  logger?: {
+    error: (msg: string) => void;
+    info: (msg: string) => void;
+  };
+}) => {
+  const { promPrefix = prefix, logger } = options;
+  logger?.info('useHttpStatusTracking: Initializing');
+
+  const labels = ['statusCode'];
+
+  const HTTP_RESPONSE_COUNTER = new promClient.Counter({
+    name: `${promPrefix}http_response`,
+    help: 'http responses by response code',
+    labelNames: labels,
+  });
+
+  const HTTP_RESPONSE_SUMMARY_COUNTER = new promClient.Counter({
+    name: `${promPrefix}http_response_summary`,
+    help: 'summary of http responses',
+    labelNames: labels,
+  });
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return async (ctx: ParameterizedContext, next: () => Promise<any>) => {
+    await next();
+    if (ctx.status) {
+      const status = ctx.status.toString();
+      HTTP_RESPONSE_COUNTER.inc({ statusCode: status });
+
+      const statusBucket = status.slice(0, 1);
+      HTTP_RESPONSE_SUMMARY_COUNTER.inc({ statusCode: `${statusBucket}xx` });
+    } else {
+      logger?.error(
+        'useHttpStatusTracking: no status on context! Is this middleware applied properly?'
+      );
+    }
+  };
+};
+
 export const tracerProvider = new BasicTracerProvider({
   resource: new Resource({
     [SemanticResourceAttributes.SERVICE_NAME]: 'taql',
