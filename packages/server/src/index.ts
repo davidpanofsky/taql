@@ -9,7 +9,6 @@ import process from 'node:process';
 import promClient from 'prom-client';
 import { useTaqlContext } from '@taql/context';
 import { useYoga } from './useYoga';
-import { useKoaPrometheus } from './useKoaPrometheus';
 
 const workerStartup = async () => {
   const port = SERVER_PARAMS.svcoWorker
