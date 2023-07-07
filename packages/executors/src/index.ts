@@ -6,15 +6,42 @@ import {
 } from '@taql/config';
 import { ExecutionRequest, ExecutionResult } from '@graphql-tools/utils';
 import fetch, { Headers } from 'node-fetch';
+import { caching, multiCaching } from 'cache-manager';
 import { httpAgent, httpsAgent } from '@taql/httpAgent';
+import { wrappedLRUStore, InstrumentedCache } from '@taql/metrics';
 import type { Agent } from 'http';
 import { ForwardableHeaders } from '@taql/context';
-import { InstrumentedCache } from '@taql/metrics';
 import type { TaqlState } from '@taql/context';
 import { getDeadline } from '@taql/deadlines';
+import { ioRedisStore } from '@tirke/node-cache-manager-ioredis';
 import { print } from 'graphql';
 
 export type TaqlRequest = ExecutionRequest<Record<string, unknown>, TaqlState>;
+
+/**
+ *  Set up redis cache for printed documents, if so configured.
+ */
+const printCacheRedisParams = PRINT_DOCUMENT_PARAMS.redisInstance
+  ? {
+    ttl: PRINT_DOCUMENT_PARAMS.redisTTL,
+    host: PRINT_DOCUMENT_PARAMS.redisInstance,
+    port: 6379,
+  }
+  : PRINT_DOCUMENT_PARAMS.redisCluster
+  ? {
+    ttl: PRINT_DOCUMENT_PARAMS.redisTTL,
+    clusterConfig: {
+      nodes: [
+        {
+          host: PRINT_DOCUMENT_PARAMS.redisCluster,
+          port: 6379,
+        },
+      ],
+    },
+  }
+  : undefined;
+
+const printCacheWrappedRedis = printCacheRedisParams && ioRedisStore(printCacheRedisParams);
 
 /**
  * Converting from DocumentNode to string can take more than 20ms for some of our lagger queries.
@@ -24,6 +51,8 @@ export type TaqlRequest = ExecutionRequest<Record<string, unknown>, TaqlState>;
 const printCache = new InstrumentedCache<string, string>('printed_documents', {
   max: PRINT_DOCUMENT_PARAMS.maxCacheSize,
 });
+
+
 
 export const formatRequest = (request: TaqlRequest) => {
   const { document, variables, context, info } = request;
