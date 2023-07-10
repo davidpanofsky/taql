@@ -52,7 +52,8 @@ const printCache = new InstrumentedCache<string, string>('printed_documents', {
   max: PRINT_DOCUMENT_PARAMS.maxCacheSize,
 });
 
-
+// Can't do this in a commonjs module
+//const wrappedPrintCache = await caching(wrappedLRUStore({ cache: printCache}));
 
 export const formatRequest = (request: TaqlRequest) => {
   const { document, variables, context, info } = request;
@@ -87,16 +88,17 @@ type ConstantLoadParams = {
 
 type LoadParams<T> = {
   forwardHeaders?: ForwardableHeaders;
-  request: T;
+  request: Promise<T> | T;
 };
 
 type RequestTransform<T_1, T_2> = {
-  request: (req: T_1) => T_2;
+  request: (req: T_1) => Promise<T_2> | T_2;
 };
 
 type ResponseTransform<R_1, R_2> = {
   response: (res: R_2) => R_1;
 };
+
 type Transform<T_1, R_1, T_2 = T_1, R_2 = R_1> =
   | RequestTransform<T_1, T_2>
   | ResponseTransform<R_1, R_2>
@@ -148,7 +150,7 @@ const load = async <T, R>({
     headers,
     agent,
     timeout,
-    body: JSON.stringify(request),
+    body: JSON.stringify(await request),
   });
   return <R>response.json();
 };
@@ -175,33 +177,33 @@ export const bindLoad = <T_1, R_1, T_2 = unknown, R_2 = unknown>(
     computeTimeout(maxTimeout, getDeadline(req));
 
   if (transform == undefined) {
-    return (args: LoadParams<T_1>) =>
-      load({ url, timeout: requestTimeout(args.request), agent, ...args });
+    return async (args: LoadParams<T_1>) =>
+      load({ url, timeout: requestTimeout(await args.request), agent, ...args });
   } else if (!('response' in transform)) {
     // this is a request transformation without a response transformation:
-    return (args: LoadParams<T_1>) =>
+    return async (args: LoadParams<T_1>) =>
       load({
         url,
         agent,
         ...args,
-        timeout: requestTimeout(args.request),
-        request: transform.request(args.request),
+        timeout: requestTimeout(await args.request),
+        request: transform.request(await args.request),
       });
   } else if (!('request' in transform)) {
     // the response is transformed but the request is not
-    return (args: LoadParams<T_1>) =>
-      load({ url, agent, timeout: requestTimeout(args.request), ...args }).then(
+    return async (args: LoadParams<T_1>) =>
+      load({ url, agent, timeout: requestTimeout(await args.request), ...args }).then(
         (response) => transform.response(<R_2>response)
       );
   } else {
     //both request and response are transformed.
-    return (args: LoadParams<T_1>) =>
+    return async (args: LoadParams<T_1>) =>
       load({
         url,
         agent,
-        timeout: requestTimeout(args.request),
+        timeout: requestTimeout(await args.request),
         ...args,
-        request: transform.request(args.request),
+        request: transform.request(await args.request),
       }).then((response) => transform.response(<R_2>response));
   }
 };
