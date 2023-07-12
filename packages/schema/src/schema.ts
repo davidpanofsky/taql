@@ -1,7 +1,7 @@
 import { Cache, caching, multiCaching } from 'cache-manager';
 import { ExecutorConfig, Subgraph, stitch } from '@ta-graphql-utils/stitch';
 import { InstrumentedCache, wrappedLRUStore } from '@taql/metrics';
-import { LEGACY_GQL_PARAMS, PRINT_DOCUMENT_PARAMS } from '@taql/config';
+import { LEGACY_GQL_PARAMS, PRINT_DOCUMENT_PARAMS, logger } from '@taql/config';
 import {
   PrintedDocumentCacheConfig,
   makeRemoteExecutor,
@@ -43,42 +43,48 @@ function makeExecutorFactory(
 }
 
 /**
- *  Set up redis cache for printed documents, if so configured.
- */
-const printCacheRedisParams = PRINT_DOCUMENT_PARAMS.redisInstance
-  ? {
-      ttl: PRINT_DOCUMENT_PARAMS.redisTTL,
-      host: PRINT_DOCUMENT_PARAMS.redisInstance,
-      port: 6379,
-    }
-  : PRINT_DOCUMENT_PARAMS.redisCluster
-  ? {
-      ttl: PRINT_DOCUMENT_PARAMS.redisTTL,
-      clusterConfig: {
-        nodes: [
-          {
-            host: PRINT_DOCUMENT_PARAMS.redisCluster,
-            port: 6379,
-          },
-        ],
-      },
-    }
-  : undefined;
-
-const printCacheWrappedRedis =
-  printCacheRedisParams && ioRedisStore(printCacheRedisParams);
-
-/**
  * Converting from DocumentNode to string can take more than 20ms for some of our lagger queries.
  * We'll cache the most common ones to avoid unnecessary work.
  * Currently only works for preregistered/persisted queries, as that's the only thing we could use as a cache key.
  */
-const printLruCache = new InstrumentedCache<string, string>(
-  'printed_documents',
-  {
-    max: PRINT_DOCUMENT_PARAMS.maxCacheSize,
-  }
-);
+async function createPrintedDocumentCache() {
+  // Set up redis cache, if so configured
+  const printCacheRedisParams = PRINT_DOCUMENT_PARAMS.redisInstance
+    ? {
+        ttl: PRINT_DOCUMENT_PARAMS.redisTTL,
+        host: PRINT_DOCUMENT_PARAMS.redisInstance,
+        port: 6379,
+      }
+    : PRINT_DOCUMENT_PARAMS.redisCluster
+    ? {
+        ttl: PRINT_DOCUMENT_PARAMS.redisTTL,
+        clusterConfig: {
+          nodes: [
+            {
+              host: PRINT_DOCUMENT_PARAMS.redisCluster,
+              port: 6379,
+            },
+          ],
+        },
+      }
+    : undefined;
+
+  const printCacheWrappedRedis =
+    printCacheRedisParams && ioRedisStore(printCacheRedisParams);
+
+  // In memory LRU
+  const printLruCache = new InstrumentedCache<string, string>(
+    'printed_documents',
+    {
+      max: PRINT_DOCUMENT_PARAMS.maxCacheSize,
+    }
+  );
+
+  return multiCaching([
+    await caching(wrappedLRUStore({ cache: printLruCache })),
+    ...(printCacheWrappedRedis ? [await caching(printCacheWrappedRedis)] : []),
+  ]);
+}
 
 let printedDocumentCache: Omit<Cache, 'store'>;
 
@@ -98,12 +104,8 @@ export async function makeSchema({
 
   // Initialize the printed document cache if it hasn't been already
   if (!printedDocumentCache) {
-    printedDocumentCache = multiCaching([
-      await caching(wrappedLRUStore({ cache: printLruCache })),
-      ...(printCacheWrappedRedis
-        ? [await caching(printCacheWrappedRedis)]
-        : []),
-    ]);
+    logger.info('building printed document cache');
+    printedDocumentCache = await createPrintedDocumentCache();
   }
 
   const cacheConfig: PrintedDocumentCacheConfig = {
