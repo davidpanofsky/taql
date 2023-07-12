@@ -15,9 +15,6 @@ import { print } from 'graphql';
 
 export type TaqlRequest = ExecutionRequest<Record<string, unknown>, TaqlState>;
 
-// Can't do this in a commonjs module
-//const wrappedPrintCache = await caching(wrappedLRUStore({ cache: printCache}));
-
 export type PrintedDocumentCacheConfig = {
   cache?: Omit<Cache, 'store'>;
   keyFn?: (queryId: string, fieldName: string | number) => string;
