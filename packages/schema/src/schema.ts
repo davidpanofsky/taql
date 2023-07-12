@@ -72,16 +72,15 @@ async function createPrintedDocumentCache() {
   const printCacheWrappedRedis =
     printCacheRedisParams && ioRedisStore(printCacheRedisParams);
 
-  // In memory LRU
-  const printLruCache = new InstrumentedCache<string, string>(
-    'printed_documents',
-    {
-      max: PRINT_DOCUMENT_PARAMS.maxCacheSize,
-    }
-  );
-
+  // Multicache with redis if a redis configuration is present
   return multiCaching([
-    await caching(wrappedLRUStore({ cache: printLruCache })),
+    await caching(
+      wrappedLRUStore({
+        cache: new InstrumentedCache<string, string>('printed_documents', {
+          max: PRINT_DOCUMENT_PARAMS.maxCacheSize,
+        }),
+      })
+    ),
     ...(printCacheWrappedRedis ? [await caching(printCacheWrappedRedis)] : []),
   ]);
 }
