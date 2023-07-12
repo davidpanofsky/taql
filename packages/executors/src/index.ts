@@ -113,7 +113,7 @@ const load = async <T, R>({
 
   headers.set('x-timeout', `${paddedTimeout}`);
   headers.set('content-type', 'application/json');
-  logger.debug('Fetching from remote: ', url);
+  logger.debug(`Fetching from remote: ${url}`);
   const response = await fetch(url, {
     method: 'POST',
     headers,
