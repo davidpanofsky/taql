@@ -43,25 +43,31 @@ function makeExecutorFactory(
 }
 
 /**
- * Converting from DocumentNode to string can take more than 20ms for some of our lagger queries.
+ * Converting from DocumentNode to string can take more than 20ms for some of our larger queries.
  * We'll cache the most common ones to avoid unnecessary work.
- * Currently only works for preregistered/persisted queries, as that's the only thing we could use as a cache key.
+ * Currently only works for preregistered/persisted queries, as their respective IDs constitute a portion
+ * of the cache key.
  */
-async function createPrintedDocumentCache() {
+async function createPrintedDocumentCache(params: {
+  maxCacheSize: number;
+  redisTTL: number;
+  redisInstance?: string;
+  redisCluster?: string;
+}) {
   // Set up redis cache, if so configured
-  const printCacheRedisParams = PRINT_DOCUMENT_PARAMS.redisInstance
+  const printCacheRedisParams = params.redisInstance
     ? {
-        ttl: PRINT_DOCUMENT_PARAMS.redisTTL,
-        host: PRINT_DOCUMENT_PARAMS.redisInstance,
+        ttl: params.redisTTL,
+        host: params.redisInstance,
         port: 6379,
       }
-    : PRINT_DOCUMENT_PARAMS.redisCluster
+    : params.redisCluster
     ? {
-        ttl: PRINT_DOCUMENT_PARAMS.redisTTL,
+        ttl: params.redisTTL,
         clusterConfig: {
           nodes: [
             {
-              host: PRINT_DOCUMENT_PARAMS.redisCluster,
+              host: params.redisCluster,
               port: 6379,
             },
           ],
@@ -77,7 +83,7 @@ async function createPrintedDocumentCache() {
     await caching(
       wrappedLRUStore({
         cache: new InstrumentedCache<string, string>('printed_documents', {
-          max: PRINT_DOCUMENT_PARAMS.maxCacheSize,
+          max: params.maxCacheSize,
         }),
       })
     ),
@@ -104,7 +110,9 @@ export async function makeSchema({
   // Initialize the printed document cache if it hasn't been already
   if (!printedDocumentCache) {
     logger.info('building printed document cache');
-    printedDocumentCache = await createPrintedDocumentCache();
+    printedDocumentCache = await createPrintedDocumentCache(
+      PRINT_DOCUMENT_PARAMS
+    );
   }
 
   const cacheConfig: PrintedDocumentCacheConfig = {
