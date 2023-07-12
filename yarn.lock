@@ -1741,8 +1741,7 @@ __metadata:
     "@taql/context": "workspace:^"
     "@taql/deadlines": "workspace:^"
     "@taql/httpAgent": "workspace:^"
-    "@taql/metrics": "workspace:^"
-    "@tirke/node-cache-manager-ioredis": ^3.2.0
+    cache-manager: ^5.2.1
     graphql: ^16.6.0
     node-fetch: ^2.6.11
     typescript: ^5.0.4
@@ -1788,6 +1787,7 @@ __metadata:
   dependencies:
     "@taql/config": "workspace:^"
     "@types/lodash.clonedeep": ^4.5.0
+    cache-manager: ^5.2.1
     lodash.clonedeep: ^4.5.0
     lru-cache: ^9.1.2
     prom-client: ^14.2.0
@@ -1824,9 +1824,12 @@ __metadata:
     "@taql/debug": "workspace:^"
     "@taql/executors": "workspace:^"
     "@taql/httpAgent": "workspace:^"
+    "@taql/metrics": "workspace:^"
+    "@tirke/node-cache-manager-ioredis": ^3.2.0
     "@types/deep-equal": ^1.0.1
     "@types/node": ^18.16.7
     "@types/node-fetch": ^2.6.3
+    cache-manager: ^5.2.1
     deep-equal: ^2.2.1
     graphql: ^16.6.0
     node-fetch: ^2.6.11

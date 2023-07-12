@@ -23,6 +23,9 @@
     "@taql/debug": "workspace:^",
     "@taql/executors": "workspace:^",
     "@taql/httpAgent": "workspace:^",
+    "@taql/metrics": "workspace:^",
+    "@tirke/node-cache-manager-ioredis": "^3.2.0",
+    "cache-manager": "^5.2.1",
     "deep-equal": "^2.2.1",
     "graphql": "^16.6.0",
     "node-fetch": "^2.6.11"

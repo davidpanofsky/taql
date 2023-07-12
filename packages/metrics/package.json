@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@taql/config": "workspace:^",
+    "cache-manager": "^5.2.1",
     "lodash.clonedeep": "^4.5.0",
     "lru-cache": "^9.1.2",
     "prom-client": "^14.2.0"

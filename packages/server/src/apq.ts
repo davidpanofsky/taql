@@ -1,7 +1,7 @@
 import { APQStore, useAPQ } from '@graphql-yoga/plugin-apq';
+import { InstrumentedCache, wrappedLRUStore } from '@taql/metrics';
 import { caching, multiCaching } from 'cache-manager';
 import { AUTOMATIC_PERSISTED_QUERY_PARAMS } from '@taql/config';
-import { wrappedLRUStore, InstrumentedCache } from '@taql/metrics';
 import type { Redis } from 'ioredis';
 import { Plugin as YogaPlugin } from 'graphql-yoga';
 import { ioRedisStore } from '@tirke/node-cache-manager-ioredis';
@@ -79,12 +79,14 @@ export class TaqlAPQ {
 
   async makePlugin(): Promise<YogaPlugin> {
     // Two tier store for automatic persisted queries
-    const memoryCache = await caching(wrappedLRUStore({
-      cache: new InstrumentedCache<string, string>('apq', {
-        max: AUTOMATIC_PERSISTED_QUERY_PARAMS.memCacheSize,
-        ttl: AUTOMATIC_PERSISTED_QUERY_PARAMS.redisTTL,
-      }),
-    }));
+    const memoryCache = await caching(
+      wrappedLRUStore({
+        cache: new InstrumentedCache<string, string>('apq', {
+          max: AUTOMATIC_PERSISTED_QUERY_PARAMS.memCacheSize,
+          ttl: AUTOMATIC_PERSISTED_QUERY_PARAMS.redisTTL,
+        }),
+      })
+    );
 
     const apqStore: APQStore = multiCaching([
       memoryCache,
