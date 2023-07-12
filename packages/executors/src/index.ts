@@ -27,7 +27,6 @@ export const requestFormatter =
   (config: PrintedDocumentCacheConfig) => async (request: TaqlRequest) => {
     const { document, variables, context, info } = request;
     const { cache, keyFn } = config;
-    let query: string | undefined;
 
     const queryId =
       context?.params?.extensions?.preRegisteredQueryId ||
@@ -36,16 +35,12 @@ export const requestFormatter =
 
     const cacheKey = keyFn && queryId && fieldName && keyFn(queryId, fieldName);
 
-    if (cache && cacheKey) {
-      query = <string>await cache.get(cacheKey);
-    }
-
-    if (!query) {
-      query = print(document);
-      if (cache && cacheKey) {
-        await cache.set(cacheKey, query);
-      }
-    }
+    // It's important that we call cache.wrap here, as for multicaches this ensures that if the value is in a "deeper" cache
+    // that the value is propagated into the "shallower" caches that we would prefer to resolve it from in the future.
+    const query: string =
+      cache && cacheKey
+        ? <string>await cache.wrap(cacheKey, async () => print(document))
+        : print(document);
 
     return { query, variables } as const;
   };
