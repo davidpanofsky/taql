@@ -1,84 +1,54 @@
 import {
   EXECUTION_TIMEOUT_PARAMS,
-  PRINT_DOCUMENT_PARAMS,
   UPSTREAM_TIMEOUT_PARAMS,
   logger,
 } from '@taql/config';
 import { ExecutionRequest, ExecutionResult } from '@graphql-tools/utils';
 import fetch, { Headers } from 'node-fetch';
-import { caching, multiCaching } from 'cache-manager';
 import { httpAgent, httpsAgent } from '@taql/httpAgent';
-import { wrappedLRUStore, InstrumentedCache } from '@taql/metrics';
 import type { Agent } from 'http';
+import { Cache } from 'cache-manager';
 import { ForwardableHeaders } from '@taql/context';
 import type { TaqlState } from '@taql/context';
 import { getDeadline } from '@taql/deadlines';
-import { ioRedisStore } from '@tirke/node-cache-manager-ioredis';
 import { print } from 'graphql';
 
 export type TaqlRequest = ExecutionRequest<Record<string, unknown>, TaqlState>;
 
-/**
- *  Set up redis cache for printed documents, if so configured.
- */
-const printCacheRedisParams = PRINT_DOCUMENT_PARAMS.redisInstance
-  ? {
-    ttl: PRINT_DOCUMENT_PARAMS.redisTTL,
-    host: PRINT_DOCUMENT_PARAMS.redisInstance,
-    port: 6379,
-  }
-  : PRINT_DOCUMENT_PARAMS.redisCluster
-  ? {
-    ttl: PRINT_DOCUMENT_PARAMS.redisTTL,
-    clusterConfig: {
-      nodes: [
-        {
-          host: PRINT_DOCUMENT_PARAMS.redisCluster,
-          port: 6379,
-        },
-      ],
-    },
-  }
-  : undefined;
-
-const printCacheWrappedRedis = printCacheRedisParams && ioRedisStore(printCacheRedisParams);
-
-/**
- * Converting from DocumentNode to string can take more than 20ms for some of our lagger queries.
- * We'll cache the most common ones to avoid unnecessary work.
- * Currently only works for preregistered/persisted queries, as that's the only thing we could use as a cache key.
- */
-const printCache = new InstrumentedCache<string, string>('printed_documents', {
-  max: PRINT_DOCUMENT_PARAMS.maxCacheSize,
-});
-
 // Can't do this in a commonjs module
 //const wrappedPrintCache = await caching(wrappedLRUStore({ cache: printCache}));
 
-export const formatRequest = (request: TaqlRequest) => {
-  const { document, variables, context, info } = request;
-  let query: string | undefined;
-
-  const queryId =
-    context?.params?.extensions?.preRegisteredQueryId ||
-    context?.params?.extensions?.persistedQuery?.sha256Hash;
-  const fieldName = info?.path.key; // the aliased field name
-
-  const cacheKey = queryId && fieldName && `${queryId}_${fieldName}`;
-
-  if (cacheKey) {
-    query = printCache.get(cacheKey);
-  }
-
-  if (!query) {
-    query = print(document);
-    if (cacheKey) {
-      printCache.set(cacheKey, query);
-    }
-  }
-
-  return { query, variables } as const;
+export type PrintedDocumentCacheConfig = {
+  cache?: Omit<Cache, 'store'>;
+  keyFn?: (queryId: string, fieldName: string | number) => string;
 };
+
+export const requestFormatter =
+  (config: PrintedDocumentCacheConfig) => async (request: TaqlRequest) => {
+    const { document, variables, context, info } = request;
+    const { cache, keyFn } = config;
+    let query: string | undefined;
+
+    const queryId =
+      context?.params?.extensions?.preRegisteredQueryId ||
+      context?.params?.extensions?.persistedQuery?.sha256Hash;
+    const fieldName = info?.path.key; // the aliased field name
+
+    const cacheKey = keyFn && queryId && fieldName && keyFn(queryId, fieldName);
+
+    if (cache && cacheKey) {
+      query = <string>await cache.get(cacheKey);
+    }
+
+    if (!query) {
+      query = print(document);
+      if (cache && cacheKey) {
+        await cache.set(cacheKey, query);
+      }
+    }
+
+    return { query, variables } as const;
+  };
 
 type ConstantLoadParams = {
   url: string;
@@ -178,7 +148,12 @@ export const bindLoad = <T_1, R_1, T_2 = unknown, R_2 = unknown>(
 
   if (transform == undefined) {
     return async (args: LoadParams<T_1>) =>
-      load({ url, timeout: requestTimeout(await args.request), agent, ...args });
+      load({
+        url,
+        timeout: requestTimeout(await args.request),
+        agent,
+        ...args,
+      });
   } else if (!('response' in transform)) {
     // this is a request transformation without a response transformation:
     return async (args: LoadParams<T_1>) =>
@@ -192,9 +167,12 @@ export const bindLoad = <T_1, R_1, T_2 = unknown, R_2 = unknown>(
   } else if (!('request' in transform)) {
     // the response is transformed but the request is not
     return async (args: LoadParams<T_1>) =>
-      load({ url, agent, timeout: requestTimeout(await args.request), ...args }).then(
-        (response) => transform.response(<R_2>response)
-      );
+      load({
+        url,
+        agent,
+        timeout: requestTimeout(await args.request),
+        ...args,
+      }).then((response) => transform.response(<R_2>response));
   } else {
     //both request and response are transformed.
     return async (args: LoadParams<T_1>) =>
@@ -210,14 +188,15 @@ export const bindLoad = <T_1, R_1, T_2 = unknown, R_2 = unknown>(
 
 export const makeRemoteExecutor = (
   url: string,
-  requestedMaxTimeout: number | undefined
+  requestedMaxTimeout: number | undefined,
+  printedDocumentCacheConfig: PrintedDocumentCacheConfig = {}
 ): ((req: ExecutionRequest) => Promise<ExecutionResult>) => {
   const load = bindLoad<TaqlRequest, ExecutionResult>(
     url,
     getDeadline,
     requestedMaxTimeout,
     {
-      request: formatRequest,
+      request: requestFormatter(printedDocumentCacheConfig),
     }
   );
   return async (request: TaqlRequest): Promise<ExecutionResult> =>

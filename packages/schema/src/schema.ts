@@ -1,14 +1,21 @@
+import { Cache, caching, multiCaching } from 'cache-manager';
 import { ExecutorConfig, Subgraph, stitch } from '@ta-graphql-utils/stitch';
+import { LEGACY_GQL_PARAMS, PRINT_DOCUMENT_PARAMS } from '@taql/config';
+import { InstrumentedCache, wrappedLRUStore } from '@taql/metrics';
 import { EventEmitter } from 'events';
 import { Executor } from '@graphql-tools/utils';
 import { GraphQLSchema } from 'graphql';
-import { LEGACY_GQL_PARAMS } from '@taql/config';
 import type { TaqlYogaPlugin } from '@taql/context';
 import TypedEmitter from 'typed-emitter';
 import { createExecutor as batchingExecutorFactory } from '@taql/batching';
 import deepEqual from 'deep-equal';
 import { getLegacySubgraph } from './legacy';
-import { makeRemoteExecutor } from '@taql/executors';
+import { ioRedisStore } from '@tirke/node-cache-manager-ioredis';
+import {
+  PrintedDocumentCacheConfig,
+  makeRemoteExecutor,
+  requestFormatter,
+} from '@taql/executors';
 
 export type SchemaDigest = {
   legacyHash: string;
@@ -22,10 +29,58 @@ export type TASchema = {
 
 const requestedMaxTimeout = LEGACY_GQL_PARAMS.maxTimeout;
 
-const executorFactory = (config: ExecutorConfig): Executor =>
-  config.batching != undefined
-    ? batchingExecutorFactory(requestedMaxTimeout, config)
-    : makeRemoteExecutor(config.url, requestedMaxTimeout);
+function makeExecutorFactory(
+  cacheConfig: PrintedDocumentCacheConfig
+): (config: ExecutorConfig) => Executor {
+  return (config: ExecutorConfig): Executor =>
+    config.batching != undefined
+      ? batchingExecutorFactory(
+          requestedMaxTimeout,
+          config,
+          requestFormatter(cacheConfig)
+        )
+      : makeRemoteExecutor(config.url, requestedMaxTimeout);
+}
+
+/**
+ *  Set up redis cache for printed documents, if so configured.
+ */
+const printCacheRedisParams = PRINT_DOCUMENT_PARAMS.redisInstance
+  ? {
+      ttl: PRINT_DOCUMENT_PARAMS.redisTTL,
+      host: PRINT_DOCUMENT_PARAMS.redisInstance,
+      port: 6379,
+    }
+  : PRINT_DOCUMENT_PARAMS.redisCluster
+  ? {
+      ttl: PRINT_DOCUMENT_PARAMS.redisTTL,
+      clusterConfig: {
+        nodes: [
+          {
+            host: PRINT_DOCUMENT_PARAMS.redisCluster,
+            port: 6379,
+          },
+        ],
+      },
+    }
+  : undefined;
+
+const printCacheWrappedRedis =
+  printCacheRedisParams && ioRedisStore(printCacheRedisParams);
+
+/**
+ * Converting from DocumentNode to string can take more than 20ms for some of our lagger queries.
+ * We'll cache the most common ones to avoid unnecessary work.
+ * Currently only works for preregistered/persisted queries, as that's the only thing we could use as a cache key.
+ */
+const printLruCache = new InstrumentedCache<string, string>(
+  'printed_documents',
+  {
+    max: PRINT_DOCUMENT_PARAMS.maxCacheSize,
+  }
+);
+
+let printedDocumentCache: Omit<Cache, 'store'>;
 
 export async function makeSchema({
   previous,
@@ -41,6 +96,23 @@ export async function makeSchema({
   const legacy = await getLegacySubgraph(legacySVCO);
   const digest: SchemaDigest = { manifest: '', legacyHash: legacy?.hash || '' };
 
+  // Initialize the printed document cache if it hasn't been already
+  if (!printedDocumentCache) {
+    printedDocumentCache = multiCaching([
+      await caching(wrappedLRUStore({ cache: printLruCache })),
+      ...(printCacheWrappedRedis
+        ? [await caching(printCacheWrappedRedis)]
+        : []),
+    ]);
+  }
+
+  const cacheConfig: PrintedDocumentCacheConfig = {
+    cache: printedDocumentCache,
+    keyFn(queryId: string, fieldName: string | number) {
+      return `${queryId}_${fieldName}_${digest.manifest}_${digest.legacyHash}`;
+    },
+  };
+
   if (previous != undefined && deepEqual(digest, previous.digest)) {
     return previous;
   }
@@ -50,7 +122,10 @@ export async function makeSchema({
   // TODO load schemas from schema repository, add to subschemas.
 
   try {
-    const stitchResult = await stitch(subgraphs, executorFactory);
+    const stitchResult = await stitch(
+      subgraphs,
+      makeExecutorFactory(cacheConfig)
+    );
 
     if ('errors' in stitchResult) {
       throw new Error(

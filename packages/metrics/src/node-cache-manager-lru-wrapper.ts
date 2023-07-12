@@ -1,7 +1,7 @@
 import { LRUCache } from 'lru-cache';
 import cloneDeep from 'lodash.clonedeep';
 
-import { Config, Cache, Store } from 'cache-manager';
+import { Cache, Config, Store } from 'cache-manager';
 
 function clone<T>(object: T): T {
   if (typeof object === 'object' && object !== null) {
@@ -14,7 +14,7 @@ function clone<T>(object: T): T {
 type LRU = LRUCache<string, any, unknown>;
 
 export type WrappedLRUConfig = {
-  cache: LRU,
+  cache: LRU;
   shouldCloneBeforeSet?: boolean;
 } & Config;
 
@@ -48,14 +48,20 @@ export function wrappedLRUStore(args: WrappedLRUConfig): WrappedLRUStore {
     async mset(args, ttl?) {
       const opt = { ttl: ttl !== undefined ? ttl : lruCache.ttl } as const;
       for (const [key, value] of args) {
-        if (!isCacheable(value))
+        if (!isCacheable(value)) {
           throw new Error(`no cacheable value ${JSON.stringify(value)}`);
-        if (shouldCloneBeforeSet) lruCache.set(key, clone(value), opt);
-        else lruCache.set(key, value, opt);
+        }
+        if (shouldCloneBeforeSet) {
+          lruCache.set(key, clone(value), opt);
+        } else {
+          lruCache.set(key, value, opt);
+        }
       }
     },
     async mdel(...args) {
-      for (const key of args) lruCache.delete(key);
+      for (const key of args) {
+        lruCache.delete(key);
+      }
     },
     async reset() {
       lruCache.clear();

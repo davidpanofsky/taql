@@ -17,7 +17,6 @@
     "@taql/deadlines": "workspace:^",
     "@taql/httpAgent": "workspace:^",
     "@taql/metrics": "workspace:^",
-    "@tirke/node-cache-manager-ioredis": "^3.2.0",
     "graphql": "^16.6.0",
     "node-fetch": "^2.6.11"
   }
