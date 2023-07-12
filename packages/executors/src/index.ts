@@ -36,7 +36,7 @@ export const requestFormatter =
     // that the value is propagated into the "shallower" caches that we would prefer to resolve it from in the future.
     const query: string =
       cache && cacheKey
-        ? <string>await cache.wrap(cacheKey, async () => print(document))
+        ? await cache.wrap(cacheKey, async () => print(document))
         : print(document);
 
     return { query, variables } as const;
