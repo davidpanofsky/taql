@@ -1,7 +1,12 @@
 import { Cache, caching, multiCaching } from 'cache-manager';
 import { ExecutorConfig, Subgraph, stitch } from '@ta-graphql-utils/stitch';
-import { LEGACY_GQL_PARAMS, PRINT_DOCUMENT_PARAMS } from '@taql/config';
 import { InstrumentedCache, wrappedLRUStore } from '@taql/metrics';
+import { LEGACY_GQL_PARAMS, PRINT_DOCUMENT_PARAMS } from '@taql/config';
+import {
+  PrintedDocumentCacheConfig,
+  makeRemoteExecutor,
+  requestFormatter,
+} from '@taql/executors';
 import { EventEmitter } from 'events';
 import { Executor } from '@graphql-tools/utils';
 import { GraphQLSchema } from 'graphql';
@@ -11,11 +16,6 @@ import { createExecutor as batchingExecutorFactory } from '@taql/batching';
 import deepEqual from 'deep-equal';
 import { getLegacySubgraph } from './legacy';
 import { ioRedisStore } from '@tirke/node-cache-manager-ioredis';
-import {
-  PrintedDocumentCacheConfig,
-  makeRemoteExecutor,
-  requestFormatter,
-} from '@taql/executors';
 
 export type SchemaDigest = {
   legacyHash: string;
