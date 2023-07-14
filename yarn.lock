@@ -1649,9 +1649,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ta-graphql-utils/stitch@npm:3.1.0":
-  version: 3.1.0
-  resolution: "@ta-graphql-utils/stitch@npm:3.1.0::__archiveUrl=https%3A%2F%2Fgitlab.dev.tripadvisor.com%2Fapi%2Fv4%2Fprojects%2F16433%2Fpackages%2Fnpm%2F%40ta-graphql-utils%2Fstitch%2F-%2F%40ta-graphql-utils%2Fstitch-3.1.0.tgz"
+"@ta-graphql-utils/stitch@npm:3.3.0":
+  version: 3.3.0
+  resolution: "@ta-graphql-utils/stitch@npm:3.3.0::__archiveUrl=https%3A%2F%2Fgitlab.dev.tripadvisor.com%2Fapi%2Fv4%2Fprojects%2F16433%2Fpackages%2Fnpm%2F%40ta-graphql-utils%2Fstitch%2F-%2F%40ta-graphql-utils%2Fstitch-3.3.0.tgz"
   dependencies:
     "@graphql-tools/delegate": 9.0.35
     "@graphql-tools/load": 7.8.14
@@ -1660,7 +1660,7 @@ __metadata:
     "@graphql-tools/utils": 9.2.1
     "@graphql-tools/wrap": 9.4.2
     graphql: 16.6.0
-  checksum: 10466812e6c744d3cbe87fd61e44b40c153c3f62e6973c3e6377e1e32eb99645eb0d09d48665b2b216426db3474531ae371cdbdede496fdf7a71362d0b59a013
+  checksum: 6f96ef60379368f27482b1773fc13cfd913e7efa5939d2a169ccd0c540c23c3bffea1441396763d94765c2caac6eb716a864a224c46f7dbc4ebaac7e50af152a
   languageName: node
   linkType: hard
 
@@ -1744,6 +1744,7 @@ __metadata:
     cache-manager: ^5.2.1
     graphql: ^16.6.0
     node-fetch: ^2.6.11
+    prom-client: ^14.2.0
     typescript: ^5.0.4
   languageName: unknown
   linkType: soft
@@ -1831,7 +1832,6 @@ __metadata:
     "@types/node-fetch": ^2.6.3
     cache-manager: ^5.2.1
     deep-equal: ^2.2.1
-    graphql: ^16.6.0
     node-fetch: ^2.6.11
     typed-emitter: ^2.1.0
     typescript: ^5.0.4
