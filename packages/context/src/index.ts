@@ -1,7 +1,11 @@
+import {
+  EXECUTION_TIMEOUT_PARAMS,
+  LEGACY_GQL_PARAMS,
+  logger,
+} from '@taql/config';
 import { ForwardableHeaders, forwardableHeaders } from './headers';
 import { GenericHeaders, getHeaderOrDefault } from '@taql/headers';
 import type { Middleware, ParameterizedContext } from 'koa';
-import { EXECUTION_TIMEOUT_PARAMS } from '@taql/config';
 import type { Plugin as Yoga } from 'graphql-yoga';
 
 export {
@@ -90,22 +94,29 @@ export const timeRemaining = (context: TaqlContext): number =>
 // around the service that makes that extremely unlikely.
 const nonStitchedRoles = [
   // the components svc only consumes the schema - it's probably what called us
-  'components',
+  'components*',
   // taql _is_ us
-  'taql',
-].map((role) => `${role}*`);
+  'taql*',
+  // the legacy host we would talk to anyhow is not interesting
+  `graphql*${LEGACY_GQL_PARAMS.host}:${LEGACY_GQL_PARAMS.httpsPort}:https:`,
+  `graphql*${LEGACY_GQL_PARAMS.host}:${LEGACY_GQL_PARAMS.httpPort}:http:`,
+];
+logger.info(`ignored svco roles: ${nonStitchedRoles}`);
 
 /**
  * return true if the svco string has overrides for stitched roles in it, i.e. roles that
  * impact the stitched schema
  */
 const hasStitchedRoles = (svco: string): boolean =>
-  svco.split('|').find(
-    (role) =>
-      // The role is not non-stitched, so it _may_ be stitched.
-      nonStitchedRoles.find((nonStitched) => role.startsWith(nonStitched)) ==
-      undefined
-  ) != undefined;
+  svco
+    .split('|')
+    .filter((role) => role.trim() !== '')
+    .find(
+      (role) =>
+        // The role is not non-stitched, so it _may_ be stitched.
+        nonStitchedRoles.find((nonStitched) => role.startsWith(nonStitched)) ==
+        undefined
+    ) != undefined;
 
 const svco = (headers: GenericHeaders): undefined | SVCO => {
   const value = getHeaderOrDefault(headers, 'x-service-overrides', undefined);
