@@ -289,7 +289,7 @@ export const useYoga = async () => {
     // Capture metrics for request and response sizes.
     const labels = {
       method: ctx.request.method,
-      path: ctx.request.url,
+      path: ctx.request.path,
       statusCode: ctx.status,
     };
     requestSizeMetric.observe(labels, ctx.request.length || 0);
@@ -297,7 +297,7 @@ export const useYoga = async () => {
 
     accessTimer.done({
       method: ctx.request.method,
-      url: ctx.request.url,
+      path: ctx.request.path,
       query: ctx.request.query,
       http_version: ctx.req.httpVersion,
       remote_addr: ctx.request.ip,

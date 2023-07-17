@@ -29,7 +29,7 @@ promClient.collectDefaultMetrics({ prefix, labels });
 // end: memory monitoring
 
 export const useMetricsEndpoint = async (ctx: ParameterizedContext) => {
-  if (ctx.request.method === 'GET' && ctx.request.url === '/metrics') {
+  if (ctx.request.method === 'GET' && ctx.request.path === '/metrics') {
     try {
       const primaryMetrics = await promClient.register.metrics();
       const clusterMetrics = await prometheusRegistry.clusterMetrics();
@@ -77,7 +77,7 @@ export const useHttpStatusTracking = (options: {
     const start = performance.now();
     await next();
     const duration = performance.now() - start;
-    const path = ctx.request.url;
+    const path = ctx.request.path;
     if (ctx.status) {
       const statusCode = ctx.status.toString();
       HTTP_RESPONSE_COUNTER.inc({ statusCode, path });
