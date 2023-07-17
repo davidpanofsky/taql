@@ -294,15 +294,15 @@ export const AUTOMATIC_PERSISTED_QUERY_PARAMS = resolve({
 
 export const PRINT_DOCUMENT_PARAMS = resolve({
   redisCluster: {
-    property: 'PRINTED_DOCUMENT_CACHE_REDIS_CLUSTER',
+    property: 'PRINTED_DOCUMENT_REDIS_CLUSTER',
     defaultTo: undefined,
   },
   redisInstance: {
-    property: 'PRINTED_DOCUMENT_CACHE_REDIS_INSTANCE',
+    property: 'PRINTED_DOCUMENT_REDIS_INSTANCE',
     defaultTo: undefined,
   },
   redisTTL: {
-    property: 'PRINTED_DOCUMENT_CACHE_REDIS_TTL',
+    property: 'PRINTED_DOCUMENT_REDIS_TTL',
     resolver: resolvers.nonNegativeInteger,
     defaultTo: 36_000,
   },
