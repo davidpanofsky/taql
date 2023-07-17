@@ -1,5 +1,4 @@
 import { Cache, caching, multiCaching } from 'cache-manager';
-import { ExecutorConfig, Subgraph, stitch } from '@ta-graphql-utils/stitch';
 import { InstrumentedCache, wrappedLRUStore } from '@taql/metrics';
 import { LEGACY_GQL_PARAMS, PRINT_DOCUMENT_PARAMS, logger } from '@taql/config';
 import {
@@ -7,11 +6,16 @@ import {
   makeRemoteExecutor,
   requestFormatter,
 } from '@taql/executors';
+import {
+  Subgraph,
+  SubgraphExecutorConfig,
+  stitch,
+} from '@ta-graphql-utils/stitch';
 import { EventEmitter } from 'events';
-import { Executor } from '@graphql-tools/utils';
+import type { Executor } from '@graphql-tools/utils';
 import { GraphQLSchema } from 'graphql';
 import type { TaqlYogaPlugin } from '@taql/context';
-import TypedEmitter from 'typed-emitter';
+import type TypedEmitter from 'typed-emitter';
 import { createExecutor as batchingExecutorFactory } from '@taql/batching';
 import deepEqual from 'deep-equal';
 import { getLegacySubgraph } from './legacy';
@@ -31,15 +35,20 @@ const requestedMaxTimeout = LEGACY_GQL_PARAMS.maxTimeout;
 
 function makeExecutorFactory(
   cacheConfig: PrintedDocumentCacheConfig
-): (config: ExecutorConfig) => Executor {
-  return (config: ExecutorConfig): Executor =>
+): (config: SubgraphExecutorConfig) => Executor {
+  return (config: SubgraphExecutorConfig): Executor =>
     config.batching != undefined
       ? batchingExecutorFactory(
-          requestedMaxTimeout,
-          config,
+          {
+            ...(<
+              SubgraphExecutorConfig &
+                Required<Pick<SubgraphExecutorConfig, 'batching'>>
+            >config),
+            requestedMaxTimeout,
+          },
           requestFormatter(cacheConfig)
         )
-      : makeRemoteExecutor(config.url, requestedMaxTimeout);
+      : makeRemoteExecutor({ ...config, requestedMaxTimeout });
 }
 
 /**

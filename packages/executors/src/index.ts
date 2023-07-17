@@ -12,6 +12,7 @@ import { ForwardableHeaders } from '@taql/context';
 import type { TaqlState } from '@taql/context';
 import { getDeadline } from '@taql/deadlines';
 import { print } from 'graphql';
+import promClient from 'prom-client';
 
 export type TaqlRequest = ExecutionRequest<Record<string, unknown>, TaqlState>;
 
@@ -42,8 +43,26 @@ export const requestFormatter =
     return { query, variables } as const;
   };
 
-type ConstantLoadParams = {
+const BODY_BYTES_SENT = new promClient.Counter({
+  name: 'taql_executor_body_bytes_sent',
+  help: 'byte length of request bodies sent by taql executors',
+  labelNames: ['subgraph'],
+});
+
+const BODY_BYTES_RECEIVED = new promClient.Counter({
+  name: 'taql_executor_body_bytes_received',
+  help: 'byte length of response bodies receieved by this executor',
+  labelNames: ['subgraph'],
+});
+
+type SubgraphConfig = {
   url: string;
+  name: string;
+  requestedMaxTimeout?: number;
+};
+
+type ConstantLoadParams = {
+  subgraph: SubgraphConfig;
   agent: Agent;
   timeout: number;
 };
@@ -82,7 +101,7 @@ const computeTimeout = (maxTimeout: number, deadline?: number): number => {
 
 const load = async <T, R>({
   timeout,
-  url,
+  subgraph,
   agent,
   forwardHeaders,
   request,
@@ -95,7 +114,9 @@ const load = async <T, R>({
   }
 
   if (timeout < 0) {
-    throw new Error(`Skipping upstream request to ${url}. No time remaining.`);
+    throw new Error(
+      `Skipping upstream request to ${subgraph.url}. No time remaining.`
+    );
   }
 
   // pad timeout to give the upstream time for network overhead.
@@ -106,33 +127,39 @@ const load = async <T, R>({
 
   headers.set('x-timeout', `${paddedTimeout}`);
   headers.set('content-type', 'application/json');
-  logger.debug(`Fetching from remote: ${url}`);
-  const response = await fetch(url, {
+  logger.debug(`Fetching from remote: ${subgraph.url}`);
+  const body = Buffer.from(JSON.stringify(await request));
+  BODY_BYTES_SENT.labels({ subgraph: subgraph.name }).inc(body.byteLength);
+  const response = await fetch(subgraph.url, {
     method: 'POST',
     headers,
     agent,
     timeout,
-    body: JSON.stringify(await request),
+    body,
   });
-  return <R>response.json();
+  const responseBody = await response.buffer();
+  BODY_BYTES_RECEIVED.labels({ subgraph: subgraph.name }).inc(
+    responseBody.byteLength
+  );
+  return <R>JSON.parse(responseBody.toString());
 };
 
 export const bindLoad = <T_1, R_1, T_2 = unknown, R_2 = unknown>(
-  url: string,
+  subgraph: SubgraphConfig,
   getDeadline: (req: T_1) => number | undefined,
-  requestedMaxTimeout: number | undefined,
   transform?: Transform<T_1, R_1, T_2, R_2>
 ): Load<T_1, R_1> => {
-  const agent = url.startsWith('https://') ? httpsAgent : httpAgent;
+  const agent = subgraph.url.startsWith('https://') ? httpsAgent : httpAgent;
   if (agent == undefined) {
     throw new Error(
-      `Cannot create agent for requests to ${url}. (This probably happened because you are trying to use https, but don't have ssl configured. See @taql/config or the project README for more information)`
+      `Cannot create agent for requests to ${subgraph.url}. (This probably happened because you are trying to use https, but don't have ssl configured. See @taql/config or the project README for more information)`
     );
   }
 
   const maxTimeout = Math.min(
     UPSTREAM_TIMEOUT_PARAMS.hardMaxUpstreamTimeoutMillis,
-    requestedMaxTimeout ?? UPSTREAM_TIMEOUT_PARAMS.softMaxUpstreamTimeoutMillis
+    subgraph.requestedMaxTimeout ??
+      UPSTREAM_TIMEOUT_PARAMS.softMaxUpstreamTimeoutMillis
   );
 
   const requestTimeout = (req: T_1) =>
@@ -141,7 +168,7 @@ export const bindLoad = <T_1, R_1, T_2 = unknown, R_2 = unknown>(
   if (transform == undefined) {
     return async (args: LoadParams<T_1>) =>
       load({
-        url,
+        subgraph,
         timeout: requestTimeout(await args.request),
         agent,
         ...args,
@@ -150,7 +177,7 @@ export const bindLoad = <T_1, R_1, T_2 = unknown, R_2 = unknown>(
     // this is a request transformation without a response transformation:
     return async (args: LoadParams<T_1>) =>
       load({
-        url,
+        subgraph,
         agent,
         ...args,
         timeout: requestTimeout(await args.request),
@@ -160,7 +187,7 @@ export const bindLoad = <T_1, R_1, T_2 = unknown, R_2 = unknown>(
     // the response is transformed but the request is not
     return async (args: LoadParams<T_1>) =>
       load({
-        url,
+        subgraph,
         agent,
         timeout: requestTimeout(await args.request),
         ...args,
@@ -169,7 +196,7 @@ export const bindLoad = <T_1, R_1, T_2 = unknown, R_2 = unknown>(
     //both request and response are transformed.
     return async (args: LoadParams<T_1>) =>
       load({
-        url,
+        subgraph,
         agent,
         timeout: requestTimeout(await args.request),
         ...args,
@@ -179,18 +206,12 @@ export const bindLoad = <T_1, R_1, T_2 = unknown, R_2 = unknown>(
 };
 
 export const makeRemoteExecutor = (
-  url: string,
-  requestedMaxTimeout: number | undefined,
+  subgraph: SubgraphConfig,
   printedDocumentCacheConfig: PrintedDocumentCacheConfig = {}
 ): ((req: ExecutionRequest) => Promise<ExecutionResult>) => {
-  const load = bindLoad<TaqlRequest, ExecutionResult>(
-    url,
-    getDeadline,
-    requestedMaxTimeout,
-    {
-      request: requestFormatter(printedDocumentCacheConfig),
-    }
-  );
+  const load = bindLoad<TaqlRequest, ExecutionResult>(subgraph, getDeadline, {
+    request: requestFormatter(printedDocumentCacheConfig),
+  });
   return async (request: TaqlRequest): Promise<ExecutionResult> =>
     load({
       forwardHeaders: request.context?.state.taql.forwardHeaders,

@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "build/index.js",
   "scripts": {
-    "build": "tsc --build",
+    "build": "tsc",
+    "incremental-build": "tsc --build",
     "start": "node build/index.js"
   },
   "license": "UNLICENSED",
@@ -18,6 +19,7 @@
     "@taql/httpAgent": "workspace:^",
     "cache-manager": "^5.2.1",
     "graphql": "^16.6.0",
-    "node-fetch": "^2.6.11"
+    "node-fetch": "^2.6.11",
+    "prom-client": "^14.2.0"
   }
 }

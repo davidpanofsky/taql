@@ -1,9 +1,4 @@
-import {
-  BatchStyle,
-  BatchingConfig,
-  BatchingStrategy,
-  ExecutorConfig,
-} from '@ta-graphql-utils/stitch';
+import { BatchStyle, SubgraphExecutorConfig } from '@ta-graphql-utils/stitch';
 import {
   ExecutionResult,
   Executor,
@@ -41,12 +36,17 @@ export const createBatchingExecutor = (
   };
 };
 
+type BatchingExecutorConfig<T extends BatchStyle = BatchStyle> = Readonly<
+  SubgraphExecutorConfig &
+    Required<Pick<SubgraphExecutorConfig, 'batching'>> & {
+      requestedMaxTimeout?: number;
+    } & { batching: { style: T } }
+>;
+
 function makeSingleQueryBatchingExecutor(
-  url: string,
-  requestedMaxTimeout: number | undefined,
-  config: BatchingConfig
+  config: BatchingExecutorConfig<BatchStyle.Single>
 ): Executor<TaqlRequest> {
-  const executor = makeRemoteExecutor(url, requestedMaxTimeout);
+  const executor = makeRemoteExecutor(config);
   // Use a loader graphql-tools helpfully defines, which goes through the
   // effort of merging queries for us.
   const loadFn = createLoadFn(
@@ -55,22 +55,22 @@ function makeSingleQueryBatchingExecutor(
   );
 
   return createBatchingExecutor(
-    STRATEGIES[config.strategy](({ request }) => loadFn(request), config),
+    STRATEGIES[config.batching.strategy](
+      ({ request }) => loadFn(request),
+      config.batching
+    ),
     executor,
-    translateConfigToLoaderOptions(config)
+    translateConfigToLoaderOptions(config.batching)
   );
 }
 
 function makeArrayBatchingExecutor(
-  url: string,
-  requestedMaxTimeout: number | undefined,
-  config: BatchingConfig,
+  config: BatchingExecutorConfig<BatchStyle.Array>,
   requestFormatter: (req: TaqlRequest) => unknown | Promise<unknown>
 ): Executor<TaqlRequest> {
   const arrayLoader = bindLoad<ReadonlyArray<TaqlRequest>, ExecutionResult[]>(
-    url,
+    config,
     pickDeadline,
-    requestedMaxTimeout,
     {
       async request(requests) {
         return await Promise.all(requests.map(requestFormatter));
@@ -79,16 +79,14 @@ function makeArrayBatchingExecutor(
   );
 
   return createBatchingExecutor(
-    STRATEGIES[config.strategy](arrayLoader, config),
-    makeRemoteExecutor(url, requestedMaxTimeout),
-    translateConfigToLoaderOptions(config)
+    STRATEGIES[config.batching.strategy](arrayLoader, config.batching),
+    makeRemoteExecutor(config),
+    translateConfigToLoaderOptions(config.batching)
   );
 }
 
 function makeLegacyGqlExecutor(
-  url: string,
-  requestedMaxTimeout: number | undefined,
-  config: BatchingConfig,
+  config: BatchingExecutorConfig<BatchStyle.Legacy>,
   requestFormatter: (req: TaqlRequest) => unknown | Promise<unknown>
 ): Executor {
   const load = bindLoad<
@@ -96,7 +94,7 @@ function makeLegacyGqlExecutor(
     ExecutionResult[],
     unknown,
     { results: { result: ExecutionResult }[] }
-  >(url, pickDeadline, requestedMaxTimeout, {
+  >(config, pickDeadline, {
     // legacy graphql's batched endpoint accepts `{ requests: request[] }`, not request[]
     async request(requests) {
       // Since we generate the legacy RequestContext from headers we assume that if those headers are considered batch-compatible,
@@ -123,7 +121,7 @@ function makeLegacyGqlExecutor(
   });
 
   return createBatchingExecutor(
-    STRATEGIES[config.strategy](load, config),
+    STRATEGIES[config.batching.strategy](load, config.batching),
     // Legacy-style endpoints must shape single requests like singleton batches; they don't
     // speak the typical graphql API.
     (req: TaqlRequest) =>
@@ -131,38 +129,30 @@ function makeLegacyGqlExecutor(
         forwardHeaders: req.context?.state.taql.forwardHeaders,
         request: [req],
       }).then((results) => results[0]),
-    translateConfigToLoaderOptions(config)
+    translateConfigToLoaderOptions(config.batching)
   );
 }
-
-const defaultBatchingConfig: BatchingConfig = {
-  style: BatchStyle.Single,
-  strategy: BatchingStrategy.BatchByInboundRequest,
-};
 
 /**
  * Create an executor that will call the given url according to the provided configuration
  */
 export const createExecutor = (
-  requestedMaxTimeout: number | undefined,
-  { url, batching: config = defaultBatchingConfig }: ExecutorConfig,
+  config: BatchingExecutorConfig,
   requestFormatter: (req: TaqlRequest) => unknown | Promise<unknown>
 ): Executor => {
-  switch (config.style) {
+  switch (config.batching.style) {
     case BatchStyle.Single:
-      return makeSingleQueryBatchingExecutor(url, requestedMaxTimeout, config);
+      return makeSingleQueryBatchingExecutor(
+        <BatchingExecutorConfig<BatchStyle.Single>>config
+      );
     case BatchStyle.Array:
       return makeArrayBatchingExecutor(
-        url,
-        requestedMaxTimeout,
-        config,
+        <BatchingExecutorConfig<BatchStyle.Array>>config,
         requestFormatter
       );
     case BatchStyle.Legacy:
       return makeLegacyGqlExecutor(
-        url,
-        requestedMaxTimeout,
-        config,
+        <BatchingExecutorConfig<BatchStyle.Legacy>>config,
         requestFormatter
       );
   }

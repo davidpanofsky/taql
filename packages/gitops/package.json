@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "build/index.js",
   "scripts": {
-    "build": "tsc --build",
+    "build": "tsc",
+    "incremental-build": "tsc --build",
     "update": "node build/index.js"
   },
   "license": "UNLICENSED",

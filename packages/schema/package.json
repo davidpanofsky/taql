@@ -3,11 +3,13 @@
   "version": "1.0.0",
   "main": "build/index.js",
   "scripts": {
-    "build": "tsc --build",
+    "build": "tsc",
+    "incremental-build": "tsc --build",
     "start": "node build/index.js"
   },
   "license": "UNLICENSED",
   "devDependencies": {
+    "@graphql-tools/utils": "^8.13.1",
     "@taql/context": "workspace:^",
     "@types/deep-equal": "^1.0.1",
     "@types/node": "^18.16.7",
@@ -16,7 +18,6 @@
     "typescript": "^5.0.4"
   },
   "dependencies": {
-    "@graphql-tools/utils": "^8.13.1",
     "@ta-graphql-utils/stitch": "*",
     "@taql/batching": "workspace:^",
     "@taql/config": "workspace:^",
@@ -27,7 +28,6 @@
     "@tirke/node-cache-manager-ioredis": "^3.2.0",
     "cache-manager": "^5.2.1",
     "deep-equal": "^2.2.1",
-    "graphql": "^16.6.0",
     "node-fetch": "^2.6.11"
   }
 }
