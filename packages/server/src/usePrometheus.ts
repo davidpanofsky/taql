@@ -66,19 +66,8 @@ const errorCounter = ({ name, help }: { name: string; help: string }) =>
 
 export const preconfiguredUsePrometheus = usePrometheus({
   // Options specified by @graphql-yoga/plugin-prometheus
-  // Note: http histogram metric is in milliseconds, not seconds.
-  http: createHistogram({
-    histogram: new promClient.Histogram({
-      name: 'taql_http_duration_ms',
-      help: 'Time (ms) spent on HTTP connection',
-      buckets: histoBucketsSec.map((x) => x * 1000),
-      labelNames: ['operationType', 'statusCode'],
-    }),
-    fillLabelsFn: (params, { response }) => ({
-      operationType: params.operationType ?? 'unknown',
-      statusCode: response.status,
-    }),
-  }),
+  // disabled because we track this via koa middleware, before the request gets to yoga
+  http: false,
   // Options passed on to @envelop/prometheus
   // https://the-guild.dev/graphql/envelop/plugins/use-prometheus
   // all optional, and by default, all set to false

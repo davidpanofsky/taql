@@ -14,6 +14,7 @@ import type { ParameterizedContext } from 'koa';
 import { Resource } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import { ZipkinExporter } from '@opentelemetry/exporter-zipkin';
+import { performance } from 'perf_hooks';
 
 const prometheusRegistry = new AggregatorRegistry();
 const { prefix } = PROM_PARAMS;
@@ -52,27 +53,35 @@ export const useHttpStatusTracking = (options: {
   const { promPrefix = prefix, logger } = options;
   logger?.info('useHttpStatusTracking: Initializing');
 
-  const labels = ['statusCode', 'path'];
+  const labelNames = ['statusCode', 'path'];
 
   const HTTP_RESPONSE_COUNTER = new promClient.Counter({
     name: `${promPrefix}http_response`,
     help: 'http responses by response code',
-    labelNames: labels,
+    labelNames,
   });
 
   const HTTP_RESPONSE_SUMMARY_COUNTER = new promClient.Counter({
     name: `${promPrefix}http_response_summary`,
     help: 'summary of http responses',
-    labelNames: labels,
+    labelNames,
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return async (ctx: ParameterizedContext, next: () => Promise<any>) => {
+  const HTTP_REQUEST_DURATION_HISTOGRAM = new promClient.Histogram({
+    name: `${promPrefix}http_duration_ms`,
+    help: 'Time (ms) spent on HTTP connection',
+    labelNames,
+  });
+
+  return async (ctx: ParameterizedContext, next: () => Promise<void>) => {
+    const start = performance.now();
     await next();
+    const duration = performance.now() - start;
     const path = ctx.request.path;
     if (ctx.status) {
       const statusCode = ctx.status.toString();
       HTTP_RESPONSE_COUNTER.inc({ statusCode, path });
+      HTTP_REQUEST_DURATION_HISTOGRAM.observe({ statusCode, path }, duration);
 
       const statusBucket = statusCode.slice(0, 1);
       HTTP_RESPONSE_SUMMARY_COUNTER.inc({

@@ -189,7 +189,9 @@ export function usePreregisteredQueries(options: {
         let preregisteredQuery: string | undefined;
         const cached = cache.get(maybePreregisteredId);
         if (cached) {
-          logger.debug('preregistered query cache hit: ', maybePreregisteredId);
+          logger.debug(
+            `preregistered query cache hit: ${maybePreregisteredId}`
+          );
           preregisteredQuery = cached;
         } else if (
           (preregisteredQuery = await lookupQuery(maybePreregisteredId, pool))
@@ -221,7 +223,7 @@ export function usePreregisteredQueries(options: {
           });
         }
       } else if (maybePreregisteredId) {
-        logger.debug('preregistered query unresolved: ', maybePreregisteredId);
+        logger.debug(`preregistered query unresolved: ${maybePreregisteredId}`);
         PREREG_UNK.labels({ worker }).inc();
         throw createGraphQLError('PreregisteredQueryNotFound', {
           extensions: {
