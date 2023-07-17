@@ -1,14 +1,21 @@
+import { Cache, caching, multiCaching } from 'cache-manager';
 import { ExecutorConfig, Subgraph, stitch } from '@ta-graphql-utils/stitch';
+import { InstrumentedCache, wrappedLRUStore } from '@taql/metrics';
+import { LEGACY_GQL_PARAMS, PRINT_DOCUMENT_PARAMS, logger } from '@taql/config';
+import {
+  PrintedDocumentCacheConfig,
+  makeRemoteExecutor,
+  requestFormatter,
+} from '@taql/executors';
 import { EventEmitter } from 'events';
 import { Executor } from '@graphql-tools/utils';
 import { GraphQLSchema } from 'graphql';
-import { LEGACY_GQL_PARAMS } from '@taql/config';
 import type { TaqlYogaPlugin } from '@taql/context';
 import TypedEmitter from 'typed-emitter';
 import { createExecutor as batchingExecutorFactory } from '@taql/batching';
 import deepEqual from 'deep-equal';
 import { getLegacySubgraph } from './legacy';
-import { makeRemoteExecutor } from '@taql/executors';
+import { ioRedisStore } from '@tirke/node-cache-manager-ioredis';
 
 export type SchemaDigest = {
   legacyHash: string;
@@ -22,10 +29,69 @@ export type TASchema = {
 
 const requestedMaxTimeout = LEGACY_GQL_PARAMS.maxTimeout;
 
-const executorFactory = (config: ExecutorConfig): Executor =>
-  config.batching != undefined
-    ? batchingExecutorFactory(requestedMaxTimeout, config)
-    : makeRemoteExecutor(config.url, requestedMaxTimeout);
+function makeExecutorFactory(
+  cacheConfig: PrintedDocumentCacheConfig
+): (config: ExecutorConfig) => Executor {
+  return (config: ExecutorConfig): Executor =>
+    config.batching != undefined
+      ? batchingExecutorFactory(
+          requestedMaxTimeout,
+          config,
+          requestFormatter(cacheConfig)
+        )
+      : makeRemoteExecutor(config.url, requestedMaxTimeout);
+}
+
+/**
+ * Converting from DocumentNode to string can take more than 20ms for some of our larger queries.
+ * We'll cache the most common ones to avoid unnecessary work.
+ * Currently only works for preregistered/persisted queries, as their respective IDs constitute a portion
+ * of the cache key.
+ */
+async function createPrintedDocumentCache(params: {
+  maxCacheSize: number;
+  redisTTL: number;
+  redisInstance?: string;
+  redisCluster?: string;
+}) {
+  // Set up redis cache, if so configured
+  const printCacheRedisParams = params.redisInstance
+    ? {
+        ttl: params.redisTTL,
+        host: params.redisInstance,
+        port: 6379,
+      }
+    : params.redisCluster
+    ? {
+        ttl: params.redisTTL,
+        clusterConfig: {
+          nodes: [
+            {
+              host: params.redisCluster,
+              port: 6379,
+            },
+          ],
+        },
+      }
+    : undefined;
+
+  const printCacheWrappedRedis =
+    printCacheRedisParams && ioRedisStore(printCacheRedisParams);
+
+  // Multicache with redis if a redis configuration is present
+  return multiCaching([
+    await caching(
+      wrappedLRUStore({
+        cache: new InstrumentedCache<string, string>('printed_documents', {
+          max: params.maxCacheSize,
+        }),
+      })
+    ),
+    ...(printCacheWrappedRedis ? [await caching(printCacheWrappedRedis)] : []),
+  ]);
+}
+
+let printedDocumentCache: Omit<Cache, 'store'>;
 
 export async function makeSchema({
   previous,
@@ -41,6 +107,21 @@ export async function makeSchema({
   const legacy = await getLegacySubgraph(legacySVCO);
   const digest: SchemaDigest = { manifest: '', legacyHash: legacy?.hash || '' };
 
+  // Initialize the printed document cache if it hasn't been already
+  if (!printedDocumentCache) {
+    logger.info('building printed document cache');
+    printedDocumentCache = await createPrintedDocumentCache(
+      PRINT_DOCUMENT_PARAMS
+    );
+  }
+
+  const cacheConfig: PrintedDocumentCacheConfig = {
+    cache: printedDocumentCache,
+    keyFn(queryId: string, fieldName: string | number) {
+      return `${queryId}_${fieldName}_${digest.manifest}_${digest.legacyHash}`;
+    },
+  };
+
   if (previous != undefined && deepEqual(digest, previous.digest)) {
     return previous;
   }
@@ -50,7 +131,10 @@ export async function makeSchema({
   // TODO load schemas from schema repository, add to subschemas.
 
   try {
-    const stitchResult = await stitch(subgraphs, executorFactory);
+    const stitchResult = await stitch(
+      subgraphs,
+      makeExecutorFactory(cacheConfig)
+    );
 
     if ('errors' in stitchResult) {
       throw new Error(
