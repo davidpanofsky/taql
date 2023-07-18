@@ -87,6 +87,19 @@ async function createPrintedDocumentCache(params: {
   const printCacheWrappedRedis =
     printCacheRedisParams && ioRedisStore(printCacheRedisParams);
 
+  const cacheInfo = [
+    `lru: max=${params.maxCacheSize}`,
+    ...(printCacheWrappedRedis
+      ? [
+          `redis: ${params.redisInstance || params.redisCluster} ttl=${
+            params.redisTTL
+          }`,
+        ]
+      : []),
+  ];
+
+  logger.info(`building printed document cache: [${cacheInfo}]`);
+
   // Multicache with redis if a redis configuration is present
   return multiCaching([
     await caching(
@@ -118,7 +131,6 @@ export async function makeSchema({
 
   // Initialize the printed document cache if it hasn't been already
   if (!printedDocumentCache) {
-    logger.info('building printed document cache');
     printedDocumentCache = await createPrintedDocumentCache(
       PRINT_DOCUMENT_PARAMS
     );
