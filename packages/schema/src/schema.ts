@@ -33,6 +33,8 @@ export type TASchema = {
 
 const requestedMaxTimeout = LEGACY_GQL_PARAMS.maxTimeout;
 
+const isDefined = <T>(obj: T | undefined | void): obj is T => !!obj;
+
 function makeExecutorFactory(
   cacheConfig: PrintedDocumentCacheConfig
 ): (config: SubgraphExecutorConfig) => Executor {
@@ -101,16 +103,21 @@ async function createPrintedDocumentCache(params: {
   logger.info(`building printed document cache: [${cacheInfo}]`);
 
   // Multicache with redis if a redis configuration is present
-  return multiCaching([
-    await caching(
-      wrappedLRUStore({
-        cache: new InstrumentedCache<string, string>('printed_documents', {
-          max: params.maxCacheSize,
-        }),
-      })
-    ),
-    ...(printCacheWrappedRedis ? [await caching(printCacheWrappedRedis)] : []),
-  ]);
+  return multiCaching(
+    [
+      await caching(
+        wrappedLRUStore({
+          cache: new InstrumentedCache<string, string>('printed_documents', {
+            max: params.maxCacheSize,
+          }),
+        })
+      ),
+      printCacheWrappedRedis &&
+        (await caching(printCacheWrappedRedis).catch(() => {
+          logger.error('Unable to initialize printed document redis cache');
+        })),
+    ].filter(isDefined)
+  );
 }
 
 let printedDocumentCache: Omit<Cache, 'store'>;
