@@ -18,11 +18,13 @@ export const useErrorLogging: Plugin = {
               payload.args.operationName
             );
             const operationName = operationAST?.name?.value;
+            const operationType = operationAST?.operation;
             result.errors.forEach((err) => {
               logger.error(err?.message, {
                 uniqueId,
                 requestId,
                 operationName,
+                operationType,
               });
             });
           }
