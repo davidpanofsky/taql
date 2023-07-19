@@ -1,7 +1,7 @@
 import { APQStore, useAPQ } from '@graphql-yoga/plugin-apq';
+import { AUTOMATIC_PERSISTED_QUERY_PARAMS, logger } from '@taql/config';
 import { InstrumentedCache, wrappedLRUStore } from '@taql/metrics';
 import { caching, multiCaching } from 'cache-manager';
-import { AUTOMATIC_PERSISTED_QUERY_PARAMS, logger } from '@taql/config';
 import type { Redis } from 'ioredis';
 import { Plugin as YogaPlugin } from 'graphql-yoga';
 import { ioRedisStore } from '@tirke/node-cache-manager-ioredis';
