@@ -1,11 +1,13 @@
 import { APQStore, useAPQ } from '@graphql-yoga/plugin-apq';
+import { AUTOMATIC_PERSISTED_QUERY_PARAMS, logger } from '@taql/config';
 import { InstrumentedCache, wrappedLRUStore } from '@taql/metrics';
 import { caching, multiCaching } from 'cache-manager';
-import { AUTOMATIC_PERSISTED_QUERY_PARAMS } from '@taql/config';
 import type { Redis } from 'ioredis';
 import { Plugin as YogaPlugin } from 'graphql-yoga';
 import { ioRedisStore } from '@tirke/node-cache-manager-ioredis';
 import { promisify } from 'util';
+
+const isDefined = <T>(obj: T | undefined | void): obj is T => !!obj;
 
 async function* nodePersistedQueries(redis: Redis): AsyncGenerator<{
   id: string;
@@ -88,10 +90,15 @@ export class TaqlAPQ {
       })
     );
 
-    const apqStore: APQStore = multiCaching([
-      memoryCache,
-      ...(this.wrappedClient ? [await caching(this.wrappedClient)] : []),
-    ]);
+    const apqStore: APQStore = multiCaching(
+      [
+        memoryCache,
+        this.wrappedClient &&
+          (await caching(this.wrappedClient).catch(() => {
+            logger.error('Unable to initialize APQ redis cache');
+          })),
+      ].filter(isDefined)
+    );
 
     return useAPQ({ store: apqStore });
   }
