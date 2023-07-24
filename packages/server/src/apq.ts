@@ -8,7 +8,7 @@ import {
 import { caching, multiCaching } from 'cache-manager';
 import { AUTOMATIC_PERSISTED_QUERY_PARAMS } from '@taql/config';
 import type { Redis } from 'ioredis';
-import { RedisCache } from '@tirke/node-cache-manager-ioredis';
+import type { RedisCache } from '@tirke/node-cache-manager-ioredis';
 import { Plugin as YogaPlugin } from 'graphql-yoga';
 import { promisify } from 'util';
 

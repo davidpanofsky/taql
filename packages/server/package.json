@@ -35,7 +35,6 @@
     "@taql/security": "workspace:^",
     "@taql/ssl": "workspace:^",
     "@taql/unifiedCaching": "workspace:^",
-    "@tirke/node-cache-manager-ioredis": "^3.2.0",
     "cache-manager": "^5.2.1",
     "graphql": "^16.6.0",
     "graphql-yoga": "^4.0.0",
