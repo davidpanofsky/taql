@@ -1,13 +1,16 @@
 import { APQStore, useAPQ } from '@graphql-yoga/plugin-apq';
-import { AUTOMATIC_PERSISTED_QUERY_PARAMS, logger } from '@taql/config';
-import { InstrumentedCache, wrappedLRUStore } from '@taql/metrics';
+import {
+  InstrumentedCache,
+  getRedisCache,
+  isCache,
+  wrappedLRUStore,
+} from '@taql/metrics';
 import { caching, multiCaching } from 'cache-manager';
+import { AUTOMATIC_PERSISTED_QUERY_PARAMS } from '@taql/config';
 import type { Redis } from 'ioredis';
+import { RedisCache } from '@tirke/node-cache-manager-ioredis';
 import { Plugin as YogaPlugin } from 'graphql-yoga';
-import { ioRedisStore } from '@tirke/node-cache-manager-ioredis';
 import { promisify } from 'util';
-
-const isDefined = <T>(obj: T | undefined | void): obj is T => !!obj;
 
 async function* nodePersistedQueries(redis: Redis): AsyncGenerator<{
   id: string;
@@ -56,18 +59,23 @@ export class TaqlAPQ {
       }
     : undefined;
 
-  private readonly wrappedClient: undefined | ReturnType<typeof ioRedisStore>;
-
-  constructor() {
-    this.wrappedClient = this.redisParams && ioRedisStore(this.redisParams);
+  private redisCachePromise: undefined | Promise<RedisCache | void>;
+  private async getRedisCache() {
+    if (this.redisCachePromise) {
+      return this.redisCachePromise;
+    } else if (this.redisParams) {
+      this.redisCachePromise = getRedisCache('apq', this.redisParams);
+      return this.redisCachePromise;
+    }
   }
 
   async loadPersistedQueries(): Promise<{ id: string; query: string }[]> {
-    const redisOrCluster = this.wrappedClient?.client;
+    const redisCache = await this.getRedisCache();
     const persistedQueries: { id: string; query: string }[] = [];
-    if (redisOrCluster) {
+    if (redisCache) {
+      const redisClient = redisCache.store.client;
       const redises =
-        'nodes' in redisOrCluster ? redisOrCluster.nodes() : [redisOrCluster];
+        'nodes' in redisClient ? redisClient.nodes() : [redisClient];
       await Promise.allSettled(
         redises.map(async (redis) => {
           for await (const pq of nodePersistedQueries(redis)) {
@@ -91,13 +99,7 @@ export class TaqlAPQ {
     );
 
     const apqStore: APQStore = multiCaching(
-      [
-        memoryCache,
-        this.wrappedClient &&
-          (await caching(this.wrappedClient).catch(() => {
-            logger.error('Unable to initialize APQ redis cache');
-          })),
-      ].filter(isDefined)
+      [memoryCache, await this.getRedisCache()].filter(isCache)
     );
 
     return useAPQ({ store: apqStore });

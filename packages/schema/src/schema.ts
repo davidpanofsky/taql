@@ -1,5 +1,10 @@
 import { Cache, caching, multiCaching } from 'cache-manager';
-import { InstrumentedCache, wrappedLRUStore } from '@taql/metrics';
+import {
+  InstrumentedCache,
+  getRedisCache,
+  isCache,
+  wrappedLRUStore,
+} from '@taql/metrics';
 import { LEGACY_GQL_PARAMS, PRINT_DOCUMENT_PARAMS, logger } from '@taql/config';
 import {
   PrintedDocumentCacheConfig,
@@ -19,7 +24,6 @@ import type TypedEmitter from 'typed-emitter';
 import { createExecutor as batchingExecutorFactory } from '@taql/batching';
 import deepEqual from 'deep-equal';
 import { getLegacySubgraph } from './legacy';
-import { ioRedisStore } from '@tirke/node-cache-manager-ioredis';
 
 export type SchemaDigest = {
   legacyHash: string;
@@ -32,41 +36,6 @@ export type TASchema = {
 };
 
 const requestedMaxTimeout = LEGACY_GQL_PARAMS.maxTimeout;
-
-async function getRedisCache(
-  args: Parameters<typeof ioRedisStore>[0],
-  timeoutMs = 2000
-): Promise<Cache<ReturnType<typeof ioRedisStore>>> {
-  const store = ioRedisStore({
-    ...args,
-    // if we fail, don't retry - we should instead fall back to other caches or recompute the value
-    maxRetriesPerRequest: 1,
-  });
-
-  store.client.on('error', () => {
-    // No point in logging since it's too noisy and not particularly useful
-    // TODO: hook this up to a counter
-  });
-
-  let waitTime = timeoutMs;
-  while (store.client.status !== 'ready' && waitTime > 0) {
-    waitTime -= 100;
-    await new Promise((resolve) => setTimeout(resolve, 100));
-  }
-
-  if (store.client.status === 'ready') {
-    return caching(store);
-  } else {
-    await store.client.quit();
-    throw new Error(
-      `Timed out while trying to connect to redis after ${timeoutMs}ms. Redis config: ${JSON.stringify(
-        args
-      )}`
-    );
-  }
-}
-
-const isDefined = <T>(obj: T | undefined | void): obj is T => !!obj;
 
 function makeExecutorFactory(
   cacheConfig: PrintedDocumentCacheConfig
@@ -143,10 +112,8 @@ async function createPrintedDocumentCache(params: {
         })
       ),
       printCacheRedisParams &&
-        (await getRedisCache(printCacheRedisParams).catch((err) => {
-          logger.error('Unable to create printed_documents redis cache.', err);
-        })),
-    ].filter(isDefined)
+        (await getRedisCache('printed_documents', printCacheRedisParams)),
+    ].filter(isCache)
   );
 }
 
