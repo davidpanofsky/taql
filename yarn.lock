@@ -1787,6 +1787,7 @@ __metadata:
   resolution: "@taql/metrics@workspace:packages/metrics"
   dependencies:
     "@taql/config": "workspace:^"
+    "@tirke/node-cache-manager-ioredis": ^3.2.0
     "@types/lodash.clonedeep": ^4.5.0
     cache-manager: ^5.2.1
     lodash.clonedeep: ^4.5.0
@@ -1826,7 +1827,6 @@ __metadata:
     "@taql/executors": "workspace:^"
     "@taql/httpAgent": "workspace:^"
     "@taql/metrics": "workspace:^"
-    "@tirke/node-cache-manager-ioredis": ^3.2.0
     "@types/deep-equal": ^1.0.1
     "@types/node": ^18.16.7
     "@types/node-fetch": ^2.6.3
@@ -1874,7 +1874,6 @@ __metadata:
     "@taql/security": "workspace:^"
     "@taql/ssl": "workspace:^"
     "@taql/unifiedCaching": "workspace:^"
-    "@tirke/node-cache-manager-ioredis": ^3.2.0
     "@types/koa": ^2.13.6
     cache-manager: ^5.2.1
     graphql: ^16.6.0

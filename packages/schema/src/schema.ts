@@ -1,5 +1,10 @@
 import { Cache, caching, multiCaching } from 'cache-manager';
-import { InstrumentedCache, wrappedLRUStore } from '@taql/metrics';
+import {
+  InstrumentedCache,
+  getRedisCache,
+  isCache,
+  wrappedLRUStore,
+} from '@taql/metrics';
 import { LEGACY_GQL_PARAMS, PRINT_DOCUMENT_PARAMS, logger } from '@taql/config';
 import {
   PrintedDocumentCacheConfig,
@@ -19,7 +24,6 @@ import type TypedEmitter from 'typed-emitter';
 import { createExecutor as batchingExecutorFactory } from '@taql/batching';
 import deepEqual from 'deep-equal';
 import { getLegacySubgraph } from './legacy';
-import { ioRedisStore } from '@tirke/node-cache-manager-ioredis';
 
 export type SchemaDigest = {
   legacyHash: string;
@@ -32,8 +36,6 @@ export type TASchema = {
 };
 
 const requestedMaxTimeout = LEGACY_GQL_PARAMS.maxTimeout;
-
-const isDefined = <T>(obj: T | undefined | void): obj is T => !!obj;
 
 function makeExecutorFactory(
   cacheConfig: PrintedDocumentCacheConfig
@@ -86,12 +88,9 @@ async function createPrintedDocumentCache(params: {
       }
     : undefined;
 
-  const printCacheWrappedRedis =
-    printCacheRedisParams && ioRedisStore(printCacheRedisParams);
-
   const cacheInfo = [
     `lru: max=${params.maxCacheSize}`,
-    ...(printCacheWrappedRedis
+    ...(printCacheRedisParams
       ? [
           `redis: ${params.redisInstance || params.redisCluster} ttl=${
             params.redisTTL
@@ -112,11 +111,9 @@ async function createPrintedDocumentCache(params: {
           }),
         })
       ),
-      printCacheWrappedRedis &&
-        (await caching(printCacheWrappedRedis).catch(() => {
-          logger.error('Unable to initialize printed document redis cache');
-        })),
-    ].filter(isDefined)
+      printCacheRedisParams &&
+        (await getRedisCache('printed_documents', printCacheRedisParams)),
+    ].filter(isCache)
   );
 }
 
