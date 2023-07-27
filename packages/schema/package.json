@@ -9,6 +9,7 @@
   },
   "license": "UNLICENSED",
   "devDependencies": {
+    "@graphql-tools/delegate": "9.0.35",
     "@graphql-tools/utils": "^8.13.1",
     "@taql/context": "workspace:^",
     "@types/deep-equal": "^1.0.1",

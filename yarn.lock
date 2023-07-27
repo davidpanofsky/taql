@@ -1818,6 +1818,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@taql/schema@workspace:packages/schema"
   dependencies:
+    "@graphql-tools/delegate": 9.0.35
     "@graphql-tools/utils": ^8.13.1
     "@ta-graphql-utils/stitch": "*"
     "@taql/batching": "workspace:^"
