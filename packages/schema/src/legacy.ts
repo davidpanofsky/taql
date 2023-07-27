@@ -7,6 +7,8 @@ import { LEGACY_GQL_PARAMS, logger } from '@taql/config';
 import { httpAgent, httpsAgent } from '@taql/httpAgent';
 import { ENABLE_FEATURES } from '@taql/config';
 import { ForwardSubschemaExtensions } from '@taql/debug';
+import type { Transform } from '@graphql-tools/delegate';
+import { createGraphQLError } from '@graphql-tools/utils';
 import crypto from 'crypto';
 import fetch from 'node-fetch';
 
@@ -51,6 +53,37 @@ const legacyHost = (
   }
 };
 
+const isTransform = <T extends Transform>(
+  t: T | boolean | undefined | null | void
+): t is T => !!t;
+
+/**
+ * Converts legacy graphql errors to GraphQLError objects
+ */
+const forwardLegacyErrorsTransform: Transform = {
+  transformResult(result) {
+    if (result.errors?.length) {
+      return {
+        ...result,
+        errors: result.errors.map((e) =>
+          createGraphQLError(
+            e.message,
+            ENABLE_FEATURES.debugExtensions
+              ? {
+                  extensions: {
+                    subgraphName,
+                    originalError: e,
+                  },
+                }
+              : undefined
+          )
+        ),
+      };
+    }
+    return result;
+  },
+};
+
 export async function getLegacySubgraph(
   legacySVCO?: string
 ): Promise<{ subgraph: Subgraph; hash: string }> {
@@ -84,15 +117,15 @@ export async function getLegacySubgraph(
           },
         },
       },
-      transforms: ENABLE_FEATURES.debugExtensions
-        ? [
-            new ForwardSubschemaExtensions(
-              subgraphName,
-              // Omit mutatedFields since TAQL already provides that
-              ({ mutatedFields, ...extensions }) => extensions
-            ),
-          ]
-        : undefined,
+      transforms: [
+        forwardLegacyErrorsTransform,
+        ENABLE_FEATURES.debugExtensions &&
+          new ForwardSubschemaExtensions(
+            subgraphName,
+            // Omit mutatedFields since TAQL already provides that
+            ({ mutatedFields, ...extensions }) => extensions
+          ),
+      ].filter(isTransform),
     };
 
     return { subgraph, hash };
