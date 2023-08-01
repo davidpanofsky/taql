@@ -1,35 +1,33 @@
 import { DocumentNode, GraphQLSchema, parse } from 'graphql';
 import { YogaInitialContext, Plugin as YogaPlugin } from 'graphql-yoga';
-import { InstrumentedCache } from '@taql/metrics';
-import { LRUCache } from 'lru-cache';
+import { instrumentedStore, memoryStore } from './stores';
+import type { Store } from 'cache-manager';
 import { logPrewarm } from './util';
+import { logger } from '@taql/config';
 
-type Cache<K extends NonNullable<unknown> = NonNullable<unknown>> = LRUCache<
-  K,
-  DocumentNode | Error
->;
+type DocumentStore = Store<DocumentNode | Error>;
 
 export class DocumentCache {
-  private readonly preregisteredDocuments: Cache<string>;
-  private readonly persistedDocuments: Cache<string>;
-  private readonly defaultDocuments: Cache<string>;
+  private readonly preregisteredDocuments: DocumentStore;
+  private readonly persistedDocuments: DocumentStore;
+  private readonly defaultDocuments: DocumentStore;
 
   constructor(maxCacheSize: number) {
     const cacheConfig = {
       max: maxCacheSize,
     };
-    this.preregisteredDocuments = new InstrumentedCache<
-      string,
-      DocumentNode | Error
-    >('preregistered_documents', cacheConfig);
-    this.persistedDocuments = new InstrumentedCache<
-      string,
-      DocumentNode | Error
-    >('persisted_documents', cacheConfig);
-    this.defaultDocuments = new InstrumentedCache<string, DocumentNode | Error>(
-      'default_documents',
-      cacheConfig
-    );
+    this.preregisteredDocuments = instrumentedStore({
+      store: memoryStore<DocumentNode | Error>(cacheConfig),
+      name: 'preregistered_documents',
+    });
+    this.persistedDocuments = instrumentedStore({
+      store: memoryStore<DocumentNode | Error>(cacheConfig),
+      name: 'persisted_documents',
+    });
+    this.defaultDocuments = instrumentedStore({
+      store: memoryStore<DocumentNode | Error>(cacheConfig),
+      name: 'default_documents',
+    });
   }
   /**
    * Given the request context, pick the appropriate document cache and they key to use
@@ -38,7 +36,7 @@ export class DocumentCache {
   private pickDocumentCache(
     context: YogaInitialContext,
     defaultId: string
-  ): [key: string, cache: LRUCache<string, DocumentNode | Error>] {
+  ): [key: string, cache: DocumentStore] {
     const preregisteredId: string | undefined =
       context.params.extensions?.['preRegisteredQueryId'];
     if (preregisteredId != undefined) {
@@ -61,11 +59,7 @@ export class DocumentCache {
     },
     parsedDocuments?: DocumentNode[]
   ) => {
-    const parseDocument = (
-      cache: LRUCache<string, DocumentNode | Error>,
-      id: string,
-      query: string
-    ) => {
+    const parseDocument = (cache: DocumentStore, id: string, query: string) => {
       try {
         const document = parse(query);
         parsedDocuments?.push(document);
@@ -109,6 +103,14 @@ export class DocumentCache {
         args.params.source.toString()
       );
       const cached = cache.get(key);
+      if (cached instanceof Promise) {
+        // At the moment envelop doesn't support async functions in parse / validate hooks
+        // That will change in the future and we will be able to use redis and similar stores there
+        // https://github.com/graphql/graphql-js/issues/3421
+        // Until that happens fail hard if anyone tries to use anything other than memory store
+        logger.error('Trying to use unsupported store for parse cache', cache);
+        throw new Error('Could not parse document. Unsupported cache type.');
+      }
       if (cached) {
         if (cached instanceof Error) {
           throw cached;

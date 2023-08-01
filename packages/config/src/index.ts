@@ -285,6 +285,11 @@ export const AUTOMATIC_PERSISTED_QUERY_PARAMS = resolve({
     resolver: resolvers.nonNegativeInteger,
     defaultTo: 36_000,
   },
+  redisWaitTimeMs: {
+    property: 'AUTOMATIC_PERSISTED_QUERY_REDIS_WAIT_TIME_MS',
+    resolver: resolvers.nonNegativeInteger,
+    defaultTo: 2000,
+  },
   memCacheSize: {
     property: 'AUTOMATIC_PERSISTED_QUERY_CACHE_SIZE',
     resolver: resolvers.nonNegativeInteger,
@@ -305,6 +310,11 @@ export const PRINT_DOCUMENT_PARAMS = resolve({
     property: 'PRINTED_DOCUMENT_REDIS_TTL',
     resolver: resolvers.nonNegativeInteger,
     defaultTo: 36_000,
+  },
+  redisWaitTimeMs: {
+    property: 'PRINTED_DOCUMENT_REDIS_WAIT_TIME_MS',
+    resolver: resolvers.nonNegativeInteger,
+    defaultTo: 2000,
   },
   maxCacheSize: {
     property: 'PRINTED_DOCUMENT_CACHE_SIZE',

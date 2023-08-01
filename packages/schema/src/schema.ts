@@ -1,10 +1,4 @@
 import { Cache, caching, multiCaching } from 'cache-manager';
-import {
-  InstrumentedCache,
-  getRedisCache,
-  isCache,
-  wrappedLRUStore,
-} from '@taql/metrics';
 import { LEGACY_GQL_PARAMS, PRINT_DOCUMENT_PARAMS, logger } from '@taql/config';
 import {
   PrintedDocumentCacheConfig,
@@ -16,6 +10,12 @@ import {
   SubgraphExecutorConfig,
   stitch,
 } from '@ta-graphql-utils/stitch';
+import {
+  instrumentedStore,
+  isCache,
+  memoryStore,
+  redisStore,
+} from '@taql/caching';
 import { EventEmitter } from 'events';
 import type { Executor } from '@graphql-tools/utils';
 import { GraphQLSchema } from 'graphql';
@@ -66,17 +66,20 @@ async function createPrintedDocumentCache(params: {
   redisTTL: number;
   redisInstance?: string;
   redisCluster?: string;
+  redisWaitTimeMs?: number;
 }) {
   // Set up redis cache, if so configured
   const printCacheRedisParams = params.redisInstance
     ? {
         ttl: params.redisTTL,
+        waitTimeMs: params.redisWaitTimeMs,
         host: params.redisInstance,
         port: 6379,
       }
     : params.redisCluster
     ? {
         ttl: params.redisTTL,
+        waitTimeMs: params.redisWaitTimeMs,
         clusterConfig: {
           nodes: [
             {
@@ -101,18 +104,32 @@ async function createPrintedDocumentCache(params: {
 
   logger.info(`building printed document cache: [${cacheInfo}]`);
 
+  const printRedisStore =
+    printCacheRedisParams &&
+    instrumentedStore({
+      name: 'printed_documents',
+      store: redisStore<string>(printCacheRedisParams),
+    });
+
+  // Try to establish connection to redis before we start handling traffic
+  await printRedisStore?.ready().catch((err) => {
+    // Still use the store even if this fails, since we may get connection later
+    // If we don't, volume of errors that store produces should let us know that something is wrong
+    logger.error(err?.message || err);
+  });
+
   // Multicache with redis if a redis configuration is present
   return multiCaching(
     [
       await caching(
-        wrappedLRUStore({
-          cache: new InstrumentedCache<string, string>('printed_documents', {
+        instrumentedStore({
+          name: 'printed_documents',
+          store: memoryStore<string>({
             max: params.maxCacheSize,
           }),
         })
       ),
-      printCacheRedisParams &&
-        (await getRedisCache('printed_documents', printCacheRedisParams)),
+      printRedisStore && (await caching(printRedisStore)),
     ].filter(isCache)
   );
 }

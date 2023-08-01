@@ -21,11 +21,11 @@
   "dependencies": {
     "@ta-graphql-utils/stitch": "*",
     "@taql/batching": "workspace:^",
+    "@taql/caching": "workspace:^",
     "@taql/config": "workspace:^",
     "@taql/debug": "workspace:^",
     "@taql/executors": "workspace:^",
     "@taql/httpAgent": "workspace:^",
-    "@taql/metrics": "workspace:^",
     "cache-manager": "^5.2.1",
     "deep-equal": "^2.2.1",
     "node-fetch": "^2.6.11"

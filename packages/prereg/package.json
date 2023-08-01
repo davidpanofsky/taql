@@ -11,12 +11,13 @@
   "devDependencies": {
     "@taql/testing": "workspace:^",
     "@types/pg": "^8.6.6",
+    "cache-manager": "^5.2.1",
     "typescript": "^5.0.4"
   },
   "dependencies": {
     "@envelop/core": "4.0.0",
+    "@taql/caching": "workspace:^",
     "@taql/config": "workspace:^",
-    "@taql/metrics": "workspace:^",
     "graphql": "^16.6.0",
     "graphql-yoga": "^4.0.0",
     "pg": "^8.10.0",
