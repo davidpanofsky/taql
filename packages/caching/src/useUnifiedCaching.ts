@@ -29,9 +29,7 @@ export async function useUnifiedCaching(options: {
       [
         () => documentCache.prewarm(prewarm, documents),
         () => validationCache.prewarm(prewarm.schema, documents),
-        ...(jitCache
-          ? [() => jitCache.prewarm(prewarm.schema, documents)]
-          : []),
+        () => jitCache?.prewarm(prewarm.schema, documents),
       ],
       (fun) => fun()
     );

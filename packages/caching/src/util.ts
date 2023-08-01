@@ -1,4 +1,6 @@
+import { Cache } from 'cache-manager';
 import { logger } from '@taql/config';
+
 /**
  * A weak map with _two_ weak keys.
  * Order matters under the hood: the longest-lived keys should be first. for best performance.
@@ -44,3 +46,9 @@ export const logPrewarm = async <T>(
     `prewarmed ${stage} (${entries.length} item(s)) in ${Date.now() - start}ms`
   );
 };
+
+export function isCache<T extends Cache>(
+  maybeCache: T | undefined | null
+): maybeCache is T {
+  return !!maybeCache && !!maybeCache.store;
+}

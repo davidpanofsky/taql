@@ -1,9 +1,10 @@
 import { Kind, OperationDefinitionNode, OperationTypeNode } from 'graphql';
 import { Plugin, handleStreamOrSingleExecutionResult } from '@envelop/core';
 import { Plugin as YogaPlugin, createGraphQLError } from 'graphql-yoga';
+import { instrumentedStore, memoryStore } from '@taql/caching';
 import { logger, WORKER as worker } from '@taql/config';
-import { InstrumentedCache } from '@taql/metrics';
 import { Pool } from 'pg';
+import type { Store } from 'cache-manager';
 import promClient from 'prom-client';
 
 // metrics
@@ -73,21 +74,20 @@ async function lookupQuery(
 }
 
 async function preloadCache(
-  cache: InstrumentedCache<string, string>,
+  cache: Store<string>,
   db: Pool,
   limit: number
 ): Promise<number> {
   return db
-    .query(
+    .query<{ id: string; code: string }>(
       'WITH most_recent AS (SELECT max(updated) AS updated FROM t_graphql_operations) ' +
         'SELECT id, code FROM t_graphql_operations WHERE updated = (select updated from most_recent) LIMIT $1',
       [limit]
     )
     .then((res) => {
-      res.rows.forEach((o: { id: string; code: string }) =>
-        cache.set(o.id, o.code)
-      );
-      return res.rows.length;
+      const entries = res.rows.map(({ id, code }) => [id, code] as const);
+      cache.mset(entries);
+      return entries.length;
     });
 }
 
@@ -120,8 +120,11 @@ export function usePreregisteredQueries(options: {
 
   const knownQueries = new Set<string>();
 
-  const cache = new InstrumentedCache<string, string>('preregistered_query', {
-    max: maxCacheSize,
+  const cache = instrumentedStore({
+    name: 'preregistered_query',
+    store: memoryStore<string>({
+      max: maxCacheSize,
+    }),
   });
 
   const pool = new Pool({
@@ -187,7 +190,7 @@ export function usePreregisteredQueries(options: {
         (knownQueries.has(maybePreregisteredId) || knownQueries.size == 0)
       ) {
         let preregisteredQuery: string | undefined;
-        const cached = cache.get(maybePreregisteredId);
+        const cached = await cache.get(maybePreregisteredId);
         if (cached) {
           logger.debug(
             `preregistered query cache hit: ${maybePreregisteredId}`

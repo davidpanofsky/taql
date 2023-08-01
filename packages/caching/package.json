@@ -1,5 +1,5 @@
 {
-  "name": "@taql/unifiedCaching",
+  "name": "@taql/caching",
   "version": "1.0.0",
   "main": "build/index.js",
   "scripts": {
@@ -9,16 +9,19 @@
   },
   "license": "UNLICENSED",
   "devDependencies": {
+    "@types/lodash.clonedeep": "^4.5.0",
     "typescript": "^5.0.4"
   },
   "dependencies": {
     "@envelop/core": "4.0.0",
     "@taql/config": "workspace:^",
-    "@taql/metrics": "workspace:^",
+    "cache-manager": "^5.2.1",
     "graphql": "^16.6.0",
     "graphql-jit": "^0.8.2",
     "graphql-yoga": "^4.0.0",
-    "lru-cache": "^9.1.2",
+    "ioredis": "^5.3.2",
+    "lodash.clonedeep": "^4.5.0",
+    "lru-cache": "^10.0.0",
     "prom-client": "^14.2.0"
   }
 }

@@ -1680,6 +1680,25 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@taql/caching@workspace:^, @taql/caching@workspace:packages/caching":
+  version: 0.0.0-use.local
+  resolution: "@taql/caching@workspace:packages/caching"
+  dependencies:
+    "@envelop/core": 4.0.0
+    "@taql/config": "workspace:^"
+    "@types/lodash.clonedeep": ^4.5.0
+    cache-manager: ^5.2.1
+    graphql: ^16.6.0
+    graphql-jit: ^0.8.2
+    graphql-yoga: ^4.0.0
+    ioredis: ^5.3.2
+    lodash.clonedeep: ^4.5.0
+    lru-cache: ^10.0.0
+    prom-client: ^14.2.0
+    typescript: ^5.0.4
+  languageName: unknown
+  linkType: soft
+
 "@taql/config@workspace:^, @taql/config@workspace:packages/config":
   version: 0.0.0-use.local
   resolution: "@taql/config@workspace:packages/config"
@@ -1782,30 +1801,16 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@taql/metrics@workspace:^, @taql/metrics@workspace:packages/metrics":
-  version: 0.0.0-use.local
-  resolution: "@taql/metrics@workspace:packages/metrics"
-  dependencies:
-    "@taql/config": "workspace:^"
-    "@tirke/node-cache-manager-ioredis": ^3.2.0
-    "@types/lodash.clonedeep": ^4.5.0
-    cache-manager: ^5.2.1
-    lodash.clonedeep: ^4.5.0
-    lru-cache: ^9.1.2
-    prom-client: ^14.2.0
-    typescript: ^5.0.4
-  languageName: unknown
-  linkType: soft
-
 "@taql/prereg@workspace:^, @taql/prereg@workspace:packages/prereg":
   version: 0.0.0-use.local
   resolution: "@taql/prereg@workspace:packages/prereg"
   dependencies:
     "@envelop/core": 4.0.0
+    "@taql/caching": "workspace:^"
     "@taql/config": "workspace:^"
-    "@taql/metrics": "workspace:^"
     "@taql/testing": "workspace:^"
     "@types/pg": ^8.6.6
+    cache-manager: ^5.2.1
     graphql: ^16.6.0
     graphql-yoga: ^4.0.0
     pg: ^8.10.0
@@ -1822,12 +1827,12 @@ __metadata:
     "@graphql-tools/utils": ^8.13.1
     "@ta-graphql-utils/stitch": "*"
     "@taql/batching": "workspace:^"
+    "@taql/caching": "workspace:^"
     "@taql/config": "workspace:^"
     "@taql/context": "workspace:^"
     "@taql/debug": "workspace:^"
     "@taql/executors": "workspace:^"
     "@taql/httpAgent": "workspace:^"
-    "@taql/metrics": "workspace:^"
     "@types/deep-equal": ^1.0.1
     "@types/node": ^18.16.7
     "@types/node-fetch": ^2.6.3
@@ -1865,16 +1870,15 @@ __metadata:
     "@opentelemetry/resources": ^1.14.0
     "@opentelemetry/sdk-trace-base": ^1.13.0
     "@opentelemetry/semantic-conventions": ^1.14.0
+    "@taql/caching": "workspace:^"
     "@taql/config": "workspace:^"
     "@taql/context": "workspace:^"
     "@taql/debug": "workspace:^"
     "@taql/httpAgent": "workspace:^"
-    "@taql/metrics": "workspace:^"
     "@taql/prereg": "workspace:^"
     "@taql/schema": "workspace:^"
     "@taql/security": "workspace:^"
     "@taql/ssl": "workspace:^"
-    "@taql/unifiedCaching": "workspace:^"
     "@types/koa": ^2.13.6
     cache-manager: ^5.2.1
     graphql: ^16.6.0
@@ -1907,22 +1911,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@taql/unifiedCaching@workspace:^, @taql/unifiedCaching@workspace:packages/unifiedCaching":
-  version: 0.0.0-use.local
-  resolution: "@taql/unifiedCaching@workspace:packages/unifiedCaching"
-  dependencies:
-    "@envelop/core": 4.0.0
-    "@taql/config": "workspace:^"
-    "@taql/metrics": "workspace:^"
-    graphql: ^16.6.0
-    graphql-jit: ^0.8.2
-    graphql-yoga: ^4.0.0
-    lru-cache: ^9.1.2
-    prom-client: ^14.2.0
-    typescript: ^5.0.4
-  languageName: unknown
-  linkType: soft
-
 "@taql@workspace:.":
   version: 0.0.0-use.local
   resolution: "@taql@workspace:."
@@ -1930,6 +1918,7 @@ __metadata:
     "@types/jest": ^29.5.1
     "@typescript-eslint/eslint-plugin": ^5.59.5
     "@typescript-eslint/parser": ^5.59.5
+    cache-manager: ^5.2.1
     depcheck: ^1.4.3
     eslint: ^8.40.0
     eslint-config-prettier: ^8.8.0
@@ -1939,15 +1928,6 @@ __metadata:
     typescript: ^5.0.4
   languageName: unknown
   linkType: soft
-
-"@tirke/node-cache-manager-ioredis@npm:^3.2.0":
-  version: 3.2.0
-  resolution: "@tirke/node-cache-manager-ioredis@npm:3.2.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40tirke%2Fnode-cache-manager-ioredis%2F-%2Fnode-cache-manager-ioredis-3.2.0.tgz"
-  dependencies:
-    ioredis: ^5.2.2
-  checksum: 767d695e10f5a3858023055dffe12216e46a72ad0eac3b688aedc93b8c6ac2b21b0c2a02df98c39f0d568fe42bcaaa6fe6c265eeb90b778b374a5ed332490bc8
-  languageName: node
-  linkType: hard
 
 "@tootallnate/once@npm:2":
   version: 2.0.0
@@ -4630,7 +4610,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ioredis@npm:^5.2.2, ioredis@npm:^5.3.2":
+"ioredis@npm:^5.3.2":
   version: 5.3.2
   resolution: "ioredis@npm:5.3.2::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fioredis%2F-%2Fioredis-5.3.2.tgz"
   dependencies:
@@ -5702,6 +5682,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"lru-cache@npm:^10.0.0":
+  version: 10.0.0
+  resolution: "lru-cache@npm:10.0.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Flru-cache%2F-%2Flru-cache-10.0.0.tgz"
+  checksum: 18f101675fe283bc09cda0ef1e3cc83781aeb8373b439f086f758d1d91b28730950db785999cd060d3c825a8571c03073e8c14512b6655af2188d623031baf50
+  languageName: node
+  linkType: hard
+
 "lru-cache@npm:^5.1.1":
   version: 5.1.1
   resolution: "lru-cache@npm:5.1.1::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Flru-cache%2F-%2Flru-cache-5.1.1.tgz"
@@ -5727,7 +5714,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lru-cache@npm:^9.0.0, lru-cache@npm:^9.1.2":
+"lru-cache@npm:^9.0.0":
   version: 9.1.2
   resolution: "lru-cache@npm:9.1.2::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Flru-cache%2F-%2Flru-cache-9.1.2.tgz"
   checksum: d3415634be3908909081fc4c56371a8d562d9081eba70543d86871b978702fffd0e9e362b83921b27a29ae2b37b90f55675aad770a54ac83bb3e4de5049d4b15

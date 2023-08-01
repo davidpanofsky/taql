@@ -11,6 +11,11 @@ import fetch, {
   Response as FetchResponse,
 } from 'node-fetch';
 import {
+  instrumentedStore,
+  memoryStore,
+  useUnifiedCaching,
+} from '@taql/caching';
+import {
   mutatedFieldsExtensionPlugin,
   usePreregisteredQueries,
 } from '@taql/prereg';
@@ -20,7 +25,6 @@ import {
 } from '@taql/debug';
 import { GraphQLSchema } from 'graphql';
 import type { IncomingHttpHeaders } from 'http';
-import { InstrumentedCache } from '@taql/metrics';
 import { TaqlAPQ } from './apq';
 import { TaqlState } from '@taql/context';
 import { httpsAgent } from '@taql/httpAgent';
@@ -33,7 +37,6 @@ import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspect
 import { useErrorLogging } from './logging';
 import { useOpenTelemetry } from '@envelop/opentelemetry';
 import { useTaqlSecurity } from '@taql/security';
-import { useUnifiedCaching } from '@taql/unifiedCaching';
 
 const makePlugins = async (defaultSchema: GraphQLSchema) => {
   const apq = new TaqlAPQ();
@@ -130,9 +133,9 @@ const makeSchemaProvider = (
     return defaultSchema;
   }
 
-  const schemaForSVCOCache = new InstrumentedCache<string, GraphQLSchema>(
-    'svco_schemas',
-    {
+  const schemaForSVCOCache = instrumentedStore({
+    name: 'svco_schemas',
+    store: memoryStore<GraphQLSchema>({
       max: 128,
       ttl: 1000 * 60 * 2,
       async fetchMethod(key): Promise<GraphQLSchema> {
@@ -140,12 +143,13 @@ const makeSchemaProvider = (
         SVCO_SCHEMA_BUILD_COUNTER.inc(); // We're probably about to hang the event loop, inc before building schema
         return makeSchema(key);
       },
-    }
-  );
+    }),
+  });
+
   return async (context) => {
     if (context.state?.taql.SVCO?.hasStitchedRoles) {
       logger.debug(`Using schema for SVCO: ${context.state.taql.SVCO}`);
-      const schemaForSVCO = await schemaForSVCOCache?.fetch(
+      const schemaForSVCO = await schemaForSVCOCache?.lruCache.fetch(
         context.state.taql.SVCO.value,
         { allowStale: true }
       );
