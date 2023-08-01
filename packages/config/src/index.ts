@@ -283,7 +283,7 @@ export const AUTOMATIC_PERSISTED_QUERY_PARAMS = resolve({
   redisTTL: {
     property: 'AUTOMATIC_PERSISTED_QUERY_REDIS_TTL',
     resolver: resolvers.nonNegativeInteger,
-    defaultTo: 36_000,
+    defaultTo: 300_000, // 5 minutes
   },
   redisWaitTimeMs: {
     property: 'AUTOMATIC_PERSISTED_QUERY_REDIS_WAIT_TIME_MS',
@@ -309,7 +309,7 @@ export const PRINT_DOCUMENT_PARAMS = resolve({
   redisTTL: {
     property: 'PRINTED_DOCUMENT_REDIS_TTL',
     resolver: resolvers.nonNegativeInteger,
-    defaultTo: 36_000,
+    defaultTo: 300_000, // 5 minutes
   },
   redisWaitTimeMs: {
     property: 'PRINTED_DOCUMENT_REDIS_WAIT_TIME_MS',
