@@ -66,7 +66,7 @@ export const copyHeaders = <T extends HeaderKey>(
  * @return the header value, or the provided default
  */
 export const getHeaderOrDefault = <T>(
-  headers: GenericHeaders | TaqlHeaders,
+  headers: GenericHeaders | TaqlHeaders | undefined,
   key: string,
   defaultV: T
 ): string | T => {
