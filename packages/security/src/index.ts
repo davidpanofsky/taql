@@ -8,8 +8,11 @@ import { SECURITY } from '@taql/config';
 // integrate workload authentication via oidc or whatever's in vogue at TA by
 // the time we get around to it
 const trustClient = (headers?: GenericHeaders): boolean =>
-  headers == undefined ||
-  getHeaderOrDefault(headers, 'x-taql-trust-client', undefined) !== 'false';
+  getHeaderOrDefault(
+    headers,
+    'x-taql-trust-client',
+    SECURITY.trustByDefault ? 'true' : 'false'
+  ) === 'true';
 
 export const useTaqlSecurity = (): YogaPlugin | undefined =>
   SECURITY.runUntrustedOperations

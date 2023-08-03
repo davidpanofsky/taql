@@ -360,6 +360,11 @@ export const GITOPS_PARAMS = resolve({
 });
 
 export const SECURITY = resolve({
+  trustByDefault: {
+    property: 'TRUST_BY_DEFAULT',
+    resolver: resolvers.booleanFromString,
+    defaultTo: process.env.NODE_ENV === 'production' ? false : true,
+  },
   runUntrustedOperations: {
     property: 'RUN_UNTRUSTED_OPERATIONS',
     resolver: resolvers.booleanFromString,
