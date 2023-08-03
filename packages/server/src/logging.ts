@@ -20,7 +20,7 @@ export const useErrorLogging: Plugin = {
             const operationName = operationAST?.name?.value;
             const operationType = operationAST?.operation;
             result.errors.forEach((err) => {
-              logger.error(err?.message, {
+              logger.warn(err?.message, {
                 uniqueId,
                 requestId,
                 operationName,
