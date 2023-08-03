@@ -20,13 +20,28 @@ const loggerConfig = resolve({
     resolver: resolvers.booleanFromString,
     defaultTo: true,
   },
-  level: {
+  logLevel: {
     property: 'LOG_LEVEL',
     defaultTo: process.env.NODE_ENV === 'test' ? 'error' : 'info',
   },
+  accessLogMinStatus: {
+    property: 'ACCESS_LOG_MIN_STATUS',
+    resolver: resolvers.nonNegativeInteger,
+    // by default only log failed requests in production
+    defaultTo: process.env.NODE_ENV === 'production' ? 400 : 0,
+  },
 });
 
-//export const logger = createLogger({
+const filterByStatusCode = format((info) => {
+  if (!('status' in info) || typeof info.status !== 'number') {
+    return info;
+  }
+  if (info.status < loggerConfig.accessLogMinStatus) {
+    return false;
+  }
+  return info;
+});
+
 loggers.add('access', {
   defaultMeta: { worker: WORKER },
   exitOnError: true,
@@ -36,6 +51,7 @@ loggers.add('access', {
     level: 'info',
     stderrLevels: [],
     format: format.combine(
+      filterByStatusCode(),
       loggerConfig.console
         ? format.combine(format.colorize(), format.simple())
         : format.combine(
@@ -52,7 +68,7 @@ loggers.add('app', {
   transports: new transports.Console({
     handleExceptions: !loggerConfig.console,
     handleRejections: !loggerConfig.console,
-    level: loggerConfig.level,
+    level: loggerConfig.logLevel,
     stderrLevels: ['debug', 'info', 'warn', 'error', 'critical'],
     format: format.combine(
       format.errors({ stack: true }),
