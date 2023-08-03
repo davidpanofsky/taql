@@ -231,6 +231,7 @@ export const useYoga = async () => {
     headers: {
       'Content-Type': 'application/json',
       Accept: 'application/json',
+      'x-taql-trust-client': 'true',
     },
     body: JSON.stringify({
       query: 'query prewarm { __typename }',
