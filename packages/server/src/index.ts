@@ -13,7 +13,7 @@ import { useYoga } from './useYoga';
 const unhandledErrors = new promClient.Counter({
   name: 'taql_koa_unhandled_errors',
   help: 'count of unhandled koa errors',
-  labelNames: ['code', 'name'] as const,
+  labelNames: ['code', 'name', 'reason'] as const,
 });
 
 const workerStartup = async () => {
@@ -27,8 +27,9 @@ const workerStartup = async () => {
     unhandledErrors.inc({
       code: error?.code || 'Unknown',
       name: error?.name || 'Error',
+      reason: error?.reason || 'Unknown',
     });
-    logger.error(error);
+    logger.error('Unhandled koa error', error);
   });
 
   koa.use(useHttpStatusTracking({ logger }));
