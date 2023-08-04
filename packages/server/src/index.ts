@@ -10,12 +10,26 @@ import promClient from 'prom-client';
 import { useTaqlContext } from '@taql/context';
 import { useYoga } from './useYoga';
 
+const unhandledErrors = new promClient.Counter({
+  name: 'taql_koa_unhandled_errors',
+  help: 'count of unhadled koa errors',
+  labelNames: ['code', 'name'] as const,
+});
+
 const workerStartup = async () => {
   const port = SERVER_PARAMS.svcoWorker
     ? SERVER_PARAMS.port - 1
     : SERVER_PARAMS.port;
 
   const koa = new Koa();
+
+  koa.on('error', (error) => {
+    unhandledErrors.inc({
+      code: error?.code || 'Unknown',
+      name: error?.name || 'Error',
+    });
+    logger.error(error);
+  });
 
   koa.use(useHttpStatusTracking({ logger }));
 
