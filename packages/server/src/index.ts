@@ -12,7 +12,7 @@ import { useYoga } from './useYoga';
 
 const unhandledErrors = new promClient.Counter({
   name: 'taql_koa_unhandled_errors',
-  help: 'count of unhadled koa errors',
+  help: 'count of unhandled koa errors',
   labelNames: ['code', 'name'] as const,
 });
 
