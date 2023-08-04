@@ -69,7 +69,7 @@ loggers.add('app', {
     handleExceptions: !loggerConfig.console,
     handleRejections: !loggerConfig.console,
     level: loggerConfig.logLevel,
-    stderrLevels: ['debug', 'info', 'warn', 'error', 'critical'],
+    stderrLevels: ['error', 'critical'],
     format: format.combine(
       format.errors({ stack: true }),
       loggerConfig.console
