@@ -1,7 +1,9 @@
+import { type ASTNode, print } from 'graphql';
 import {
   EXECUTION_TIMEOUT_PARAMS,
   UPSTREAM_TIMEOUT_PARAMS,
   logger,
+  WORKER as worker,
 } from '@taql/config';
 import { ExecutionRequest, ExecutionResult } from '@graphql-tools/utils';
 import fetch, { Headers } from 'node-fetch';
@@ -11,7 +13,6 @@ import { Cache } from 'cache-manager';
 import { ForwardableHeaders } from '@taql/context';
 import type { TaqlState } from '@taql/context';
 import { getDeadline } from '@taql/deadlines';
-import { print } from 'graphql';
 import promClient from 'prom-client';
 
 export type TaqlRequest = ExecutionRequest<Record<string, unknown>, TaqlState>;
@@ -20,6 +21,32 @@ export type PrintedDocumentCacheConfig = {
   cache?: Omit<Cache, 'store'>;
   keyFn?: (queryId: string, fieldName: string | number) => string;
 };
+
+const labelNames = ['worker'];
+const buckets = [0.0001, 0.0005, 0.001, 0.005, 0.01, 0.05, 0.1, 0.5];
+
+const EXECUTOR_PRINT_DURATION_HISTOGRAM = new promClient.Histogram({
+  name: 'taql_executor_print_duration',
+  help: 'Time spent printing the graphql document or accessing the printed ones from the cache',
+  labelNames,
+  buckets,
+});
+
+const EXECUTOR_UNCACHED_PRINT_DURATION_HISTOGRAM = new promClient.Histogram({
+  name: 'taql_executor_uncached_print_duration',
+  help: 'Time spent printing the graphql document',
+  labelNames,
+  buckets,
+});
+
+function instrumentedPrint(ast: ASTNode): string {
+  const stopTimer = EXECUTOR_UNCACHED_PRINT_DURATION_HISTOGRAM.startTimer({
+    worker,
+  });
+  const result = print(ast);
+  stopTimer();
+  return result;
+}
 
 export const requestFormatter =
   (config: PrintedDocumentCacheConfig) => async (request: TaqlRequest) => {
@@ -33,12 +60,16 @@ export const requestFormatter =
 
     const cacheKey = keyFn && queryId && fieldName && keyFn(queryId, fieldName);
 
+    const stopTimer = EXECUTOR_PRINT_DURATION_HISTOGRAM.startTimer({ worker });
+
     // It's important that we call cache.wrap here, as for multicaches this ensures that if the value is in a "deeper" cache
     // that the value is propagated into the "shallower" caches that we would prefer to resolve it from in the future.
     const query: string =
       cache && cacheKey
-        ? await cache.wrap(cacheKey, async () => print(document))
-        : print(document);
+        ? await cache.wrap(cacheKey, async () => instrumentedPrint(document))
+        : instrumentedPrint(document);
+
+    stopTimer();
 
     return { query, variables } as const;
   };
