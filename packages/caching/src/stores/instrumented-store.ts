@@ -30,9 +30,12 @@ const caches: Map<
   WeakRef<InstrumentedStore<MemoryStore | RedisStore | Store>>
 > = new Map();
 
-const OPERATION_COUNTER = new promClient.Counter({
+const buckets = [0.00005, 0.0001, 0.0005, 0.001, 0.005, 0.01, 0.05, 0.1];
+
+const OPERATION_DURATION_HISTOGRAM = new promClient.Histogram({
   name: 'taql_cache_operations',
   help: 'outcomes of operations on caches',
+  buckets,
   labelNames: ['name', 'type', 'worker', 'operation', 'status'] as const,
 });
 
@@ -170,92 +173,82 @@ export function instrumentedStore<T, S extends Store<T>>({
     });
   }
 
-  const record = (operation: keyof Store, status = 'success', value = 1) => {
-    OPERATION_COUNTER.inc(
-      {
-        name,
-        type,
-        worker,
-        operation,
-        status,
-      },
-      value
-    );
-  };
-
   const handleOperation = <T>(
-    promiseOrResult: T | Promise<T>,
-    recordFn: (result: T) => void,
-    recordErrorFn?: (error: Error) => void
+    operation: keyof Store,
+    getPromiseOrResult: () => T | Promise<T>,
+    getStatus?: (result: T) => string
   ) => {
+    const stopTimer = OPERATION_DURATION_HISTOGRAM.startTimer({
+      name,
+      type,
+      worker,
+      operation,
+    });
+
+    let promiseOrResult;
+    try {
+      promiseOrResult = getPromiseOrResult();
+    } catch (err) {
+      stopTimer({ status: 'error' });
+      if (emptyOnError) {
+        return undefined;
+      } else {
+        throw err;
+      }
+    }
+
     if (promiseOrResult instanceof Promise) {
       return promiseOrResult
         .then((result) => {
-          recordFn(result);
+          const status = getStatus?.(result) || 'success';
+          stopTimer({ status });
           return result;
         })
         .catch((err) => {
-          recordErrorFn?.(err);
+          stopTimer({ status: 'error' });
           return emptyOnError ? undefined : Promise.reject(err);
         });
     } else {
-      recordFn(promiseOrResult);
+      const status = getStatus?.(promiseOrResult) || 'success';
+      stopTimer({ status });
       return promiseOrResult;
     }
   };
 
   const get = (key: string) =>
     handleOperation(
-      store.get(key),
-      (result) => record('get', result === undefined ? 'miss' : 'hit'),
-      () => record('get', 'error')
+      'get',
+      () => store.get(key),
+      (result) => (result === undefined ? 'miss' : 'hit')
     );
 
   const mget = (...keys: string[]) =>
     handleOperation(
-      store.mget(...keys),
+      'mget',
+      () => store.mget(...keys),
       (results) => {
-        results.forEach((res) => {
-          record('get', res === undefined ? 'miss' : 'hit');
-        });
-      },
-      () => record('get', 'error', keys.length)
+        if (results.some((r) => r === undefined)) {
+          return 'partial';
+        } else if (results.every((r) => r === undefined)) {
+          return 'miss';
+        } else {
+          return 'hit';
+        }
+      }
     );
 
   const set = (key: string, value: T, ttl?: number) =>
-    handleOperation(
-      store.set(key, value, ttl),
-      () => record('set'),
-      () => record('set', 'error')
-    );
+    handleOperation('set', () => store.set(key, value, ttl));
 
   const mset = (entries: [string, T][], ttl?: number) =>
-    handleOperation(
-      store.mset(entries, ttl),
-      () => record('set', 'success', entries.length),
-      () => record('set', 'error', entries.length)
-    );
+    handleOperation('mset', () => store.mset(entries, ttl));
 
-  const del = (key: string) =>
-    handleOperation(
-      store.del(key),
-      () => record('del'),
-      () => record('del', 'error')
-    );
+  const del = (key: string) => handleOperation('del', () => store.del(key));
 
   const mdel = (...keys: string[]) =>
-    handleOperation(
-      store.mdel(...keys),
-      () => record('del', 'success', keys.length),
-      () => record('del', 'error', keys.length)
-    );
+    handleOperation('mdel', () => store.mdel(...keys));
 
-  const reset = () =>
-    handleOperation(
-      store.reset(),
-      () => record('reset'),
-      () => record('reset', 'error')
-    );
+  const reset = () => handleOperation('reset', () => store.reset());
 
   const instrumentedStore: InstrumentedStore<S> = {
     ...store,
