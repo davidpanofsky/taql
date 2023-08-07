@@ -14,6 +14,14 @@ import DataLoader from 'dataloader';
 import { STRATEGIES } from './strategies';
 import type { TaqlState } from '@taql/context';
 import { createLoadFn } from '@graphql-tools/batch-execute';
+import promClient from 'prom-client';
+
+const BATCH_SIZE_HISTOGRAM = new promClient.Histogram({
+  name: 'taql_executor_batch_size',
+  help: 'number of requests in the batch',
+  buckets: [1, 5, 20, 50, 100, 160, 240],
+  labelNames: ['subgraph', 'batchStyle'],
+});
 
 export const createBatchingExecutor = (
   /** The load function that we expect to do execution for batches */
@@ -73,6 +81,13 @@ function makeArrayBatchingExecutor(
     pickDeadline,
     {
       async request(requests) {
+        BATCH_SIZE_HISTOGRAM.observe(
+          {
+            subgraph: config.name,
+            batchStyle: config.batching.style,
+          },
+          requests.length
+        );
         return await Promise.all(requests.map(requestFormatter));
       },
     }
@@ -101,6 +116,15 @@ function makeLegacyGqlExecutor(
       // we can just select any request in the batch from which to use the derived context.
       const legacyContext = requests?.find((i) => i)?.context?.state.taql
         .legacyContext;
+
+      BATCH_SIZE_HISTOGRAM.observe(
+        {
+          subgraph: config.name,
+          batchStyle: config.batching.style,
+        },
+        requests.length
+      );
+
       const formatted: {
         requests: unknown[];
         requestContext?: unknown | undefined;
