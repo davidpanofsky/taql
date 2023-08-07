@@ -1676,6 +1676,7 @@ __metadata:
     "@taql/executors": "workspace:^"
     dataloader: ^2.2.2
     graphql: ^16.6.0
+    prom-client: ^14.2.0
     typescript: ^5.0.4
   languageName: unknown
   linkType: soft
