@@ -1,3 +1,4 @@
+import { type ASTNode, print } from 'graphql';
 import {
   EXECUTION_TIMEOUT_PARAMS,
   UPSTREAM_TIMEOUT_PARAMS,
@@ -12,7 +13,6 @@ import { Cache } from 'cache-manager';
 import { ForwardableHeaders } from '@taql/context';
 import type { TaqlState } from '@taql/context';
 import { getDeadline } from '@taql/deadlines';
-import { print, type ASTNode } from 'graphql';
 import promClient from 'prom-client';
 
 export type TaqlRequest = ExecutionRequest<Record<string, unknown>, TaqlState>;
