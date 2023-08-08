@@ -84,6 +84,7 @@ docker-publish:
       --label org.label-schema.vcs-ref="$CI_COMMIT_SHA"
       --label org.label-schema.vcs-url="$CI_PROJECT_URL"
       --label org.label-schema.vendor=TripAdvisor
+      --build-arg APP_VERSION="${CI_COMMIT_TAG}"
       --verbosity=info
 
 pages:

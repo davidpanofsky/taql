@@ -1,4 +1,4 @@
-import { ENABLE_FEATURES, SERVER_PARAMS, logger } from '@taql/config';
+import { ENABLE_FEATURES, SERVER_PARAMS, logger, appMeta } from '@taql/config';
 import { Server, createServer as httpServer } from 'http';
 import cluster, { Worker } from 'node:cluster';
 import { useHttpStatusTracking, useMetricsEndpoint } from './observability';
@@ -82,17 +82,19 @@ const primaryStartup = async () => {
   const forkCount = new promClient.Counter({
     name: 'taql_worker_forks',
     help: 'Count of workers forked with clustering',
-  });
+    labelNames: ['version'] as const,
+  }).labels({ version: appMeta.version });
 
   const workersStarted = new promClient.Counter({
     name: 'taql_workers_started',
     help: 'Count of workers started cleanly',
-  });
+    labelNames: ['version'] as const,
+  }).labels({ version: appMeta.version });
 
   const workersExited = new promClient.Counter({
     name: 'taql_workers_exited',
     help: 'count of workers exited',
-    labelNames: ['kind'] as const,
+    labelNames: ['kind', 'version'] as const,
   });
 
   const environments = new WeakMap<
@@ -128,18 +130,18 @@ const primaryStartup = async () => {
   cluster.on('exit', (worker, code, signal) => {
     if (worker.exitedAfterDisconnect === true) {
       logger.info('worker shutdown gracefully', { pid: worker.process.pid });
-      workersExited.inc({ kind: 'graceful' });
+      workersExited.inc({ kind: 'graceful', version: appMeta.version });
     } else {
       if (signal) {
         logger.warn(`worker was killed by signal: ${signal}`, {
           pid: worker.process.pid,
         });
-        workersExited.inc({ kind: 'killed' });
+        workersExited.inc({ kind: 'killed', version: appMeta.version });
       } else if (code !== 0) {
         logger.warn(`worker exited with error code: ${code}`, {
           pid: worker.process.pid,
         });
-        workersExited.inc({ kind: 'error' });
+        workersExited.inc({ kind: 'error', version: appMeta.version });
       }
       if (sucessfulInitialization) {
         logger.info(`replacing worker ${worker.id}...`);
