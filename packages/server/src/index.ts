@@ -1,4 +1,4 @@
-import { ENABLE_FEATURES, SERVER_PARAMS, logger, appMeta } from '@taql/config';
+import { ENABLE_FEATURES, SERVER_PARAMS, appMeta, logger } from '@taql/config';
 import { Server, createServer as httpServer } from 'http';
 import cluster, { Worker } from 'node:cluster';
 import { useHttpStatusTracking, useMetricsEndpoint } from './observability';
