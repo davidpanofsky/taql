@@ -1,4 +1,4 @@
-import { EXECUTION_TIMEOUT_PARAMS, GSR, logger } from '@taql/config';
+import { EXECUTION_TIMEOUT_PARAMS, SCHEMA, logger } from '@taql/config';
 import { ForwardableHeaders, forwardableHeaders } from './headers';
 import { GenericHeaders, getHeaderOrDefault } from '@taql/headers';
 import type { Middleware, ParameterizedContext } from 'koa';
@@ -85,9 +85,9 @@ export const timeRemaining = (context: TaqlContext): number =>
   context.deadline - Date.now();
 
 const legacyGqlRoles =
-  GSR.legacySchemaSource == 'gsr'
+  SCHEMA.legacySchemaSource == 'gsr'
     ? []
-    : `graphql*${GSR.legacySchemaSource.url.hostname}:${GSR.legacySchemaSource.url.port}:${GSR.legacySchemaSource.url.protocol}`;
+    : `graphql*${SCHEMA.legacySchemaSource.url.hostname}:${SCHEMA.legacySchemaSource.url.port}:${SCHEMA.legacySchemaSource.url.protocol}`;
 // We know these roles do not affect the stitched schema. This list is not
 // intended to be exhaustive, and an exhaustive list is not desirable: services
 // may _become_ stitched, unless there is some special property or use case

@@ -1,7 +1,7 @@
 import { AuthManager, getManager } from '@ta-graphql-utils/auth-manager';
 import { Cache, caching, multiCaching } from 'cache-manager';
-import { GSR, PRINT_DOCUMENT_PARAMS, logger } from '@taql/config';
 import { GraphQLError, GraphQLSchema } from 'graphql';
+import { PRINT_DOCUMENT_PARAMS, SCHEMA, logger } from '@taql/config';
 import {
   PrintedDocumentCacheConfig,
   makeRemoteExecutor,
@@ -24,6 +24,7 @@ import { createExecutor as batchingExecutorFactory } from '@taql/batching';
 import { getLegacySubgraph } from './legacy';
 import { inspect } from 'util';
 import { makeClient } from '@gsr/client';
+import { promises } from 'fs';
 
 export type TASchema =
   | {
@@ -135,13 +136,13 @@ async function createPrintedDocumentCache(params: {
 let printedDocumentCache: Omit<Cache, 'store'>;
 
 const initAuth = (): AuthManager => {
-  if (GSR.useIam) {
+  if (SCHEMA.useIam) {
     return getManager({ kind: 'iam' });
   } else {
-    if (GSR.identityToken == undefined) {
+    if (SCHEMA.identityToken == undefined) {
       throw new Error('cannot use oidc without identity token');
     }
-    return getManager({ tokenPath: GSR.identityToken });
+    return getManager({ tokenPath: SCHEMA.identityToken });
   }
 };
 
@@ -154,10 +155,10 @@ export type Supergraph = {
 
 const loadSupergraphFromGsr = async (): Promise<Supergraph> => {
   const manager = initAuth();
-  const gsrClient = makeClient(GSR, manager);
+  const gsrClient = makeClient(SCHEMA, manager);
 
   const supergraph = await gsrClient.supergraph({
-    query: { environment: GSR.environment },
+    query: { environment: SCHEMA.environment },
   });
   switch (supergraph.statusCode) {
     case '200':
@@ -170,42 +171,55 @@ const loadSupergraphFromGsr = async (): Promise<Supergraph> => {
 };
 
 export const loadSupergraph = async (): Promise<Supergraph> => {
+  if (SCHEMA.source == 'file') {
+    logger.info(`loaded supergraph from file: ${SCHEMA.schemaFile}`);
+    if (SCHEMA.schemaFile == undefined) {
+      throw new Error('no schema file specified');
+    }
+    return JSON.parse(await promises.readFile(SCHEMA.schemaFile, 'utf-8'));
+  }
+
   let id = 'unknown';
   let manifest: Subgraph[] = [];
   let sdl = '';
   let legacyDigest: string | undefined = undefined;
 
-  const subgraphs: Subgraph[] = [];
-  if (GSR.useGsr) {
-    try {
-      const supergraph = await loadSupergraphFromGsr();
-      id = supergraph.id;
-      sdl = supergraph.supergraph;
-      manifest = [...supergraph.manifest];
-    } catch (err) {
-      if (GSR.legacySchemaSource == 'gsr') {
-        // we have no schema. DO not proceed.
-        throw err;
-      }
-      logger.error(`unable to load schema from GSR: ${err}`);
+  try {
+    logger.info('loading supergraph from GSR');
+    const supergraph = await loadSupergraphFromGsr();
+    id = supergraph.id;
+    sdl = supergraph.supergraph;
+    manifest = [...supergraph.manifest];
+  } catch (err) {
+    if (SCHEMA.legacySchemaSource == 'gsr') {
+      // we have no schema. DO not proceed.
+      throw err;
     }
+    // TODO
+    // This is a safety valve to allow us to 'test' GSR contact
+    // by trying to load from GSR but falling back to querying legacy graphql.
+    // That possibility will not remain long; remove this.
+    logger.error(`unable to load schema from GSR: ${err}`);
   }
 
-  if (GSR.legacySchemaSource != 'gsr') {
+  if (SCHEMA.legacySchemaSource != 'gsr') {
+    logger.info(
+      `loading legacy subgraph from ${SCHEMA.legacySchemaSource.url}`
+    );
     const { subgraph, digest } = await getLegacySubgraph(
-      GSR.legacySchemaSource
+      SCHEMA.legacySchemaSource
     );
     legacyDigest = digest;
-    subgraphs.push(subgraph);
+    manifest.push(subgraph);
   }
-  const stitched = await stitch(subgraphs);
+  const stitched = await stitch(manifest);
   if (!('schema' in stitched)) {
     throw new Error(`Unable to stitch schema: ${inspect(stitched)}`);
   }
 
   // Check that we know what we're doing.
   const reprintedSdl = normalizeSdl(stitched.schema);
-  if (GSR.legacySchemaSource == 'gsr' && reprintedSdl != sdl) {
+  if (SCHEMA.legacySchemaSource == 'gsr' && reprintedSdl != sdl) {
     // warn and continue.
     logger.warn(
       'Stitched schema SDL does not match SDL retrieved from GSR. Ensure GSR and taql have the same stitch version.'

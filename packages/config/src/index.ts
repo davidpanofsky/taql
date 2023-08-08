@@ -92,11 +92,14 @@ loggers.add('app', {
 export const logger = loggers.get('app');
 export const accessLogger = loggers.get('access');
 
-export const GSR = resolve({
-  useGsr: {
-    property: 'GSR_ENABLED',
-    resolver: resolvers.booleanFromString,
-    defaultTo: true,
+export const SCHEMA = resolve({
+  source: {
+    property: 'SCHEMA_SOURCE',
+    resolver: resolvers.options('gsr', 'file'),
+    defaultTo: 'gsr',
+  },
+  schemaFile: {
+    property: 'SCHEMA_FILE',
   },
   legacySchemaSource: {
     property: 'LEGACY_SCHEMA_SOURCE',

@@ -105,9 +105,21 @@ const booleanFromString = (value: string | undefined): boolean | undefined =>
 const urlFromString = (value?: string): undefined | URL =>
   value == undefined ? undefined : new URL(value);
 
+const options = <T extends string | undefined>(...options: T[]) => {
+  const valid: Set<T> = new Set(options);
+  return (value?: string): T | undefined => {
+    if (valid.has(<T>value)) {
+      return <T>value;
+    }
+    logger.warn(`${value} is not one of ${options}`);
+    return undefined;
+  };
+};
+
 export const resolvers = {
   fileContents,
   nonNegativeInteger,
   booleanFromString,
   urlFromString,
+  options,
 };

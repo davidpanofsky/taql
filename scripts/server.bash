@@ -123,10 +123,11 @@ function main {
   fi
 
   export GSR_URL="https://gsr.domains-platform-sbx.tamg.cloud"
+  export GSR_USE_IAM=true
   export AUTOMATIC_PERSISTED_QUERY_REDIS_CLUSTER=redis.taql-query-cache.svc.kub.n.tripadvisor.com
   export NODE_OPTIONS="--max-old-space-size=1500"
-  export GSR_ENABLED=true
-  export GSR_USE_IAM=true
+  export SCHEMA_SOURCE=gsr
+  export SCHEMA_FILE=/tmp/taql/supergraph.json
 
   case $1 in
     start )
