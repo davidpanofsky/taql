@@ -1,6 +1,8 @@
 FROM node:18-alpine3.17
 WORKDIR /opt/taql
 
+ARG APP_VERSION=development
+
 # Prepare a skeleton of the project including only what is needed for yarn
 # install (e.g. package.json files and yarn config). This will be copied into
 # the next build stage and yarn installed there. This way, the yarn install
