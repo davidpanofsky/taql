@@ -6,6 +6,7 @@ import { logger, WORKER as worker } from '@taql/config';
 import { Pool } from 'pg';
 import type { Store } from 'cache-manager';
 import promClient from 'prom-client';
+import { preregisteredQueriesPlugin } from '@taql/readiness';
 
 // metrics
 const PREREG_UNK = new promClient.Counter({
@@ -178,6 +179,9 @@ export function usePreregisteredQueries(options: {
           })
           .catch((e) => logger.error(`Failed to update known query ids: ${e}`));
       }, 30000);
+
+      // Initialization complete
+      preregisteredQueriesPlugin.ready();
     },
 
     // Check extensions for a potential preregistered query id, and resolve it to the query text, parsed

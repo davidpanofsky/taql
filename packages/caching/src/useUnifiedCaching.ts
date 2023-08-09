@@ -5,6 +5,7 @@ import { JitCache } from './jit';
 import { ValidationCache } from './validation';
 import { Plugin as YogaPlugin } from 'graphql-yoga';
 import { logPrewarm } from './util';
+import { unifiedCachesPrewarmed } from '@taql/readiness';
 
 export async function useUnifiedCaching(options: {
   maxCacheSize: number;
@@ -42,5 +43,6 @@ export async function useUnifiedCaching(options: {
     ...validationCache.plugin,
     ...jitCache?.plugin,
   };
+  unifiedCachesPrewarmed.ready();
   return plugin;
 }

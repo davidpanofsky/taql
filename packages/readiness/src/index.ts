@@ -23,15 +23,25 @@ export function readinessStage(stage: string) {
     },
     unready() {
       logger.info(`Readiness stage "${stage}" invalidated`);
+      if (ready) {
+        // reset the timer if and only if the state is changing
+        start = Date.now();
+      }
       ready = false;
-      start = Date.now();
     },
     stage,
   };
 }
 
-export const unifiedCachesPrewarmed = readinessStage('documentCache');
-//CLUSTER_READINESS.addReadinessStage(unifiedCachesPrewarmed);
 
+// Readiness stages.  Exported so the related initialization sequences can import them and mark them when appropriate
+export const unifiedCachesPrewarmed = readinessStage('unifiedCachesPrewarmed');
+export const preregisteredQueriesPlugin = readinessStage('preregisteredQueriesPlugin');
 export const serverListening = readinessStage('serverListening');
-CLUSTER_READINESS.addReadinessStage(serverListening);
+
+export const stages = [unifiedCachesPrewarmed, preregisteredQueriesPlugin, serverListening]
+stages.forEach(CLUSTER_READINESS.addReadinessStage);
+
+export function globalUnready() {
+  stages.forEach((stage) => stage.unready());
+}

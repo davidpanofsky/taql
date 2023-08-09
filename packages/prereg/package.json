@@ -18,6 +18,7 @@
     "@envelop/core": "4.0.0",
     "@taql/caching": "workspace:^",
     "@taql/config": "workspace:^",
+    "@taql/readiness": "workspace:^",
     "graphql": "^16.6.0",
     "graphql-yoga": "^4.0.0",
     "pg": "^8.10.0",
