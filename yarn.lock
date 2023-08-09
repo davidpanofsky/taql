@@ -1810,6 +1810,7 @@ __metadata:
     "@envelop/core": 4.0.0
     "@taql/caching": "workspace:^"
     "@taql/config": "workspace:^"
+    "@taql/readiness": "workspace:^"
     "@taql/testing": "workspace:^"
     "@types/pg": ^8.6.6
     cache-manager: ^5.2.1
