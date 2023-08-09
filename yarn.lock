@@ -1824,6 +1824,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@taql/readiness@workspace:packages/readiness"
   dependencies:
+    "@taql/config": "workspace:^"
     "@types/koa": ^2.13.6
     koa: ^2.14.2
     typescript: ^5.0.4

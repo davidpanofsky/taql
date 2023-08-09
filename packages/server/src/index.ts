@@ -52,7 +52,7 @@ const workerStartup = async () => {
 
   logger.info(`launching server on port ${port}`);
   server.listen(port, () => {
-    serverListening.complete();
+    serverListening.ready();
     logger.info('server running');
   });
 

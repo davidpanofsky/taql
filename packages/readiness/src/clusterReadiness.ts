@@ -30,12 +30,11 @@ function addListeners() {
   if (cluster.isPrimary) {
     cluster.on('message', (worker, message) => {
       if (message.type === GET_READINESS_RES) {
-        logger.info(`Processing readiness response from worker: ${message}`);
         // process response from worker
         const request = requests.get(message.requestId);
         if (!request) {
           logger.error(
-            `Request for requestId ${message.requestId} not found during processing`
+            `Readiness request for requestId ${message.requestId} not found during processing`
           );
           return;
         }
@@ -67,7 +66,6 @@ function addListeners() {
   if (cluster.isWorker) {
     process.on('message', (message: { type?: string; requestId?: number }) => {
       if (message.type === GET_READINESS_REQ) {
-        logger.info(`Processing readiness request from primary: ${message}`);
         // Send readiness response to primary (master)
         // Compute this worker's readiness
         const readiness = checks.every((check) => check());
@@ -82,16 +80,22 @@ function addListeners() {
 }
 
 export class ClusterReadiness {
-  private readonly maxWaitMs: number = 200;
-  constructor() {
+  private readonly maxWaitMs: number;
+  constructor(maxWaitMs: number) {
+    this.maxWaitMs = maxWaitMs;
     addListeners();
+  }
+
+  addReadinessStage(readiness: { check: () => boolean; stage: string }) {
+    logger.info(`Asserting readiness of ${readiness.stage}`);
+    checks.push(readiness.check);
   }
 
   addCheck(check: () => boolean) {
     checks.push(check);
   }
 
-  clusterReadiness(): Promise<boolean> {
+  isReady(): Promise<boolean> {
     const requestId = requestIdSeq++;
     return new Promise((resolve, reject) => {
       let settled = false;
@@ -107,7 +111,6 @@ export class ClusterReadiness {
         }
       }
 
-      logger.info(`Setting up readiness request ${requestId}`);
       const request: ReadinessRequest = {
         responses: [],
         pending: 0,
@@ -128,7 +131,6 @@ export class ClusterReadiness {
 
       for (const workerId in cluster.workers) {
         if (cluster.workers[workerId]?.isConnected()) {
-          logger.info(`sending readiness request to worker ${workerId}`);
           cluster.workers[workerId]?.send(message);
           request.pending++;
         }

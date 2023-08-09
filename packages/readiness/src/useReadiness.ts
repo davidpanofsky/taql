@@ -7,7 +7,7 @@ export const useClusterReadiness =
   async (ctx: ParameterizedContext, next: () => Promise<unknown>) => {
     if (ctx.request.method === 'GET' && ctx.request.path === path) {
       try {
-        if (await readiness.clusterReadiness()) {
+        if (await readiness.isReady()) {
           ctx.body = '<NotImplemented/>\n';
           ctx.status = 200;
         } else {
