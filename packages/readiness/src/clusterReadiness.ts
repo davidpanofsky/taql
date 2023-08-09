@@ -86,8 +86,8 @@ export class ClusterReadiness {
     addListeners();
   }
 
-  addReadinessStage(readiness: { check: () => boolean; stage: string }) {
-    logger.info(`Asserting readiness of ${readiness.stage}`);
+  addReadinessStage(readiness: { check: () => boolean; name: string }) {
+    logger.info(`Asserting readiness of ${readiness.name}`);
     checks.push(readiness.check);
   }
 
