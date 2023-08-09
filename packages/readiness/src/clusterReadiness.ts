@@ -1,26 +1,30 @@
-import { logger } from '@taql/config';
 import cluster from 'node:cluster';
+import { logger } from '@taql/config';
 
 // Set up message names
-const GET_READINESS_REQ = 'taql-readiness:getReadinessReq'
-const GET_READINESS_RES = 'taql-readiness:getReadinessRes'
+const GET_READINESS_REQ = 'taql-readiness:getReadinessReq';
+const GET_READINESS_RES = 'taql-readiness:getReadinessRes';
 
 // What amounts to an id sequence per primary process so it can keep track of concurrent readiness checks.
 let requestIdSeq = 0;
 
 type ReadinessRequest = {
-  responses: boolean[]
-  pending: number,
-  done: (result: boolean | null, error: unknown) => void,
+  responses: boolean[];
+  pending: number;
+  done: (result: boolean | null, error: unknown) => void;
   errorTimeout: ReturnType<typeof setTimeout>;
 };
 
-const requests = new Map<number, ReadinessRequest>(); 
+const requests = new Map<number, ReadinessRequest>();
+
+const checks: (() => boolean)[] = [];
 
 let listenersAdded = false;
 // idempotently add listeners for IPC messages
 function addListeners() {
-  if (listenersAdded) return;
+  if (listenersAdded) {
+    return;
+  }
   listenersAdded = true;
 
   if (cluster.isPrimary) {
@@ -30,10 +34,12 @@ function addListeners() {
         // process response from worker
         const request = requests.get(message.requestId);
         if (!request) {
-          logger.error(`Request for requestId ${message.requestId} not found during processing`);
+          logger.error(
+            `Request for requestId ${message.requestId} not found during processing`
+          );
           return;
         }
- 
+
         if (message.error) {
           request.done(null, new Error(message.error));
           request.responses.push(false);
@@ -50,8 +56,8 @@ function addListeners() {
           // clean up
           requests.delete(message.requestId);
           clearTimeout(request.errorTimeout);
-          // Since we shortcircuit 
-          const readiness = request.responses.every(response => response);
+          // Since we shortcircuit
+          const readiness = request.responses.every((response) => response);
           request.done(readiness, null);
         }
       }
@@ -59,17 +65,17 @@ function addListeners() {
   }
 
   if (cluster.isWorker) {
-    process.on('message', (message: {type?: string, requestId?: number}) => {
+    process.on('message', (message: { type?: string; requestId?: number }) => {
       if (message.type === GET_READINESS_REQ) {
         logger.info(`Processing readiness request from primary: ${message}`);
         // Send readiness response to primary (master)
         // Compute this worker's readiness
-        const readiness = true;
+        const readiness = checks.every((check) => check());
         process.send?.({
           type: GET_READINESS_RES,
           requestId: message.requestId,
-          readiness
-        })
+          readiness,
+        });
       }
     });
   }
@@ -81,19 +87,25 @@ export class ClusterReadiness {
     addListeners();
   }
 
+  addCheck(check: () => boolean) {
+    checks.push(check);
+  }
+
   clusterReadiness(): Promise<boolean> {
     const requestId = requestIdSeq++;
     return new Promise((resolve, reject) => {
       let settled = false;
       function done(result: boolean | null, error: unknown) {
-        if (settled) return;
+        if (settled) {
+          return;
+        }
         settled = true;
         if (error) {
           reject(error);
         } else {
           resolve(!!result);
         }
-      };
+      }
 
       logger.info(`Setting up readiness request ${requestId}`);
       const request: ReadinessRequest = {
@@ -101,9 +113,11 @@ export class ClusterReadiness {
         pending: 0,
         done,
         errorTimeout: setTimeout(() => {
-          const error = new Error(`Cluster readiness timed out after ${this.maxWaitMs}ms`);
+          const error = new Error(
+            `Cluster readiness timed out after ${this.maxWaitMs}ms`
+          );
           request.done(null, error);
-        }, this.maxWaitMs)
+        }, this.maxWaitMs),
       };
 
       requests.set(requestId, request);
@@ -122,7 +136,7 @@ export class ClusterReadiness {
 
       if (request.pending === 0) {
         // No workers were connected
-        clearTimeout(request.errorTimeout)
+        clearTimeout(request.errorTimeout);
         process.nextTick(() => done(false, null));
       }
     });

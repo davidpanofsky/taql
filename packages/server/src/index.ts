@@ -1,3 +1,8 @@
+import {
+  CLUSTER_READINESS,
+  serverListening,
+  useClusterReadiness,
+} from '@taql/readiness';
 import { ENABLE_FEATURES, SERVER_PARAMS, logger } from '@taql/config';
 import { Server, createServer as httpServer } from 'http';
 import cluster, { Worker } from 'node:cluster';
@@ -7,7 +12,6 @@ import { SSL_CONFIG } from '@taql/ssl';
 import { createServer as httpsServer } from 'https';
 import process from 'node:process';
 import promClient from 'prom-client';
-import { useClusterReadiness, CLUSTER_READINESS } from '@taql/readiness';
 import { useTaqlContext } from '@taql/context';
 import { useYoga } from './useYoga';
 
@@ -48,6 +52,7 @@ const workerStartup = async () => {
 
   logger.info(`launching server on port ${port}`);
   server.listen(port, () => {
+    serverListening.complete();
     logger.info('server running');
   });
 
