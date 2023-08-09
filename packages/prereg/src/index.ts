@@ -5,8 +5,8 @@ import { instrumentedStore, memoryStore } from '@taql/caching';
 import { logger, WORKER as worker } from '@taql/config';
 import { Pool } from 'pg';
 import type { Store } from 'cache-manager';
-import promClient from 'prom-client';
 import { preregisteredQueriesPlugin } from '@taql/readiness';
+import promClient from 'prom-client';
 
 // metrics
 const PREREG_UNK = new promClient.Counter({

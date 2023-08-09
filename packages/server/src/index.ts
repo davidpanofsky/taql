@@ -70,12 +70,14 @@ const primaryStartup = async () => {
 
   const koa = new Koa();
 
-  koa.use(useClusterReadiness({
-    path:'/NotImplemented',
-    readyBody: "<NotImplemented/>\n",
-    unreadyBody: "<NotReady/>\n",
-    readiness: CLUSTER_READINESS,
-  }));
+  koa.use(
+    useClusterReadiness({
+      path: '/NotImplemented',
+      readyBody: '<NotImplemented/>\n',
+      unreadyBody: '<NotReady/>\n',
+      readiness: CLUSTER_READINESS,
+    })
+  );
   // add prom metrics endpoint
   koa.use(useMetricsEndpoint);
 
