@@ -5,27 +5,31 @@ import { logger } from '@taql/config';
 export const useClusterReadiness =
   (params: {path: string, readiness: ClusterReadiness, readyBody: string, unreadyBody?: string}) => {
     const {path, readiness, readyBody, unreadyBody} = params;
+
+    logger.info(`useClusterReadiness: handling ${path}`)
+
+    function unready(ctx: ParameterizedContext) {
+      ctx.status = 500;
+      if (unreadyBody) {
+        ctx.body = unreadyBody
+      }
+    }
+
+    function ready(ctx: ParameterizedContext) {
+      ctx.body = readyBody;
+      ctx.status = 200;
+    }
+
     return async (ctx: ParameterizedContext, next: () => Promise<unknown>) => {
       if (ctx.request.method === 'GET' && ctx.request.path === path) {
-        logger.info(`useClusterReadiness: handling ${path}`)
         try {
           if (await readiness.isReady()) {
-            logger.info('useClusterReadiness: ready');
-            ctx.body = readyBody;
-            ctx.status = 200;
+            ready(ctx);
           } else {
-            logger.info('useClusterReadiness: unready');
-            ctx.status = 500;
-            if (unreadyBody) {
-              ctx.body = unreadyBody;
-            }
+            unready(ctx);
           }
         } catch (err) {
-          logger.info(`useClusterReadiness: error: ${err}`);
-          ctx.status = 500;
-          if (unreadyBody) {
-            ctx.body = unreadyBody;
-          }
+          unready(ctx);
         }
       } else {
         await next();
