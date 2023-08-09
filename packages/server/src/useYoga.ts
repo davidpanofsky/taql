@@ -81,6 +81,14 @@ const makePlugins = async (defaultSchema: GraphQLSchema) => {
 
   const securityPlugin = useTaqlSecurity();
 
+  const logReadinessOnce = (function () {
+    let logged = false;
+    return function () {
+      logged || logger.info('Readiness check called');
+      logged = true;
+    };
+  })();
+
   const yogaPlugins = [
     ...((securityPlugin && [securityPlugin]) || []),
     useErrorLogging,
@@ -108,6 +116,7 @@ const makePlugins = async (defaultSchema: GraphQLSchema) => {
           // Todo: Add checks for other things like database connection, etc.
           //redisCache[0].store.client.status
           // The trailing newline is important for unblacklisting, apparently.
+          logReadinessOnce();
           return new fetchAPI.Response('<NotImplemented/>\n');
         } catch (err) {
           logger.error(err);

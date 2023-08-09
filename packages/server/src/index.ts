@@ -7,6 +7,7 @@ import { SSL_CONFIG } from '@taql/ssl';
 import { createServer as httpsServer } from 'https';
 import process from 'node:process';
 import promClient from 'prom-client';
+import { useClusterReadiness, CLUSTER_READINESS } from '@taql/readiness';
 import { useTaqlContext } from '@taql/context';
 import { useYoga } from './useYoga';
 
@@ -64,8 +65,10 @@ const primaryStartup = async () => {
 
   const koa = new Koa();
 
+  koa.use(useClusterReadiness('/NotImplemented', CLUSTER_READINESS));
   // add prom metrics endpoint
   koa.use(useMetricsEndpoint);
+
   const server: Server =
     SSL_CONFIG == undefined ? httpServer() : httpsServer(SSL_CONFIG);
 
@@ -136,7 +139,7 @@ const primaryStartup = async () => {
         });
         workersExited.inc({ kind: 'killed' });
       } else if (code !== 0) {
-        logger.warn(`worker exited with error code: ${code}`, {
+        logger.warn(`worker ${worker.id} exited with error code: ${code}`, {
           pid: worker.process.pid,
         });
         workersExited.inc({ kind: 'error' });

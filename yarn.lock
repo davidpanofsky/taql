@@ -1820,6 +1820,16 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@taql/readiness@workspace:^, @taql/readiness@workspace:packages/readiness":
+  version: 0.0.0-use.local
+  resolution: "@taql/readiness@workspace:packages/readiness"
+  dependencies:
+    "@types/koa": ^2.13.6
+    koa: ^2.14.2
+    typescript: ^5.0.4
+  languageName: unknown
+  linkType: soft
+
 "@taql/schema@workspace:^, @taql/schema@workspace:packages/schema":
   version: 0.0.0-use.local
   resolution: "@taql/schema@workspace:packages/schema"
@@ -1877,6 +1887,7 @@ __metadata:
     "@taql/debug": "workspace:^"
     "@taql/httpAgent": "workspace:^"
     "@taql/prereg": "workspace:^"
+    "@taql/readiness": "workspace:^"
     "@taql/schema": "workspace:^"
     "@taql/security": "workspace:^"
     "@taql/ssl": "workspace:^"
