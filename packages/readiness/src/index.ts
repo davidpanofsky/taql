@@ -30,8 +30,8 @@ export function readinessStage(stage: string) {
   };
 }
 
-export const documentCacheReady = readinessStage('documentCache');
-CLUSTER_READINESS.addReadinessStage(documentCacheReady);
+export const unifiedCachesPrewarmed = readinessStage('documentCache');
+//CLUSTER_READINESS.addReadinessStage(unifiedCachesPrewarmed);
 
 export const serverListening = readinessStage('serverListening');
 CLUSTER_READINESS.addReadinessStage(serverListening);
