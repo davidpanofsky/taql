@@ -257,6 +257,11 @@ export const ENABLE_FEATURES = resolve({
     resolver: resolvers.booleanFromString,
     defaultTo: process.env.NODE_ENV === 'production' ? false : true,
   },
+  astLocationInfo: {
+    property: 'ENABLE_AST_LOCATION_INFO',
+    resolver: resolvers.booleanFromString,
+    defaultTo: process.env.NODE_ENV === 'production' ? false : true,
+  },
 });
 
 export const PREREGISTERED_QUERY_PARAMS = resolve({

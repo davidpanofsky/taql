@@ -1,11 +1,16 @@
-import { DocumentNode, GraphQLSchema, parse } from 'graphql';
+import { DocumentNode, GraphQLSchema, parse as graphqlParse } from 'graphql';
+import { ENABLE_FEATURES, logger } from '@taql/config';
 import { YogaInitialContext, Plugin as YogaPlugin } from 'graphql-yoga';
 import { instrumentedStore, memoryStore } from './stores';
 import type { Store } from 'cache-manager';
 import { logPrewarm } from './util';
-import { logger } from '@taql/config';
 
 type DocumentStore = Store<DocumentNode | Error>;
+
+const parse = (query: string) =>
+  graphqlParse(query, {
+    noLocation: !ENABLE_FEATURES.astLocationInfo,
+  });
 
 export class DocumentCache {
   private readonly preregisteredDocuments: DocumentStore;
@@ -118,6 +123,7 @@ export class DocumentCache {
         args.setParsedDocument(cached);
         return;
       } else {
+        args.setParseFn(parse);
         return ({ result }) => cache.set(key, result);
       }
     },
