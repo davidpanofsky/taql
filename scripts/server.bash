@@ -122,7 +122,7 @@ function main {
     exit 1
   fi
 
-  export GSR_URL="https://gsr.domains-platform-sbx.tamg.cloud"
+  export GSR_URL="https://gsr.domains-platform-dev.tamg.cloud"
   export GSR_USE_IAM=true
   export AUTOMATIC_PERSISTED_QUERY_REDIS_CLUSTER=redis.taql-query-cache.svc.kub.n.tripadvisor.com
   export NODE_OPTIONS="--max-old-space-size=1500"
