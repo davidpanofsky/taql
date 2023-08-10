@@ -55,7 +55,7 @@ function addListeners() {
           // clean up
           requests.delete(message.requestId);
           clearTimeout(request.errorTimeout);
-          // Since we shortcircuit
+          // Compute readiness. We might have already shortcircuited due to a failed check.
           const readiness = request.responses.every((response) => response);
           request.done(readiness, null);
         }
