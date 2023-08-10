@@ -37,6 +37,7 @@ import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspect
 import { useErrorLogging } from './logging';
 import { useOpenTelemetry } from '@envelop/opentelemetry';
 import { useTaqlSecurity } from '@taql/security';
+import { yogaPrewarmed } from '@taql/readiness';
 
 const makePlugins = async (defaultSchema: GraphQLSchema) => {
   const apq = new TaqlAPQ();
@@ -247,6 +248,7 @@ export const useYoga = async () => {
     }),
   });
   logger.info('Prewarmed yoga server');
+  yogaPrewarmed.ready();
 
   return async (ctx: TaqlState) => {
     const accessTimer = accessLogger.startTimer();

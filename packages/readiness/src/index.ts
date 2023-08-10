@@ -47,10 +47,13 @@ export const preregisteredQueriesPlugin = readinessStage(
 );
 export const serverListening = readinessStage('serverListening');
 
+export const yogaPrewarmed = readinessStage('yogaPrewarmed');
+
 export const stages = [
   unifiedCachesPrewarmed,
   preregisteredQueriesPlugin,
   serverListening,
+  yogaPrewarmed,
 ];
 stages.forEach(CLUSTER_READINESS.addReadinessStage);
 
