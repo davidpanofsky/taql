@@ -32,6 +32,13 @@ const loggerConfig = resolve({
   },
 });
 
+export const appMeta = resolve({
+  version: {
+    property: 'APP_VERSION',
+    defaultTo: process.env.NODE_ENV,
+  },
+});
+
 const filterByStatusCode = format((info) => {
   if (!('status' in info) || typeof info.status !== 'number') {
     return info;
@@ -43,7 +50,7 @@ const filterByStatusCode = format((info) => {
 });
 
 loggers.add('access', {
-  defaultMeta: { worker: WORKER },
+  defaultMeta: { worker: WORKER, version: appMeta.version },
   exitOnError: true,
   transports: new transports.Console({
     handleExceptions: false,
@@ -63,7 +70,7 @@ loggers.add('access', {
   }),
 });
 loggers.add('app', {
-  defaultMeta: { worker: WORKER },
+  defaultMeta: { worker: WORKER, version: appMeta.version },
   exitOnError: true,
   transports: new transports.Console({
     handleExceptions: !loggerConfig.console,

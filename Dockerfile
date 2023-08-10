@@ -17,6 +17,9 @@ RUN find /opt/taql/packages -type f \! -name "package.json" | xargs rm
 FROM node:18-alpine3.17
 WORKDIR /opt/taql
 
+ARG APP_VERSION
+ENV APP_VERSION=${APP_VERSION}
+
 # Install non-application packages
 RUN apk update && \
     apk upgrade && \
