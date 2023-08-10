@@ -7,6 +7,7 @@ import {
 } from '@taql/config';
 import {
   Supergraph,
+  TASchema,
   loadSupergraph,
   makeSchema,
   overrideSupergraphWithSvco,
@@ -115,7 +116,7 @@ const makePlugins = async (defaultSchema: GraphQLSchema) => {
           // The trailing newline is important for unblacklisting, apparently.
           return new fetchAPI.Response('<NotImplemented/>\n');
         } catch (err) {
-          logger.error(err);
+          logger.error(`not ready yet: ${err}`);
           return false;
         }
       },
@@ -133,10 +134,10 @@ const SVCO_SCHEMA_BUILD_COUNTER = new promClient.Counter({
 
 const makeSchemaProvider = (
   defaultSupergraph: Supergraph,
-  defaultSchema: GraphQLSchema
+  defaultSchema: TASchema
 ): GraphQLSchema | ((context: TaqlState) => Promise<GraphQLSchema>) => {
   if (!SERVER_PARAMS.svcoWorker) {
-    return defaultSchema;
+    return defaultSchema.schema;
   }
 
   const schemaForSVCOCache = instrumentedStore({
@@ -148,23 +149,27 @@ const makeSchemaProvider = (
         logger.debug(`Fetching and building schema for SVCO: ${legacySVCO}`);
         SVCO_SCHEMA_BUILD_COUNTER.inc(); // We're probably about to hang the event loop, inc before building schema
         return overrideSupergraphWithSvco(defaultSupergraph, legacySVCO).then(
-          (schema) =>
-            schema && 'schema' in schema ? schema.schema : defaultSchema
+          (stitchResult) =>
+            stitchResult == undefined || 'error' in stitchResult
+              ? defaultSchema.schema
+              : 'partial' in stitchResult
+              ? stitchResult.partial.schema
+              : stitchResult.success.schema
         );
       },
     }),
   });
 
   return async (context) => {
-    if (context.state?.taql.SVCO?.hasStitchedRoles) {
+    if (defaultSchema.isOverriddenBy(context.state.taql.SVCO)) {
       logger.debug(`Using schema for SVCO: ${context.state.taql.SVCO}`);
       const schemaForSVCO = await schemaForSVCOCache?.lruCache.fetch(
-        context.state.taql.SVCO.value,
+        context.state.taql.SVCO ?? 'no_svco',
         { allowStale: true }
       );
-      return schemaForSVCO == undefined ? defaultSchema : schemaForSVCO;
+      return schemaForSVCO == undefined ? defaultSchema.schema : schemaForSVCO;
     } else {
-      return defaultSchema;
+      return defaultSchema.schema;
     }
   };
 };
@@ -214,14 +219,20 @@ export const useYoga = async () => {
   } as const;
 
   const supergraph = await loadSupergraph();
-  const schema = await makeSchema(supergraph);
-  if (!('schema' in schema)) {
+  const stitchResult = await makeSchema(supergraph);
+  const schema =
+    'success' in stitchResult
+      ? stitchResult.success
+      : 'partial' in stitchResult
+      ? stitchResult.partial
+      : undefined;
+  if (schema == undefined) {
     throw new Error('failed to load initial schema');
   }
   logger.info('created initial schema');
 
   const yoga = createYoga<TaqlState>({
-    schema: makeSchemaProvider(supergraph, schema.schema),
+    schema: makeSchemaProvider(supergraph, schema),
     ...yogaOptions,
     plugins: await makePlugins(schema.schema),
   });
@@ -247,10 +258,10 @@ export const useYoga = async () => {
     if (
       ENABLE_FEATURES.serviceOverrides &&
       !SERVER_PARAMS.svcoWorker &&
-      svco?.hasStitchedRoles
+      schema.isOverriddenBy(svco)
     ) {
       logger.debug(
-        `SVCO cookie set, but I'm not the SVCO worker... forwarding request. SVCO: ${svco.value}`
+        `SVCO cookie set, but I'm not the SVCO worker... forwarding request. SVCO: ${svco}`
       );
       const requestHeaders: FetchHeaders = new FetchHeaders();
       for (const key in ctx.request.headers) {
