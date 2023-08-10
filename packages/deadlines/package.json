@@ -14,6 +14,6 @@
   "dependencies": {
     "@graphql-tools/utils": "^8.13.1",
     "@taql/context": "workspace:^",
-    "graphql": "^16.6.0"
+    "graphql": "*"
   }
 }

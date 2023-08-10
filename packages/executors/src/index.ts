@@ -87,7 +87,7 @@ const BODY_BYTES_RECEIVED = new promClient.Counter({
 });
 
 type SubgraphConfig = {
-  url: string;
+  url: URL;
   name: string;
   requestedMaxTimeout?: number;
 };
@@ -180,7 +180,7 @@ export const bindLoad = <T_1, R_1, T_2 = unknown, R_2 = unknown>(
   getDeadline: (req: T_1) => number | undefined,
   transform?: Transform<T_1, R_1, T_2, R_2>
 ): Load<T_1, R_1> => {
-  const agent = subgraph.url.startsWith('https://') ? httpsAgent : httpAgent;
+  const agent = subgraph.url.protocol == 'https:' ? httpsAgent : httpAgent;
   if (agent == undefined) {
     throw new Error(
       `Cannot create agent for requests to ${subgraph.url}. (This probably happened because you are trying to use https, but don't have ssl configured. See @taql/config or the project README for more information)`

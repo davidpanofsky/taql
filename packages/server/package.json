@@ -35,7 +35,7 @@
     "@taql/security": "workspace:^",
     "@taql/ssl": "workspace:^",
     "cache-manager": "^5.2.1",
-    "graphql": "^16.6.0",
+    "graphql": "*",
     "graphql-yoga": "^4.0.0",
     "koa": "^2.14.2",
     "node-fetch": "^2.6.11",

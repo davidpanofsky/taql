@@ -16,7 +16,7 @@
     "@envelop/core": "4.0.0",
     "@taql/config": "workspace:^",
     "cache-manager": "^5.2.1",
-    "graphql": "^16.6.0",
+    "graphql": "*",
     "graphql-jit": "^0.8.2",
     "graphql-yoga": "^4.0.0",
     "ioredis": "^5.3.2",

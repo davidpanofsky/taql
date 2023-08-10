@@ -1,36 +1,18 @@
-import {
-  BatchStyle,
-  BatchingStrategy,
-  Subgraph,
-} from '@ta-graphql-utils/stitch';
-import { LEGACY_GQL_PARAMS, logger } from '@taql/config';
 import { httpAgent, httpsAgent } from '@taql/httpAgent';
 import { ENABLE_FEATURES } from '@taql/config';
 import { ForwardSubschemaExtensions } from '@taql/debug';
+import { Subgraph } from '@ta-graphql-utils/stitch';
 import type { Transform } from '@graphql-tools/delegate';
 import { createGraphQLError } from '@graphql-tools/utils';
 import crypto from 'crypto';
 import fetch from 'node-fetch';
+import { logger } from '@taql/config';
 
 const subgraphName = 'legacy-graphql';
 
-const defaultLegacyScheme = httpsAgent == undefined ? 'http' : 'https';
-const defaultLegacyPort =
-  defaultLegacyScheme == 'http'
-    ? LEGACY_GQL_PARAMS.httpPort
-    : LEGACY_GQL_PARAMS.httpsPort;
-const defaultLegacyHost = LEGACY_GQL_PARAMS.host;
-const defaultLegacy = {
-  host: defaultLegacyHost,
-  scheme: defaultLegacyScheme,
-  port: defaultLegacyPort,
-};
-
-const legacyHost = (
-  legacySVCO?: string
-): { host: string; port: number; scheme: string } => {
+const legacyHost = (url: URL, legacySVCO?: string): URL => {
   if (legacySVCO == undefined) {
-    return defaultLegacy;
+    return url;
   }
 
   try {
@@ -41,15 +23,13 @@ const legacyHost = (
         .map((override) => override.split('*')[1])
         .map((parts) => parts.split(':'))
         .pop() ?? [];
-    return {
-      host: legacyOverride[0] ?? defaultLegacyHost,
-      port:
-        (legacyOverride[1] && parseInt(legacyOverride[1])) || defaultLegacyPort,
-      scheme: legacyOverride[2] ?? defaultLegacyScheme,
-    };
+    const hostname = legacyOverride[0] ?? url.hostname;
+    const port = legacyOverride[1] || url.port;
+    const protocol = legacyOverride[2] ?? url.protocol;
+    return new URL(`${protocol}://${hostname}:${port}`);
   } catch (e) {
     console.debug(`unable to parse svco: ${legacySVCO}`, e);
-    return defaultLegacy;
+    return url;
   }
 };
 
@@ -84,36 +64,40 @@ const forwardLegacyErrorsTransform: Transform = {
   },
 };
 
-export async function getLegacySubgraph(
-  legacySVCO?: string
-): Promise<{ subgraph: Subgraph; hash: string }> {
-  const { batchMaxSize, batchWaitQueries, batchWaitMillis } = LEGACY_GQL_PARAMS;
-  const { scheme, host, port } = legacyHost(legacySVCO);
-  const rootUrl = `${scheme}://${host}:${port}`;
-  const batchUrl = `${rootUrl}/v1/graphqlBatched`;
+export async function getLegacySubgraph(args: {
+  url: URL;
+  batchMaxSize: number;
+  batchWaitQueries: number;
+  batchWaitMillis: number;
+  legacySVCO?: string;
+}): Promise<{ subgraph: Subgraph; digest: string }> {
+  const baseUrl = legacyHost(args.url, args.legacySVCO).toString();
+  const schemaUrl = new URL(baseUrl);
+  schemaUrl.pathname = '/Schema';
+  const batchUrl = new URL(baseUrl);
+  batchUrl.pathname = '/v1/graphqlBatched';
   try {
-    const rawSchemaResponse = await fetch(`${rootUrl}/Schema`, {
+    const rawSchemaResponse = await fetch(schemaUrl, {
       agent: httpsAgent || httpAgent,
       headers:
-        legacySVCO == undefined
+        args.legacySVCO == undefined
           ? undefined
-          : { 'X-Service-Overrides': legacySVCO },
+          : { 'X-Service-Overrides': args.legacySVCO },
     });
     const rawSchema = await rawSchemaResponse.text();
-    const hash = crypto.createHash('md5').update(rawSchema).digest('hex');
     const subgraph: Subgraph = {
       name: subgraphName,
       namespace: 'Global',
       sdl: rawSchema,
       executorConfig: {
-        url: batchUrl,
+        url: batchUrl.toString(),
         batching: {
-          style: BatchStyle.Legacy,
-          strategy: BatchingStrategy.BatchByUpstreamHeaders,
-          maxSize: batchMaxSize,
+          style: 'Legacy',
+          strategy: 'Headers',
+          maxSize: args.batchMaxSize,
           wait: {
-            queries: batchWaitQueries,
-            millis: batchWaitMillis,
+            queries: args.batchWaitQueries,
+            millis: args.batchWaitMillis,
           },
         },
       },
@@ -127,8 +111,9 @@ export async function getLegacySubgraph(
           ),
       ].filter(isTransform),
     };
+    const digest = crypto.createHash('md5').update(rawSchema).digest('hex');
 
-    return { subgraph, hash };
+    return { subgraph, digest };
   } catch (e) {
     logger.error(`error loading legacy schema: ${e}`);
     throw e;

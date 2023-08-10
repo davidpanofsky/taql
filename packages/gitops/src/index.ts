@@ -1,7 +1,8 @@
 import * as yaml from 'js-yaml';
-import { SchemaDigest, makeSchemaWithDigest } from '@taql/schema';
+import { loadSupergraph, makeSchema } from '@taql/schema';
 import { lstatSync, readFileSync, writeFileSync } from 'fs';
 import { GITOPS_PARAMS } from '@taql/config';
+import { inspect } from 'util';
 
 // Env vars
 // = This package =
@@ -33,29 +34,26 @@ type PatchItem = {
   };
 };
 
-type Digest = {
-  digest: SchemaDigest;
-};
+// we're only interested in the ID part of the schema.
+type Schema = { id: string };
 
 /**
  * Encode a SchemaDigest into a base64 string that can be injected into deployment manifests
  */
-function encodeDigest(digest: SchemaDigest): string {
-  return Buffer.from(`${digest.legacyHash}_${digest.manifest}`).toString(
-    'base64'
-  );
+function makeDigest(schema: Schema): string {
+  return Buffer.from(schema.id).toString('base64');
 }
 
 async function updateSchemaDigest(
   patchFilePath: string,
-  digestProvider: () => Promise<Digest | undefined> = makeSchemaWithDigest,
+  schemaProvider: () => Promise<Schema | undefined>,
   envVarToInject = 'SCHEMA_DIGEST'
-): Promise<{ digest: SchemaDigest; encoded: string }> {
-  const result = await digestProvider();
-  if (!result) {
+): Promise<{ schemaId: string; digest: string }> {
+  const schema = await schemaProvider();
+  if (!schema) {
     throw new Error('Failed to build schema');
   }
-  const encodedDigest = encodeDigest(result.digest);
+  const digest = makeDigest(schema);
 
   // nodegit doesn't compile on my mac, so we won't use that and will instead just use a standard git installation
   // Load existing patch
@@ -66,11 +64,8 @@ async function updateSchemaDigest(
   let changed = false;
   // Update digest if necessary
   patch.forEach((item: PatchItem) => {
-    if (
-      item.value.name == envVarToInject &&
-      item.value.value != encodedDigest
-    ) {
-      item.value.value = encodedDigest;
+    if (item.value.name == envVarToInject && item.value.value != digest) {
+      item.value.value = digest;
       changed = true;
     }
   });
@@ -85,17 +80,34 @@ async function updateSchemaDigest(
     );
   }
 
-  return { digest: result.digest, encoded: encodedDigest };
+  return { schemaId: schema.id, digest };
 }
 
 // For testing
-async function dummyDigest(): Promise<Digest> {
+async function dummySchema(): Promise<Schema> {
   return {
-    digest: {
-      legacyHash: Math.random().toString(36).substr(2, 10),
-      manifest: '',
-    },
+    id: Math.random().toString(36).substring(2, 10),
   };
+}
+async function loadSchema(): Promise<Schema> {
+  const schema = await makeSchema(await loadSupergraph());
+  if (!('schema' in schema)) {
+    throw new Error(
+      `Unable to produce schema: ${inspect(schema.validationErrors)}`
+    );
+  }
+
+  if (schema.validationErrors.length > 1) {
+    const message = `Validation errors in schema: ${inspect(
+      schema.validationErrors
+    )}`;
+    if (GITOPS_PARAMS.allowPartialSchema) {
+      console.error(message);
+    } else {
+      throw new Error(message);
+    }
+  }
+  return schema;
 }
 
 function main() {
@@ -108,15 +120,15 @@ function main() {
     );
   }
 
-  let digestProvider: () => Promise<Digest | undefined> = makeSchemaWithDigest;
+  let schemaProvider: () => Promise<Schema | undefined> = loadSchema;
   if (GITOPS_PARAMS.useDummyDigest) {
     console.log('RUNNING IN TEST MODE, USING DUMMY DIGEST');
-    digestProvider = dummyDigest;
+    schemaProvider = dummySchema;
   }
 
-  updateSchemaDigest(GITOPS_PARAMS.patchFilePath, digestProvider).then(
+  updateSchemaDigest(GITOPS_PARAMS.patchFilePath, schemaProvider).then(
     function (result) {
-      console.log(`Digest (base64 encoded): ${result.encoded}`);
+      console.log(`Digest (base64 encoded): ${result}`);
     }
   );
 }

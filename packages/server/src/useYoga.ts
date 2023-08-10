@@ -5,6 +5,12 @@ import {
   accessLogger,
   logger,
 } from '@taql/config';
+import {
+  Supergraph,
+  loadSupergraph,
+  makeSchema,
+  overrideSupergraphWithSvco,
+} from '@taql/schema';
 import { createYoga, useReadinessCheck } from 'graphql-yoga';
 import fetch, {
   Headers as FetchHeaders,
@@ -28,7 +34,6 @@ import type { IncomingHttpHeaders } from 'http';
 import { TaqlAPQ } from './apq';
 import { TaqlState } from '@taql/context';
 import { httpsAgent } from '@taql/httpAgent';
-import { makeSchema } from '@taql/schema';
 import { preconfiguredUsePrometheus } from './usePrometheus';
 import promClient from 'prom-client';
 import { readFileSync } from 'fs';
@@ -127,6 +132,7 @@ const SVCO_SCHEMA_BUILD_COUNTER = new promClient.Counter({
 });
 
 const makeSchemaProvider = (
+  defaultSupergraph: Supergraph,
   defaultSchema: GraphQLSchema
 ): GraphQLSchema | ((context: TaqlState) => Promise<GraphQLSchema>) => {
   if (!SERVER_PARAMS.svcoWorker) {
@@ -138,10 +144,13 @@ const makeSchemaProvider = (
     store: memoryStore<GraphQLSchema>({
       max: 128,
       ttl: 1000 * 60 * 2,
-      async fetchMethod(key): Promise<GraphQLSchema> {
-        logger.debug(`Fetching and building schema for SVCO: ${key}`);
+      async fetchMethod(legacySVCO): Promise<GraphQLSchema> {
+        logger.debug(`Fetching and building schema for SVCO: ${legacySVCO}`);
         SVCO_SCHEMA_BUILD_COUNTER.inc(); // We're probably about to hang the event loop, inc before building schema
-        return makeSchema(key);
+        return overrideSupergraphWithSvco(defaultSupergraph, legacySVCO).then(
+          (schema) =>
+            schema && 'schema' in schema ? schema.schema : defaultSchema
+        );
       },
     }),
   });
@@ -204,25 +213,17 @@ export const useYoga = async () => {
     legacySse: false,
   } as const;
 
-  /*
-  // Example use of SchemaPoller, currently not in use due to it binding the CPU too aggressively
-  const schemaPoller = new SchemaPoller({
-    interval: TEN_MINUTES_MILLIS,
-  });
-
-  const schema = await schemaPoller.schema;
-  */
-  const schema = await makeSchema();
-
-  if (schema == undefined) {
+  const supergraph = await loadSupergraph();
+  const schema = await makeSchema(supergraph);
+  if (!('schema' in schema)) {
     throw new Error('failed to load initial schema');
   }
   logger.info('created initial schema');
 
   const yoga = createYoga<TaqlState>({
-    schema: makeSchemaProvider(schema),
+    schema: makeSchemaProvider(supergraph, schema.schema),
     ...yogaOptions,
-    plugins: await makePlugins(schema),
+    plugins: await makePlugins(schema.schema),
   });
   logger.info('Created yoga server');
 

@@ -52,7 +52,7 @@ type BatchingExecutorConfig<T extends BatchStyle = BatchStyle> = Readonly<
 >;
 
 function makeSingleQueryBatchingExecutor(
-  config: BatchingExecutorConfig<BatchStyle.Single>
+  config: BatchingExecutorConfig<'Single'>
 ): Executor<TaqlRequest> {
   const executor = makeRemoteExecutor(config);
   // Use a loader graphql-tools helpfully defines, which goes through the
@@ -73,7 +73,7 @@ function makeSingleQueryBatchingExecutor(
 }
 
 function makeArrayBatchingExecutor(
-  config: BatchingExecutorConfig<BatchStyle.Array>,
+  config: BatchingExecutorConfig<'Array'>,
   requestFormatter: (req: TaqlRequest) => unknown | Promise<unknown>
 ): Executor<TaqlRequest> {
   const arrayLoader = bindLoad<ReadonlyArray<TaqlRequest>, ExecutionResult[]>(
@@ -100,10 +100,23 @@ function makeArrayBatchingExecutor(
   );
 }
 
+// TODO this papers over a problem in the publication cronjob, namely that it passes on the
+// url it uses to procure the legacy schema (the graphqlUnwrapped endpoint on legacy). Big
+// changes are coming to that cronjob later; for now this will do
+const rewriteLegacyConfig = (
+  config: BatchingExecutorConfig<'Legacy'>
+): BatchingExecutorConfig<'Legacy'> => ({
+  ...config,
+  url: new URL(
+    config.url.toString().replace('graphqlUnwrapped', 'graphqlBatched')
+  ),
+});
+
 function makeLegacyGqlExecutor(
-  config: BatchingExecutorConfig<BatchStyle.Legacy>,
+  rawConfig: BatchingExecutorConfig<'Legacy'>,
   requestFormatter: (req: TaqlRequest) => unknown | Promise<unknown>
 ): Executor {
+  const config = rewriteLegacyConfig(rawConfig);
   const load = bindLoad<
     ReadonlyArray<TaqlRequest>,
     ExecutionResult[],
@@ -165,18 +178,18 @@ export const createExecutor = (
   requestFormatter: (req: TaqlRequest) => unknown | Promise<unknown>
 ): Executor => {
   switch (config.batching.style) {
-    case BatchStyle.Single:
+    case 'Single':
       return makeSingleQueryBatchingExecutor(
-        <BatchingExecutorConfig<BatchStyle.Single>>config
+        <BatchingExecutorConfig<'Single'>>config
       );
-    case BatchStyle.Array:
+    case 'Array':
       return makeArrayBatchingExecutor(
-        <BatchingExecutorConfig<BatchStyle.Array>>config,
+        <BatchingExecutorConfig<'Array'>>config,
         requestFormatter
       );
-    case BatchStyle.Legacy:
+    case 'Legacy':
       return makeLegacyGqlExecutor(
-        <BatchingExecutorConfig<BatchStyle.Legacy>>config,
+        <BatchingExecutorConfig<'Legacy'>>config,
         requestFormatter
       );
   }
