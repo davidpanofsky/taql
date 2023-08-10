@@ -13,7 +13,6 @@
     "typescript": "^5.0.4"
   },
   "dependencies": {
-    "@taql/config": "workspace:^",
-    "koa": "^2.14.2"
+    "@taql/config": "workspace:^"
   }
 }

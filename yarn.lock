@@ -1828,7 +1828,6 @@ __metadata:
   dependencies:
     "@taql/config": "workspace:^"
     "@types/koa": ^2.13.6
-    koa: ^2.14.2
     typescript: ^5.0.4
   languageName: unknown
   linkType: soft
