@@ -196,7 +196,7 @@ const insecureStrategy: Strategy = (executor, config) => async (requests) => {
 };
 
 export const STRATEGIES: Record<BatchingStrategy, Strategy> = {
-  [BatchingStrategy.BatchByInboundRequest]: byRequestStrategy,
-  [BatchingStrategy.BatchByUpstreamHeaders]: byHeadersStrategy,
-  [BatchingStrategy.InsecurelyBatchIndiscriminately]: insecureStrategy,
+  Request: byRequestStrategy,
+  Headers: byHeadersStrategy,
+  Insecure: insecureStrategy,
 };

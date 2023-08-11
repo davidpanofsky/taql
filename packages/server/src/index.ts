@@ -1,17 +1,26 @@
 import {
+
   CLUSTER_READINESS,
   addClusterReadinessStage,
   useClusterReadiness,
 } from '@taql/readiness';
-import { ENABLE_FEATURES, SERVER_PARAMS, appMeta, logger } from '@taql/config';
+import {
+  ENABLE_FEATURES,
+  SCHEMA,
+  SERVER_PARAMS,
+  appMeta,
+  logger,
+} from '@taql/config';
 import { Server, createServer as httpServer } from 'http';
 import cluster, { Worker } from 'node:cluster';
 import { useHttpStatusTracking, useMetricsEndpoint } from './observability';
 import Koa from 'koa';
 import { SSL_CONFIG } from '@taql/ssl';
 import { createServer as httpsServer } from 'https';
+import { loadSupergraph } from '@taql/schema';
 import process from 'node:process';
 import promClient from 'prom-client';
+import { promises } from 'fs';
 import { useTaqlContext } from '@taql/context';
 import { useYoga } from './useYoga';
 
@@ -69,6 +78,13 @@ const workerStartup = async () => {
 
 const primaryStartup = async () => {
   const { port } = SERVER_PARAMS;
+
+  const schemaFile = SCHEMA.schemaFile ?? '/supergraph.json';
+  if (SCHEMA.source == 'gsr') {
+    const supergraph = await loadSupergraph();
+    await promises.writeFile(schemaFile, JSON.stringify(supergraph));
+    logger.info(`serialized supergraph from GSR to ${schemaFile}`);
+  }
 
   const koa = new Koa();
 
@@ -128,13 +144,22 @@ const primaryStartup = async () => {
     sucessfulInitialization = true;
   });
 
+  const schemaEnv = {
+    SCHEMA_FILE: schemaFile,
+    SCHEMA_SOURCE: 'file',
+  };
+
   // create one worker for svco on port - 1 if enabled.
-  ENABLE_FEATURES.serviceOverrides && fork({ SVCO_WORKER: 'true' });
+  ENABLE_FEATURES.serviceOverrides &&
+    fork({ SVCO_WORKER: 'true', ...schemaEnv });
   const clusterParallelism = ENABLE_FEATURES.serviceOverrides
     ? Math.max(SERVER_PARAMS.clusterParallelism - 1, 1)
     : SERVER_PARAMS.clusterParallelism;
   for (let i = 0; i < clusterParallelism; i++) {
-    fork({ SVCO_WORKER: 'false' });
+    fork({
+      SVCO_WORKER: 'false',
+      ...schemaEnv,
+    });
     // A small delay between forks seems to help keep external dependencies happy.
     await new Promise<void>((resolve) => setTimeout(resolve, 100));
   }

@@ -17,7 +17,7 @@
   "dependencies": {
     "@taql/config": "workspace:^",
     "@taql/headers": "workspace:^",
-    "graphql": "^16.6.0",
+    "graphql": "*",
     "node-fetch": "^2.6.11"
   }
 }

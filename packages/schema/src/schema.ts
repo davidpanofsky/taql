@@ -1,5 +1,12 @@
+import { AuthManager, getManager } from '@ta-graphql-utils/auth-manager';
 import { Cache, caching, multiCaching } from 'cache-manager';
-import { LEGACY_GQL_PARAMS, PRINT_DOCUMENT_PARAMS, logger } from '@taql/config';
+import {
+  ENABLE_FEATURES,
+  PRINT_DOCUMENT_PARAMS,
+  SCHEMA,
+  logger,
+} from '@taql/config';
+import { GraphQLError, GraphQLSchema } from 'graphql';
 import {
   PrintedDocumentCacheConfig,
   makeRemoteExecutor,
@@ -8,6 +15,7 @@ import {
 import {
   Subgraph,
   SubgraphExecutorConfig,
+  normalizeSdl,
   stitch,
 } from '@ta-graphql-utils/stitch';
 import {
@@ -16,26 +24,22 @@ import {
   memoryStore,
   redisStore,
 } from '@taql/caching';
-import { EventEmitter } from 'events';
 import type { Executor } from '@graphql-tools/utils';
-import { GraphQLSchema } from 'graphql';
-import type { TaqlYogaPlugin } from '@taql/context';
-import type TypedEmitter from 'typed-emitter';
 import { createExecutor as batchingExecutorFactory } from '@taql/batching';
-import deepEqual from 'deep-equal';
 import { getLegacySubgraph } from './legacy';
+import { inspect } from 'util';
+import { makeClient } from '@gsr/client';
+import { promises } from 'fs';
 
-export type SchemaDigest = {
-  legacyHash: string;
-  manifest: string;
-};
+export type TASchema =
+  | {
+      schema: GraphQLSchema;
+      validationErrors: (string | GraphQLError)[];
+      id: string;
+    }
+  | { validationErrors: (string | GraphQLError)[] };
 
-export type TASchema = {
-  schema: GraphQLSchema;
-  digest: SchemaDigest;
-};
-
-const requestedMaxTimeout = LEGACY_GQL_PARAMS.maxTimeout;
+const requestedMaxTimeout = 5000;
 
 function makeExecutorFactory(
   cacheConfig: PrintedDocumentCacheConfig
@@ -136,104 +140,188 @@ async function createPrintedDocumentCache(params: {
 
 let printedDocumentCache: Omit<Cache, 'store'>;
 
-export async function makeSchema({
-  previous,
-  legacySVCO,
-}: {
-  previous?: TASchema;
-  legacySVCO?: string;
-} = {}): Promise<TASchema> {
-  const subgraphs: Subgraph[] = [];
+const initAuth = (): AuthManager => {
+  if (SCHEMA.useIam) {
+    return getManager({ kind: 'iam' });
+  } else {
+    if (SCHEMA.identityToken == undefined) {
+      throw new Error('cannot use oidc without identity token');
+    }
+    return getManager({ tokenPath: SCHEMA.identityToken });
+  }
+};
 
-  // TODO load manifest from schema repository
+export type Supergraph = {
+  id: string;
+  manifest: Subgraph[];
+  supergraph: string;
+  legacyDigest?: string;
+};
 
-  const legacy = await getLegacySubgraph(legacySVCO);
-  const digest: SchemaDigest = { manifest: '', legacyHash: legacy?.hash || '' };
+const loadSupergraphFromGsr = async (): Promise<Supergraph> => {
+  const manager = initAuth();
+  const gsrClient = makeClient(SCHEMA, manager);
 
+  const supergraph = await gsrClient.supergraph({
+    query: { environment: SCHEMA.environment },
+  });
+  switch (supergraph.statusCode) {
+    case '200':
+      return supergraph.body;
+    case '404':
+      throw new Error(
+        `Unable to read supergraph: ${JSON.stringify(supergraph)}`
+      );
+  }
+};
+
+export const loadSupergraph = async (): Promise<Supergraph> => {
+  if (SCHEMA.source == 'file') {
+    logger.info(`loaded supergraph from file: ${SCHEMA.schemaFile}`);
+    if (SCHEMA.schemaFile == undefined) {
+      throw new Error('no schema file specified');
+    }
+    return JSON.parse(await promises.readFile(SCHEMA.schemaFile, 'utf-8'));
+  }
+
+  let id = 'unknown';
+  let manifest: Subgraph[] = [];
+  let sdl = '';
+  let legacyDigest: string | undefined = undefined;
+
+  try {
+    logger.info('loading supergraph from GSR');
+    const supergraph = await loadSupergraphFromGsr();
+    id = supergraph.id;
+    sdl = supergraph.supergraph;
+    manifest = [...supergraph.manifest];
+  } catch (err) {
+    if (SCHEMA.legacySchemaSource == 'gsr') {
+      // we have no schema. DO not proceed.
+      throw err;
+    }
+    // TODO
+    // This is a safety valve to allow us to 'test' GSR contact
+    // by trying to load from GSR but falling back to querying legacy graphql.
+    // That possibility will not remain long; remove this.
+    logger.error(`unable to load schema from GSR: ${err}`);
+  }
+
+  if (SCHEMA.legacySchemaSource != 'gsr') {
+    logger.info(
+      `loading legacy subgraph from ${SCHEMA.legacySchemaSource.url}`
+    );
+    const { subgraph, digest } = await getLegacySubgraph(
+      SCHEMA.legacySchemaSource
+    );
+    legacyDigest = digest;
+    manifest.push(subgraph);
+  }
+  const stitched = await stitch({
+    subgraphs: manifest,
+    parseOptions: {
+      noLocation: !ENABLE_FEATURES.astLocationInfo,
+    },
+  });
+  if (!('schema' in stitched)) {
+    throw new Error(`Unable to stitch schema: ${inspect(stitched)}`);
+  }
+
+  // Check that we know what we're doing.
+  const reprintedSdl = normalizeSdl(stitched.schema);
+  if (SCHEMA.legacySchemaSource == 'gsr' && reprintedSdl != sdl) {
+    // warn and continue.
+    logger.warn(
+      'Stitched schema SDL does not match SDL retrieved from GSR. Ensure GSR and taql have the same stitch version.'
+    );
+  }
+
+  return {
+    id,
+    manifest,
+    supergraph: reprintedSdl,
+    legacyDigest,
+  };
+};
+
+export const makeSchema = async (supergraph: Supergraph): Promise<TASchema> => {
   // Initialize the printed document cache if it hasn't been already
   if (!printedDocumentCache) {
     printedDocumentCache = await createPrintedDocumentCache(
       PRINT_DOCUMENT_PARAMS
     );
   }
+  const schemaId =
+    supergraph.id + supergraph.legacyDigest != undefined
+      ? `_${supergraph.legacyDigest}`
+      : '';
 
   const cacheConfig: PrintedDocumentCacheConfig = {
     cache: printedDocumentCache,
     keyFn(queryId: string, fieldName: string | number) {
-      return `${queryId}_${fieldName}_${digest.manifest}_${digest.legacyHash}`;
+      return `${queryId}_${fieldName}_${schemaId}`;
     },
   };
 
-  if (previous != undefined && deepEqual(digest, previous.digest)) {
-    return previous;
-  }
-
-  subgraphs.push(legacy.subgraph);
-
-  // TODO load schemas from schema repository, add to subschemas.
-
   try {
-    const stitchResult = await stitch(
-      subgraphs,
-      makeExecutorFactory(cacheConfig)
-    );
+    const stitchResult = await stitch({
+      subgraphs: supergraph.manifest,
+      executorFactory: makeExecutorFactory(cacheConfig),
+      parseOptions: {
+        noLocation: !ENABLE_FEATURES.astLocationInfo,
+      },
+    });
 
+    let validationErrors: (string | GraphQLError)[] = [];
     if ('errors' in stitchResult) {
-      throw new Error(
-        `Schema failed to validate: ${stitchResult.errors.toString()}`
-      );
+      validationErrors = stitchResult.errors;
     }
 
     if ('schema' in stitchResult) {
       const { schema } = stitchResult;
-      return { schema, digest };
+      return { schema, validationErrors, id: schemaId };
+    } else if ('schemaWithErrors' in stitchResult) {
+      const { schemaWithErrors: schema } = stitchResult;
+      return { schema, validationErrors, id: schemaId };
     } else {
-      throw new Error('No schema in stitch result');
+      return { validationErrors };
     }
   } catch (err: unknown) {
     throw new Error(`Error stitching schemas: ${err}`);
   }
-}
-
-type SchemaEvents = {
-  schema: (schema: GraphQLSchema) => void;
 };
 
-export class SchemaPoller extends (EventEmitter as new () => TypedEmitter<SchemaEvents>) {
-  private _schema: undefined | TASchema | Promise<TASchema | undefined>;
-
-  constructor(args: { interval: number }) {
-    super();
-    const { interval } = args;
-    this._schema = makeSchema();
-    setInterval(this.tryUpdate.bind(this), interval);
+export const overrideSupergraphWithSvco = async (
+  supergraph: Supergraph,
+  legacySVCO: string
+): Promise<TASchema | undefined> => {
+  const manifest: Subgraph[] = [...supergraph.manifest];
+  const legacySubgraph = manifest.find((sg) => sg.name == 'legacy-graphql');
+  if (legacySubgraph == undefined) {
+    console.warn("Can't use svco without legacy graphql");
+    return undefined;
   }
 
-  private async tryUpdate() {
-    const prev = await this._schema;
-    const next = await makeSchema({ previous: prev });
-    if (next != prev && next != undefined) {
-      // Don't update on broken schemas. The change between any two
-      // schemas likely concerns very few subgraphs. If changing them
-      // fails validation, we'll see errors in calls to them no matter
-      // what. The rest of the schema is probably fine, so skipping the
-      // update preserves most of our functionality. Conversely, producing
-      // an empty schema at this juncture would cause every query to fail.
-      this._schema = next;
-      this.emit('schema', next.schema);
-    }
-  }
+  const legacyHost = new URL(legacySubgraph.executorConfig.url);
 
-  public asPlugin(): TaqlYogaPlugin {
-    const onSchema = this.on.bind(this, 'schema');
-    return {
-      onPluginInit({ setSchema }) {
-        onSchema((schema) => setSchema(schema));
-      },
-    };
-  }
+  const legacyOverride = await getLegacySubgraph({
+    url: legacyHost,
+    batchMaxSize: legacySubgraph.executorConfig.batching?.maxSize ?? 250,
+    batchWaitQueries:
+      legacySubgraph.executorConfig.batching?.wait?.queries ?? 20,
+    batchWaitMillis:
+      legacySubgraph.executorConfig.batching?.wait?.millis ?? 200,
+    legacySVCO,
+  });
 
-  get schema(): Promise<GraphQLSchema | undefined> {
-    return Promise.resolve(this._schema).then((s) => s?.schema);
+  if (legacyOverride.digest == supergraph.legacyDigest) {
+    //no change
+    return undefined;
   }
-}
+  manifest.push(legacyOverride.subgraph);
+  return makeSchema({
+    ...supergraph,
+    manifest,
+    legacyDigest: legacyOverride.digest,
+  });
+};

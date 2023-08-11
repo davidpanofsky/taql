@@ -1,8 +1,4 @@
-import {
-  EXECUTION_TIMEOUT_PARAMS,
-  LEGACY_GQL_PARAMS,
-  logger,
-} from '@taql/config';
+import { EXECUTION_TIMEOUT_PARAMS, SCHEMA, logger } from '@taql/config';
 import { ForwardableHeaders, forwardableHeaders } from './headers';
 import { GenericHeaders, getHeaderOrDefault } from '@taql/headers';
 import type { Middleware, ParameterizedContext } from 'koa';
@@ -88,6 +84,10 @@ const deadline = (headers: GenericHeaders): number =>
 export const timeRemaining = (context: TaqlContext): number =>
   context.deadline - Date.now();
 
+const legacyGqlRoles =
+  SCHEMA.legacySchemaSource == 'gsr'
+    ? []
+    : `graphql*${SCHEMA.legacySchemaSource.url.hostname}:${SCHEMA.legacySchemaSource.url.port}:${SCHEMA.legacySchemaSource.url.protocol}`;
 // We know these roles do not affect the stitched schema. This list is not
 // intended to be exhaustive, and an exhaustive list is not desirable: services
 // may _become_ stitched, unless there is some special property or use case
@@ -98,9 +98,9 @@ const nonStitchedRoles = [
   // taql _is_ us
   'taql*',
   // the legacy host we would talk to anyhow is not interesting
-  `graphql*${LEGACY_GQL_PARAMS.host}:${LEGACY_GQL_PARAMS.httpsPort}:https:`,
-  `graphql*${LEGACY_GQL_PARAMS.host}:${LEGACY_GQL_PARAMS.httpPort}:http:`,
+  ...legacyGqlRoles,
 ];
+
 logger.info(`ignored svco roles: ${nonStitchedRoles}`);
 
 /**

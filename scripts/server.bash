@@ -26,6 +26,7 @@ function running_pid {
     cat $PIDFILE
   fi
 }
+
 function is_running_pid {
   ps -p $1 >/dev/null 
 }
@@ -121,8 +122,12 @@ function main {
     exit 1
   fi
 
-  export AUTOMATIC_PERSISTED_QUERY_REDIS_CLUSTER=redis.taql-query-cache.svc.kub.n.tripadvisor.com
-  export NODE_OPTIONS="--max-old-space-size=6144"
+  export GSR_USE_IAM=${GSR_USE_IAM:-true}
+  export AUTOMATIC_PERSISTED_QUERY_REDIS_CLUSTER=${AUTOMATIC_PERSISTED_QUERY_REDIS_CLUSTER:-redis.taql-query-cache.svc.kub.n.tripadvisor.com}
+  export NODE_OPTIONS=${NODE_OPTIONS:-"--max-old-space-size=1500"}
+  export SCHEMA_SOURCE=${SCHEMA_SOURCE:-gsr}
+  export SCHEMA_FILE=${SCHEMA_FILE:-/tmp/taql/supergraph.json}
+
   case $1 in
     start )
       assert_not_running && start
