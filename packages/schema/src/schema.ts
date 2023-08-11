@@ -1,7 +1,12 @@
 import { AuthManager, getManager } from '@ta-graphql-utils/auth-manager';
 import { Cache, caching, multiCaching } from 'cache-manager';
+import {
+  ENABLE_FEATURES,
+  PRINT_DOCUMENT_PARAMS,
+  SCHEMA,
+  logger,
+} from '@taql/config';
 import { GraphQLError, GraphQLSchema } from 'graphql';
-import { PRINT_DOCUMENT_PARAMS, SCHEMA, logger } from '@taql/config';
 import {
   PrintedDocumentCacheConfig,
   makeRemoteExecutor,
@@ -212,7 +217,12 @@ export const loadSupergraph = async (): Promise<Supergraph> => {
     legacyDigest = digest;
     manifest.push(subgraph);
   }
-  const stitched = await stitch(manifest);
+  const stitched = await stitch({
+    subgraphs: manifest,
+    parseOptions: {
+      noLocation: !ENABLE_FEATURES.astLocationInfo,
+    },
+  });
   if (!('schema' in stitched)) {
     throw new Error(`Unable to stitch schema: ${inspect(stitched)}`);
   }
@@ -254,10 +264,13 @@ export const makeSchema = async (supergraph: Supergraph): Promise<TASchema> => {
   };
 
   try {
-    const stitchResult = await stitch(
-      supergraph.manifest,
-      makeExecutorFactory(cacheConfig)
-    );
+    const stitchResult = await stitch({
+      subgraphs: supergraph.manifest,
+      executorFactory: makeExecutorFactory(cacheConfig),
+      parseOptions: {
+        noLocation: !ENABLE_FEATURES.astLocationInfo,
+      },
+    });
 
     let validationErrors: (string | GraphQLError)[] = [];
     if ('errors' in stitchResult) {

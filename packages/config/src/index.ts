@@ -1,13 +1,13 @@
+// Importing it this way ensures we can use env variables to set the path to correct .env file
+import 'dotenv/config';
+
 import { format as consoleFormat, inspect } from 'util';
 import { format, loggers, transports } from 'winston';
 import { resolve, resolvers } from './resolution';
 import { availableParallelism } from 'node:os';
 import cluster from 'node:cluster';
-import { config } from 'dotenv';
 import { hostname } from 'os';
 import { logFmtFormat } from 'winston-logfmt';
-
-config();
 
 /**
  * A consistent identifier for any given process, for example 'primary' for the
