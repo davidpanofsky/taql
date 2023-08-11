@@ -45,14 +45,31 @@ export function addClusterReadinessStage(
 ): ReadinessStage {
   if (typeof stage === 'string') {
     stage = readinessStage(stage);
-    CLUSTER_READINESS.addReadinessStage(stage);
+    CLUSTER_READINESS.addClusterReadinessStage(stage);
   } else {
-    CLUSTER_READINESS.addReadinessStage(stage);
+    CLUSTER_READINESS.addClusterReadinessStage(stage);
+  }
+  return stage;
+}
+
+export function addPrimaryReadinessStage(
+  stage: ReadinessStage | string
+): ReadinessStage {
+  if (typeof stage === 'string') {
+    stage = readinessStage(stage);
+    CLUSTER_READINESS.addPrimaryReadinessStage(stage);
+  } else {
+    CLUSTER_READINESS.addPrimaryReadinessStage(stage);
   }
   return stage;
 }
 
 export function addClusterReadinessCheck(check: () => boolean) {
-  CLUSTER_READINESS.addCheck(check);
+  CLUSTER_READINESS.addWorkerCheck(check);
+  return check;
+}
+
+export function addPrimaryReadinessCheck(check: () => boolean) {
+  CLUSTER_READINESS.addPrimaryCheck(check);
   return check;
 }

@@ -1,6 +1,7 @@
 import {
   CLUSTER_READINESS,
   addClusterReadinessStage,
+  addPrimaryReadinessStage,
   useClusterReadiness,
 } from '@taql/readiness';
 import {
@@ -24,6 +25,7 @@ import { useTaqlContext } from '@taql/context';
 import { useYoga } from './useYoga';
 
 const serverListening = addClusterReadinessStage('serverListening');
+const workersForked = addPrimaryReadinessStage('allWorkersForked');
 
 const unhandledErrors = new promClient.Counter({
   name: 'taql_koa_unhandled_errors',
@@ -162,6 +164,8 @@ const primaryStartup = async () => {
     // A small delay between forks seems to help keep external dependencies happy.
     await new Promise<void>((resolve) => setTimeout(resolve, 100));
   }
+
+  workersForked.ready();
 
   cluster.on('online', (worker) => {
     workersStarted.inc();

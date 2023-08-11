@@ -17,7 +17,8 @@ type ReadinessRequest = {
 
 const requests = new Map<number, ReadinessRequest>();
 
-const checks: (() => boolean)[] = [];
+const workerChecks: (() => boolean)[] = [];
+const primaryChecks: (() => boolean)[] = [];
 
 let listenersAdded = false;
 // idempotently add listeners for IPC messages
@@ -68,7 +69,7 @@ function addListeners() {
       if (message.type === GET_READINESS_REQ) {
         // Send readiness response to primary (master)
         // Compute this worker's readiness
-        const readiness = checks.every((check) => check());
+        const readiness = workerChecks.every((check) => check());
         process.send?.({
           type: GET_READINESS_RES,
           requestId: message.requestId,
@@ -86,13 +87,28 @@ export class ClusterReadiness {
     addListeners();
   }
 
-  addReadinessStage(readiness: { check: () => boolean; name: string }) {
-    logger.info(`Asserting readiness of ${readiness.name}`);
-    checks.push(readiness.check);
+  addClusterReadinessStage(readiness: { check: () => boolean; name: string }) {
+    if (cluster.isWorker) {
+      logger.info(`Asserting readiness of ${readiness.name}`);
+    }
+    workerChecks.push(readiness.check);
+    return readiness;
   }
 
-  addCheck(check: () => boolean) {
-    checks.push(check);
+  addPrimaryReadinessStage(readiness: { check: () => boolean; name: string }) {
+    logger.info(`Asserting readiness of ${readiness.name} in primary`);
+    primaryChecks.push(readiness.check);
+    return readiness;
+  }
+
+  addWorkerCheck(check: () => boolean) {
+    workerChecks.push(check);
+    return check;
+  }
+
+  addPrimaryCheck(check: () => boolean) {
+    primaryChecks.push(check);
+    return check;
   }
 
   isReady(): Promise<boolean> {
@@ -141,6 +157,9 @@ export class ClusterReadiness {
         clearTimeout(request.errorTimeout);
         process.nextTick(() => done(false, null));
       }
-    });
+    }).then(
+      (workerReadiness) =>
+        workerReadiness === true && primaryChecks.every((check) => check())
+    );
   }
 }
