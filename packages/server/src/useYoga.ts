@@ -135,7 +135,9 @@ const SVCO_SCHEMA_BUILD_COUNTER = new promClient.Counter({
 const makeSchemaProvider = (
   defaultSupergraph: Supergraph,
   defaultSchema: TASchema
-): GraphQLSchema | ((context: TaqlState) => Promise<GraphQLSchema>) => {
+):
+  | GraphQLSchema
+  | ((context?: Partial<TaqlState>) => Promise<GraphQLSchema>) => {
   if (!SERVER_PARAMS.svcoWorker) {
     return defaultSchema.schema;
   }
@@ -161,10 +163,10 @@ const makeSchemaProvider = (
   });
 
   return async (context) => {
-    if (defaultSchema.isOverriddenBy(context.state.taql.SVCO)) {
-      logger.debug(`Using schema for SVCO: ${context.state.taql.SVCO}`);
+    if (defaultSchema.isOverriddenBy(context?.state?.taql.SVCO)) {
+      logger.debug(`Using schema for SVCO: ${context?.state?.taql.SVCO}`);
       const schemaForSVCO = await schemaForSVCOCache?.lruCache.fetch(
-        context.state.taql.SVCO ?? 'no_svco',
+        context?.state?.taql.SVCO ?? 'no_svco',
         { allowStale: true }
       );
       return schemaForSVCO == undefined ? defaultSchema.schema : schemaForSVCO;
