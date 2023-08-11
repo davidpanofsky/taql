@@ -9,7 +9,9 @@ import { addClusterReadinessStage } from '@taql/readiness';
 import promClient from 'prom-client';
 
 // Readiness
-const preregisteredQueriesInit = addClusterReadinessStage('preregisteredQueriesPlugin');
+const preregisteredQueriesInit = addClusterReadinessStage(
+  'preregisteredQueriesPlugin'
+);
 
 // metrics
 const PREREG_UNK = new promClient.Counter({

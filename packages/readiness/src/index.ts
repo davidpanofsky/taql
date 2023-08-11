@@ -40,7 +40,9 @@ export function readinessStage(name: string): ReadinessStage {
   };
 }
 
-export function addClusterReadinessStage(stage: ReadinessStage | string): ReadinessStage {
+export function addClusterReadinessStage(
+  stage: ReadinessStage | string
+): ReadinessStage {
   if (typeof stage === 'string') {
     stage = readinessStage(stage);
     CLUSTER_READINESS.addReadinessStage(stage);

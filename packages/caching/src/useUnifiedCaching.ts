@@ -7,7 +7,9 @@ import { Plugin as YogaPlugin } from 'graphql-yoga';
 import { addClusterReadinessStage } from '@taql/readiness';
 import { logPrewarm } from './util';
 
-const unifiedCachesPrewarmed = addClusterReadinessStage('unifiedCachesPrewarmed');
+const unifiedCachesPrewarmed = addClusterReadinessStage(
+  'unifiedCachesPrewarmed'
+);
 
 export async function useUnifiedCaching(options: {
   maxCacheSize: number;
