@@ -18,6 +18,7 @@ import {
   normalizeSdl,
   stitch,
 } from '@ta-graphql-utils/stitch';
+import { getLegacySubgraph, legacyTransforms } from './legacy';
 import {
   instrumentedStore,
   isCache,
@@ -26,7 +27,6 @@ import {
 } from '@taql/caching';
 import type { Executor } from '@graphql-tools/utils';
 import { createExecutor as batchingExecutorFactory } from '@taql/batching';
-import { getLegacySubgraph } from './legacy';
 import { inspect } from 'util';
 import { makeClient } from '@gsr/client';
 import { promises } from 'fs';
@@ -284,9 +284,11 @@ export const makeSchema = async (
   };
 
   let isOverriddenBy = () => false;
-  const legacySubgraph = supergraph.manifest.find(
-    (sg) => sg.name == 'legacy-graphql'
-  );
+  // Our runtime doesn't have `findLast` yet, so filter and pop to find the last legacy-graphql subgraph :(
+  // There may be more than one if an override was applied; it is the last one that will be stitched.
+  const legacySubgraph = supergraph.manifest
+    .filter((sg) => sg.name == 'legacy-graphql')
+    .pop();
   if (legacySubgraph != undefined) {
     // We know these roles do not affect the stitched schema. This list is not
     // intended to be exhaustive, and an exhaustive list is not desirable: services
@@ -316,6 +318,10 @@ export const makeSchema = async (
               role.startsWith(nonStitched)
             ) == undefined
         ) != undefined;
+
+    // We need a few transforms for the legacy subgraph to work, add a final copy of it to the manifest with the transforms
+    // Cast to dangerously escape the readonly nature of the subgraphs.
+    (<Record<string, unknown>>legacySubgraph).transforms = legacyTransforms;
   }
 
   try {
