@@ -1,6 +1,6 @@
 import {
   CLUSTER_READINESS,
-  serverListening,
+  addClusterReadinessStage,
   useClusterReadiness,
 } from '@taql/readiness';
 import { ENABLE_FEATURES, SERVER_PARAMS, appMeta, logger } from '@taql/config';
@@ -14,6 +14,8 @@ import process from 'node:process';
 import promClient from 'prom-client';
 import { useTaqlContext } from '@taql/context';
 import { useYoga } from './useYoga';
+
+const serverListening = addClusterReadinessStage('serverListening');
 
 const unhandledErrors = new promClient.Counter({
   name: 'taql_koa_unhandled_errors',

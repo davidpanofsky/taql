@@ -27,6 +27,7 @@ import { GraphQLSchema } from 'graphql';
 import type { IncomingHttpHeaders } from 'http';
 import { TaqlAPQ } from './apq';
 import { TaqlState } from '@taql/context';
+import { addClusterReadinessStage } from '@taql/readiness';
 import { httpsAgent } from '@taql/httpAgent';
 import { makeSchema } from '@taql/schema';
 import { preconfiguredUsePrometheus } from './usePrometheus';
@@ -37,7 +38,6 @@ import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspect
 import { useErrorLogging } from './logging';
 import { useOpenTelemetry } from '@envelop/opentelemetry';
 import { useTaqlSecurity } from '@taql/security';
-import { yogaPrewarmed } from '@taql/readiness';
 
 const makePlugins = async (defaultSchema: GraphQLSchema) => {
   const apq = new TaqlAPQ();
@@ -188,7 +188,10 @@ const responseSizeMetric = new promClient.Histogram({
   buckets: defaultSizeBytesBuckets,
 });
 
+const yogaPrewarmed = addClusterReadinessStage('yogaPrewarmed');
+
 export const useYoga = async () => {
+  yogaPrewarmed.unready();
   const batchLimit = SERVER_PARAMS.batchLimit;
   const port = SERVER_PARAMS.svcoWorker
     ? SERVER_PARAMS.port - 1

@@ -29,10 +29,10 @@ export function readinessStage(name: string): ReadinessStage {
       ready = true;
     },
     unready() {
-      logger.info(`Readiness stage "${name}" invalidated`);
       if (ready) {
         // reset the timer if and only if the state is changing
         start = Date.now();
+        logger.info(`Readiness stage "${name}" invalidated`);
       }
       ready = false;
     },
@@ -40,31 +40,17 @@ export function readinessStage(name: string): ReadinessStage {
   };
 }
 
-// Readiness stages.  Exported so the related initialization sequences can import them and mark them when appropriate
-export const unifiedCachesPrewarmed = readinessStage('unifiedCachesPrewarmed');
-export const preregisteredQueriesPlugin = readinessStage(
-  'preregisteredQueriesPlugin'
-);
-export const serverListening = readinessStage('serverListening');
-
-export const yogaPrewarmed = readinessStage('yogaPrewarmed');
-
-export const stages = [
-  unifiedCachesPrewarmed,
-  preregisteredQueriesPlugin,
-  serverListening,
-  yogaPrewarmed,
-];
-stages.forEach(CLUSTER_READINESS.addReadinessStage);
-
-export function globalUnready() {
-  stages.forEach((stage) => stage.unready());
-}
-
-export function addClusterReadinessStage(stage: ReadinessStage) {
-  CLUSTER_READINESS.addReadinessStage(stage);
+export function addClusterReadinessStage(stage: ReadinessStage | string): ReadinessStage {
+  if (typeof stage === 'string') {
+    stage = readinessStage(stage);
+    CLUSTER_READINESS.addReadinessStage(stage);
+  } else {
+    CLUSTER_READINESS.addReadinessStage(stage);
+  }
+  return stage;
 }
 
 export function addClusterReadinessCheck(check: () => boolean) {
   CLUSTER_READINESS.addCheck(check);
+  return check;
 }
