@@ -1,7 +1,7 @@
-import { EXECUTION_TIMEOUT_PARAMS, SCHEMA, logger } from '@taql/config';
 import { ForwardableHeaders, forwardableHeaders } from './headers';
 import { GenericHeaders, getHeaderOrDefault } from '@taql/headers';
 import type { Middleware, ParameterizedContext } from 'koa';
+import { EXECUTION_TIMEOUT_PARAMS } from '@taql/config';
 import type { Plugin as Yoga } from 'graphql-yoga';
 
 export {
@@ -26,17 +26,12 @@ export type LegacyContext = Readonly<{
   uniqueId: string | undefined;
   userClientIP: string | undefined;
 }>;
-type Mutable<Type> = {
-  -readonly [Key in keyof Type]: Type[Key];
-};
-
-type SVCO = Readonly<{ value: string; hasStitchedRoles: boolean }>;
 
 export type TaqlContext = Readonly<{
   forwardHeaders: ForwardableHeaders;
   deadline: number;
   legacyContext: LegacyContext;
-  SVCO?: SVCO;
+  SVCO?: string;
 }>;
 
 type RawState = Readonly<{ taql: TaqlContext }>;
@@ -84,54 +79,8 @@ const deadline = (headers: GenericHeaders): number =>
 export const timeRemaining = (context: TaqlContext): number =>
   context.deadline - Date.now();
 
-const legacyGqlRoles =
-  SCHEMA.legacySchemaSource == 'gsr'
-    ? []
-    : `graphql*${SCHEMA.legacySchemaSource.url.hostname}:${SCHEMA.legacySchemaSource.url.port}:${SCHEMA.legacySchemaSource.url.protocol}`;
-// We know these roles do not affect the stitched schema. This list is not
-// intended to be exhaustive, and an exhaustive list is not desirable: services
-// may _become_ stitched, unless there is some special property or use case
-// around the service that makes that extremely unlikely.
-const nonStitchedRoles = [
-  // the components svc only consumes the schema - it's probably what called us
-  'components*',
-  // taql _is_ us
-  'taql*',
-  // the legacy host we would talk to anyhow is not interesting
-  ...legacyGqlRoles,
-];
-
-logger.info(`ignored svco roles: ${nonStitchedRoles}`);
-
-/**
- * return true if the svco string has overrides for stitched roles in it, i.e. roles that
- * impact the stitched schema
- */
-const hasStitchedRoles = (svco: string): boolean =>
-  svco
-    .split('|')
-    .filter((role) => role.trim() !== '')
-    .find(
-      (role) =>
-        // The role is not non-stitched, so it _may_ be stitched.
-        nonStitchedRoles.find((nonStitched) => role.startsWith(nonStitched)) ==
-        undefined
-    ) != undefined;
-
-const svco = (headers: GenericHeaders): undefined | SVCO => {
-  const value = getHeaderOrDefault(headers, 'x-service-overrides', undefined);
-  return value == undefined
-    ? value
-    : {
-        value,
-        get hasStitchedRoles() {
-          //memoize.
-          delete (<Mutable<Partial<SVCO>>>this).hasStitchedRoles;
-          return ((<Mutable<SVCO>>this).hasStitchedRoles =
-            hasStitchedRoles(value));
-        },
-      };
-};
+const svco = (headers: GenericHeaders): string | undefined =>
+  getHeaderOrDefault(headers, 'x-service-overrides', undefined);
 
 const buildContext = (headers: GenericHeaders): TaqlContext => ({
   forwardHeaders: forwardableHeaders(headers),

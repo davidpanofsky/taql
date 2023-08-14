@@ -104,7 +104,9 @@ export class TaqlAPQ {
 
     // Try to establish connection to redis before we start handling traffic
     await this.redisStore?.ready().catch((err) => {
-      logger.error(err?.message || err);
+      logger.error(
+        `Failed to connect to apq redis store: ${err?.message || err}`
+      );
     });
 
     const redisCache = this.redisStore && (await caching(this.redisStore));

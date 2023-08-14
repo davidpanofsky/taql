@@ -18,6 +18,7 @@ import {
   normalizeSdl,
   stitch,
 } from '@ta-graphql-utils/stitch';
+import { getLegacySubgraph, legacyTransforms } from './legacy';
 import {
   instrumentedStore,
   isCache,
@@ -26,18 +27,30 @@ import {
 } from '@taql/caching';
 import type { Executor } from '@graphql-tools/utils';
 import { createExecutor as batchingExecutorFactory } from '@taql/batching';
-import { getLegacySubgraph } from './legacy';
 import { inspect } from 'util';
 import { makeClient } from '@gsr/client';
 import { promises } from 'fs';
 
-export type TASchema =
+export type TASchema = {
+  schema: GraphQLSchema;
+  isOverriddenBy: (svco?: string) => boolean;
+  id: string;
+};
+
+export type ErrorSchema = {
+  validationErrors: (string | GraphQLError)[];
+};
+
+export type PartialSchema = ErrorSchema & TASchema;
+
+export type StitchResult =
   | {
-      schema: GraphQLSchema;
-      validationErrors: (string | GraphQLError)[];
-      id: string;
+      success: TASchema;
     }
-  | { validationErrors: (string | GraphQLError)[] };
+  | { partial: PartialSchema }
+  | {
+      error: ErrorSchema;
+    };
 
 const requestedMaxTimeout = 5000;
 
@@ -119,7 +132,9 @@ async function createPrintedDocumentCache(params: {
   await printRedisStore?.ready().catch((err) => {
     // Still use the store even if this fails, since we may get connection later
     // If we don't, volume of errors that store produces should let us know that something is wrong
-    logger.error(err?.message || err);
+    logger.error(
+      `Failed to init printed documents redis: ${err?.message || err}`
+    );
   });
 
   // Multicache with redis if a redis configuration is present
@@ -151,14 +166,17 @@ const initAuth = (): AuthManager => {
   }
 };
 
-export type Supergraph = {
+type RawSupergraph = {
   id: string;
   manifest: Subgraph[];
   supergraph: string;
+};
+
+export type Supergraph = RawSupergraph & {
   legacyDigest?: string;
 };
 
-const loadSupergraphFromGsr = async (): Promise<Supergraph> => {
+const loadSupergraphFromGsr = async (): Promise<RawSupergraph> => {
   const manager = initAuth();
   const gsrClient = makeClient(SCHEMA, manager);
 
@@ -244,7 +262,9 @@ export const loadSupergraph = async (): Promise<Supergraph> => {
   };
 };
 
-export const makeSchema = async (supergraph: Supergraph): Promise<TASchema> => {
+export const makeSchema = async (
+  supergraph: Supergraph
+): Promise<StitchResult> => {
   // Initialize the printed document cache if it hasn't been already
   if (!printedDocumentCache) {
     printedDocumentCache = await createPrintedDocumentCache(
@@ -263,6 +283,47 @@ export const makeSchema = async (supergraph: Supergraph): Promise<TASchema> => {
     },
   };
 
+  let isOverriddenBy = () => false;
+  // Our runtime doesn't have `findLast` yet, so filter and pop to find the last legacy-graphql subgraph :(
+  // There may be more than one if an override was applied; it is the last one that will be stitched.
+  const legacySubgraph = supergraph.manifest
+    .filter((sg) => sg.name == 'legacy-graphql')
+    .pop();
+  if (legacySubgraph != undefined) {
+    // We know these roles do not affect the stitched schema. This list is not
+    // intended to be exhaustive, and an exhaustive list is not desirable: services
+    // may _become_ stitched, unless there is some special property or use case
+    // around the service that makes that extremely unlikely.
+    const legacyUrl = new URL(legacySubgraph.executorConfig.url);
+    const nonstitchedRoles = [
+      // the components svc only consumes the schema - it's probably what called us
+      'components*',
+      // taql _is_ us
+      'taql*',
+      `graphql*${legacyUrl.hostname}:${legacyUrl.port}:${legacyUrl.protocol}`,
+    ];
+    logger.info(
+      `Schema will ignore SVCO records starting with ${nonstitchedRoles}`
+    );
+
+    isOverriddenBy = (svco?: string) =>
+      svco != undefined &&
+      svco
+        .split('|')
+        .filter((role) => role.trim() !== '')
+        .find(
+          (role) =>
+            // The role is not non-stitched, so it _may_ be stitched.
+            nonstitchedRoles.find((nonStitched) =>
+              role.startsWith(nonStitched)
+            ) == undefined
+        ) != undefined;
+
+    // We need a few transforms for the legacy subgraph to work, add a final copy of it to the manifest with the transforms
+    // Cast to dangerously escape the readonly nature of the subgraphs.
+    (<Record<string, unknown>>legacySubgraph).transforms = legacyTransforms;
+  }
+
   try {
     const stitchResult = await stitch({
       subgraphs: supergraph.manifest,
@@ -279,12 +340,19 @@ export const makeSchema = async (supergraph: Supergraph): Promise<TASchema> => {
 
     if ('schema' in stitchResult) {
       const { schema } = stitchResult;
-      return { schema, validationErrors, id: schemaId };
+      return { success: { schema, isOverriddenBy, id: schemaId } };
     } else if ('schemaWithErrors' in stitchResult) {
       const { schemaWithErrors: schema } = stitchResult;
-      return { schema, validationErrors, id: schemaId };
+      return {
+        partial: {
+          schema,
+          isOverriddenBy,
+          validationErrors,
+          id: schemaId,
+        },
+      };
     } else {
-      return { validationErrors };
+      return { error: { validationErrors } };
     }
   } catch (err: unknown) {
     throw new Error(`Error stitching schemas: ${err}`);
@@ -294,7 +362,7 @@ export const makeSchema = async (supergraph: Supergraph): Promise<TASchema> => {
 export const overrideSupergraphWithSvco = async (
   supergraph: Supergraph,
   legacySVCO: string
-): Promise<TASchema | undefined> => {
+): Promise<StitchResult | undefined> => {
   const manifest: Subgraph[] = [...supergraph.manifest];
   const legacySubgraph = manifest.find((sg) => sg.name == 'legacy-graphql');
   if (legacySubgraph == undefined) {

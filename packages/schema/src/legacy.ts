@@ -64,6 +64,16 @@ const forwardLegacyErrorsTransform: Transform = {
   },
 };
 
+export const legacyTransforms = [
+  forwardLegacyErrorsTransform,
+  ENABLE_FEATURES.debugExtensions &&
+    new ForwardSubschemaExtensions(
+      subgraphName,
+      // Omit mutatedFields since TAQL already provides that
+      ({ mutatedFields, ...extensions }) => extensions
+    ),
+].filter(isTransform);
+
 export async function getLegacySubgraph(args: {
   url: URL;
   batchMaxSize: number;
@@ -101,15 +111,7 @@ export async function getLegacySubgraph(args: {
           },
         },
       },
-      transforms: [
-        forwardLegacyErrorsTransform,
-        ENABLE_FEATURES.debugExtensions &&
-          new ForwardSubschemaExtensions(
-            subgraphName,
-            // Omit mutatedFields since TAQL already provides that
-            ({ mutatedFields, ...extensions }) => extensions
-          ),
-      ].filter(isTransform),
+      transforms: legacyTransforms,
     };
     const digest = crypto.createHash('md5').update(rawSchema).digest('hex');
 

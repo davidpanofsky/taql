@@ -90,24 +90,26 @@ async function dummySchema(): Promise<Schema> {
   };
 }
 async function loadSchema(): Promise<Schema> {
-  const schema = await makeSchema(await loadSupergraph());
-  if (!('schema' in schema)) {
-    throw new Error(
-      `Unable to produce schema: ${inspect(schema.validationErrors)}`
-    );
-  }
-
-  if (schema.validationErrors.length > 1) {
-    const message = `Validation errors in schema: ${inspect(
-      schema.validationErrors
+  const stitchResult = await makeSchema(await loadSupergraph());
+  if ('success' in stitchResult) {
+    return stitchResult.success;
+  } else if ('partial' in stitchResult) {
+    const message = `Partial schema. Validation errors in schema: ${inspect(
+      stitchResult.partial.validationErrors
     )}`;
     if (GITOPS_PARAMS.allowPartialSchema) {
       console.error(message);
+      return stitchResult.partial;
     } else {
       throw new Error(message);
     }
+  } else {
+    throw new Error(
+      `Unable to produce schema: ${inspect(
+        stitchResult.error.validationErrors
+      )}`
+    );
   }
-  return schema;
 }
 
 function main() {
