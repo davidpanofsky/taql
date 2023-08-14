@@ -1,16 +1,32 @@
-import { DocumentNode, GraphQLSchema, parse as graphqlParse } from 'graphql';
-import { ENABLE_FEATURES, logger } from '@taql/config';
+import { DocumentNode, GraphQLSchema, getOperationAST, parse } from 'graphql';
+import { ENABLE_FEATURES, logger, WORKER as worker } from '@taql/config';
 import { YogaInitialContext, Plugin as YogaPlugin } from 'graphql-yoga';
 import { instrumentedStore, memoryStore } from './stores';
 import type { Store } from 'cache-manager';
 import { logPrewarm } from './util';
+import promClient from 'prom-client';
 
 type DocumentStore = Store<DocumentNode | Error>;
 
-const parse = (query: string) =>
-  graphqlParse(query, {
+const labelNames = ['worker', 'operationType'];
+const buckets = [0.0001, 0.0005, 0.001, 0.005, 0.01, 0.05, 0.1, 0.5];
+
+const UNCACHED_PARSE_DURATION_HISTOGRAM = new promClient.Histogram({
+  name: 'taql_uncached_parse_duration',
+  help: 'Time spent parsing the string into DocumentNode',
+  labelNames,
+  buckets,
+});
+
+const instrumentedParse = (query: string): DocumentNode => {
+  const stopTimer = UNCACHED_PARSE_DURATION_HISTOGRAM.startTimer({ worker });
+  const document = parse(query, {
     noLocation: !ENABLE_FEATURES.astLocationInfo,
   });
+  const operationType = getOperationAST(document)?.operation || 'unknown';
+  stopTimer({ operationType });
+  return document;
+};
 
 export class DocumentCache {
   private readonly preregisteredDocuments: DocumentStore;
@@ -66,7 +82,7 @@ export class DocumentCache {
   ) => {
     const parseDocument = (cache: DocumentStore, id: string, query: string) => {
       try {
-        const document = parse(query);
+        const document = instrumentedParse(query);
         parsedDocuments?.push(document);
         cache.set(id, document);
       } catch (error) {
@@ -123,7 +139,7 @@ export class DocumentCache {
         args.setParsedDocument(cached);
         return;
       } else {
-        args.setParseFn(parse);
+        args.setParseFn(instrumentedParse);
         return ({ result }) => cache.set(key, result);
       }
     },
