@@ -1,0 +1,18 @@
+{
+  "name": "@taql/readiness",
+  "version": "1.0.0",
+  "main": "build/index.js",
+  "scripts": {
+    "build": "tsc",
+    "incremental-build": "tsc --build",
+    "start": "node build/index.js"
+  },
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@types/koa": "^2.13.6",
+    "typescript": "^5.0.4"
+  },
+  "dependencies": {
+    "@taql/config": "workspace:^"
+  }
+}

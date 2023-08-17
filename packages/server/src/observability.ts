@@ -28,7 +28,10 @@ const labels = { worker: WORKER };
 promClient.collectDefaultMetrics({ prefix, labels });
 // end: memory monitoring
 
-export const useMetricsEndpoint = async (ctx: ParameterizedContext) => {
+export const useMetricsEndpoint = async (
+  ctx: ParameterizedContext,
+  next: () => Promise<unknown>
+) => {
   if (ctx.request.method === 'GET' && ctx.request.path === '/metrics') {
     try {
       const primaryMetrics = await promClient.register.metrics();
@@ -40,6 +43,8 @@ export const useMetricsEndpoint = async (ctx: ParameterizedContext) => {
       ctx.status = 500;
       ctx.body = err;
     }
+  } else {
+    await next();
   }
 };
 

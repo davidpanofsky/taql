@@ -5,7 +5,13 @@ import { instrumentedStore, memoryStore } from '@taql/caching';
 import { logger, WORKER as worker } from '@taql/config';
 import { Pool } from 'pg';
 import type { Store } from 'cache-manager';
+import { addClusterReadinessStage } from '@taql/readiness';
 import promClient from 'prom-client';
+
+// Readiness
+const preregisteredQueriesInit = addClusterReadinessStage(
+  'preregisteredQueriesPlugin'
+);
 
 // metrics
 const PREREG_UNK = new promClient.Counter({
@@ -114,6 +120,7 @@ export function usePreregisteredQueries(options: {
     ssl,
   } = options;
 
+  preregisteredQueriesInit.unready();
   logger.info(
     `Initializing preregistered queries plugin using ${postgresConnectionString}, max cache size = ${maxCacheSize}`
   );
@@ -178,6 +185,9 @@ export function usePreregisteredQueries(options: {
           })
           .catch((e) => logger.error(`Failed to update known query ids: ${e}`));
       }, 30000);
+
+      // Initialization complete
+      preregisteredQueriesInit.ready();
     },
 
     // Check extensions for a potential preregistered query id, and resolve it to the query text, parsed

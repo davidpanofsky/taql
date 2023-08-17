@@ -2735,6 +2735,7 @@ __metadata:
   dependencies:
     "@envelop/core": 4.0.0
     "@taql/config": "workspace:^"
+    "@taql/readiness": "workspace:^"
     "@types/lodash.clonedeep": ^4.5.0
     cache-manager: ^5.2.1
     graphql: "*"
@@ -2857,6 +2858,7 @@ __metadata:
     "@envelop/core": 4.0.0
     "@taql/caching": "workspace:^"
     "@taql/config": "workspace:^"
+    "@taql/readiness": "workspace:^"
     "@taql/testing": "workspace:^"
     "@types/pg": ^8.6.6
     cache-manager: ^5.2.1
@@ -2864,6 +2866,16 @@ __metadata:
     graphql-yoga: ^4.0.0
     pg: ^8.10.0
     prom-client: ^14.2.0
+    typescript: ^5.0.4
+  languageName: unknown
+  linkType: soft
+
+"@taql/readiness@workspace:^, @taql/readiness@workspace:packages/readiness":
+  version: 0.0.0-use.local
+  resolution: "@taql/readiness@workspace:packages/readiness"
+  dependencies:
+    "@taql/config": "workspace:^"
+    "@types/koa": ^2.13.6
     typescript: ^5.0.4
   languageName: unknown
   linkType: soft
@@ -2924,6 +2936,7 @@ __metadata:
     "@taql/debug": "workspace:^"
     "@taql/httpAgent": "workspace:^"
     "@taql/prereg": "workspace:^"
+    "@taql/readiness": "workspace:^"
     "@taql/schema": "workspace:^"
     "@taql/security": "workspace:^"
     "@taql/ssl": "workspace:^"

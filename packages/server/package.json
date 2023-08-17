@@ -31,6 +31,7 @@
     "@taql/debug": "workspace:^",
     "@taql/httpAgent": "workspace:^",
     "@taql/prereg": "workspace:^",
+    "@taql/readiness": "workspace:^",
     "@taql/schema": "workspace:^",
     "@taql/security": "workspace:^",
     "@taql/ssl": "workspace:^",

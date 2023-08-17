@@ -1,4 +1,10 @@
 import {
+  CLUSTER_READINESS,
+  addClusterReadinessStage,
+  addPrimaryReadinessStage,
+  useClusterReadiness,
+} from '@taql/readiness';
+import {
   ENABLE_FEATURES,
   SCHEMA,
   SERVER_PARAMS,
@@ -17,6 +23,9 @@ import promClient from 'prom-client';
 import { promises } from 'fs';
 import { useTaqlContext } from '@taql/context';
 import { useYoga } from './useYoga';
+
+const serverListening = addClusterReadinessStage('serverListening');
+const workersForked = addPrimaryReadinessStage('allWorkersForked');
 
 const unhandledErrors = new promClient.Counter({
   name: 'taql_koa_unhandled_errors',
@@ -55,6 +64,7 @@ const workerStartup = async () => {
 
   logger.info(`launching server on port ${port}`);
   server.listen(port, () => {
+    serverListening.ready();
     logger.info('server running');
   });
 
@@ -79,8 +89,17 @@ const primaryStartup = async () => {
 
   const koa = new Koa();
 
+  koa.use(
+    useClusterReadiness({
+      path: '/NotImplemented',
+      readyBody: '<NotImplemented/>\n',
+      unreadyBody: '<NotReady/>\n',
+      readiness: CLUSTER_READINESS,
+    })
+  );
   // add prom metrics endpoint
   koa.use(useMetricsEndpoint);
+
   const server: Server =
     SSL_CONFIG == undefined ? httpServer() : httpsServer(SSL_CONFIG);
 
@@ -146,6 +165,8 @@ const primaryStartup = async () => {
     await new Promise<void>((resolve) => setTimeout(resolve, 100));
   }
 
+  workersForked.ready();
+
   cluster.on('online', (worker) => {
     workersStarted.inc();
     logger.info('online', { pid: worker.process.pid });
@@ -162,7 +183,7 @@ const primaryStartup = async () => {
         });
         workersExited.inc({ kind: 'killed', version: appMeta.version });
       } else if (code !== 0) {
-        logger.warn(`worker exited with error code: ${code}`, {
+        logger.warn(`worker ${worker.id} exited with error code: ${code}`, {
           pid: worker.process.pid,
         });
         workersExited.inc({ kind: 'error', version: appMeta.version });

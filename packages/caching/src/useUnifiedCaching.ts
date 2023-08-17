@@ -4,7 +4,12 @@ import { DocumentCache } from './documents';
 import { JitCache } from './jit';
 import { ValidationCache } from './validation';
 import { Plugin as YogaPlugin } from 'graphql-yoga';
+import { addClusterReadinessStage } from '@taql/readiness';
 import { logPrewarm } from './util';
+
+const unifiedCachesPrewarmed = addClusterReadinessStage(
+  'unifiedCachesPrewarmed'
+);
 
 export async function useUnifiedCaching(options: {
   maxCacheSize: number;
@@ -16,6 +21,7 @@ export async function useUnifiedCaching(options: {
     queries?: [];
   };
 }): Promise<YogaPlugin> {
+  unifiedCachesPrewarmed.unready();
   const { maxCacheSize, useJit, prewarm } = options;
 
   const documentCache = new DocumentCache(maxCacheSize);
@@ -42,5 +48,6 @@ export async function useUnifiedCaching(options: {
     ...validationCache.plugin,
     ...jitCache?.plugin,
   };
+  unifiedCachesPrewarmed.ready();
   return plugin;
 }

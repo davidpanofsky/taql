@@ -34,6 +34,7 @@ import { GraphQLSchema } from 'graphql';
 import type { IncomingHttpHeaders } from 'http';
 import { TaqlAPQ } from './apq';
 import { TaqlState } from '@taql/context';
+import { addClusterReadinessStage } from '@taql/readiness';
 import { httpsAgent } from '@taql/httpAgent';
 import { preconfiguredUsePrometheus } from './usePrometheus';
 import promClient from 'prom-client';
@@ -194,7 +195,10 @@ const responseSizeMetric = new promClient.Histogram({
   buckets: defaultSizeBytesBuckets,
 });
 
+const yogaPrewarmed = addClusterReadinessStage('yogaPrewarmed');
+
 export const useYoga = async () => {
+  yogaPrewarmed.unready();
   const batchLimit = SERVER_PARAMS.batchLimit;
   const port = SERVER_PARAMS.svcoWorker
     ? SERVER_PARAMS.port - 1
@@ -252,6 +256,7 @@ export const useYoga = async () => {
     }),
   });
   logger.info('Prewarmed yoga server');
+  yogaPrewarmed.ready();
 
   return async (ctx: TaqlState) => {
     const accessTimer = accessLogger.startTimer();
