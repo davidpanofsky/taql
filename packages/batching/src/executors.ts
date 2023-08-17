@@ -12,6 +12,7 @@ import {
 } from '@taql/deadlines';
 import DataLoader from 'dataloader';
 import { STRATEGIES } from './strategies';
+import { SubgraphConfig } from '@taql/executors';
 import type { TaqlState } from '@taql/context';
 import { createLoadFn } from '@graphql-tools/batch-execute';
 import promClient from 'prom-client';
@@ -46,6 +47,7 @@ export const createBatchingExecutor = (
 
 type BatchingExecutorConfig<T extends BatchStyle = BatchStyle> = Readonly<
   SubgraphExecutorConfig &
+    SubgraphConfig &
     Required<Pick<SubgraphExecutorConfig, 'batching'>> & {
       requestedMaxTimeout?: number;
     } & { batching: { style: T } }

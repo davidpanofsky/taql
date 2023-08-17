@@ -1,18 +1,25 @@
-import { type ASTNode, print } from 'graphql';
+import { type ASTNode, GraphQLError, print } from 'graphql';
 import {
+  AUTH_MANAGER_CONFIG,
   EXECUTION_TIMEOUT_PARAMS,
   UPSTREAM_TIMEOUT_PARAMS,
   logger,
   WORKER as worker,
 } from '@taql/config';
+import {
+  AuthManager,
+  AuthProvider,
+  getManager,
+} from '@ta-graphql-utils/auth-manager';
 import { ExecutionRequest, ExecutionResult } from '@graphql-tools/utils';
+import { ForwardableHeaders, type TaqlState } from '@taql/context';
 import fetch, { Headers } from 'node-fetch';
 import { httpAgent, httpsAgent } from '@taql/httpAgent';
 import type { Agent } from 'http';
 import { Cache } from 'cache-manager';
-import { ForwardableHeaders } from '@taql/context';
-import type { TaqlState } from '@taql/context';
+import { SubgraphExecutorConfig } from '@ta-graphql-utils/stitch';
 import { getDeadline } from '@taql/deadlines';
+import path from 'node:path';
 import promClient from 'prom-client';
 
 export type TaqlRequest = ExecutionRequest<Record<string, unknown>, TaqlState>;
@@ -86,9 +93,8 @@ const BODY_BYTES_RECEIVED = new promClient.Counter({
   labelNames: ['subgraph'],
 });
 
-type SubgraphConfig = {
-  url: URL;
-  name: string;
+export type SubgraphConfig = SubgraphExecutorConfig & {
+  authProvider?: AuthProvider;
   requestedMaxTimeout?: number;
 };
 
@@ -130,6 +136,54 @@ const computeTimeout = (maxTimeout: number, deadline?: number): number => {
   }
 };
 
+export const authManager = (
+  oidcLiteAuthorizationDomain: string
+): AuthManager => {
+  if (AUTH_MANAGER_CONFIG.authKind == undefined) {
+    throw new Error('working authManager is required');
+  } else {
+    if (AUTH_MANAGER_CONFIG.authKind == 'aws') {
+      return getManager({ kind: 'iam' });
+    } else {
+      const tokenPath = path.join(
+        AUTH_MANAGER_CONFIG.oidcTokenPath,
+        oidcLiteAuthorizationDomain
+      );
+      return getManager({ tokenPath });
+    }
+  }
+};
+
+export const subgraphAuthProvider = (
+  url: URL,
+  oidcLiteAuthorizationDomain?: string
+): AuthProvider | undefined => {
+  if (oidcLiteAuthorizationDomain == undefined) {
+    return undefined;
+  }
+
+  const audience = url.origin;
+  const scopeBase = url.href.replace(/\/$/, '');
+  const scopes = new Set([`${scopeBase}::write`, `${scopeBase}::read`]);
+  logger.debug('@taql/executors subgraphAuthProvider: ', {
+    oidcLiteAuthorizationDomain,
+    audience,
+    scopes: [...scopes],
+  });
+  const providerConfig = {
+    issuerConfig: { domain: oidcLiteAuthorizationDomain },
+    audience,
+    scopes,
+  };
+  return oidcLiteAuthorizationDomain
+    ? AUTH_MANAGER_CONFIG.eagerProvider
+      ? authManager(oidcLiteAuthorizationDomain).getEagerProvider(
+          providerConfig
+        )
+      : authManager(oidcLiteAuthorizationDomain).getLazyProvider(providerConfig)
+    : undefined;
+};
+
 const load = async <T, R>({
   timeout,
   subgraph,
@@ -156,6 +210,8 @@ const load = async <T, R>({
     timeout - UPSTREAM_TIMEOUT_PARAMS.upstreamTimeoutPaddingMillis
   );
 
+  const token = (await subgraph.authProvider?.getAuth())?.accessToken;
+  token != undefined && headers.set('x-oidc-authorization', `Bearer ${token}`);
   headers.set('x-timeout', `${paddedTimeout}`);
   headers.set('content-type', 'application/json');
   logger.debug(`Fetching from remote: ${subgraph.url}`);
@@ -168,11 +224,17 @@ const load = async <T, R>({
     timeout,
     body,
   });
-  const responseBody = await response.buffer();
-  BODY_BYTES_RECEIVED.labels({ subgraph: subgraph.name }).inc(
-    responseBody.byteLength
-  );
-  return <R>JSON.parse(responseBody.toString());
+  if (!response.ok) {
+    throw new GraphQLError(
+      `Got ${response.status} error from remote: ${subgraph.url}`
+    );
+  } else {
+    const responseBody = await response.json();
+    BODY_BYTES_RECEIVED.labels({ subgraph: subgraph.name }).inc(
+      responseBody.length
+    );
+    return responseBody;
+  }
 };
 
 export const bindLoad = <T_1, R_1, T_2 = unknown, R_2 = unknown>(
@@ -180,12 +242,16 @@ export const bindLoad = <T_1, R_1, T_2 = unknown, R_2 = unknown>(
   getDeadline: (req: T_1) => number | undefined,
   transform?: Transform<T_1, R_1, T_2, R_2>
 ): Load<T_1, R_1> => {
-  const agent = subgraph.url.protocol == 'https:' ? httpsAgent : httpAgent;
-  if (agent == undefined) {
+  subgraph.authProvider = subgraphAuthProvider(
+    subgraph.url,
+    subgraph.oidcLiteAuthorizationDomain
+  );
+  if (subgraph.url.protocol == 'http:' && subgraph.authProvider != undefined) {
     throw new Error(
-      `Cannot create agent for requests to ${subgraph.url}. (This probably happened because you are trying to use https, but don't have ssl configured. See @taql/config or the project README for more information)`
+      `Subgraph misconfiguration for: ${subgraph.url}. Refusing to send authentication headers over cleartext http.`
     );
   }
+  const agent = subgraph.url.protocol == 'https:' ? httpsAgent : httpAgent;
 
   const maxTimeout = Math.min(
     UPSTREAM_TIMEOUT_PARAMS.hardMaxUpstreamTimeoutMillis,

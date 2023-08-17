@@ -3,9 +3,9 @@
 TA GraphQL service
 
 ## Enabling/Disabling TAQL via Cookie
-The TAQL experience can be enabled or disabled explicitly via the `GraphQLNextGen` cookie in dev/preproduction. 
-Due to gitlab's sanitization of links, bookmarklets for setting/unsetting this cookie can be found in [this project's gitlab pages](https://dplat.pages.tamg.io/taql).
 
+The TAQL experience can be enabled or disabled explicitly via the `GraphQLNextGen` cookie in dev/preproduction.
+Due to gitlab's sanitization of links, bookmarklets for setting/unsetting this cookie can be found in [this project's gitlab pages](https://dplat.pages.tamg.io/taql).
 
 ## Commands
 
@@ -52,13 +52,35 @@ For most development operations, the LRU cache is sufficient. If you need to tes
 
 ### Stitching
 
-#### legacy graphql
+### OIDC-Lite Authentication
 
-If `LEGACY_GQL_HOST` is not set, the legacy graphql service will not be stitched.
+- `AUTH_MANAGER_KIND`: _(optional, default `undefined`)_ Set to `aws` or `oidc` to use OIDC-Lite mode.
+- `AUTH_MANAGER_OIDC_TOKEN_PATH`: _(optional, default `/var/run/secrets/kubernetes.io/oidc`)_ Directory which contains oidc token(s) for delegated access. Default should work for k8s deployments of TAQL.
+- `AUTH_MANAGER_EAGER_PROVIDER`: _(optional, default `false`)_ Whether to use `getEagerProvider()` or `getLazyProvider()`
 
-- `LEGACY_GQL_HOST`: _(optional)_ The host of the legacy graphql service
-- `LEGACY_GQL_HTTP_PORT`: _(optional, default `4723`)_ The port to use when making http requests to the legacy graphql service
-- `LEGACY_GQL_HTTPS_PORT`: _(optional, default `443`)_ The port to use when making https requests to the legacy graphql service.
+### legacy graphql
+
+- `LEGACY_GQL_URL`: _(optional, default `http://graphql.graphql-lapin.svc.kub.n.tripadvisor.com:4723`)_ The url of the legacy graphql service
+- `LEGACY_GQL_OIDC_DOMAIN`: _(optional, default `siteops-dev.tamg.cloud`)_ The OIDC-Lite domain to use for authorization. This is only used for access via service gateway (see below).
+
+#### legacy graphql via service gateway
+
+By default, taql accesses legacy graphql directly, but it can also be configured to access it via service gateway (with IAM authorization):
+
+```shell
+AUTH_KIND=aws
+LEGACY_GQL_OIDC_DOMAIN=siteops-dev.tamg.cloud
+LEGACY_GQL_URL=https://ingress-gateway.platform.ml.tripadvisor.com/graphql
+```
+
+Access to legacy graphql via service gateway can also use an OIDC token taken from lapin with a configuration similar to:
+
+```shell
+AUTH_KIND=oidc
+OIDC_TOKEN_PATH=/run/secrets/kubernetes.io/serviceaccount/token
+LEGACY_GQL_OIDC_DOMAIN=siteops-dev.tamg.cloud
+LEGACY_GQL_URL=https://ingress-gateway.platform.ml.tripadvisor.com/graphql
+```
 
 ## Building containers
 
@@ -77,3 +99,12 @@ IMAGE=siteops-docker.maven.dev.tripadvisor.com/taql
 docker login siteops-docker.maven.dev.tripadvisor.com
 docker push ${IMAGE}
 ```
+
+### Hints for running taql under docker locally
+
+Using a combination of the following parameters can make running taql in docker locally much more plesant:
+
+- `-p 4000:4000` _expose taql's port_
+- `-v /etc/certs:/etc/certs` _use local ssl certs within taql_
+- `-v ~/.aws:/root/.aws` _use local aws credentials/sso for OIDC-Lite_
+- `-v ./oidc:/var/run/secrets/kubernetes.io/oidc` _use an oidc token (pulled from lapin) for OIDC-Lite_

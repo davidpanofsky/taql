@@ -115,11 +115,15 @@ export const SCHEMA = resolve({
       prop == 'custom'
         ? resolve({
             url: {
-              property: 'LEGACY_GQL_HOST',
+              property: 'LEGACY_GQL_URL',
               resolver: resolvers.urlFromString,
               defaultTo: new URL(
-                'https://graphql.graphql-lapin.svc.kub.n.tripadvisor.com:443'
+                'http://graphql.graphql-lapin.svc.kub.n.tripadvisor.com:4723'
               ),
+            },
+            oidcLiteAuthorizationDomain: {
+              property: 'LEGACY_GQL_OIDC_DOMAIN',
+              defaultTo: undefined,
             },
             maxTimeout: {
               property: 'LEGACY_GQL_TIMEOUT',
@@ -152,18 +156,30 @@ export const SCHEMA = resolve({
     property: 'GSR_ENVIRONMENT',
     defaultTo: 'development',
   },
-  useIam: {
-    property: 'GSR_USE_IAM',
-    resolver: resolvers.booleanFromString,
-    defaultTo: false,
-  },
-  identityToken: {
-    property: 'GSR_IDENTITY_TOKEN',
-    defaultTo: undefined,
-  },
   repositoryUrl: {
     property: 'GSR_URL',
     defaultTo: 'https://gsr.domains-platform-dev.tamg.cloud',
+  },
+  oidcLiteAuthorizationDomain: {
+    property: 'GSR_OIDC_DOMAIN',
+    defaultTo: 'domains-platform-dev.tamg.cloud',
+  },
+});
+
+export const AUTH_MANAGER_CONFIG = resolve({
+  authKind: {
+    property: 'AUTH_MANAGER_KIND',
+    resolver: resolvers.oidcKindFromString,
+    defaultTo: undefined,
+  },
+  oidcTokenPath: {
+    property: 'AUTH_MANAGER_OIDC_TOKEN_PATH',
+    defaultTo: '/var/run/secrets/kubernetes.io/oidc',
+  },
+  eagerProvider: {
+    property: 'AUTH_MANAGER_EAGER_PROVIDER',
+    resolver: resolvers.booleanFromString,
+    defaultTo: false,
   },
 });
 

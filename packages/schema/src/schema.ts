@@ -1,4 +1,3 @@
-import { AuthManager, getManager } from '@ta-graphql-utils/auth-manager';
 import { Cache, caching, multiCaching } from 'cache-manager';
 import {
   ENABLE_FEATURES,
@@ -9,6 +8,8 @@ import {
 import { GraphQLError, GraphQLSchema } from 'graphql';
 import {
   PrintedDocumentCacheConfig,
+  SubgraphConfig,
+  authManager,
   makeRemoteExecutor,
   requestFormatter,
 } from '@taql/executors';
@@ -56,13 +57,13 @@ const requestedMaxTimeout = 5000;
 
 function makeExecutorFactory(
   cacheConfig: PrintedDocumentCacheConfig
-): (config: SubgraphExecutorConfig) => Executor {
-  return (config: SubgraphExecutorConfig): Executor =>
+): (config: SubgraphConfig) => Executor {
+  return (config: SubgraphConfig): Executor =>
     config.batching != undefined
       ? batchingExecutorFactory(
           {
             ...(<
-              SubgraphExecutorConfig &
+              SubgraphConfig &
                 Required<Pick<SubgraphExecutorConfig, 'batching'>>
             >config),
             requestedMaxTimeout,
@@ -155,17 +156,6 @@ async function createPrintedDocumentCache(params: {
 
 let printedDocumentCache: Omit<Cache, 'store'>;
 
-const initAuth = (): AuthManager => {
-  if (SCHEMA.useIam) {
-    return getManager({ kind: 'iam' });
-  } else {
-    if (SCHEMA.identityToken == undefined) {
-      throw new Error('cannot use oidc without identity token');
-    }
-    return getManager({ tokenPath: SCHEMA.identityToken });
-  }
-};
-
 type RawSupergraph = {
   id: string;
   manifest: Subgraph[];
@@ -177,7 +167,7 @@ export type Supergraph = RawSupergraph & {
 };
 
 const loadSupergraphFromGsr = async (): Promise<RawSupergraph> => {
-  const manager = initAuth();
+  const manager = authManager(SCHEMA.oidcLiteAuthorizationDomain);
   const gsrClient = makeClient(SCHEMA, manager);
 
   const supergraph = await gsrClient.supergraph({
@@ -295,12 +285,14 @@ export const makeSchema = async (
     // may _become_ stitched, unless there is some special property or use case
     // around the service that makes that extremely unlikely.
     const legacyUrl = new URL(legacySubgraph.executorConfig.url);
+    const legacyPort =
+      legacyUrl.port || (legacyUrl.protocol == 'http:' ? 80 : 443);
     const nonstitchedRoles = [
       // the components svc only consumes the schema - it's probably what called us
       'components*',
       // taql _is_ us
       'taql*',
-      `graphql*${legacyUrl.hostname}:${legacyUrl.port}:${legacyUrl.protocol}`,
+      `graphql*${legacyUrl.hostname}:${legacyPort}:${legacyUrl.protocol}`,
     ];
     logger.info(
       `Schema will ignore SVCO records starting with ${nonstitchedRoles}`
@@ -374,6 +366,8 @@ export const overrideSupergraphWithSvco = async (
 
   const legacyOverride = await getLegacySubgraph({
     url: legacyHost,
+    oidcLiteAuthorizationDomain:
+      legacySubgraph.executorConfig.oidcLiteAuthorizationDomain,
     batchMaxSize: legacySubgraph.executorConfig.batching?.maxSize ?? 250,
     batchWaitQueries:
       legacySubgraph.executorConfig.batching?.wait?.queries ?? 20,
@@ -382,7 +376,11 @@ export const overrideSupergraphWithSvco = async (
     legacySVCO,
   });
 
-  if (legacyOverride.digest == supergraph.legacyDigest) {
+  if (
+    legacyOverride.digest == supergraph.legacyDigest &&
+    legacyOverride.subgraph.executorConfig.url ==
+      legacySubgraph.executorConfig.url
+  ) {
     //no change
     return undefined;
   }
