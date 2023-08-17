@@ -105,6 +105,11 @@ const booleanFromString = (value: string | undefined): boolean | undefined =>
 const urlFromString = (value?: string): undefined | URL =>
   value == undefined ? undefined : new URL(value);
 
+const oidcKindFromString = (
+  value: string | undefined
+): 'aws' | 'oidc' | undefined =>
+  value == 'aws' ? 'aws' : value == 'oidc' ? 'oidc' : undefined;
+
 const options = <T extends string | undefined>(...options: T[]) => {
   const valid: Set<T> = new Set(options);
   return (value?: string): T | undefined => {
@@ -121,5 +126,6 @@ export const resolvers = {
   nonNegativeInteger,
   booleanFromString,
   urlFromString,
+  oidcKindFromString,
   options,
 };

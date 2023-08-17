@@ -2686,7 +2686,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ta-graphql-utils/auth-manager@npm:^2.0.0, @ta-graphql-utils/auth-manager@npm:^2.1.1":
+"@ta-graphql-utils/auth-manager@npm:2.1.1":
   version: 2.1.1
   resolution: "@ta-graphql-utils/auth-manager@npm:2.1.1::__archiveUrl=https%3A%2F%2Fgitlab.dev.tripadvisor.com%2Fapi%2Fv4%2Fprojects%2F16433%2Fpackages%2Fnpm%2F%40ta-graphql-utils%2Fauth-manager%2F-%2F%40ta-graphql-utils%2Fauth-manager-2.1.1.tgz"
   dependencies:
@@ -2806,6 +2806,8 @@ __metadata:
   resolution: "@taql/executors@workspace:packages/executors"
   dependencies:
     "@graphql-tools/utils": ^8.13.1
+    "@ta-graphql-utils/auth-manager": "*"
+    "@ta-graphql-utils/stitch": "*"
     "@taql/config": "workspace:^"
     "@taql/context": "workspace:^"
     "@taql/deadlines": "workspace:^"
@@ -6781,7 +6783,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-fetch@npm:2.6.12":
+"node-fetch@npm:2.6.12, node-fetch@npm:^2.6.7":
   version: 2.6.12
   resolution: "node-fetch@npm:2.6.12::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fnode-fetch%2F-%2Fnode-fetch-2.6.12.tgz"
   dependencies:
@@ -6795,7 +6797,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-fetch@npm:^2.6.11, node-fetch@npm:^2.6.7":
+"node-fetch@npm:^2.6.11":
   version: 2.6.11
   resolution: "node-fetch@npm:2.6.11::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fnode-fetch%2F-%2Fnode-fetch-2.6.11.tgz"
   dependencies:

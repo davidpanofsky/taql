@@ -25,9 +25,11 @@ const agentDefaults = {
 };
 
 export const agentConfig = makeAgentConfig();
-export const httpsAgent: Agent | undefined =
-  SSL_CONFIG &&
-  new HttpsAgent({ ...SSL_CONFIG, ...agentConfig, ...agentDefaults });
+export const httpsAgent: Agent = new HttpsAgent({
+  ...SSL_CONFIG,
+  ...agentConfig,
+  ...agentDefaults,
+});
 //httpsAgent && cacheable.install(httpsAgent);
 
 export const httpAgent: Agent = new Agent(agentDefaults);

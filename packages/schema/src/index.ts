@@ -1,7 +1,7 @@
 export {
   Supergraph,
-  makeSchema,
   TASchema,
   loadSupergraph,
+  makeSchema,
   overrideSupergraphWithSvco,
 } from './schema';

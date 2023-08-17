@@ -9,7 +9,7 @@ import { inspect } from 'util';
 // GITOPS_FILE_TO_PATCH
 //
 // = Schema generation =
-// LEGACY_GQL_HOST
+// LEGACY_GQL_URL
 // CLIENT_CERT_PATH
 // CLIENT_KEY_PATH
 // CLIENT_CERT_CA_PATH

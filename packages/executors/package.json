@@ -13,6 +13,8 @@
   },
   "dependencies": {
     "@graphql-tools/utils": "^8.13.1",
+    "@ta-graphql-utils/auth-manager": "*",
+    "@ta-graphql-utils/stitch": "*",
     "@taql/config": "workspace:^",
     "@taql/context": "workspace:^",
     "@taql/deadlines": "workspace:^",
