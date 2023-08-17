@@ -2686,7 +2686,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ta-graphql-utils/auth-manager@npm:2.1.1, @ta-graphql-utils/auth-manager@npm:^2.0.0, @ta-graphql-utils/auth-manager@npm:^2.1.1":
+"@ta-graphql-utils/auth-manager@npm:^2.0.0, @ta-graphql-utils/auth-manager@npm:^2.1.1":
   version: 2.1.1
   resolution: "@ta-graphql-utils/auth-manager@npm:2.1.1::__archiveUrl=https%3A%2F%2Fgitlab.dev.tripadvisor.com%2Fapi%2Fv4%2Fprojects%2F16433%2Fpackages%2Fnpm%2F%40ta-graphql-utils%2Fauth-manager%2F-%2F%40ta-graphql-utils%2Fauth-manager-2.1.1.tgz"
   dependencies:
@@ -2697,9 +2697,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ta-graphql-utils/stitch@npm:4.3.0":
-  version: 4.3.0
-  resolution: "@ta-graphql-utils/stitch@npm:4.3.0::__archiveUrl=https%3A%2F%2Fgitlab.dev.tripadvisor.com%2Fapi%2Fv4%2Fprojects%2F16433%2Fpackages%2Fnpm%2F%40ta-graphql-utils%2Fstitch%2F-%2F%40ta-graphql-utils%2Fstitch-4.3.0.tgz"
+"@ta-graphql-utils/stitch@npm:4.6.0":
+  version: 4.6.0
+  resolution: "@ta-graphql-utils/stitch@npm:4.6.0::__archiveUrl=https%3A%2F%2Fgitlab.dev.tripadvisor.com%2Fapi%2Fv4%2Fprojects%2F16433%2Fpackages%2Fnpm%2F%40ta-graphql-utils%2Fstitch%2F-%2F%40ta-graphql-utils%2Fstitch-4.6.0.tgz"
   dependencies:
     "@graphql-tools/delegate": 9.0.35
     "@graphql-tools/load": 7.8.14
@@ -2707,9 +2707,8 @@ __metadata:
     "@graphql-tools/stitching-directives": 2.3.34
     "@graphql-tools/utils": 9.2.1
     "@graphql-tools/wrap": 9.4.2
-    "@ta-graphql-utils/auth-manager": 2.1.1
     graphql: 16.6.0
-  checksum: 21b6ab2342b48377935d0b1c536bfe481937a98f1796a8b6c44fcfb05b864145c19fb3e6e61acf5c3adf79fd48a6f57fed143a86529a196a0eb68f7bf3a22a31
+  checksum: e6068731ec2c4d8bc74a0203d874377d4c4168a76bd746a042daa5a4e1395aaf1222a86ecbd729ad24635f7becfbf0ac962a8ef293cbe9449986b548537d911e
   languageName: node
   linkType: hard
 
