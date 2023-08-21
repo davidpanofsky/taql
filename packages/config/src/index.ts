@@ -169,8 +169,8 @@ export const SCHEMA = resolve({
 export const AUTH_MANAGER_CONFIG = resolve({
   authKind: {
     property: 'AUTH_MANAGER_KIND',
-    resolver: resolvers.oidcKindFromString,
-    defaultTo: undefined,
+    resolver: resolvers.options('aws', 'oidc'),
+    defaultTo: 'aws',
   },
   oidcTokenPath: {
     property: 'AUTH_MANAGER_OIDC_TOKEN_PATH',

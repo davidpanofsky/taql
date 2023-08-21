@@ -16,7 +16,7 @@
     "typescript": "^5.0.4"
   },
   "dependencies": {
-    "@gsr/client": "^1.0.0",
+    "@gsr/client": "^2.0.0",
     "@ta-graphql-utils/auth-manager": "^2.1.1",
     "@ta-graphql-utils/stitch": "*",
     "@taql/batching": "workspace:^",
