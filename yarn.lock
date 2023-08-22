@@ -1300,6 +1300,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@graphql-tools/optimize@npm:2.0.0":
+  version: 2.0.0
+  resolution: "@graphql-tools/optimize@npm:2.0.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-tools%2Foptimize%2F-%2Foptimize-2.0.0.tgz"
+  dependencies:
+    tslib: ^2.4.0
+  peerDependencies:
+    graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
+  checksum: 7f79c0e1852abc571308e887d27d613da5b797256c8c6eb6c5fe7ca77f09e61524778ae281cebc0b698c51d4fe1074e2b8e0d0627b8e2dcf505aa6ed09b49a2f
+  languageName: node
+  linkType: hard
+
 "@graphql-tools/schema@npm:^10.0.0":
   version: 10.0.0
   resolution: "@graphql-tools/schema@npm:10.0.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-tools%2Fschema%2F-%2Fschema-10.0.0.tgz"
@@ -2697,18 +2708,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ta-graphql-utils/stitch@npm:4.6.0":
-  version: 4.6.0
-  resolution: "@ta-graphql-utils/stitch@npm:4.6.0::__archiveUrl=https%3A%2F%2Fgitlab.dev.tripadvisor.com%2Fapi%2Fv4%2Fprojects%2F16433%2Fpackages%2Fnpm%2F%40ta-graphql-utils%2Fstitch%2F-%2F%40ta-graphql-utils%2Fstitch-4.6.0.tgz"
+"@ta-graphql-utils/stitch@npm:4.7.0":
+  version: 4.7.0
+  resolution: "@ta-graphql-utils/stitch@npm:4.7.0::__archiveUrl=https%3A%2F%2Fgitlab.dev.tripadvisor.com%2Fapi%2Fv4%2Fprojects%2F16433%2Fpackages%2Fnpm%2F%40ta-graphql-utils%2Fstitch%2F-%2F%40ta-graphql-utils%2Fstitch-4.7.0.tgz"
   dependencies:
     "@graphql-tools/delegate": 9.0.35
     "@graphql-tools/load": 7.8.14
+    "@graphql-tools/optimize": 2.0.0
     "@graphql-tools/stitch": 8.7.49
     "@graphql-tools/stitching-directives": 2.3.34
     "@graphql-tools/utils": 9.2.1
     "@graphql-tools/wrap": 9.4.2
     graphql: 16.6.0
-  checksum: e6068731ec2c4d8bc74a0203d874377d4c4168a76bd746a042daa5a4e1395aaf1222a86ecbd729ad24635f7becfbf0ac962a8ef293cbe9449986b548537d911e
+  checksum: 274dd87794390c699e0f4a4241a4540d9b6a861638d26d180b9dcfbacc61b37700d19a1e564fdb32934a31ede6e0a92abe415a8ced403f6df5461aa7c379abf6
   languageName: node
   linkType: hard
 
