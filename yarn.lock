@@ -1264,6 +1264,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@graphql-tools/load@npm:^8.0.0":
+  version: 8.0.0
+  resolution: "@graphql-tools/load@npm:8.0.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-tools%2Fload%2F-%2Fload-8.0.0.tgz"
+  dependencies:
+    "@graphql-tools/schema": ^10.0.0
+    "@graphql-tools/utils": ^10.0.0
+    p-limit: 3.1.0
+    tslib: ^2.4.0
+  peerDependencies:
+    graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
+  checksum: e1126bef8917e8a7e89c12cc95b127de727c04502e57f379d93dd3027ce72dc38b16a52a417263959a938b4660a1d362836eed59f941cd30ee3d5452c793a50d
+  languageName: node
+  linkType: hard
+
 "@graphql-tools/merge@npm:^8.4.1":
   version: 8.4.1
   resolution: "@graphql-tools/merge@npm:8.4.1::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-tools%2Fmerge%2F-%2Fmerge-8.4.1.tgz"
@@ -2899,6 +2913,7 @@ __metadata:
   resolution: "@taql/schema@workspace:packages/schema"
   dependencies:
     "@graphql-tools/delegate": 9.0.35
+    "@graphql-tools/load": ^8.0.0
     "@graphql-tools/utils": ^8.13.1
     "@gsr/client": ^2.0.0
     "@ta-graphql-utils/auth-manager": ^2.1.1
