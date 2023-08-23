@@ -262,9 +262,8 @@ export const makeSchema = async (
     );
   }
   const schemaId =
-    supergraph.id + supergraph.legacyDigest != undefined
-      ? `_${supergraph.legacyDigest}`
-      : '';
+    supergraph.id +
+    (supergraph.legacyDigest != undefined ? `_${supergraph.legacyDigest}` : '');
 
   const cacheConfig: PrintedDocumentCacheConfig = {
     cache: printedDocumentCache,
