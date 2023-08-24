@@ -61,11 +61,11 @@ const requestedMaxTimeout = 5000;
  * If ENABLE_AST_DESCRIPTION env var is set to false descriptions will be removed too.
  */
 export const optimizeSdl = async (rawSchema: string): Promise<string> => {
-  const legacySchema = await loadSchema(rawSchema, {
+  const schema = await loadSchema(rawSchema, {
     loaders: [],
     noLocation: !ENABLE_FEATURES.astLocationInfo,
   });
-  return normalizeSdl(legacySchema, {
+  return normalizeSdl(schema, {
     noDescription: !ENABLE_FEATURES.astDescription,
   });
 };
