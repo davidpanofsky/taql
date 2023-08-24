@@ -29,6 +29,7 @@ import {
 import type { Executor } from '@graphql-tools/utils';
 import { createExecutor as batchingExecutorFactory } from '@taql/batching';
 import { inspect } from 'util';
+import { loadSchema } from '@graphql-tools/load';
 import { makeClient } from '@gsr/client';
 import { promises } from 'fs';
 
@@ -54,6 +55,20 @@ export type StitchResult =
     };
 
 const requestedMaxTimeout = 5000;
+
+/**
+ * Remove unused types from the schema.
+ * If ENABLE_AST_DESCRIPTION env var is set to false descriptions will be removed too.
+ */
+export const optimizeSdl = async (rawSchema: string): Promise<string> => {
+  const schema = await loadSchema(rawSchema, {
+    loaders: [],
+    noLocation: !ENABLE_FEATURES.astLocationInfo,
+  });
+  return normalizeSdl(schema, {
+    noDescription: !ENABLE_FEATURES.astDescription,
+  });
+};
 
 function makeExecutorFactory(
   cacheConfig: PrintedDocumentCacheConfig
@@ -202,7 +217,12 @@ export const loadSupergraph = async (): Promise<Supergraph> => {
     const supergraph = await loadSupergraphFromGsr();
     id = supergraph.id;
     sdl = supergraph.supergraph;
-    manifest = [...supergraph.manifest];
+    manifest = await Promise.all(
+      [...supergraph.manifest].map(async ({ sdl: subgraphSdl, ...rest }) => ({
+        ...rest,
+        sdl: await optimizeSdl(subgraphSdl),
+      }))
+    );
   } catch (err) {
     if (SCHEMA.legacySchemaSource == 'gsr') {
       // we have no schema. DO not proceed.

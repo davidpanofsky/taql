@@ -311,6 +311,11 @@ export const ENABLE_FEATURES = resolve({
     resolver: resolvers.booleanFromString,
     defaultTo: process.env.NODE_ENV === 'production' ? false : true,
   },
+  astDescription: {
+    property: 'ENABLE_AST_DESCRIPTION',
+    resolver: resolvers.booleanFromString,
+    defaultTo: process.env.NODE_ENV === 'production' ? false : true,
+  },
 });
 
 export const PREREGISTERED_QUERY_PARAMS = resolve({

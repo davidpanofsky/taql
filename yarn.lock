@@ -1264,6 +1264,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@graphql-tools/load@npm:^8.0.0":
+  version: 8.0.0
+  resolution: "@graphql-tools/load@npm:8.0.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-tools%2Fload%2F-%2Fload-8.0.0.tgz"
+  dependencies:
+    "@graphql-tools/schema": ^10.0.0
+    "@graphql-tools/utils": ^10.0.0
+    p-limit: 3.1.0
+    tslib: ^2.4.0
+  peerDependencies:
+    graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
+  checksum: e1126bef8917e8a7e89c12cc95b127de727c04502e57f379d93dd3027ce72dc38b16a52a417263959a938b4660a1d362836eed59f941cd30ee3d5452c793a50d
+  languageName: node
+  linkType: hard
+
 "@graphql-tools/merge@npm:^8.4.1":
   version: 8.4.1
   resolution: "@graphql-tools/merge@npm:8.4.1::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-tools%2Fmerge%2F-%2Fmerge-8.4.1.tgz"
@@ -1297,6 +1311,17 @@ __metadata:
   peerDependencies:
     graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
   checksum: e93794260faa477979bdc22f05da26c0eff02bd82c11565a1197152b70b5ab1c73dc6f8a05caf06737bcb18cb244bd19ee99d62bfc41af3bffb3c17eddb70edf
+  languageName: node
+  linkType: hard
+
+"@graphql-tools/optimize@npm:2.0.0":
+  version: 2.0.0
+  resolution: "@graphql-tools/optimize@npm:2.0.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-tools%2Foptimize%2F-%2Foptimize-2.0.0.tgz"
+  dependencies:
+    tslib: ^2.4.0
+  peerDependencies:
+    graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
+  checksum: 7f79c0e1852abc571308e887d27d613da5b797256c8c6eb6c5fe7ca77f09e61524778ae281cebc0b698c51d4fe1074e2b8e0d0627b8e2dcf505aa6ed09b49a2f
   languageName: node
   linkType: hard
 
@@ -2697,18 +2722,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ta-graphql-utils/stitch@npm:4.6.0":
-  version: 4.6.0
-  resolution: "@ta-graphql-utils/stitch@npm:4.6.0::__archiveUrl=https%3A%2F%2Fgitlab.dev.tripadvisor.com%2Fapi%2Fv4%2Fprojects%2F16433%2Fpackages%2Fnpm%2F%40ta-graphql-utils%2Fstitch%2F-%2F%40ta-graphql-utils%2Fstitch-4.6.0.tgz"
+"@ta-graphql-utils/stitch@npm:4.7.0":
+  version: 4.7.0
+  resolution: "@ta-graphql-utils/stitch@npm:4.7.0::__archiveUrl=https%3A%2F%2Fgitlab.dev.tripadvisor.com%2Fapi%2Fv4%2Fprojects%2F16433%2Fpackages%2Fnpm%2F%40ta-graphql-utils%2Fstitch%2F-%2F%40ta-graphql-utils%2Fstitch-4.7.0.tgz"
   dependencies:
     "@graphql-tools/delegate": 9.0.35
     "@graphql-tools/load": 7.8.14
+    "@graphql-tools/optimize": 2.0.0
     "@graphql-tools/stitch": 8.7.49
     "@graphql-tools/stitching-directives": 2.3.34
     "@graphql-tools/utils": 9.2.1
     "@graphql-tools/wrap": 9.4.2
     graphql: 16.6.0
-  checksum: e6068731ec2c4d8bc74a0203d874377d4c4168a76bd746a042daa5a4e1395aaf1222a86ecbd729ad24635f7becfbf0ac962a8ef293cbe9449986b548537d911e
+  checksum: 274dd87794390c699e0f4a4241a4540d9b6a861638d26d180b9dcfbacc61b37700d19a1e564fdb32934a31ede6e0a92abe415a8ced403f6df5461aa7c379abf6
   languageName: node
   linkType: hard
 
@@ -2887,6 +2913,7 @@ __metadata:
   resolution: "@taql/schema@workspace:packages/schema"
   dependencies:
     "@graphql-tools/delegate": 9.0.35
+    "@graphql-tools/load": ^8.0.0
     "@graphql-tools/utils": ^8.13.1
     "@gsr/client": ^2.0.0
     "@ta-graphql-utils/auth-manager": ^2.1.1
