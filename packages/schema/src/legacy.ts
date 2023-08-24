@@ -1,27 +1,16 @@
 import { ENABLE_FEATURES, logger } from '@taql/config';
-import { Subgraph, normalizeSdl } from '@ta-graphql-utils/stitch';
 import fetch, { FetchError, Headers } from 'node-fetch';
 import { httpAgent, httpsAgent } from '@taql/httpAgent';
 import { ForwardSubschemaExtensions } from '@taql/debug';
+import { Subgraph } from '@ta-graphql-utils/stitch';
 import type { Transform } from '@graphql-tools/delegate';
 import { URL } from 'node:url';
 import { createGraphQLError } from '@graphql-tools/utils';
 import crypto from 'crypto';
-import { loadSchema } from '@graphql-tools/load';
 import path from 'node:path';
 import { subgraphAuthProvider } from '@taql/executors';
 
 const subgraphName = 'legacy-graphql';
-
-const normalizeLegacySchema = async (rawSchema: string): Promise<string> => {
-  const legacySchema = await loadSchema(rawSchema, {
-    loaders: [],
-    noLocation: !ENABLE_FEATURES.astLocationInfo,
-  });
-  return normalizeSdl(legacySchema, {
-    noDescription: !ENABLE_FEATURES.astDescription,
-  });
-};
 
 const legacyHostOverride = (url: URL, legacySVCO: string): URL => {
   try {
@@ -124,7 +113,7 @@ export async function getLegacySubgraph(args: {
     const subgraph: Subgraph = {
       name: subgraphName,
       namespace: 'Global',
-      sdl: await normalizeLegacySchema(rawSchema),
+      sdl: rawSchema,
       executorConfig: {
         url: batchUrl,
         oidcLiteAuthorizationDomain: args.oidcLiteAuthorizationDomain,
