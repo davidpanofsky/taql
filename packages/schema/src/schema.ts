@@ -217,12 +217,7 @@ export const loadSupergraph = async (): Promise<Supergraph> => {
     const supergraph = await loadSupergraphFromGsr();
     id = supergraph.id;
     sdl = supergraph.supergraph;
-    manifest = await Promise.all(
-      [...supergraph.manifest].map(async ({ sdl: subgraphSdl, ...rest }) => ({
-        ...rest,
-        sdl: await optimizeSdl(subgraphSdl),
-      }))
-    );
+    manifest = [...supergraph.manifest];
   } catch (err) {
     if (SCHEMA.legacySchemaSource == 'gsr') {
       // we have no schema. DO not proceed.
@@ -245,8 +240,16 @@ export const loadSupergraph = async (): Promise<Supergraph> => {
     legacyDigest = digest;
     manifest.push(subgraph);
   }
+
+  const subgraphs = await Promise.all(
+    manifest.map(async ({ sdl: subgraphSdl, ...rest }) => ({
+      ...rest,
+      sdl: await optimizeSdl(subgraphSdl),
+    }))
+  );
+
   const stitched = await stitch({
-    subgraphs: manifest,
+    subgraphs,
     parseOptions: {
       noLocation: !ENABLE_FEATURES.astLocationInfo,
     },
@@ -266,7 +269,7 @@ export const loadSupergraph = async (): Promise<Supergraph> => {
 
   return {
     id,
-    manifest,
+    manifest: subgraphs,
     supergraph: reprintedSdl,
     legacyDigest,
   };
