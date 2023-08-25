@@ -1546,45 +1546,45 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@gsr/api.endpoints.compose-subgraphs@npm:2.0.0":
-  version: 2.0.0
-  resolution: "@gsr/api.endpoints.compose-subgraphs@npm:2.0.0::__archiveUrl=https%3A%2F%2Fgitlab.dev.tripadvisor.com%2Fapi%2Fv4%2Fprojects%2F15885%2Fpackages%2Fnpm%2F%40gsr%2Fapi.endpoints.compose-subgraphs%2F-%2F%40gsr%2Fapi.endpoints.compose-subgraphs-2.0.0.tgz"
+"@gsr/api.endpoints.compose-subgraphs@npm:3.0.0":
+  version: 3.0.0
+  resolution: "@gsr/api.endpoints.compose-subgraphs@npm:3.0.0::__archiveUrl=https%3A%2F%2Fgitlab.dev.tripadvisor.com%2Fapi%2Fv4%2Fprojects%2F15885%2Fpackages%2Fnpm%2F%40gsr%2Fapi.endpoints.compose-subgraphs%2F-%2F%40gsr%2Fapi.endpoints.compose-subgraphs-3.0.0.tgz"
   dependencies:
     "@gsr/api.types": 2.0.0
     joi: 17.9.2
-  checksum: 0c175792d93bc8ea2352190e7c3cd257af2b1ccd34077d2572761807ffc48fd79d99e8f523174204de899f11505645f8fd058f00e676d7fd37179cec6ab69fcf
+  checksum: c68dac71ff82eafdfd85efe4c110c2d43d39cf5de9b58bbd4a04752116ccb5ece00557adfa4e2ec1f30dd21d3241d65ef83b2e57160278ed7c66c2e47d740536
   languageName: node
   linkType: hard
 
-"@gsr/api.endpoints.get-supergraph@npm:2.0.0":
-  version: 2.0.0
-  resolution: "@gsr/api.endpoints.get-supergraph@npm:2.0.0::__archiveUrl=https%3A%2F%2Fgitlab.dev.tripadvisor.com%2Fapi%2Fv4%2Fprojects%2F15885%2Fpackages%2Fnpm%2F%40gsr%2Fapi.endpoints.get-supergraph%2F-%2F%40gsr%2Fapi.endpoints.get-supergraph-2.0.0.tgz"
+"@gsr/api.endpoints.get-supergraph@npm:2.2.0":
+  version: 2.2.0
+  resolution: "@gsr/api.endpoints.get-supergraph@npm:2.2.0::__archiveUrl=https%3A%2F%2Fgitlab.dev.tripadvisor.com%2Fapi%2Fv4%2Fprojects%2F15885%2Fpackages%2Fnpm%2F%40gsr%2Fapi.endpoints.get-supergraph%2F-%2F%40gsr%2Fapi.endpoints.get-supergraph-2.2.0.tgz"
   dependencies:
     "@gsr/api.types": 2.0.0
-    "@gsr/endpoint": 2.0.0
+    "@gsr/endpoint": 3.0.0
     joi: 17.9.2
-  checksum: 0ca9a7388234d786bbe96a509f16aaac0a730651b8dde818330202815b09fdd461eb92cedd59f2e1ce0ac01322a3fb146503482280c695ab334ed21d40235e61
+  checksum: ea7b3ce9909fb659d2ab64c3c3f27f3a475beb126cdbd6f8ab2f2af31f8f5d5c94e9f3127817b9ca536078fb914321c3f4c90f54cc7238e93e13df07a0b44b49
   languageName: node
   linkType: hard
 
-"@gsr/api.endpoints.get-versions@npm:2.0.0":
-  version: 2.0.0
-  resolution: "@gsr/api.endpoints.get-versions@npm:2.0.0::__archiveUrl=https%3A%2F%2Fgitlab.dev.tripadvisor.com%2Fapi%2Fv4%2Fprojects%2F15885%2Fpackages%2Fnpm%2F%40gsr%2Fapi.endpoints.get-versions%2F-%2F%40gsr%2Fapi.endpoints.get-versions-2.0.0.tgz"
+"@gsr/api.endpoints.get-versions@npm:2.2.0":
+  version: 2.2.0
+  resolution: "@gsr/api.endpoints.get-versions@npm:2.2.0::__archiveUrl=https%3A%2F%2Fgitlab.dev.tripadvisor.com%2Fapi%2Fv4%2Fprojects%2F15885%2Fpackages%2Fnpm%2F%40gsr%2Fapi.endpoints.get-versions%2F-%2F%40gsr%2Fapi.endpoints.get-versions-2.2.0.tgz"
   dependencies:
-    "@gsr/endpoint": 2.0.0
+    "@gsr/endpoint": 3.0.0
     joi: 17.9.2
-  checksum: ac23f2d4c15f87ab31e590b3621c149ee0dc4e54f1b51bc2aabbcd226fb630859218056ca1484b1bfdcf20f061b218ebd23782bc8df5ae2fdeab082aeb095aea
+  checksum: 64112a2e757a3e1be4ab405cb4137005c9201c15500238bb7ab16d2f5868aec4dfe227b75b34e9d715bd5c2bc16dcb54c6b215601623cf4771e8b0fbf61e5d9f
   languageName: node
   linkType: hard
 
-"@gsr/api.endpoints.write-subgraph@npm:2.0.0":
-  version: 2.0.0
-  resolution: "@gsr/api.endpoints.write-subgraph@npm:2.0.0::__archiveUrl=https%3A%2F%2Fgitlab.dev.tripadvisor.com%2Fapi%2Fv4%2Fprojects%2F15885%2Fpackages%2Fnpm%2F%40gsr%2Fapi.endpoints.write-subgraph%2F-%2F%40gsr%2Fapi.endpoints.write-subgraph-2.0.0.tgz"
+"@gsr/api.endpoints.write-subgraph@npm:3.0.0":
+  version: 3.0.0
+  resolution: "@gsr/api.endpoints.write-subgraph@npm:3.0.0::__archiveUrl=https%3A%2F%2Fgitlab.dev.tripadvisor.com%2Fapi%2Fv4%2Fprojects%2F15885%2Fpackages%2Fnpm%2F%40gsr%2Fapi.endpoints.write-subgraph%2F-%2F%40gsr%2Fapi.endpoints.write-subgraph-3.0.0.tgz"
   dependencies:
     "@gsr/api.types": 2.0.0
-    "@gsr/endpoint": 2.0.0
+    "@gsr/endpoint": 3.0.0
     joi: 17.9.2
-  checksum: f503f24308c94217ddfb21fbac262456ceca9e14c7b8c9b00ae6182d6371689798cc2bc3d746d166ecc338c1e8cc6a4fc530e869af8147df10e24fa96cf3e547
+  checksum: 9fa88d72dc645cdf9274041e4517eeb95df833a3f06f8ac29c9cf49ae9bb1426d9aaa332f12474742b3564c456ce2634945a095eadfb0174f70d56ee8f3c56b5
   languageName: node
   linkType: hard
 
@@ -1597,57 +1597,57 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@gsr/api@npm:2.0.0":
-  version: 2.0.0
-  resolution: "@gsr/api@npm:2.0.0::__archiveUrl=https%3A%2F%2Fgitlab.dev.tripadvisor.com%2Fapi%2Fv4%2Fprojects%2F15885%2Fpackages%2Fnpm%2F%40gsr%2Fapi%2F-%2F%40gsr%2Fapi-2.0.0.tgz"
+"@gsr/api@npm:2.3.0":
+  version: 2.3.0
+  resolution: "@gsr/api@npm:2.3.0::__archiveUrl=https%3A%2F%2Fgitlab.dev.tripadvisor.com%2Fapi%2Fv4%2Fprojects%2F15885%2Fpackages%2Fnpm%2F%40gsr%2Fapi%2F-%2F%40gsr%2Fapi-2.3.0.tgz"
   dependencies:
-    "@gsr/api.endpoints.compose-subgraphs": 2.0.0
-    "@gsr/api.endpoints.get-supergraph": 2.0.0
-    "@gsr/api.endpoints.get-versions": 2.0.0
-    "@gsr/api.endpoints.write-subgraph": 2.0.0
-  checksum: 958bf2b69bda1c911ef8fb877f4530cccc82e8735776ec241e935ed34bc84d507ebf2a7b23add03f6ca002e167bedd787f0a0888810e58fc349d5cc89d25a147
+    "@gsr/api.endpoints.compose-subgraphs": 3.0.0
+    "@gsr/api.endpoints.get-supergraph": 2.2.0
+    "@gsr/api.endpoints.get-versions": 2.2.0
+    "@gsr/api.endpoints.write-subgraph": 3.0.0
+  checksum: a5f62d1ddcefa9a5ea554dfcc10031972293fc8aecfd6e38d31b2696e123d783abd1a3a47dc0154b6c1849dc67af036c34cf491b1292c7492a594644aa9c7aac
   languageName: node
   linkType: hard
 
-"@gsr/apis@npm:2.0.0":
-  version: 2.0.0
-  resolution: "@gsr/apis@npm:2.0.0::__archiveUrl=https%3A%2F%2Fgitlab.dev.tripadvisor.com%2Fapi%2Fv4%2Fprojects%2F15885%2Fpackages%2Fnpm%2F%40gsr%2Fapis%2F-%2F%40gsr%2Fapis-2.0.0.tgz"
+"@gsr/apis@npm:2.2.0":
+  version: 2.2.0
+  resolution: "@gsr/apis@npm:2.2.0::__archiveUrl=https%3A%2F%2Fgitlab.dev.tripadvisor.com%2Fapi%2Fv4%2Fprojects%2F15885%2Fpackages%2Fnpm%2F%40gsr%2Fapis%2F-%2F%40gsr%2Fapis-2.2.0.tgz"
   dependencies:
-    "@gsr/endpoint": 2.0.0
-  checksum: 50555398c4b04ea9d3bb308c99c397d307c7f317037738cf8aa19d7616458300e311600882287ea48a4dfdac08d3d7fbcbd3cb0477d989937f607a5a20eb58ca
+    "@gsr/endpoint": 3.0.0
+  checksum: bb784117175598acc3a2a00f9a133dea2b5828a6d6661cd7e53a8c8dcbace293a310aa111b737d696ff1d4034fe238681f2b842f86c86818525e3d2b00317771
   languageName: node
   linkType: hard
 
-"@gsr/client@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "@gsr/client@npm:2.0.0::__archiveUrl=https%3A%2F%2Fgitlab.dev.tripadvisor.com%2Fapi%2Fv4%2Fprojects%2F15885%2Fpackages%2Fnpm%2F%40gsr%2Fclient%2F-%2F%40gsr%2Fclient-2.0.0.tgz"
+"@gsr/client@npm:^2.2.0":
+  version: 2.2.0
+  resolution: "@gsr/client@npm:2.2.0::__archiveUrl=https%3A%2F%2Fgitlab.dev.tripadvisor.com%2Fapi%2Fv4%2Fprojects%2F15885%2Fpackages%2Fnpm%2F%40gsr%2Fclient%2F-%2F%40gsr%2Fclient-2.2.0.tgz"
   dependencies:
-    "@gsr/api": 2.0.0
-    "@gsr/clients": 2.0.0
+    "@gsr/api": 2.3.0
+    "@gsr/clients": 2.3.0
   peerDependencies:
     "@ta-graphql-utils/auth-manager": ^2.1.1
-  checksum: b6c5ac4b613fd86ac3e7b82e2ecfaa6fbb22b7eed0d6183f5e13f99c86b9469b4fd8cc02fc8ca9f90cd21c99aa135d390d4a71979c49d0e06abce1ae826af8ac
+  checksum: 229e5c4a5d12321f6d36e8707c4d832bf0854cf11cc4f2f7fe9f0ef9f7e6fdcb438f72c56a7e6b56257f82a22471f1c76e19da23b31b6ffcb4445655f41c2658
   languageName: node
   linkType: hard
 
-"@gsr/clients@npm:2.0.0":
-  version: 2.0.0
-  resolution: "@gsr/clients@npm:2.0.0::__archiveUrl=https%3A%2F%2Fgitlab.dev.tripadvisor.com%2Fapi%2Fv4%2Fprojects%2F15885%2Fpackages%2Fnpm%2F%40gsr%2Fclients%2F-%2F%40gsr%2Fclients-2.0.0.tgz"
+"@gsr/clients@npm:2.3.0":
+  version: 2.3.0
+  resolution: "@gsr/clients@npm:2.3.0::__archiveUrl=https%3A%2F%2Fgitlab.dev.tripadvisor.com%2Fapi%2Fv4%2Fprojects%2F15885%2Fpackages%2Fnpm%2F%40gsr%2Fclients%2F-%2F%40gsr%2Fclients-2.3.0.tgz"
   dependencies:
-    "@gsr/apis": 2.0.0
-    "@gsr/endpoint": 2.0.0
+    "@gsr/apis": 2.2.0
+    "@gsr/endpoint": 3.0.0
     "@ta-graphql-utils/auth-manager": ^2.1.1
     node-fetch: 2.6.12
   peerDependencies:
     "@ta-graphql-utils/auth-manager": ^2.1.1
-  checksum: d338fadc63fa1785e9b34296b4e8276143817d7bf0998891d76ace1b58eed0af6fb633cc9e24b87b2ca63c49230054d06c1dfc2b42933c1b8e9a4525fb4386c3
+  checksum: 7f22743c62b8177556165bd0f214c4dc6e64137fba993f885fc60176fc692f48f7d322164b3bdf8ba6ccd58b3cd459fe74a64625f048f800ea13a0bf5947de47
   languageName: node
   linkType: hard
 
-"@gsr/endpoint@npm:2.0.0":
-  version: 2.0.0
-  resolution: "@gsr/endpoint@npm:2.0.0::__archiveUrl=https%3A%2F%2Fgitlab.dev.tripadvisor.com%2Fapi%2Fv4%2Fprojects%2F15885%2Fpackages%2Fnpm%2F%40gsr%2Fendpoint%2F-%2F%40gsr%2Fendpoint-2.0.0.tgz"
-  checksum: e3e7d3ab2d23691f2af06b21d10da740e360cf853d24f093bff18376157ab9831794e584632909e778ba88287646a2df57bcfa29d0c1a36fabccdd154b664f62
+"@gsr/endpoint@npm:3.0.0":
+  version: 3.0.0
+  resolution: "@gsr/endpoint@npm:3.0.0::__archiveUrl=https%3A%2F%2Fgitlab.dev.tripadvisor.com%2Fapi%2Fv4%2Fprojects%2F15885%2Fpackages%2Fnpm%2F%40gsr%2Fendpoint%2F-%2F%40gsr%2Fendpoint-3.0.0.tgz"
+  checksum: 5f8ecbd994e3e2c1fc3f69f2ac29efd40ec52afe5274619e72afd8be684199615aadfbe66e014c614c2183db643bcb67a04550a792fcb45bb60cde2886bdd5ae
   languageName: node
   linkType: hard
 
@@ -2915,7 +2915,7 @@ __metadata:
     "@graphql-tools/delegate": 9.0.35
     "@graphql-tools/load": ^8.0.0
     "@graphql-tools/utils": ^8.13.1
-    "@gsr/client": ^2.0.0
+    "@gsr/client": ^2.2.0
     "@ta-graphql-utils/auth-manager": ^2.1.1
     "@ta-graphql-utils/stitch": "*"
     "@taql/batching": "workspace:^"
