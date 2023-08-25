@@ -13,6 +13,8 @@ export const useErrorLogging: Plugin = {
               payload.args.contextValue.request.headers.get('x-unique-id');
             const requestId =
               payload.args.contextValue.request.headers.get('x-request-id');
+            const userAgent =
+              payload.args.contextValue.request.headers.get('user-agent');
             const operationAST = getOperationAST(
               payload.args.document,
               payload.args.operationName
@@ -23,6 +25,7 @@ export const useErrorLogging: Plugin = {
               logger.warn(err?.message, {
                 uniqueId,
                 requestId,
+                userAgent,
                 operationName,
                 operationType,
               });
