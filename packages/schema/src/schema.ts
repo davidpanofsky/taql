@@ -186,6 +186,7 @@ const loadSupergraphFromGsr = async (): Promise<RawSupergraph> => {
   const gsrClient = makeClient(SCHEMA, manager);
 
   const supergraph = await gsrClient.supergraph({
+    method: 'GET',
     query: { environment: SCHEMA.environment },
   });
   switch (supergraph.statusCode) {
