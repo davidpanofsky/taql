@@ -95,7 +95,6 @@ const BODY_BYTES_RECEIVED = new promClient.Counter({
 
 export type SubgraphConfig = SubgraphExecutorConfig & {
   authProvider?: AuthProvider;
-  requestedMaxTimeout?: number;
 };
 
 type ConstantLoadParams = {
@@ -255,7 +254,7 @@ export const bindLoad = <T_1, R_1, T_2 = unknown, R_2 = unknown>(
 
   const maxTimeout = Math.min(
     UPSTREAM_TIMEOUT_PARAMS.hardMaxUpstreamTimeoutMillis,
-    subgraph.requestedMaxTimeout ??
+    subgraph.sla.maxTimeoutMillis ??
       UPSTREAM_TIMEOUT_PARAMS.softMaxUpstreamTimeoutMillis
   );
 

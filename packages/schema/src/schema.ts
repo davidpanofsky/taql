@@ -54,8 +54,6 @@ export type StitchResult =
       error: ErrorSchema;
     };
 
-const requestedMaxTimeout = 5000;
-
 /**
  * Remove unused types from the schema.
  * If ENABLE_AST_DESCRIPTION env var is set to false descriptions will be removed too.
@@ -81,11 +79,10 @@ function makeExecutorFactory(
               SubgraphConfig &
                 Required<Pick<SubgraphExecutorConfig, 'batching'>>
             >config),
-            requestedMaxTimeout,
           },
           requestFormatter(cacheConfig)
         )
-      : makeRemoteExecutor({ ...config, requestedMaxTimeout });
+      : makeRemoteExecutor({ ...config });
 }
 
 /**
