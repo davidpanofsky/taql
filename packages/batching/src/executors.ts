@@ -49,8 +49,8 @@ type BatchingExecutorConfig<T extends BatchStyle = BatchStyle> = Readonly<
   SubgraphExecutorConfig &
     SubgraphConfig &
     Required<Pick<SubgraphExecutorConfig, 'batching'>> & {
-      requestedMaxTimeout?: number;
-    } & { batching: { style: T } }
+      batching: { style: T };
+    }
 >;
 
 function makeSingleQueryBatchingExecutor(
