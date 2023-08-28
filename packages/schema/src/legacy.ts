@@ -82,7 +82,6 @@ export async function getLegacySubgraph(args: {
   batchMaxSize: number;
   batchWaitQueries: number;
   batchWaitMillis: number;
-  maxTimeout: number;
   legacySVCO?: string;
 }): Promise<{ subgraph: Subgraph; digest: string }> {
   const rootUrl = args.legacySVCO
@@ -118,9 +117,6 @@ export async function getLegacySubgraph(args: {
       executorConfig: {
         url: batchUrl,
         oidcLiteAuthorizationDomain: args.oidcLiteAuthorizationDomain,
-        sla: {
-          maxTimeoutMillis: args.maxTimeout,
-        },
         batching: {
           style: 'Legacy',
           strategy: 'Headers',
