@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@taql/config": "workspace:^",
-    "@taql/ssl": "workspace:^"
+    "@taql/ssl": "workspace:^",
+    "lookup-dns-cache": "^2.1.0"
   }
 }

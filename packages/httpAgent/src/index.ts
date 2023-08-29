@@ -1,9 +1,8 @@
 import { SSL_PARAMS, logger } from '@taql/config';
 import { Agent } from 'http';
-// TODO fix modules so we can import this thing.
-//import CacheableLookup from 'cacheable-lookup';
 import { Agent as HttpsAgent } from 'https';
 import { SSL_CONFIG } from '@taql/ssl';
+import { lookup } from 'lookup-dns-cache';
 
 const makeAgentConfig = () => {
   const { rejectUnauthorized } = SSL_PARAMS;
@@ -15,10 +14,9 @@ const makeAgentConfig = () => {
   return { rejectUnauthorized } as const;
 };
 
-//const cacheable = new CacheableLookup();
-
 // Inspiration from https://gitlab.dev.tripadvisor.com/tripadvisor/web/-/blob/master/platform/component-server/service/isolate-service-caller.ts#L137-142
 const agentDefaults = {
+  lookup,
   keepAlive: true,
   maxSockets: 128,
   maxFreeSockets: 16,
@@ -31,13 +29,10 @@ export const legacyHttpsAgent: Agent = new HttpsAgent({
   ...agentConfig,
   ...agentDefaults,
 });
-//cacheable.install(legacyHttpsAgent);
 
 export const httpsAgent: Agent = new HttpsAgent({
   ...agentConfig,
   ...agentDefaults,
 });
-//cacheable.install(httpsAgent);
 
 export const httpAgent: Agent = new Agent(agentDefaults);
-//cacheable.install(httpAgent);
