@@ -58,7 +58,7 @@ export const useHttpStatusTracking = (options: {
   const { promPrefix = prefix, logger } = options;
   logger?.info('useHttpStatusTracking: Initializing');
 
-  const labelNames = ['statusCode', 'path'];
+  const labelNames = ['statusCode', 'path', 'client'];
 
   const HTTP_RESPONSE_COUNTER = new promClient.Counter({
     name: `${promPrefix}http_response`,
@@ -88,14 +88,22 @@ export const useHttpStatusTracking = (options: {
     await next();
     const duration = performance.now() - start;
     const path = ctx.request.path;
+    const client =
+      (ctx.request.header['x-app-name'] as string) ||
+      ctx.request.header['user-agent'] ||
+      'unknown';
     if (ctx.status) {
       const statusCode = ctx.status.toString();
-      HTTP_RESPONSE_COUNTER.inc({ statusCode, path });
-      HTTP_REQUEST_DURATION_HISTOGRAM.observe({ statusCode, path }, duration);
+      HTTP_RESPONSE_COUNTER.inc({ statusCode, path, client });
+      HTTP_REQUEST_DURATION_HISTOGRAM.observe(
+        { statusCode, path, client },
+        duration
+      );
 
       const statusBucket = statusCode.slice(0, 1);
       HTTP_RESPONSE_SUMMARY_COUNTER.inc({
         statusCode: `${statusBucket}xx`,
+        client,
         path,
       });
     } else {

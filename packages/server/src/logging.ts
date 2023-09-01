@@ -9,12 +9,13 @@ export const useErrorLogging: Plugin = {
       onExecuteDone(payload) {
         return handleStreamOrSingleExecutionResult(payload, ({ result }) => {
           if (result.errors) {
-            const uniqueId =
-              payload.args.contextValue.request.headers.get('x-unique-id');
-            const requestId =
-              payload.args.contextValue.request.headers.get('x-request-id');
-            const userAgent =
-              payload.args.contextValue.request.headers.get('user-agent');
+            const request = payload.args.contextValue.request;
+            const uniqueId = request.headers.get('x-unique-id');
+            const requestId = request.headers.get('x-request-id');
+            const client =
+              request.headers.get('x-app-name') ||
+              request.headers.get('user-agent') ||
+              'unknown';
             const operationAST = getOperationAST(
               payload.args.document,
               payload.args.operationName
@@ -25,7 +26,7 @@ export const useErrorLogging: Plugin = {
               logger.warn(err?.message, {
                 uniqueId,
                 requestId,
-                userAgent,
+                client,
                 operationName,
                 operationType,
               });
