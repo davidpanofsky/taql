@@ -79,6 +79,7 @@ export const legacyTransforms = [
 export async function getLegacySubgraph(args: {
   url: URL;
   oidcLiteAuthorizationDomain?: string;
+  maxTimeout?: number;
   batchMaxSize: number;
   batchWaitQueries: number;
   batchWaitMillis: number;
@@ -117,6 +118,7 @@ export async function getLegacySubgraph(args: {
       executorConfig: {
         url: batchUrl,
         oidcLiteAuthorizationDomain: args.oidcLiteAuthorizationDomain,
+        sla: { maxTimeoutMillis: args.maxTimeout },
         batching: {
           style: 'Legacy',
           strategy: 'Headers',
