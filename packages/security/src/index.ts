@@ -18,20 +18,29 @@ export const useTaqlSecurity = (): YogaPlugin | undefined =>
   SECURITY.runUntrustedOperations
     ? undefined
     : {
-        onParams(args) {
-          const trusted = trustClient(args.request.headers);
-          const { query } = args.params;
-          if (
-            !trusted &&
-            // Untrusted clients cannot provide arbitrary queries. They must use
-            // persisted queries or preregistered queries (specified by identifiers in
-            // extensions)
-            query != undefined &&
-            query !== ''
-          ) {
-            throw createGraphQLError(
-              'Arbitrary operations not available to untrusted clients'
-            );
+        onParams({ request, params, setParams }) {
+          if (!trustClient(request.headers)) {
+            // Untrusted clients can only provide pre-registered queries.
+            const { query, extensions, ...rest } = params;
+            const preRegisteredQueryId = extensions?.preRegisteredQueryId;
+
+            if (
+              query &&
+              // TODO(WP-4134) tripadvisor/web sends the preRegisteredQueryId in
+              // the `query` as well, only for a period of compatibility with
+              // TRTOP, as /data/graphql is rolled out DTM. Remove this
+              // condition after the rollout is complete.
+              query !== preRegisteredQueryId
+            ) {
+              throw createGraphQLError(
+                'Arbitrary operations not available to untrusted clients'
+              );
+            }
+
+            // Strip the `query` (if any, see the above TODO), and ensure that
+            // the only extension permitted from untrusted clients is the
+            // preRegisteredQueryId.
+            setParams({ ...rest, extensions: { preRegisteredQueryId } });
           }
         },
       };
