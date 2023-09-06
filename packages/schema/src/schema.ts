@@ -394,6 +394,7 @@ export const overrideSupergraphWithSvco = async (
     batchWaitMillis:
       legacySubgraph.executorConfig.batching?.wait?.millis ?? 200,
     legacySVCO,
+    maxTimeout: legacySubgraph.executorConfig.sla?.maxTimeoutMillis ?? 5000,
   });
 
   if (
