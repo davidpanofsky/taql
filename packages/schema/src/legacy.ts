@@ -1,6 +1,6 @@
 import { ENABLE_FEATURES, logger } from '@taql/config';
 import fetch, { FetchError, Headers } from 'node-fetch';
-import { httpAgent, httpsAgent } from '@taql/httpAgent';
+import { httpAgent, legacyHttpsAgent } from '@taql/httpAgent';
 import { ForwardSubschemaExtensions } from '@taql/debug';
 import { Subgraph } from '@ta-graphql-utils/stitch';
 import type { Transform } from '@graphql-tools/delegate';
@@ -101,7 +101,7 @@ export async function getLegacySubgraph(args: {
     headers.append('x-oidc-authorization', `Bearer ${token}`);
   args.legacySVCO != undefined &&
     headers.append('x-service-overrides', args.legacySVCO);
-  const agent = schemaUrl.protocol == 'https:' ? httpsAgent : httpAgent;
+  const agent = schemaUrl.protocol == 'https:' ? legacyHttpsAgent : httpAgent;
   try {
     const rawSchemaResponse = await fetch(schemaUrl, {
       agent,

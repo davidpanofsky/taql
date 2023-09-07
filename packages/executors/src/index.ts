@@ -14,7 +14,7 @@ import {
 import { ExecutionRequest, ExecutionResult } from '@graphql-tools/utils';
 import { ForwardableHeaders, type TaqlState } from '@taql/context';
 import fetch, { Headers } from 'node-fetch';
-import { httpAgent, httpsAgent } from '@taql/httpAgent';
+import { httpAgent, httpsAgent, legacyHttpsAgent } from '@taql/httpAgent';
 import type { Agent } from 'http';
 import { Cache } from 'cache-manager';
 import { SubgraphExecutorConfig } from '@ta-graphql-utils/stitch';
@@ -245,12 +245,18 @@ export const bindLoad = <T_1, R_1, T_2 = unknown, R_2 = unknown>(
     subgraph.url,
     subgraph.oidcLiteAuthorizationDomain
   );
+
   if (subgraph.url.protocol == 'http:' && subgraph.authProvider != undefined) {
     throw new Error(
       `Subgraph misconfiguration for: ${subgraph.url}. Refusing to send authentication headers over cleartext http.`
     );
   }
-  const agent = subgraph.url.protocol == 'https:' ? httpsAgent : httpAgent;
+  const agent =
+    subgraph.url.protocol == 'http:'
+      ? httpAgent
+      : subgraph.authProvider == undefined
+      ? legacyHttpsAgent
+      : httpsAgent;
 
   const maxTimeout = Math.min(
     UPSTREAM_TIMEOUT_PARAMS.hardMaxUpstreamTimeoutMillis,
