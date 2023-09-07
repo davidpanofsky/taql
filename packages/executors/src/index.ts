@@ -210,7 +210,8 @@ const load = async <T, R>({
   );
 
   const token = (await subgraph.authProvider?.getAuth())?.accessToken;
-  token != undefined && headers.set('x-oidc-authorization', `Bearer ${token}`);
+  // Currently following the assumption that subgraphs in AWS will use the 'Authorization' header.
+  token != undefined && headers.set('authorization', `Bearer ${token}`);
   headers.set('x-timeout', `${paddedTimeout}`);
   headers.set('content-type', 'application/json');
   logger.debug(`Fetching from remote: ${subgraph.url}`);
