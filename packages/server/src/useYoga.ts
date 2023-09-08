@@ -17,6 +17,7 @@ import fetch, {
   Headers as FetchHeaders,
   Response as FetchResponse,
 } from 'node-fetch';
+import { httpAgent, legacyHttpsAgent } from '@taql/httpAgent';
 import {
   instrumentedStore,
   memoryStore,
@@ -35,7 +36,6 @@ import type { IncomingHttpHeaders } from 'http';
 import { TaqlAPQ } from './apq';
 import { TaqlState } from '@taql/context';
 import { addClusterReadinessStage } from '@taql/readiness';
-import { httpsAgent } from '@taql/httpAgent';
 import { preconfiguredUsePrometheus } from './usePrometheus';
 import promClient from 'prom-client';
 import { readFileSync } from 'fs';
@@ -287,7 +287,7 @@ export const useYoga = async () => {
             ctx.request.method != 'GET' && ctx.requestMethod != 'FETCH'
               ? ctx.req
               : undefined,
-          agent: ctx.request.protocol == 'https' ? httpsAgent : undefined,
+          agent: ctx.request.protocol == 'https' ? legacyHttpsAgent : httpAgent,
         }
       );
     } else {
