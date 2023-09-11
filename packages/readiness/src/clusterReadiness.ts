@@ -20,9 +20,13 @@ const requests = new Map<number, ReadinessRequest>();
 const workerChecks: (() => boolean)[] = [];
 const primaryChecks: (() => boolean)[] = [];
 
+function evaluateChecks(checks: (() => boolean)[], def: boolean): boolean {
+  return checks.length > 0 ? checks.every((check) => check()) : def;
+}
+
 let listenersAdded = false;
 // idempotently add listeners for IPC messages
-function addListeners() {
+function addListeners(workerDefaultReadiness: boolean) {
   if (listenersAdded) {
     return;
   }
@@ -69,7 +73,7 @@ function addListeners() {
       if (message.type === GET_READINESS_REQ) {
         // Send readiness response to primary (master)
         // Compute this worker's readiness
-        const readiness = workerChecks.every((check) => check());
+        const readiness = evaluateChecks(workerChecks, workerDefaultReadiness);
         process.send?.({
           type: GET_READINESS_RES,
           requestId: message.requestId,
@@ -82,9 +86,20 @@ function addListeners() {
 
 export class ClusterReadiness {
   private readonly maxWaitMs: number;
-  constructor(maxWaitMs: number) {
+  private readonly primaryDefaultReadiness: boolean;
+  constructor(options: {
+    maxWaitMs: number;
+    workerDefaultReadiness?: boolean;
+    primaryDefaultReadiness?: boolean;
+  }) {
+    const {
+      maxWaitMs,
+      workerDefaultReadiness = false,
+      primaryDefaultReadiness = false,
+    } = options;
     this.maxWaitMs = maxWaitMs;
-    addListeners();
+    this.primaryDefaultReadiness = primaryDefaultReadiness;
+    addListeners(workerDefaultReadiness);
   }
 
   addClusterReadinessStage(readiness: { check: () => boolean; name: string }) {
@@ -159,7 +174,8 @@ export class ClusterReadiness {
       }
     }).then(
       (workerReadiness) =>
-        workerReadiness === true && primaryChecks.every((check) => check())
+        workerReadiness === true &&
+        evaluateChecks(primaryChecks, this.primaryDefaultReadiness)
     );
   }
 }
