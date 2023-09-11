@@ -4,6 +4,7 @@ coverage
 *.env
 .tool-versions
 .vscode/*
+supergraph.json
 
 # begin ignores for yarn
 .pnp.*

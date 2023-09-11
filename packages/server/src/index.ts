@@ -80,7 +80,7 @@ const workerStartup = async () => {
 const primaryStartup = async () => {
   const { port } = SERVER_PARAMS;
 
-  const schemaFile = SCHEMA.schemaFile ?? '/supergraph.json';
+  const schemaFile = SCHEMA.schemaFile ?? './supergraph.json';
   if (SCHEMA.source == 'gsr') {
     const supergraph = await loadSupergraph();
     await promises.writeFile(schemaFile, JSON.stringify(supergraph));

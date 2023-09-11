@@ -112,7 +112,7 @@ export const SCHEMA = resolve({
   legacySchemaSource: {
     property: 'LEGACY_SCHEMA_SOURCE',
     resolver: (prop) =>
-      prop == 'custom'
+      prop != 'gsr'
         ? resolve({
             url: {
               property: 'LEGACY_GQL_URL',
@@ -149,8 +149,7 @@ export const SCHEMA = resolve({
               defaultTo: 20,
             },
           })
-        : undefined,
-    defaultTo: <const>'gsr',
+        : 'gsr',
   },
   environment: {
     property: 'GSR_ENVIRONMENT',
