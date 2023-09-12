@@ -417,7 +417,7 @@ export const TRACING_PARAMS = resolve({
     defaultTo: undefined,
   },
   useBatchingProcessor: {
-    property: 'TRACING_USE_BATCHING_WORKEROR',
+    property: 'TRACING_USE_BATCHING_PROCESSOR',
     resolver: resolvers.booleanFromString,
     defaultTo: false,
   },
