@@ -7,7 +7,7 @@
     "lint": "prettier --write . && eslint --fix --max-warnings 0 --no-error-on-unmatched-pattern .",
     "depcheck": "depcheck && yarn workspaces foreach -pv exec depcheck",
     "server": "./scripts/server.bash",
-    "start": "echo \"deprecated; use 'yarn run server start'\" >/dev/stderr ; yarn run server start",
+    "start": "yarn workspace @taql/server run start",
     "deploy-schema": "./scripts/gitops.bash",
     "build": "yarn workspaces foreach -tpv run build",
     "incremental-build": "yarn workspaces foreach -tpv run incremental-build",

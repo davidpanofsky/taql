@@ -11,8 +11,10 @@ Due to gitlab's sanitization of links, bookmarklets for setting/unsetting this c
 
 - `yarn install --immutable` - install dependencies
 - `yarn run build` - build the repository
-- `yarn run server start` - start the service
+- `yarn run start` - start the server
 - `yarn run test` - run the unit tests
+
+Alternatively, you could use `./scripts/server.bash` script to manage taql and run it as a background service. Run `yarn run server` to see the usage instructions. 
 
 ## Environment variables
 
