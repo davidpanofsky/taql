@@ -207,15 +207,16 @@ export const useYoga = async () => {
   const yogaOptions = {
     graphiql: ENABLE_FEATURES.graphiql,
     multipart: false,
-    // TODO pick a number that matches the current limit in legacy graphql,
-    // and draw it from configuration.
     batching: { limit: batchLimit },
+    // Disable @whatwg-node/server's `useCors`, which is not very spec
+    // compliant. It comes into play when browser requests are being sent
+    // straight to taql.
+    cors: false,
 
     // The following are graphql-yoga defaults added explicitly here for future stability.
     //logging: true,
     logging: logger,
     maskedErrors: true,
-    cors: undefined,
     graphqlEndpoint: '/graphql',
     healthCheckEndpoint: '/health',
     landingPage: ENABLE_FEATURES.graphiql,
