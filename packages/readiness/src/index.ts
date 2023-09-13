@@ -3,9 +3,11 @@ import { ClusterReadiness } from './clusterReadiness';
 import { logger } from '@taql/config';
 
 // IPC message listeners are set up by the constructor of ClusterReadiness.
-export const CLUSTER_READINESS = new ClusterReadiness(
-  200 // If a worker can't respond in 200ms, consider it unready
-);
+export const CLUSTER_READINESS = new ClusterReadiness({
+  maxWaitMs: 200, // If a worker can't respond in 200ms, consider it unready
+  workerDefaultReadiness: false, // workers must have at least a single check evaluated to be considered ready
+  primaryDefaultReadiness: false, // primary must have at least a single check evaluated to be considered ready
+});
 
 export type ReadinessStage = {
   check: () => boolean;
