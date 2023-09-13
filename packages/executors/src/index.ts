@@ -219,6 +219,7 @@ const load = async <T, R>({
   BODY_BYTES_SENT.labels({ subgraph: subgraph.name }).inc(body.byteLength);
   const response = await fetch(subgraph.url, {
     method: 'POST',
+    redirect: 'error',
     headers,
     agent,
     timeout,
