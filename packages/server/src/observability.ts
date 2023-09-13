@@ -3,7 +3,6 @@ import {
   AlwaysOnSampler,
   BasicTracerProvider,
   BatchSpanProcessor,
-  ConsoleSpanExporter,
   ParentBasedSampler,
   SimpleSpanProcessor,
 } from '@opentelemetry/sdk-trace-base';
@@ -133,10 +132,6 @@ tracerProvider.addSpanProcessor(
   TRACING_PARAMS.useBatchingProcessor
     ? new BatchSpanProcessor(zipkinExporter)
     : new SimpleSpanProcessor(zipkinExporter)
-);
-// Console exporter for debugging
-tracerProvider.addSpanProcessor(
-  new SimpleSpanProcessor(new ConsoleSpanExporter())
 );
 tracerProvider.register({
   propagator: new B3Propagator({
