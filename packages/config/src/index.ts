@@ -277,6 +277,11 @@ export const SERVER_PARAMS = resolve({
     resolver: resolvers.booleanFromString,
     defaultTo: false,
   },
+  svcoSchemaTtl: {
+    property: 'SVCO_SCHEMA_TTL',
+    resolver: resolvers.nonNegativeInteger,
+    defaultTo: 1000 * 60 * 10,
+  },
 });
 
 export const ENABLE_FEATURES = resolve({
