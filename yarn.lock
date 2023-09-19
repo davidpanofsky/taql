@@ -2066,6 +2066,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@opentelemetry/api@npm:^1.6.0":
+  version: 1.6.0
+  resolution: "@opentelemetry/api@npm:1.6.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40opentelemetry%2Fapi%2F-%2Fapi-1.6.0.tgz"
+  checksum: 3283b78b62a39f6568eaa050ac7045fcca747679e255874f6d2107cb8e1a3b2e10bfbf553c3e82a72500fb5fdca49dc07a5fe27fd6980debac24506cca638859
+  languageName: node
+  linkType: hard
+
+"@opentelemetry/context-async-hooks@npm:1.17.0":
+  version: 1.17.0
+  resolution: "@opentelemetry/context-async-hooks@npm:1.17.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40opentelemetry%2Fcontext-async-hooks%2F-%2Fcontext-async-hooks-1.17.0.tgz"
+  peerDependencies:
+    "@opentelemetry/api": ">=1.0.0 <1.7.0"
+  checksum: b391a911e6b0a6f7aae59de871448beea9bc32476be655472c8d32f6538afd6bd981c9e413f24b01278a5e502c1e46b064260e1def1ff469ff4f96a76adc9895
+  languageName: node
+  linkType: hard
+
 "@opentelemetry/core@npm:1.12.0":
   version: 1.12.0
   resolution: "@opentelemetry/core@npm:1.12.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40opentelemetry%2Fcore%2F-%2Fcore-1.12.0.tgz"
@@ -2077,50 +2093,243 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@opentelemetry/core@npm:1.13.0":
-  version: 1.13.0
-  resolution: "@opentelemetry/core@npm:1.13.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40opentelemetry%2Fcore%2F-%2Fcore-1.13.0.tgz"
+"@opentelemetry/core@npm:1.17.0, @opentelemetry/core@npm:^1.1.0, @opentelemetry/core@npm:^1.8.0":
+  version: 1.17.0
+  resolution: "@opentelemetry/core@npm:1.17.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40opentelemetry%2Fcore%2F-%2Fcore-1.17.0.tgz"
   dependencies:
-    "@opentelemetry/semantic-conventions": 1.13.0
+    "@opentelemetry/semantic-conventions": 1.17.0
   peerDependencies:
-    "@opentelemetry/api": ">=1.0.0 <1.5.0"
-  checksum: a69916bcb710f1241e98a58ac5f5dfbc3372fdcd6cb2a4b2d33cdeb941765ecbdeea029f60f650a5743a56f583b0f06b672566467b89db84a24f1304bf2e5205
+    "@opentelemetry/api": ">=1.0.0 <1.7.0"
+  checksum: 8f66bc47f2b9cae429830c91840515d6d70793c27fa139e661a7ae05c503d4a7244b5d52e3526cd32401a5a662775bb04546ca1e3ec20dc7124e6d0bb901f176
   languageName: node
   linkType: hard
 
-"@opentelemetry/core@npm:1.14.0":
-  version: 1.14.0
-  resolution: "@opentelemetry/core@npm:1.14.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40opentelemetry%2Fcore%2F-%2Fcore-1.14.0.tgz"
+"@opentelemetry/exporter-zipkin@npm:^1.17.0":
+  version: 1.17.0
+  resolution: "@opentelemetry/exporter-zipkin@npm:1.17.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40opentelemetry%2Fexporter-zipkin%2F-%2Fexporter-zipkin-1.17.0.tgz"
   dependencies:
-    "@opentelemetry/semantic-conventions": 1.14.0
-  peerDependencies:
-    "@opentelemetry/api": ">=1.0.0 <1.5.0"
-  checksum: 061e6f3bee492e020915427da94da902846ed6ee922bdb21a70563e5fbd3ebb39e8e3ae6eb1071eb775d27ca31093929ab65fe8abc81228042be8d9a3c96bac8
-  languageName: node
-  linkType: hard
-
-"@opentelemetry/exporter-zipkin@npm:^1.13.0":
-  version: 1.13.0
-  resolution: "@opentelemetry/exporter-zipkin@npm:1.13.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40opentelemetry%2Fexporter-zipkin%2F-%2Fexporter-zipkin-1.13.0.tgz"
-  dependencies:
-    "@opentelemetry/core": 1.13.0
-    "@opentelemetry/resources": 1.13.0
-    "@opentelemetry/sdk-trace-base": 1.13.0
-    "@opentelemetry/semantic-conventions": 1.13.0
+    "@opentelemetry/core": 1.17.0
+    "@opentelemetry/resources": 1.17.0
+    "@opentelemetry/sdk-trace-base": 1.17.0
+    "@opentelemetry/semantic-conventions": 1.17.0
   peerDependencies:
     "@opentelemetry/api": ^1.0.0
-  checksum: 3745ef5e941ffd6b3a880ceb865c4b4c6d1980d60f9b00db96562b4c301d671ce78abf8b616d8df851cc3dddc2a8edab162eb41ce9264f8335e1d74e53e8069f
+  checksum: 7d54465c3aec1cf0992297dbb8251067822d6b89a90f67c94f6d3dc3589c64a5bc35619c8ce981a3d32b3a22c0503096b6772b59f6c3fbbc630fd91883dca53e
   languageName: node
   linkType: hard
 
-"@opentelemetry/propagator-b3@npm:^1.13.0":
-  version: 1.13.0
-  resolution: "@opentelemetry/propagator-b3@npm:1.13.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40opentelemetry%2Fpropagator-b3%2F-%2Fpropagator-b3-1.13.0.tgz"
+"@opentelemetry/instrumentation-aws-sdk@npm:^0.36.0":
+  version: 0.36.0
+  resolution: "@opentelemetry/instrumentation-aws-sdk@npm:0.36.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40opentelemetry%2Finstrumentation-aws-sdk%2F-%2Finstrumentation-aws-sdk-0.36.0.tgz"
   dependencies:
-    "@opentelemetry/core": 1.13.0
+    "@opentelemetry/core": ^1.8.0
+    "@opentelemetry/instrumentation": ^0.41.2
+    "@opentelemetry/propagation-utils": ^0.30.1
+    "@opentelemetry/semantic-conventions": ^1.0.0
   peerDependencies:
-    "@opentelemetry/api": ">=1.0.0 <1.5.0"
-  checksum: 8ee0db7d47efe21c5c8128621a816221a8e94831b410d60b02d7859d373d55521b3574c288014ffbb9916aaad00b259fe4d92dfeab7c06398e96f94e2b2bea63
+    "@opentelemetry/api": ^1.3.0
+  checksum: 9a22f19551bd2fc627e26dfb62939c7a279f67ba220fcdcbeee2ed516f671a627c3de06e7619bdbd1710e9a9d75232be1b1b226349d2df6d27d22076793ffa46
+  languageName: node
+  linkType: hard
+
+"@opentelemetry/instrumentation-dataloader@npm:^0.5.1":
+  version: 0.5.1
+  resolution: "@opentelemetry/instrumentation-dataloader@npm:0.5.1::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40opentelemetry%2Finstrumentation-dataloader%2F-%2Finstrumentation-dataloader-0.5.1.tgz"
+  dependencies:
+    "@opentelemetry/instrumentation": ^0.41.2
+  peerDependencies:
+    "@opentelemetry/api": ^1.3.0
+  checksum: 689ed07bf3e193775f4eaf2cc4ecaa2b0bb019af5134fedc0bea177bcafac55aecdd584e246b457cda72d61cd8c60da7f8c04cf7564dea990452e7aee8bb4804
+  languageName: node
+  linkType: hard
+
+"@opentelemetry/instrumentation-dns@npm:^0.32.2":
+  version: 0.32.2
+  resolution: "@opentelemetry/instrumentation-dns@npm:0.32.2::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40opentelemetry%2Finstrumentation-dns%2F-%2Finstrumentation-dns-0.32.2.tgz"
+  dependencies:
+    "@opentelemetry/instrumentation": ^0.41.2
+    "@opentelemetry/semantic-conventions": ^1.0.0
+    semver: ^7.5.4
+  peerDependencies:
+    "@opentelemetry/api": ^1.3.0
+  checksum: 29386823e47b31e6603132e71a325c78d580c1274785eeb382aadef91e5f2c8a227ed876f8ca818d7df856478d7e54df6777060032d402c135a6efa3e56ae33f
+  languageName: node
+  linkType: hard
+
+"@opentelemetry/instrumentation-fetch@npm:^0.43.0":
+  version: 0.43.0
+  resolution: "@opentelemetry/instrumentation-fetch@npm:0.43.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40opentelemetry%2Finstrumentation-fetch%2F-%2Finstrumentation-fetch-0.43.0.tgz"
+  dependencies:
+    "@opentelemetry/core": 1.17.0
+    "@opentelemetry/instrumentation": 0.43.0
+    "@opentelemetry/sdk-trace-web": 1.17.0
+    "@opentelemetry/semantic-conventions": 1.17.0
+  peerDependencies:
+    "@opentelemetry/api": ^1.0.0
+  checksum: cb3c84d29ecebfd40080ec87f8ba4c17de9998542eb53569fdb64a1d32c387ee43f504baaebddfa49004013701b399c7b965b1243fb0911183e3ac7a4489207a
+  languageName: node
+  linkType: hard
+
+"@opentelemetry/instrumentation-fs@npm:^0.8.1":
+  version: 0.8.1
+  resolution: "@opentelemetry/instrumentation-fs@npm:0.8.1::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40opentelemetry%2Finstrumentation-fs%2F-%2Finstrumentation-fs-0.8.1.tgz"
+  dependencies:
+    "@opentelemetry/core": ^1.8.0
+    "@opentelemetry/instrumentation": ^0.41.2
+    "@opentelemetry/semantic-conventions": ^1.0.0
+  peerDependencies:
+    "@opentelemetry/api": ^1.3.0
+  checksum: 220fdc405478a652d3b248cc87565d43f67cffb475fd81d23879adbf4d5c561aa9b8d9fa3a32104a0ff72b1dee5f06a3d4c0c7a83890964764c40528541488cd
+  languageName: node
+  linkType: hard
+
+"@opentelemetry/instrumentation-http@npm:^0.43.0":
+  version: 0.43.0
+  resolution: "@opentelemetry/instrumentation-http@npm:0.43.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40opentelemetry%2Finstrumentation-http%2F-%2Finstrumentation-http-0.43.0.tgz"
+  dependencies:
+    "@opentelemetry/core": 1.17.0
+    "@opentelemetry/instrumentation": 0.43.0
+    "@opentelemetry/semantic-conventions": 1.17.0
+    semver: ^7.5.2
+  peerDependencies:
+    "@opentelemetry/api": ^1.3.0
+  checksum: fcd1f0161cef99d961fdbdeeba68abab1d280016de2a22d391c10090b7fbe31c7d37ca1a81d4b8e46ac0509e82994d6d1e080a53e68e07c422d421b5096d2815
+  languageName: node
+  linkType: hard
+
+"@opentelemetry/instrumentation-ioredis@npm:^0.35.1":
+  version: 0.35.1
+  resolution: "@opentelemetry/instrumentation-ioredis@npm:0.35.1::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40opentelemetry%2Finstrumentation-ioredis%2F-%2Finstrumentation-ioredis-0.35.1.tgz"
+  dependencies:
+    "@opentelemetry/instrumentation": ^0.41.2
+    "@opentelemetry/redis-common": ^0.36.1
+    "@opentelemetry/semantic-conventions": ^1.0.0
+    "@types/ioredis4": "npm:@types/ioredis@^4.28.10"
+  peerDependencies:
+    "@opentelemetry/api": ^1.3.0
+  checksum: 18399e5d3c691d0596ef29b5fee8fcafd486bc71a94c8dcbfb23786d84440ff74c0a83407acab3ad0f312391fccafee69ab4461f0ad30f4cfac10609ab35e51d
+  languageName: node
+  linkType: hard
+
+"@opentelemetry/instrumentation-koa@npm:^0.36.0":
+  version: 0.36.0
+  resolution: "@opentelemetry/instrumentation-koa@npm:0.36.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40opentelemetry%2Finstrumentation-koa%2F-%2Finstrumentation-koa-0.36.0.tgz"
+  dependencies:
+    "@opentelemetry/core": ^1.8.0
+    "@opentelemetry/instrumentation": ^0.41.2
+    "@opentelemetry/semantic-conventions": ^1.0.0
+    "@types/koa": 2.13.8
+    "@types/koa__router": 8.0.11
+  peerDependencies:
+    "@opentelemetry/api": ^1.3.0
+  checksum: 0e311a76c7d822bc21e0de9cd5bdc3b9ec7f6abbb33180f7dca56291b59c72d11197f7d0ca2ed75003ee189e98b00d6bc881700cf9bcee76f7c347e0eadeb115
+  languageName: node
+  linkType: hard
+
+"@opentelemetry/instrumentation-net@npm:^0.32.1":
+  version: 0.32.1
+  resolution: "@opentelemetry/instrumentation-net@npm:0.32.1::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40opentelemetry%2Finstrumentation-net%2F-%2Finstrumentation-net-0.32.1.tgz"
+  dependencies:
+    "@opentelemetry/instrumentation": ^0.41.2
+    "@opentelemetry/semantic-conventions": ^1.0.0
+  peerDependencies:
+    "@opentelemetry/api": ^1.3.0
+  checksum: 534cdb5c20c28b456d166d83a6f5ff0fe0082a808772cdf090123dd22ea4c90d646dcd34c17468a3222056f6ebdbf0a90467ab21dbe037b0eda81258bd7f1058
+  languageName: node
+  linkType: hard
+
+"@opentelemetry/instrumentation-pg@npm:^0.36.1":
+  version: 0.36.1
+  resolution: "@opentelemetry/instrumentation-pg@npm:0.36.1::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40opentelemetry%2Finstrumentation-pg%2F-%2Finstrumentation-pg-0.36.1.tgz"
+  dependencies:
+    "@opentelemetry/core": ^1.8.0
+    "@opentelemetry/instrumentation": ^0.41.2
+    "@opentelemetry/semantic-conventions": ^1.0.0
+    "@opentelemetry/sql-common": ^0.40.0
+    "@types/pg": 8.6.1
+    "@types/pg-pool": 2.0.3
+  peerDependencies:
+    "@opentelemetry/api": ^1.3.0
+  checksum: 6a36daa1dc397fa75d0d9d20f30d9a2063bdf61006ec34b27a350d17adc3ff9dd225e4c47028856df94792378c9fbd648f84ac7513fbca5e5e351a1dd57ddcd2
+  languageName: node
+  linkType: hard
+
+"@opentelemetry/instrumentation-winston@npm:^0.32.1":
+  version: 0.32.1
+  resolution: "@opentelemetry/instrumentation-winston@npm:0.32.1::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40opentelemetry%2Finstrumentation-winston%2F-%2Finstrumentation-winston-0.32.1.tgz"
+  dependencies:
+    "@opentelemetry/instrumentation": ^0.41.2
+  peerDependencies:
+    "@opentelemetry/api": ^1.3.0
+  checksum: 77565761e78adc9fe6c9ee8672c528371c6a65d92026469fe4531f2527161b0eebed91fb07494a13052b2168e004d4f36e85b73038c9322a1ba61c2a16b66848
+  languageName: node
+  linkType: hard
+
+"@opentelemetry/instrumentation@npm:0.43.0, @opentelemetry/instrumentation@npm:^0.43.0":
+  version: 0.43.0
+  resolution: "@opentelemetry/instrumentation@npm:0.43.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40opentelemetry%2Finstrumentation%2F-%2Finstrumentation-0.43.0.tgz"
+  dependencies:
+    "@types/shimmer": ^1.0.2
+    import-in-the-middle: 1.4.2
+    require-in-the-middle: ^7.1.1
+    semver: ^7.5.2
+    shimmer: ^1.2.1
+  peerDependencies:
+    "@opentelemetry/api": ^1.3.0
+  checksum: 6ebb916fcce79884b931f0098fbe3e12835437226b7afab43ae64580e27b74747157e2ed2c1584952e42bd21c6e1c72ecbcf260143241b43f8e62803f6ece3a6
+  languageName: node
+  linkType: hard
+
+"@opentelemetry/instrumentation@npm:^0.41.2":
+  version: 0.41.2
+  resolution: "@opentelemetry/instrumentation@npm:0.41.2::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40opentelemetry%2Finstrumentation%2F-%2Finstrumentation-0.41.2.tgz"
+  dependencies:
+    "@types/shimmer": ^1.0.2
+    import-in-the-middle: 1.4.2
+    require-in-the-middle: ^7.1.1
+    semver: ^7.5.1
+    shimmer: ^1.2.1
+  peerDependencies:
+    "@opentelemetry/api": ^1.3.0
+  checksum: 73df84c356064aaf2465f691001d6c165877d7204d2c66063b89dfa8b7206bc47442cd6dec88c40af86b104dbe72081c2e234376a63b3afaa529a9648ac016cd
+  languageName: node
+  linkType: hard
+
+"@opentelemetry/propagation-utils@npm:^0.30.1":
+  version: 0.30.1
+  resolution: "@opentelemetry/propagation-utils@npm:0.30.1::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40opentelemetry%2Fpropagation-utils%2F-%2Fpropagation-utils-0.30.1.tgz"
+  peerDependencies:
+    "@opentelemetry/api": ^1.0.0
+  checksum: d7e43ea71579f21ad52b231a05f15c29002ed44a9e8a7420d1439ae99c51bc013ca36868b2f727f9b29c53ddce541982ac60acaa1144604f84aa57126f5678c5
+  languageName: node
+  linkType: hard
+
+"@opentelemetry/propagator-b3@npm:1.17.0, @opentelemetry/propagator-b3@npm:^1.17.0":
+  version: 1.17.0
+  resolution: "@opentelemetry/propagator-b3@npm:1.17.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40opentelemetry%2Fpropagator-b3%2F-%2Fpropagator-b3-1.17.0.tgz"
+  dependencies:
+    "@opentelemetry/core": 1.17.0
+  peerDependencies:
+    "@opentelemetry/api": ">=1.0.0 <1.7.0"
+  checksum: 5e81dd38314944955dc01d7456a61299411ba1792c487b55987fe16eb122488329617ca3648dfb3ef0d670124cf3d28ec3681ca922afea802180024202ef1283
+  languageName: node
+  linkType: hard
+
+"@opentelemetry/propagator-jaeger@npm:1.17.0":
+  version: 1.17.0
+  resolution: "@opentelemetry/propagator-jaeger@npm:1.17.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40opentelemetry%2Fpropagator-jaeger%2F-%2Fpropagator-jaeger-1.17.0.tgz"
+  dependencies:
+    "@opentelemetry/core": 1.17.0
+  peerDependencies:
+    "@opentelemetry/api": ">=1.0.0 <1.7.0"
+  checksum: 1511af62159595756194106aff0771ba8e4c7f338e62b50ff965546ef6208858c49a4f7f5748e0539a5efb182ec583bffc45fbe659b42e766f675d71d778459b
+  languageName: node
+  linkType: hard
+
+"@opentelemetry/redis-common@npm:^0.36.1":
+  version: 0.36.1
+  resolution: "@opentelemetry/redis-common@npm:0.36.1::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40opentelemetry%2Fredis-common%2F-%2Fredis-common-0.36.1.tgz"
+  checksum: 85a992408ed2057ee3f6932b68553bae6a8be6bffdf6e49244df50252a494a63bfa486ecd203ce8a69f67fa79c5a74f5ae84f425de54727c628bca679b5cd16b
   languageName: node
   linkType: hard
 
@@ -2136,40 +2345,28 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@opentelemetry/resources@npm:1.13.0":
-  version: 1.13.0
-  resolution: "@opentelemetry/resources@npm:1.13.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40opentelemetry%2Fresources%2F-%2Fresources-1.13.0.tgz"
+"@opentelemetry/resources@npm:1.17.0, @opentelemetry/resources@npm:^1.17.0":
+  version: 1.17.0
+  resolution: "@opentelemetry/resources@npm:1.17.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40opentelemetry%2Fresources%2F-%2Fresources-1.17.0.tgz"
   dependencies:
-    "@opentelemetry/core": 1.13.0
-    "@opentelemetry/semantic-conventions": 1.13.0
+    "@opentelemetry/core": 1.17.0
+    "@opentelemetry/semantic-conventions": 1.17.0
   peerDependencies:
-    "@opentelemetry/api": ">=1.0.0 <1.5.0"
-  checksum: ef0a11596f27b5e1c13b74357da06c5c2725a1056df0a583562dbcc739927ad85bb8bdec4e01f4b43f348b448c0146c033b135840a7d388b75cc751a33a6364e
+    "@opentelemetry/api": ">=1.0.0 <1.7.0"
+  checksum: 517dba494be0a55ff489b086b8ba33401993d7231483c5e37ff8bc2d360846064ea71cb37b0e7fed39de4f8291a0cccdbd3724e8d9751c72c09ecc66a312f2f4
   languageName: node
   linkType: hard
 
-"@opentelemetry/resources@npm:^1.14.0":
-  version: 1.14.0
-  resolution: "@opentelemetry/resources@npm:1.14.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40opentelemetry%2Fresources%2F-%2Fresources-1.14.0.tgz"
+"@opentelemetry/sdk-trace-base@npm:1.17.0":
+  version: 1.17.0
+  resolution: "@opentelemetry/sdk-trace-base@npm:1.17.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40opentelemetry%2Fsdk-trace-base%2F-%2Fsdk-trace-base-1.17.0.tgz"
   dependencies:
-    "@opentelemetry/core": 1.14.0
-    "@opentelemetry/semantic-conventions": 1.14.0
+    "@opentelemetry/core": 1.17.0
+    "@opentelemetry/resources": 1.17.0
+    "@opentelemetry/semantic-conventions": 1.17.0
   peerDependencies:
-    "@opentelemetry/api": ">=1.0.0 <1.5.0"
-  checksum: 4494fcad2a9d8de215149675ce4f16885f6d7d0b3318c44a1f8d2e50009de07853c94b428462f70d1dd3d3681a5738d6b625806b7939839524db49a81eb90a2c
-  languageName: node
-  linkType: hard
-
-"@opentelemetry/sdk-trace-base@npm:1.13.0, @opentelemetry/sdk-trace-base@npm:^1.13.0":
-  version: 1.13.0
-  resolution: "@opentelemetry/sdk-trace-base@npm:1.13.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40opentelemetry%2Fsdk-trace-base%2F-%2Fsdk-trace-base-1.13.0.tgz"
-  dependencies:
-    "@opentelemetry/core": 1.13.0
-    "@opentelemetry/resources": 1.13.0
-    "@opentelemetry/semantic-conventions": 1.13.0
-  peerDependencies:
-    "@opentelemetry/api": ">=1.0.0 <1.5.0"
-  checksum: bfe95d56de998cf4219fa9293c9d2ebbd90d93391bbb8360a1806465983b6665cef58bc2938a8e318ae0712e2482ebed7a9db5d9e8bb6fc010199f5fa8f1592e
+    "@opentelemetry/api": ">=1.0.0 <1.7.0"
+  checksum: e009969df4edccb6898fd7af2941f9f27c530e195429309a4057ae6cb8080e4cd008fb9437acb361ccf64ca40e2a8747309cb3545916c68587eb45adb012b2db
   languageName: node
   linkType: hard
 
@@ -2186,6 +2383,35 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@opentelemetry/sdk-trace-node@npm:^1.17.0":
+  version: 1.17.0
+  resolution: "@opentelemetry/sdk-trace-node@npm:1.17.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40opentelemetry%2Fsdk-trace-node%2F-%2Fsdk-trace-node-1.17.0.tgz"
+  dependencies:
+    "@opentelemetry/context-async-hooks": 1.17.0
+    "@opentelemetry/core": 1.17.0
+    "@opentelemetry/propagator-b3": 1.17.0
+    "@opentelemetry/propagator-jaeger": 1.17.0
+    "@opentelemetry/sdk-trace-base": 1.17.0
+    semver: ^7.5.2
+  peerDependencies:
+    "@opentelemetry/api": ">=1.0.0 <1.7.0"
+  checksum: 11c149bb6c079e223b930f608e3c76e88d24b1a62bb753d29d6414accfe96d1d467feeefee1ef5c3a9e05047be1c359c93de0e36d26f59413b529b0dd2d27578
+  languageName: node
+  linkType: hard
+
+"@opentelemetry/sdk-trace-web@npm:1.17.0":
+  version: 1.17.0
+  resolution: "@opentelemetry/sdk-trace-web@npm:1.17.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40opentelemetry%2Fsdk-trace-web%2F-%2Fsdk-trace-web-1.17.0.tgz"
+  dependencies:
+    "@opentelemetry/core": 1.17.0
+    "@opentelemetry/sdk-trace-base": 1.17.0
+    "@opentelemetry/semantic-conventions": 1.17.0
+  peerDependencies:
+    "@opentelemetry/api": ">=1.0.0 <1.7.0"
+  checksum: 7fff2df3d08fc7ccff5ff9f4ac801f586450e4e2b310ca0adc88616ba9668aa6cc15279ef0241380ea2fb1798fded376cff0b009443cb1915988c2c88e39fed7
+  languageName: node
+  linkType: hard
+
 "@opentelemetry/semantic-conventions@npm:1.12.0":
   version: 1.12.0
   resolution: "@opentelemetry/semantic-conventions@npm:1.12.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40opentelemetry%2Fsemantic-conventions%2F-%2Fsemantic-conventions-1.12.0.tgz"
@@ -2193,17 +2419,28 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@opentelemetry/semantic-conventions@npm:1.13.0":
-  version: 1.13.0
-  resolution: "@opentelemetry/semantic-conventions@npm:1.13.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40opentelemetry%2Fsemantic-conventions%2F-%2Fsemantic-conventions-1.13.0.tgz"
-  checksum: 9cccf1d73315fed3920bb2201c0e82f66e58dddfa475314b6613780c2804570d6f657be3894eb8b84a2a543c9b8cd520587f5d6cd4b62bc6731d7299b4c5ee69
+"@opentelemetry/semantic-conventions@npm:1.17.0, @opentelemetry/semantic-conventions@npm:^1.0.0":
+  version: 1.17.0
+  resolution: "@opentelemetry/semantic-conventions@npm:1.17.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40opentelemetry%2Fsemantic-conventions%2F-%2Fsemantic-conventions-1.17.0.tgz"
+  checksum: 3cb99118b3720aed37fa71d9b6c38847a481d5287653275477d30126de9e548f63a302efbd8a2086a747442880598bbde95ef17f8016dce45b85798696f12be4
   languageName: node
   linkType: hard
 
-"@opentelemetry/semantic-conventions@npm:1.14.0, @opentelemetry/semantic-conventions@npm:^1.14.0":
+"@opentelemetry/semantic-conventions@npm:^1.14.0":
   version: 1.14.0
   resolution: "@opentelemetry/semantic-conventions@npm:1.14.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40opentelemetry%2Fsemantic-conventions%2F-%2Fsemantic-conventions-1.14.0.tgz"
   checksum: 0d4f752035ac25d10cfcaf0e16f29bff8fa47877baff61dc4d047f9fe1e70f1459d02f5b70982c579db48584038e4fe263755b35ffa7254385604917337469f3
+  languageName: node
+  linkType: hard
+
+"@opentelemetry/sql-common@npm:^0.40.0":
+  version: 0.40.0
+  resolution: "@opentelemetry/sql-common@npm:0.40.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40opentelemetry%2Fsql-common%2F-%2Fsql-common-0.40.0.tgz"
+  dependencies:
+    "@opentelemetry/core": ^1.1.0
+  peerDependencies:
+    "@opentelemetry/api": ^1.1.0
+  checksum: 65249c13f160a9f2d2e408bc2c33a90f47d1721b8280c9f087d722fe0d0bfed01289c165b3f668e6c512d4fe2da9a858d25bbe906e667cd12a4aedcbe9da4e1c
   languageName: node
   linkType: hard
 
@@ -2954,10 +3191,23 @@ __metadata:
     "@graphql-yoga/plugin-apq": ^2.0.0
     "@graphql-yoga/plugin-disable-introspection": ^1.0.0
     "@graphql-yoga/plugin-prometheus": ^2.0.0
-    "@opentelemetry/exporter-zipkin": ^1.13.0
-    "@opentelemetry/propagator-b3": ^1.13.0
-    "@opentelemetry/resources": ^1.14.0
-    "@opentelemetry/sdk-trace-base": ^1.13.0
+    "@opentelemetry/api": ^1.6.0
+    "@opentelemetry/exporter-zipkin": ^1.17.0
+    "@opentelemetry/instrumentation": ^0.43.0
+    "@opentelemetry/instrumentation-aws-sdk": ^0.36.0
+    "@opentelemetry/instrumentation-dataloader": ^0.5.1
+    "@opentelemetry/instrumentation-dns": ^0.32.2
+    "@opentelemetry/instrumentation-fetch": ^0.43.0
+    "@opentelemetry/instrumentation-fs": ^0.8.1
+    "@opentelemetry/instrumentation-http": ^0.43.0
+    "@opentelemetry/instrumentation-ioredis": ^0.35.1
+    "@opentelemetry/instrumentation-koa": ^0.36.0
+    "@opentelemetry/instrumentation-net": ^0.32.1
+    "@opentelemetry/instrumentation-pg": ^0.36.1
+    "@opentelemetry/instrumentation-winston": ^0.32.1
+    "@opentelemetry/propagator-b3": ^1.17.0
+    "@opentelemetry/resources": ^1.17.0
+    "@opentelemetry/sdk-trace-node": ^1.17.0
     "@opentelemetry/semantic-conventions": ^1.14.0
     "@taql/caching": "workspace:^"
     "@taql/config": "workspace:^"
@@ -3160,6 +3410,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/ioredis4@npm:@types/ioredis@^4.28.10":
+  version: 4.28.10
+  resolution: "@types/ioredis@npm:4.28.10::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40types%2Fioredis%2F-%2Fioredis-4.28.10.tgz"
+  dependencies:
+    "@types/node": "*"
+  checksum: 0f2788cf25f490d3b345db8c5f8b8ce3f6c92cc99abcf744c8f974f02b9b3875233b3d22098614c462a0d6c41c523bd655509418ea88eb6249db6652290ce7cf
+  languageName: node
+  linkType: hard
+
 "@types/istanbul-lib-coverage@npm:*, @types/istanbul-lib-coverage@npm:^2.0.0, @types/istanbul-lib-coverage@npm:^2.0.1":
   version: 2.0.4
   resolution: "@types/istanbul-lib-coverage@npm:2.0.4::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40types%2Fistanbul-lib-coverage%2F-%2Fistanbul-lib-coverage-2.0.4.tgz"
@@ -3241,6 +3500,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/koa@npm:2.13.8":
+  version: 2.13.8
+  resolution: "@types/koa@npm:2.13.8::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40types%2Fkoa%2F-%2Fkoa-2.13.8.tgz"
+  dependencies:
+    "@types/accepts": "*"
+    "@types/content-disposition": "*"
+    "@types/cookies": "*"
+    "@types/http-assert": "*"
+    "@types/http-errors": "*"
+    "@types/keygrip": "*"
+    "@types/koa-compose": "*"
+    "@types/node": "*"
+  checksum: 76a2a6d219c65f242a43efca42970d864701c58319c346a91dd8c3b4df2021786fd0d600a88dfb098358c9085f9f4a2dfe62563641441cf21e11e2bfe04f4fdf
+  languageName: node
+  linkType: hard
+
 "@types/koa@npm:^2.13.6":
   version: 2.13.6
   resolution: "@types/koa@npm:2.13.6::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40types%2Fkoa%2F-%2Fkoa-2.13.6.tgz"
@@ -3254,6 +3529,15 @@ __metadata:
     "@types/koa-compose": "*"
     "@types/node": "*"
   checksum: a4061c2e29cd4ccb65a704fe3ef6868eac82558856c7c00a5bcc0f9fdf18c595e0156c52508eb8ba926a9108d9cf5c9a1a1b73cccf50e29b37ea1154323d0b26
+  languageName: node
+  linkType: hard
+
+"@types/koa__router@npm:8.0.11":
+  version: 8.0.11
+  resolution: "@types/koa__router@npm:8.0.11::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40types%2Fkoa__router%2F-%2Fkoa__router-8.0.11.tgz"
+  dependencies:
+    "@types/koa": "*"
+  checksum: 81f55ed77273871728c81a20fa546ee906bebfe72fd72e3723d983a19504eb7d9578908a0fb8ef230764c5495031412df4245eee93479161bd7bd5135ca1ea04
   languageName: node
   linkType: hard
 
@@ -3318,6 +3602,37 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/pg-pool@npm:2.0.3":
+  version: 2.0.3
+  resolution: "@types/pg-pool@npm:2.0.3::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40types%2Fpg-pool%2F-%2Fpg-pool-2.0.3.tgz"
+  dependencies:
+    "@types/pg": "*"
+  checksum: 9ea0bcdbdd09c9de6f774e59465189e552ee094901724278082c41ba6287e7fddffb9ba4b4107c242bba4e8f8a1f0016e6a1eb0c6ca306d43c08b5ddd7f34549
+  languageName: node
+  linkType: hard
+
+"@types/pg@npm:*":
+  version: 8.10.2
+  resolution: "@types/pg@npm:8.10.2::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40types%2Fpg%2F-%2Fpg-8.10.2.tgz"
+  dependencies:
+    "@types/node": "*"
+    pg-protocol: "*"
+    pg-types: ^4.0.1
+  checksum: 49da89f64cec1bd12a3fbc0c72b17d685c2fee579726a529f62fcab395dbc5696d80455073409947a577164b3c53a90181a331e4a5d9357679f724d4ce37f4b9
+  languageName: node
+  linkType: hard
+
+"@types/pg@npm:8.6.1":
+  version: 8.6.1
+  resolution: "@types/pg@npm:8.6.1::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40types%2Fpg%2F-%2Fpg-8.6.1.tgz"
+  dependencies:
+    "@types/node": "*"
+    pg-protocol: "*"
+    pg-types: ^2.2.0
+  checksum: a44710ff06e70f57685ddb88edbb93d4b46e03fed90619f09853ed3868ab28541c4da03eccf6b0b444a7566a0b3c56028543ced43554d51168ca3f8ae15e194f
+  languageName: node
+  linkType: hard
+
 "@types/pg@npm:^8.6.6":
   version: 8.6.6
   resolution: "@types/pg@npm:8.6.6::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40types%2Fpg%2F-%2Fpg-8.6.6.tgz"
@@ -3364,6 +3679,13 @@ __metadata:
     "@types/mime": "*"
     "@types/node": "*"
   checksum: b6ac93d471fb0f53ddcac1f9b67572a09cd62806f7db5855244b28f6f421139626f24799392566e97d1ffc61b12f9de7f30380c39fcae3c8a161fe161d44edf2
+  languageName: node
+  linkType: hard
+
+"@types/shimmer@npm:^1.0.2":
+  version: 1.0.2
+  resolution: "@types/shimmer@npm:1.0.2::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40types%2Fshimmer%2F-%2Fshimmer-1.0.2.tgz"
+  checksum: 952b5555e914f632f3312a7b54e2b720b12ddce7373e1da58d25f25f32c07e5513afeb53bfce4256035a1205bbe81223fe8e47c160163de3e56fb93a3e0da42b
   languageName: node
   linkType: hard
 
@@ -3679,6 +4001,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"acorn-import-assertions@npm:^1.9.0":
+  version: 1.9.0
+  resolution: "acorn-import-assertions@npm:1.9.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Facorn-import-assertions%2F-%2Facorn-import-assertions-1.9.0.tgz"
+  peerDependencies:
+    acorn: ^8
+  checksum: 944fb2659d0845c467066bdcda2e20c05abe3aaf11972116df457ce2627628a81764d800dd55031ba19de513ee0d43bb771bc679cc0eda66dc8b4fade143bc0c
+  languageName: node
+  linkType: hard
+
 "acorn-jsx@npm:^5.3.2":
   version: 5.3.2
   resolution: "acorn-jsx@npm:5.3.2::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Facorn-jsx%2F-%2Facorn-jsx-5.3.2.tgz"
@@ -3694,6 +4025,15 @@ __metadata:
   bin:
     acorn: bin/acorn
   checksum: 4079b67283b94935157698831967642f24a075c52ce3feaaaafe095776dfbe15d86a1b33b1e53860fc0d062ed6c83f4284a5c87c85b9ad51853a01173da6097f
+  languageName: node
+  linkType: hard
+
+"acorn@npm:^8.8.2":
+  version: 8.10.0
+  resolution: "acorn@npm:8.10.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Facorn%2F-%2Facorn-8.10.0.tgz"
+  bin:
+    acorn: bin/acorn
+  checksum: 538ba38af0cc9e5ef983aee196c4b8b4d87c0c94532334fa7e065b2c8a1f85863467bb774231aae91613fcda5e68740c15d97b1967ae3394d20faddddd8af61d
   languageName: node
   linkType: hard
 
@@ -4212,6 +4552,13 @@ __metadata:
   version: 1.2.2
   resolution: "cjs-module-lexer@npm:1.2.2::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fcjs-module-lexer%2F-%2Fcjs-module-lexer-1.2.2.tgz"
   checksum: 977f3f042bd4f08e368c890d91eecfbc4f91da0bc009a3c557bc4dfbf32022ad1141244ac1178d44de70fc9f3dea7add7cd9a658a34b9fae98a55d8f92331ce5
+  languageName: node
+  linkType: hard
+
+"cjs-module-lexer@npm:^1.2.2":
+  version: 1.2.3
+  resolution: "cjs-module-lexer@npm:1.2.3::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fcjs-module-lexer%2F-%2Fcjs-module-lexer-1.2.3.tgz"
+  checksum: 5ea3cb867a9bb609b6d476cd86590d105f3cfd6514db38ff71f63992ab40939c2feb68967faa15a6d2b1f90daa6416b79ea2de486e9e2485a6f8b66a21b4fb0a
   languageName: node
   linkType: hard
 
@@ -5495,6 +5842,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"import-in-the-middle@npm:1.4.2":
+  version: 1.4.2
+  resolution: "import-in-the-middle@npm:1.4.2::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fimport-in-the-middle%2F-%2Fimport-in-the-middle-1.4.2.tgz"
+  dependencies:
+    acorn: ^8.8.2
+    acorn-import-assertions: ^1.9.0
+    cjs-module-lexer: ^1.2.2
+    module-details-from-path: ^1.0.3
+  checksum: 52971f821e9a3c94834cd5cf0ab5178321c07d4f4babd547b3cb24c4de21670d05b42ca1523890e7e90525c3bba6b7db7e54cf45421919b0b2712a34faa96ea5
+  languageName: node
+  linkType: hard
+
 "import-local@npm:^3.0.2":
   version: 3.1.0
   resolution: "import-local@npm:3.1.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fimport-local%2F-%2Fimport-local-3.1.0.tgz"
@@ -5607,6 +5966,15 @@ __metadata:
   dependencies:
     has: ^1.0.3
   checksum: f7f7eb2ab71fd769ee9fb2385c095d503aa4b5ce0028c04557de03f1e67a87c85e5bac1f215945fc3c955867a139a415a3ec4c4234a0bffdf715232660f440a6
+  languageName: node
+  linkType: hard
+
+"is-core-module@npm:^2.13.0":
+  version: 2.13.0
+  resolution: "is-core-module@npm:2.13.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fis-core-module%2F-%2Fis-core-module-2.13.0.tgz"
+  dependencies:
+    has: ^1.0.3
+  checksum: 053ab101fb390bfeb2333360fd131387bed54e476b26860dc7f5a700bbf34a0ec4454f7c8c4d43e8a0030957e4b3db6e16d35e1890ea6fb654c833095e040355
   languageName: node
   linkType: hard
 
@@ -6753,6 +7121,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"module-details-from-path@npm:^1.0.3":
+  version: 1.0.3
+  resolution: "module-details-from-path@npm:1.0.3::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fmodule-details-from-path%2F-%2Fmodule-details-from-path-1.0.3.tgz"
+  checksum: 378a8a26013889aa3086bfb0776b7860c5bb957336253e1ba5d779c2f239a218930b145ca76e52c1dd7c8079d52b2af64b8eec30822f81ffdb0dfa27d6fe6f33
+  languageName: node
+  linkType: hard
+
 "ms@npm:2.1.2":
   version: 2.1.2
   resolution: "ms@npm:2.1.2::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fms%2F-%2Fms-2.1.2.tgz"
@@ -6908,6 +7283,13 @@ __metadata:
     gauge: ^4.0.3
     set-blocking: ^2.0.0
   checksum: ae238cd264a1c3f22091cdd9e2b106f684297d3c184f1146984ecbe18aaa86343953f26b9520dedd1b1372bc0316905b736c1932d778dbeb1fcf5a1001390e2a
+  languageName: node
+  linkType: hard
+
+"obuf@npm:~1.1.2":
+  version: 1.1.2
+  resolution: "obuf@npm:1.1.2::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fobuf%2F-%2Fobuf-1.1.2.tgz"
+  checksum: 41a2ba310e7b6f6c3b905af82c275bf8854896e2e4c5752966d64cbcd2f599cfffd5932006bcf3b8b419dfdacebb3a3912d5d94e10f1d0acab59876c8757f27f
   languageName: node
   linkType: hard
 
@@ -7104,6 +7486,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"pg-numeric@npm:1.0.2":
+  version: 1.0.2
+  resolution: "pg-numeric@npm:1.0.2::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fpg-numeric%2F-%2Fpg-numeric-1.0.2.tgz"
+  checksum: 8899f8200caa1744439a8778a9eb3ceefb599d893e40a09eef84ee0d4c151319fd416634a6c0fc7b7db4ac268710042da5be700b80ef0de716fe089b8652c84f
+  languageName: node
+  linkType: hard
+
 "pg-pool@npm:^3.6.0":
   version: 3.6.0
   resolution: "pg-pool@npm:3.6.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fpg-pool%2F-%2Fpg-pool-3.6.0.tgz"
@@ -7130,6 +7519,21 @@ __metadata:
     postgres-date: ~1.0.4
     postgres-interval: ^1.1.0
   checksum: bf4ec3f594743442857fb3a8dfe5d2478a04c98f96a0a47365014557cbc0b4b0cee01462c79adca863b93befbf88f876299b75b72c665b5fb84a2c94fbd10316
+  languageName: node
+  linkType: hard
+
+"pg-types@npm:^4.0.1":
+  version: 4.0.1
+  resolution: "pg-types@npm:4.0.1::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fpg-types%2F-%2Fpg-types-4.0.1.tgz"
+  dependencies:
+    pg-int8: 1.0.1
+    pg-numeric: 1.0.2
+    postgres-array: ~3.0.1
+    postgres-bytea: ~3.0.0
+    postgres-date: ~2.0.1
+    postgres-interval: ^3.0.0
+    postgres-range: ^1.1.1
+  checksum: 05258ef2f27a75f1bf4e243f36bb749f85148339d3be818147bcc4aebe019ad7589a6869150713140250d81e5a46ec25dc6e0a031ea77e23db5ca232a0d7a3dc
   languageName: node
   linkType: hard
 
@@ -7219,10 +7623,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"postgres-array@npm:~3.0.1":
+  version: 3.0.2
+  resolution: "postgres-array@npm:3.0.2::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fpostgres-array%2F-%2Fpostgres-array-3.0.2.tgz"
+  checksum: 5955f9dffeb6fa960c1a0b04fd4b2ba16813ddb636934ad26f902e4d76a91c0b743dcc6edc4cffc52deba7d547505e0020adea027c1d50a774f989cf955420d1
+  languageName: node
+  linkType: hard
+
 "postgres-bytea@npm:~1.0.0":
   version: 1.0.0
   resolution: "postgres-bytea@npm:1.0.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fpostgres-bytea%2F-%2Fpostgres-bytea-1.0.0.tgz"
   checksum: d844ae4ca7a941b70e45cac1261a73ee8ed39d72d3d74ab1d645248185a1b7f0ac91a3c63d6159441020f4e1f7fe64689ac56536a307b31cef361e5187335090
+  languageName: node
+  linkType: hard
+
+"postgres-bytea@npm:~3.0.0":
+  version: 3.0.0
+  resolution: "postgres-bytea@npm:3.0.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fpostgres-bytea%2F-%2Fpostgres-bytea-3.0.0.tgz"
+  dependencies:
+    obuf: ~1.1.2
+  checksum: 5f917a003fcaa0df7f285e1c37108ad474ce91193466b9bd4bcaecef2cdea98ca069c00aa6a8dbe6d2e7192336cadc3c9b36ae48d1555a299521918e00e2936b
   languageName: node
   linkType: hard
 
@@ -7233,12 +7653,33 @@ __metadata:
   languageName: node
   linkType: hard
 
+"postgres-date@npm:~2.0.1":
+  version: 2.0.1
+  resolution: "postgres-date@npm:2.0.1::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fpostgres-date%2F-%2Fpostgres-date-2.0.1.tgz"
+  checksum: 0304bf8641a01412e4f5c3a374604e2e3dbc9dbee71d30df12fe60b32560c5674f887c2d15bafa2996f3b618b617398e7605f0e3669db43f31e614dfe69f8de7
+  languageName: node
+  linkType: hard
+
 "postgres-interval@npm:^1.1.0":
   version: 1.2.0
   resolution: "postgres-interval@npm:1.2.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fpostgres-interval%2F-%2Fpostgres-interval-1.2.0.tgz"
   dependencies:
     xtend: ^4.0.0
   checksum: 746b71f93805ae33b03528e429dc624706d1f9b20ee81bf743263efb6a0cd79ae02a642a8a480dbc0f09547b4315ab7df6ce5ec0be77ed700bac42730f5c76b2
+  languageName: node
+  linkType: hard
+
+"postgres-interval@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "postgres-interval@npm:3.0.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fpostgres-interval%2F-%2Fpostgres-interval-3.0.0.tgz"
+  checksum: c7a1cf006de97de663b6b8c4d2b167aa9909a238c4866a94b15d303762f5ac884ff4796cd6e2111b7f0a91302b83c570453aa8506fd005b5a5d5dfa87441bebc
+  languageName: node
+  linkType: hard
+
+"postgres-range@npm:^1.1.1":
+  version: 1.1.3
+  resolution: "postgres-range@npm:1.1.3::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fpostgres-range%2F-%2Fpostgres-range-1.1.3.tgz"
+  checksum: bf7e194a18c490d02bda0bd02035a8da454d8fd2b22c55d3d03f185c038b2a6f52d0804417d8090864afefc2b7ed664b2d12c2454a4a0f545dcbbb86488fbdf1
   languageName: node
   linkType: hard
 
@@ -7419,6 +7860,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"require-in-the-middle@npm:^7.1.1":
+  version: 7.2.0
+  resolution: "require-in-the-middle@npm:7.2.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Frequire-in-the-middle%2F-%2Frequire-in-the-middle-7.2.0.tgz"
+  dependencies:
+    debug: ^4.1.1
+    module-details-from-path: ^1.0.3
+    resolve: ^1.22.1
+  checksum: 5ed219d12aec4d0f098029827f9e929d8e0ca4f2fe01f23a9b02169e57c5157cced9e7acaef6a871d3f56646f2cb807b08f2f23d66912ee53eca16cb88eff743
+  languageName: node
+  linkType: hard
+
 "require-package-name@npm:^2.0.1":
   version: 2.0.1
   resolution: "require-package-name@npm:2.0.1::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Frequire-package-name%2F-%2Frequire-package-name-2.0.1.tgz"
@@ -7482,6 +7934,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"resolve@npm:^1.22.1":
+  version: 1.22.6
+  resolution: "resolve@npm:1.22.6::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fresolve%2F-%2Fresolve-1.22.6.tgz"
+  dependencies:
+    is-core-module: ^2.13.0
+    path-parse: ^1.0.7
+    supports-preserve-symlinks-flag: ^1.0.0
+  bin:
+    resolve: bin/resolve
+  checksum: d13bf66d4e2ee30d291491f16f2fa44edd4e0cefb85d53249dd6f93e70b2b8c20ec62f01b18662e3cd40e50a7528f18c4087a99490048992a3bb954cf3201a5b
+  languageName: node
+  linkType: hard
+
 "resolve@patch:resolve@^1.18.1#~builtin<compat/resolve>":
   version: 1.22.1
   resolution: "resolve@patch:resolve@npm%3A1.22.1%3A%3A__archiveUrl=https%253A%252F%252Fmaven.dev.tripadvisor.com%253A443%252Fartifactory%252Fapi%252Fnpm%252Fyarn%252Fresolve%252F-%252Fresolve-1.22.1.tgz#~builtin<compat/resolve>::version=1.22.1&hash=07638b"
@@ -7505,6 +7970,19 @@ __metadata:
   bin:
     resolve: bin/resolve
   checksum: ad59734723b596d0891321c951592ed9015a77ce84907f89c9d9307dd0c06e11a67906a3e628c4cae143d3e44898603478af0ddeb2bba3f229a9373efe342665
+  languageName: node
+  linkType: hard
+
+"resolve@patch:resolve@^1.22.1#~builtin<compat/resolve>":
+  version: 1.22.6
+  resolution: "resolve@patch:resolve@npm%3A1.22.6%3A%3A__archiveUrl=https%253A%252F%252Fmaven.dev.tripadvisor.com%253A443%252Fartifactory%252Fapi%252Fnpm%252Fyarn%252Fresolve%252F-%252Fresolve-1.22.6.tgz#~builtin<compat/resolve>::version=1.22.6&hash=07638b"
+  dependencies:
+    is-core-module: ^2.13.0
+    path-parse: ^1.0.7
+    supports-preserve-symlinks-flag: ^1.0.0
+  bin:
+    resolve: bin/resolve
+  checksum: 9d3b3c67aefd12cecbe5f10ca4d1f51ea190891096497c43f301b086883b426466918c3a64f1bbf1788fabb52b579d58809614006c5d0b49186702b3b8fb746a
   languageName: node
   linkType: hard
 
@@ -7623,6 +8101,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"semver@npm:^7.5.1, semver@npm:^7.5.2, semver@npm:^7.5.4":
+  version: 7.5.4
+  resolution: "semver@npm:7.5.4::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fsemver%2F-%2Fsemver-7.5.4.tgz"
+  dependencies:
+    lru-cache: ^6.0.0
+  bin:
+    semver: bin/semver.js
+  checksum: 12d8ad952fa353b0995bf180cdac205a4068b759a140e5d3c608317098b3575ac2f1e09182206bf2eb26120e1c0ed8fb92c48c592f6099680de56bb071423ca3
+  languageName: node
+  linkType: hard
+
 "set-blocking@npm:^2.0.0":
   version: 2.0.0
   resolution: "set-blocking@npm:2.0.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fset-blocking%2F-%2Fset-blocking-2.0.0.tgz"
@@ -7650,6 +8139,13 @@ __metadata:
   version: 3.0.0
   resolution: "shebang-regex@npm:3.0.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fshebang-regex%2F-%2Fshebang-regex-3.0.0.tgz"
   checksum: 1a2bcae50de99034fcd92ad4212d8e01eedf52c7ec7830eedcf886622804fe36884278f2be8be0ea5fde3fd1c23911643a4e0f726c8685b61871c8908af01222
+  languageName: node
+  linkType: hard
+
+"shimmer@npm:^1.2.1":
+  version: 1.2.1
+  resolution: "shimmer@npm:1.2.1::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fshimmer%2F-%2Fshimmer-1.2.1.tgz"
+  checksum: aa0d6252ad1c682a4fdfda69e541be987f7a265ac7b00b1208e5e48cc68dc55f293955346ea4c71a169b7324b82c70f8400b3d3d2d60b2a7519f0a3522423250
   languageName: node
   linkType: hard
 
