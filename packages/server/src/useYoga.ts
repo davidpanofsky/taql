@@ -147,7 +147,7 @@ const makeSchemaProvider = (
     name: 'svco_schemas',
     store: memoryStore<GraphQLSchema>({
       max: 128,
-      ttl: 1000 * 60 * 2,
+      ttl: SERVER_PARAMS.svcoSchemaTtl,
       async fetchMethod(legacySVCO): Promise<GraphQLSchema> {
         logger.debug(`Fetching and building schema for SVCO: ${legacySVCO}`);
         SVCO_SCHEMA_BUILD_COUNTER.inc(); // We're probably about to hang the event loop, inc before building schema
