@@ -1,19 +1,32 @@
 import {
   AlwaysOffSampler,
   AlwaysOnSampler,
-  BasicTracerProvider,
   BatchSpanProcessor,
+  ConsoleSpanExporter,
+  NodeTracerProvider,
   ParentBasedSampler,
   SimpleSpanProcessor,
-} from '@opentelemetry/sdk-trace-base';
+} from '@opentelemetry/sdk-trace-node';
 import { B3InjectEncoding, B3Propagator } from '@opentelemetry/propagator-b3';
 import { PROM_PARAMS, TRACING_PARAMS, WORKER } from '@taql/config';
 import promClient, { AggregatorRegistry } from 'prom-client';
+import { AwsInstrumentation } from '@opentelemetry/instrumentation-aws-sdk';
+import { DataloaderInstrumentation } from '@opentelemetry/instrumentation-dataloader';
+import { DnsInstrumentation } from '@opentelemetry/instrumentation-dns';
+import { FetchInstrumentation } from '@opentelemetry/instrumentation-fetch';
+import { FsInstrumentation } from '@opentelemetry/instrumentation-fs';
+import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
+import { IORedisInstrumentation } from '@opentelemetry/instrumentation-ioredis';
+import { KoaInstrumentation } from '@opentelemetry/instrumentation-koa';
+import { NetInstrumentation } from '@opentelemetry/instrumentation-net';
 import type { ParameterizedContext } from 'koa';
+import { PgInstrumentation } from '@opentelemetry/instrumentation-pg';
 import { Resource } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
+import { WinstonInstrumentation } from '@opentelemetry/instrumentation-winston';
 import { ZipkinExporter } from '@opentelemetry/exporter-zipkin';
 import { performance } from 'perf_hooks';
+import { registerInstrumentations } from '@opentelemetry/instrumentation';
 
 const prometheusRegistry = new AggregatorRegistry();
 const { prefix } = PROM_PARAMS;
@@ -113,28 +126,53 @@ export const useHttpStatusTracking = (options: {
   };
 };
 
-export const tracerProvider = new BasicTracerProvider({
-  resource: new Resource({
-    [SemanticResourceAttributes.SERVICE_NAME]: 'taql',
+export const tracerProvider = new NodeTracerProvider({
+  resource: new Resource({ [SemanticResourceAttributes.SERVICE_NAME]: 'taql' }),
+  sampler: new ParentBasedSampler({
+    root: TRACING_PARAMS.alwaysSample
+      ? new AlwaysOnSampler()
+      : new AlwaysOffSampler(),
   }),
-  sampler: TRACING_PARAMS.alwaysSample
-    ? new AlwaysOnSampler()
-    : new ParentBasedSampler({
-        root: new AlwaysOffSampler(),
-      }),
 });
 
-const zipkinExporter = new ZipkinExporter({
-  serviceName: 'taql',
-  url: TRACING_PARAMS.zipkinUrl,
-});
-tracerProvider.addSpanProcessor(
-  TRACING_PARAMS.useBatchingProcessor
-    ? new BatchSpanProcessor(zipkinExporter)
-    : new SimpleSpanProcessor(zipkinExporter)
-);
 tracerProvider.register({
   propagator: new B3Propagator({
     injectEncoding: B3InjectEncoding.MULTI_HEADER,
   }),
+});
+
+if (TRACING_PARAMS.zipkinUrl) {
+  const zipkinExporter = new ZipkinExporter({
+    serviceName: 'taql',
+    url: TRACING_PARAMS.zipkinUrl,
+  });
+  tracerProvider.addSpanProcessor(
+    TRACING_PARAMS.useBatchingProcessor
+      ? new BatchSpanProcessor(zipkinExporter)
+      : new SimpleSpanProcessor(zipkinExporter)
+  );
+} else {
+  tracerProvider.addSpanProcessor(
+    new SimpleSpanProcessor(new ConsoleSpanExporter())
+  );
+}
+
+registerInstrumentations({
+  instrumentations: [
+    new AwsInstrumentation(),
+    new DataloaderInstrumentation({ requireParentSpan: true }),
+    new DnsInstrumentation(),
+    new FetchInstrumentation(),
+    new FsInstrumentation({ requireParentSpan: true }),
+    new HttpInstrumentation({
+      requireParentforIncomingSpans: true,
+      requireParentforOutgoingSpans: true,
+    }),
+    new IORedisInstrumentation({ requireParentSpan: true }),
+    new KoaInstrumentation(),
+    new NetInstrumentation(),
+    new PgInstrumentation({ requireParentSpan: true }),
+    new WinstonInstrumentation(),
+  ],
+  tracerProvider,
 });

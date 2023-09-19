@@ -17,12 +17,12 @@ const batchIgnoreHeaders: ReadonlySet<ForwardHeaderName> = new Set([
   'x-guid',
   'x-request-id',
   // b3 headers are trace headers
-  'b3',
-  'x-b3-flags',
-  'x-b3-parentspanid',
-  'x-b3-sampled',
-  'x-b3-spanid',
-  'x-b3-traceid',
+  //'b3',
+  //'x-b3-flags',
+  //'x-b3-parentspanid',
+  //'x-b3-sampled',
+  //'x-b3-spanid',
+  //'x-b3-traceid',
 ]);
 
 export type BatchHeaders = (readonly [string, string])[];

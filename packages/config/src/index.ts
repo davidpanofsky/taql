@@ -424,7 +424,7 @@ export const TRACING_PARAMS = resolve({
   useBatchingProcessor: {
     property: 'TRACING_USE_BATCHING_PROCESSOR',
     resolver: resolvers.booleanFromString,
-    defaultTo: false,
+    defaultTo: true,
   },
   alwaysSample: {
     property: 'TRACING_ALWAYS_SAMPLE',
