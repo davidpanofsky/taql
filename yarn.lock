@@ -2875,6 +2875,7 @@ __metadata:
     "@taql/config": "workspace:^"
     "@taql/ssl": "workspace:^"
     "@types/node": ^18.16.7
+    lookup-dns-cache: ^2.1.0
     typescript: ^5.0.4
   languageName: unknown
   linkType: soft
@@ -3862,6 +3863,15 @@ __metadata:
     pvutils: ^1.1.3
     tslib: ^2.4.0
   checksum: 3b6af1bbadd5762ef8ead5daf2f6bda1bc9e23bc825c4dcc996aa1f9521ad7390a64028565d95d98090d69c8431f004c71cccb866004759169d7c203cf9075eb
+  languageName: node
+  linkType: hard
+
+"async@npm:2.6.0":
+  version: 2.6.0
+  resolution: "async@npm:2.6.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Fasync%2F-%2Fasync-2.6.0.tgz"
+  dependencies:
+    lodash: ^4.14.0
+  checksum: 1cb5dddf9a50e1e6f73a7f52753894a9f42dcc249b5b9b24a04e25f4f1b50fbd3d3cd9792b02ca280611ed5c489c07913c55bcdca186827c5909b01eb6d6813e
   languageName: node
   linkType: hard
 
@@ -6454,7 +6464,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash@npm:^4.17.20, lodash@npm:^4.17.21":
+"lodash@npm:^4.14.0, lodash@npm:^4.17.10, lodash@npm:^4.17.20, lodash@npm:^4.17.21":
   version: 4.17.21
   resolution: "lodash@npm:4.17.21::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Flodash%2F-%2Flodash-4.17.21.tgz"
   checksum: eb835a2e51d381e561e508ce932ea50a8e5a68f4ebdd771ea240d3048244a8d13658acbd502cd4829768c56f2e16bdd4340b9ea141297d472517b83868e677f7
@@ -6472,6 +6482,17 @@ __metadata:
     safe-stable-stringify: ^2.3.1
     triple-beam: ^1.3.0
   checksum: 08fdf03be5bb69af33bac214eb4f6a0c83ad3821a30de498925fccb61e993e5a4a87470aab356ca2110c11e4643685bed5597ca5f46dd1cd11437c44a0e0e3c2
+  languageName: node
+  linkType: hard
+
+"lookup-dns-cache@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "lookup-dns-cache@npm:2.1.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Flookup-dns-cache%2F-%2Flookup-dns-cache-2.1.0.tgz"
+  dependencies:
+    async: 2.6.0
+    lodash: ^4.17.10
+    rr: 0.1.0
+  checksum: bb21ac24cc1715b06ac6bbe25e3b183149c2f3d1a0fff25571e4e6ef456174eea1afe4de1b6c8138ceed7cbe400e231980bb1fa8992180f906d94e237295edfb
   languageName: node
   linkType: hard
 
@@ -7530,6 +7551,13 @@ __metadata:
   bin:
     rimraf: bin.js
   checksum: 87f4164e396f0171b0a3386cc1877a817f572148ee13a7e113b238e48e8a9f2f31d009a92ec38a591ff1567d9662c6b67fd8818a2dbbaed74bc26a87a2a4a9a0
+  languageName: node
+  linkType: hard
+
+"rr@npm:0.1.0":
+  version: 0.1.0
+  resolution: "rr@npm:0.1.0::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2Frr%2F-%2Frr-0.1.0.tgz"
+  checksum: 38a9e912b8bf98833a89d403e69b208783ee84e288e54a152472eec603f10d3b7bd98c686022b230991a3c43d12d413251b0207fa109302175b9504854fd447d
   languageName: node
   linkType: hard
 
