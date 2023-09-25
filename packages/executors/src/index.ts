@@ -1,4 +1,3 @@
-import { type ASTNode, GraphQLError, print } from 'graphql';
 import {
   AUTH_MANAGER_CONFIG,
   EXECUTION_TIMEOUT_PARAMS,
@@ -11,16 +10,24 @@ import {
   AuthProvider,
   getManager,
 } from '@ta-graphql-utils/auth-manager';
+import {
+  type DocumentNode,
+  GraphQLError,
+  getOperationAST,
+  print,
+} from 'graphql';
 import { ExecutionRequest, ExecutionResult } from '@graphql-tools/utils';
 import { ForwardableHeaders, type TaqlState } from '@taql/context';
 import fetch, { Headers } from 'node-fetch';
 import { httpAgent, httpsAgent, legacyHttpsAgent } from '@taql/httpAgent';
 import type { Agent } from 'http';
 import { Cache } from 'cache-manager';
+import { SpanKind } from '@opentelemetry/api';
 import { SubgraphExecutorConfig } from '@ta-graphql-utils/stitch';
 import { getDeadline } from '@taql/deadlines';
 import path from 'node:path';
 import promClient from 'prom-client';
+import { tracerProvider } from '@taql/observability';
 
 export type TaqlRequest = ExecutionRequest<Record<string, unknown>, TaqlState>;
 
@@ -28,6 +35,9 @@ export type PrintedDocumentCacheConfig = {
   cache?: Omit<Cache, 'store'>;
   keyFn?: (queryId: string, fieldName: string | number) => string;
 };
+
+const tracer = tracerProvider.getTracer('taql');
+const PRINT_OPERATION_NAME = 'graphql.print.operationName';
 
 const labelNames = ['worker'];
 const buckets = [0.0001, 0.0005, 0.001, 0.005, 0.01, 0.05, 0.1, 0.5];
@@ -46,12 +56,24 @@ const EXECUTOR_UNCACHED_PRINT_DURATION_HISTOGRAM = new promClient.Histogram({
   buckets,
 });
 
-function instrumentedPrint(ast: ASTNode): string {
+function instrumentedPrint(ast: DocumentNode): string {
+  const operationAST = getOperationAST(ast);
+  const operationName = operationAST?.name?.value;
+  const printSpan = tracer.startSpan(
+    `print - ${operationName || 'Anonymous Operation'}`,
+    {
+      kind: SpanKind.SERVER,
+      attributes: {
+        [PRINT_OPERATION_NAME]: operationName,
+      },
+    }
+  );
   const stopTimer = EXECUTOR_UNCACHED_PRINT_DURATION_HISTOGRAM.startTimer({
     worker,
   });
   const result = print(ast);
   stopTimer();
+  printSpan.end();
   return result;
 }
 

@@ -13,7 +13,10 @@ import {
 } from '@taql/config';
 import { Server, createServer as httpServer } from 'http';
 import cluster, { Worker } from 'node:cluster';
-import { useHttpStatusTracking, useMetricsEndpoint } from './observability';
+import {
+  httpStatusTrackingFactory,
+  useMetricsEndpoint,
+} from '@taql/observability';
 import Koa from 'koa';
 import { SSL_CONFIG } from '@taql/ssl';
 import { createServer as httpsServer } from 'https';
@@ -40,7 +43,7 @@ const workerStartup = async () => {
 
   const koa = new Koa();
 
-  koa.on('error', (error) => {
+  koa.on('error', function errorHandler(error) {
     unhandledErrors.inc({
       code: error?.code || 'Unknown',
       name: error?.name || 'Error',
@@ -49,7 +52,7 @@ const workerStartup = async () => {
     logger.error('Unhandled koa error', error);
   });
 
-  koa.use(useHttpStatusTracking({ logger }));
+  koa.use(httpStatusTrackingFactory({ logger }));
 
   //Initialize taql state.
   koa.use(useTaqlContext);

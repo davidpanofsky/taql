@@ -70,7 +70,7 @@ function makeSingleQueryBatchingExecutor(
       config.batching
     ),
     executor,
-    translateConfigToLoaderOptions(config.batching)
+    translateConfigToLoaderOptions(config)
   );
 }
 
@@ -98,7 +98,7 @@ function makeArrayBatchingExecutor(
   return createBatchingExecutor(
     STRATEGIES[config.batching.strategy](arrayLoader, config.batching),
     makeRemoteExecutor(config),
-    translateConfigToLoaderOptions(config.batching)
+    translateConfigToLoaderOptions(config)
   );
 }
 
@@ -168,7 +168,7 @@ function makeLegacyGqlExecutor(
         forwardHeaders: req.context?.state.taql.forwardHeaders,
         request: [req],
       }).then((results) => results[0]),
-    translateConfigToLoaderOptions(config.batching)
+    translateConfigToLoaderOptions(config)
   );
 }
 

@@ -13,7 +13,6 @@ import promClient, { AggregatorRegistry } from 'prom-client';
 import { AwsInstrumentation } from '@opentelemetry/instrumentation-aws-sdk';
 import { DataloaderInstrumentation } from '@opentelemetry/instrumentation-dataloader';
 import { DnsInstrumentation } from '@opentelemetry/instrumentation-dns';
-import { FetchInstrumentation } from '@opentelemetry/instrumentation-fetch';
 import { FsInstrumentation } from '@opentelemetry/instrumentation-fs';
 import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
 import { IORedisInstrumentation } from '@opentelemetry/instrumentation-ioredis';
@@ -27,6 +26,9 @@ import { WinstonInstrumentation } from '@opentelemetry/instrumentation-winston';
 import { ZipkinExporter } from '@opentelemetry/exporter-zipkin';
 import { performance } from 'perf_hooks';
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
+
+export { useOpenTelemetry } from './useOpenTelemetry';
+export { usePreconfiguredPrometheus as usePrometheus } from './usePrometheus';
 
 const prometheusRegistry = new AggregatorRegistry();
 const { prefix } = PROM_PARAMS;
@@ -60,7 +62,7 @@ export const useMetricsEndpoint = async (
   }
 };
 
-export const useHttpStatusTracking = (options: {
+export const httpStatusTrackingFactory = (options: {
   promPrefix?: string;
   logger?: {
     error: (msg: string) => void;
@@ -68,7 +70,6 @@ export const useHttpStatusTracking = (options: {
   };
 }) => {
   const { promPrefix = prefix, logger } = options;
-  logger?.info('useHttpStatusTracking: Initializing');
 
   const labelNames = ['statusCode', 'path', 'client'];
 
@@ -95,7 +96,10 @@ export const useHttpStatusTracking = (options: {
     buckets: durationBucketsMs,
   });
 
-  return async (ctx: ParameterizedContext, next: () => Promise<void>) => {
+  return async function httpStatusTracking(
+    ctx: ParameterizedContext,
+    next: () => Promise<void>
+  ) {
     const start = performance.now();
     await next();
     const duration = performance.now() - start;
@@ -162,7 +166,6 @@ registerInstrumentations({
     new AwsInstrumentation(),
     new DataloaderInstrumentation({ requireParentSpan: true }),
     new DnsInstrumentation(),
-    new FetchInstrumentation(),
     new FsInstrumentation({ requireParentSpan: true }),
     new HttpInstrumentation({
       requireParentforIncomingSpans: true,

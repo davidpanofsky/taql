@@ -1,8 +1,10 @@
 import { type MemoryStore, isMemoryStore } from './memory-store';
 import { type RedisStore, isRedisStore } from './redis-store';
 import promClient, { Gauge } from 'prom-client';
+import { SpanKind } from '@opentelemetry/api';
 import type { Store } from 'cache-manager';
 import { logger } from '@taql/config';
+import { tracerProvider } from '@taql/observability';
 import { WORKER as worker } from '@taql/config';
 
 export enum StoreType {
@@ -29,6 +31,15 @@ const caches: Map<
   string,
   WeakRef<InstrumentedStore<MemoryStore | RedisStore | Store>>
 > = new Map();
+
+const tracer = tracerProvider.getTracer('taql');
+enum AttributeName {
+  CACHE_OPERATION = 'taql.cache.operation',
+  CACHE_ERROR = 'taql.cache.error',
+  CACHE_STATUS = 'taql.cache.status',
+  CACHE_NAME = 'taql.cache.name',
+  CACHE_TYPE = 'taql.cache.type',
+}
 
 const buckets = [0.00005, 0.0001, 0.0005, 0.001, 0.005, 0.01, 0.05, 0.1];
 
@@ -178,6 +189,15 @@ export function instrumentedStore<T, S extends Store<T>>({
     getPromiseOrResult: () => T | Promise<T>,
     getStatus?: (result: T) => string
   ) => {
+    const cacheSpan = tracer.startSpan(`cache.${operation}`, {
+      kind: SpanKind.SERVER,
+      attributes: {
+        [AttributeName.CACHE_OPERATION]: operation,
+        [AttributeName.CACHE_NAME]: name,
+        [AttributeName.CACHE_TYPE]: type,
+      },
+    });
+
     const stopTimer = OPERATION_DURATION_HISTOGRAM.startTimer({
       name,
       type,
@@ -190,6 +210,11 @@ export function instrumentedStore<T, S extends Store<T>>({
       promiseOrResult = getPromiseOrResult();
     } catch (err) {
       stopTimer({ status: 'error' });
+      cacheSpan.recordException({
+        name: AttributeName.CACHE_ERROR,
+        message: JSON.stringify(err),
+      });
+      cacheSpan.end();
       if (emptyOnError) {
         return undefined;
       } else {
@@ -202,15 +227,24 @@ export function instrumentedStore<T, S extends Store<T>>({
         .then((result) => {
           const status = getStatus?.(result) || 'success';
           stopTimer({ status });
+          cacheSpan.setAttribute(AttributeName.CACHE_STATUS, status);
+          cacheSpan.end();
           return result;
         })
         .catch((err) => {
           stopTimer({ status: 'error' });
+          cacheSpan.recordException({
+            name: AttributeName.CACHE_ERROR,
+            message: JSON.stringify(err),
+          });
+          cacheSpan.end();
           return emptyOnError ? undefined : Promise.reject(err);
         });
     } else {
       const status = getStatus?.(promiseOrResult) || 'success';
       stopTimer({ status });
+      cacheSpan.setAttribute(AttributeName.CACHE_STATUS, status);
+      cacheSpan.end();
       return promiseOrResult;
     }
   };
