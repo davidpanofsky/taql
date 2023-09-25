@@ -1,7 +1,7 @@
 import type { BatchLoadFn, Options as DataLoaderOptions } from 'dataloader';
 import type { ExecutionRequest, ExecutionResult } from '@graphql-tools/utils';
 import type { ForwardableHeaders, TaqlState } from '@taql/context';
-import type { BatchingConfig } from '@ta-graphql-utils/stitch';
+import type { SubgraphConfig } from '@taql/executors';
 
 export type TaqlRequest = ExecutionRequest<Record<string, unknown>, TaqlState>;
 export type TaqlBatchLoader = (args: {
@@ -11,11 +11,13 @@ export type TaqlBatchLoader = (args: {
 
 export type BatchEntry<T> = { val: T; idx: number };
 
-export const translateConfigToLoaderOptions = <T = unknown, E = unknown>(
-  config: BatchingConfig
-): DataLoaderOptions<T, E> => ({
+export const translateConfigToLoaderOptions = <T = unknown, E = unknown>({
+  batching: config,
+  name,
+}: SubgraphConfig): DataLoaderOptions<T, E> => ({
+  name,
   batchScheduleFn: (callback) => setTimeout(callback, config?.wait?.millis),
-  maxBatchSize: config.maxSize,
+  maxBatchSize: config?.maxSize,
 });
 
 export type BatchingOptions<

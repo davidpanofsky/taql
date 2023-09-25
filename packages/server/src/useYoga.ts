@@ -31,18 +31,20 @@ import {
   serverHostExtensionPlugin,
   subschemaExtensionsPlugin,
 } from '@taql/debug';
+import {
+  tracerProvider,
+  useOpenTelemetry,
+  usePrometheus,
+} from '@taql/observability';
 import { GraphQLSchema } from 'graphql';
 import type { IncomingHttpHeaders } from 'http';
 import { TaqlAPQ } from './apq';
 import { TaqlState } from '@taql/context';
 import { addClusterReadinessStage } from '@taql/readiness';
-import { preconfiguredUsePrometheus } from './usePrometheus';
 import promClient from 'prom-client';
 import { readFileSync } from 'fs';
-import { tracerProvider } from './observability';
 import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspection';
 import { useErrorLogging } from './logging';
-import { useOpenTelemetry } from '@envelop/opentelemetry';
 import { useTaqlSecurity } from '@taql/security';
 
 const makePlugins = async (defaultSchema: GraphQLSchema) => {
@@ -94,9 +96,10 @@ const makePlugins = async (defaultSchema: GraphQLSchema) => {
     mutatedFieldsExtensionPlugin,
     useOpenTelemetry(
       {
-        resolvers: true, // Tracks resolvers calls, and tracks resolvers thrown errors
         variables: true, // Includes the operation variables values as part of the metadata collected
-        result: true, // Includes execution result object as part of the metadata collected
+        // The following are disabled due to their negative performance impact
+        resolvers: false, // Tracks resolvers calls, and tracks resolvers thrown errors
+        result: false, // Includes execution result object as part of the metadata collected
       },
       tracerProvider
     ),
@@ -106,7 +109,7 @@ const makePlugins = async (defaultSchema: GraphQLSchema) => {
     await apq.makePlugin(),
     unifiedCachingPlugin,
     preregPlugin,
-    preconfiguredUsePrometheus,
+    usePrometheus(),
     useReadinessCheck({
       endpoint: '/NotImplemented',
       async check({ fetchAPI }) {
@@ -197,7 +200,7 @@ const responseSizeMetric = new promClient.Histogram({
 
 const yogaPrewarmed = addClusterReadinessStage('yogaPrewarmed');
 
-export const useYoga = async () => {
+export async function useYoga() {
   yogaPrewarmed.unready();
   const batchLimit = SERVER_PARAMS.batchLimit;
   const port = SERVER_PARAMS.svcoWorker
@@ -259,7 +262,7 @@ export const useYoga = async () => {
   logger.info('Prewarmed yoga server');
   yogaPrewarmed.ready();
 
-  return async (ctx: TaqlState) => {
+  return async function yogaHandler(ctx: TaqlState) {
     const accessTimer = accessLogger.startTimer();
     const svco = ctx.state.taql.SVCO;
     let response: Response | FetchResponse;
@@ -333,4 +336,4 @@ export const useYoga = async () => {
       logger: 'access_log',
     });
   };
-};
+}
