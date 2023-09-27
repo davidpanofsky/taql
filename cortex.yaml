@@ -1,0 +1,12 @@
+openapi: 3.0.1
+info:
+  title: taql
+  description: TA graphql gateway
+  x-cortex-git:
+    gitlab:
+      repository: dplat/taql
+  x-cortex-tag: domain-platform-taql-gitlab-repo
+  x-cortex-type: gitlab-repo
+  x-cortex-groups:
+  - pending-adoption
+  x-cortex-definition: {}
