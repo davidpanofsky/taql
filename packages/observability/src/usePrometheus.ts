@@ -114,8 +114,9 @@ export function usePreconfiguredPrometheus() {
       name: 'taql_envelop_error_result',
       help: 'Counts the number of errors reported from all phases',
     }),
-    // leave deprecated fields alone, this one is useful as is and should be low-volume.
-    deprecatedFields: true,
     endpoint: '/worker_metrics',
+    // These have potential to slow everything down, so we disable them
+    deprecatedFields: false,
+    resolvers: false,
   });
 }
