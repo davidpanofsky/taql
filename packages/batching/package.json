@@ -12,8 +12,8 @@
     "typescript": "^5.0.4"
   },
   "dependencies": {
-    "@graphql-tools/batch-execute": "^8.5.11",
-    "@graphql-tools/utils": "^8.13.1",
+    "@graphql-tools/batch-execute": "*",
+    "@graphql-tools/utils": "*",
     "@ta-graphql-utils/stitch": "*",
     "@taql/context": "workspace:^",
     "@taql/deadlines": "workspace:^",
