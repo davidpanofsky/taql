@@ -1,8 +1,12 @@
+import {
+  type BatchStyle,
+  type BatchingStrategy,
+  Subgraph,
+} from '@ta-graphql-utils/stitch';
 import { ENABLE_FEATURES, logger } from '@taql/config';
 import fetch, { FetchError, Headers } from 'node-fetch';
 import { httpAgent, legacyHttpsAgent } from '@taql/httpAgent';
 import { ForwardSubschemaExtensions } from '@taql/debug';
-import { Subgraph } from '@ta-graphql-utils/stitch';
 import type { Transform } from '@graphql-tools/delegate';
 import { URL } from 'node:url';
 import { createGraphQLError } from '@graphql-tools/utils';
@@ -81,7 +85,8 @@ export async function getLegacySubgraph(args: {
   oidcLiteAuthorizationDomain?: string;
   maxTimeout?: number;
   batchMaxSize: number;
-  batchWaitQueries: number;
+  batchStyle: BatchStyle;
+  batchStrategy: BatchingStrategy;
   batchWaitMillis: number;
   legacySVCO?: string;
 }): Promise<{ subgraph: Subgraph; digest: string }> {
@@ -120,11 +125,10 @@ export async function getLegacySubgraph(args: {
         oidcLiteAuthorizationDomain: args.oidcLiteAuthorizationDomain,
         sla: { maxTimeoutMillis: args.maxTimeout },
         batching: {
-          style: 'Legacy',
-          strategy: 'Headers',
+          style: args.batchStyle,
+          strategy: args.batchStrategy,
           maxSize: args.batchMaxSize,
           wait: {
-            queries: args.batchWaitQueries,
             millis: args.batchWaitMillis,
           },
         },

@@ -2936,6 +2936,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@taql/config@workspace:packages/config"
   dependencies:
+    "@ta-graphql-utils/stitch": "*"
     dotenv: ^16.0.3
     typescript: ^5.0.4
     winston: ^3.9.0
