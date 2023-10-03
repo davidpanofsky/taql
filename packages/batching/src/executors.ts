@@ -1,7 +1,7 @@
 import { BatchStyle, SubgraphExecutorConfig } from '@ta-graphql-utils/stitch';
 import {
-  ExecutionResult,
   ExecutionRequest,
+  ExecutionResult,
   Executor,
   getOperationASTFromRequest,
 } from '@graphql-tools/utils';
