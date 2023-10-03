@@ -1,6 +1,10 @@
 // Importing it this way ensures we can use env variables to set the path to correct .env file
 import 'dotenv/config';
 
+import {
+  type BatchStyle,
+  type BatchingStrategy,
+} from '@ta-graphql-utils/stitch';
 import { format as consoleFormat, inspect } from 'util';
 import { format, loggers, transports } from 'winston';
 import { resolve, resolvers } from './resolution';
@@ -138,10 +142,23 @@ export const SCHEMA = resolve({
               resolver: resolvers.nonNegativeInteger,
               defaultTo: 250,
             },
-            batchWaitQueries: {
-              property: 'LEGACY_GQL_BATCH_WAIT_QUERIES',
-              resolver: resolvers.nonNegativeInteger,
-              defaultTo: 200,
+            batchStyle: {
+              property: 'LEGACY_GQL_BATCH_STYLE',
+              resolver: resolvers.options<BatchStyle>(
+                'Array',
+                'Legacy',
+                'Single'
+              ),
+              defaultTo: <BatchStyle>'Legacy',
+            },
+            batchStrategy: {
+              property: 'LEGACY_GQL_BATCH_STRATEGY',
+              resolver: resolvers.options<BatchingStrategy>(
+                'Request',
+                'Headers',
+                'Insecure'
+              ),
+              defaultTo: <BatchingStrategy>'Headers',
             },
             batchWaitMillis: {
               property: 'LEGACY_GQL_BATCH_WAIT_MILLIS',

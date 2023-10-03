@@ -1,3 +1,11 @@
+import {
+  BatchStyle,
+  BatchingStrategy,
+  Subgraph,
+  SubgraphExecutorConfig,
+  normalizeSdl,
+  stitch,
+} from '@ta-graphql-utils/stitch';
 import { Cache, caching, multiCaching } from 'cache-manager';
 import {
   ENABLE_FEATURES,
@@ -13,12 +21,6 @@ import {
   makeRemoteExecutor,
   requestFormatter,
 } from '@taql/executors';
-import {
-  Subgraph,
-  SubgraphExecutorConfig,
-  normalizeSdl,
-  stitch,
-} from '@ta-graphql-utils/stitch';
 import { getLegacySubgraph, legacyTransforms } from './legacy';
 import {
   instrumentedStore,
@@ -389,8 +391,11 @@ export const overrideSupergraphWithSvco = async (
     oidcLiteAuthorizationDomain:
       legacySubgraph.executorConfig.oidcLiteAuthorizationDomain,
     batchMaxSize: legacySubgraph.executorConfig.batching?.maxSize ?? 250,
-    batchWaitQueries:
-      legacySubgraph.executorConfig.batching?.wait?.queries ?? 20,
+    batchStrategy:
+      legacySubgraph.executorConfig.batching?.strategy ??
+      <BatchingStrategy>'Headers',
+    batchStyle:
+      legacySubgraph.executorConfig.batching?.style ?? <BatchStyle>'Legacy',
     batchWaitMillis:
       legacySubgraph.executorConfig.batching?.wait?.millis ?? 200,
     legacySVCO,

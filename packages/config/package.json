@@ -13,6 +13,7 @@
     "typescript": "^5.0.4"
   },
   "dependencies": {
+    "@ta-graphql-utils/stitch": "*",
     "winston": "^3.9.0",
     "winston-logfmt": "^1.0.0"
   }
