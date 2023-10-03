@@ -1,5 +1,6 @@
 import { BatchStyle, SubgraphExecutorConfig } from '@ta-graphql-utils/stitch';
 import {
+  ExecutionRequest,
   ExecutionResult,
   Executor,
   getOperationASTFromRequest,
@@ -37,7 +38,7 @@ export const createBatchingExecutor = (
   dataLoaderOptions?: DataLoader.Options<TaqlRequest, ExecutionResult>
 ): Executor<TaqlState> => {
   const loader = new DataLoader(loadFn, { cache: false, ...dataLoaderOptions });
-  return (request: TaqlRequest) => {
+  return (request: ExecutionRequest) => {
     const operationAst = getOperationASTFromRequest(request);
     return operationAst.operation !== 'subscription'
       ? loader.load(request)
@@ -163,7 +164,7 @@ function makeLegacyGqlExecutor(
     STRATEGIES[config.batching.strategy](load, config.batching),
     // Legacy-style endpoints must shape single requests like singleton batches; they don't
     // speak the typical graphql API.
-    (req: TaqlRequest) =>
+    (req: ExecutionRequest) =>
       load({
         forwardHeaders: req.context?.state.taql.forwardHeaders,
         request: [req],

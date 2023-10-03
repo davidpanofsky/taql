@@ -4,8 +4,8 @@
   "main": "src/index.ts",
   "license": "UNLICENSED",
   "devDependencies": {
-    "@graphql-tools/executor-http": "^0.1.10",
-    "@graphql-tools/utils": "^8.13.1",
+    "@graphql-tools/executor-http": "*",
+    "@graphql-tools/utils": "*",
     "graphql": "*",
     "graphql-yoga": "^4.0.0"
   }

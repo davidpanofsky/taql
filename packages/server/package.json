@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@envelop/core": "4.0.0",
-    "@graphql-tools/utils": "^9.2.1",
+    "@graphql-tools/utils": "*",
     "@graphql-yoga/plugin-apq": "^2.0.0",
     "@graphql-yoga/plugin-disable-introspection": "^1.0.0",
     "@taql/caching": "workspace:^",
