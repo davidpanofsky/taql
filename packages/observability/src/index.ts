@@ -87,7 +87,7 @@ export const httpStatusTrackingFactory = (options: {
 
   // Request duration is recorded in ms, so default buckets are unsuitable.
   // The default buckets are [.005, .01, .025, .05, .1, .25, .5, 1, 2.5, 5, 10, +Inf]
-  const durationBucketsMs = [10, 50, 100, 200, 500, 1000, 2000, 5000];
+  const durationBucketsMs = [10, 50, 100, 200, 500, 1000, 2000, 3000, 4000, 5000];
 
   const HTTP_REQUEST_DURATION_HISTOGRAM = new promClient.Histogram({
     name: `${promPrefix}http_duration_ms`,
