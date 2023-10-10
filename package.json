@@ -43,7 +43,7 @@
     "@graphql-tools/batch-execute": "patch:@graphql-tools/batch-execute@9.0.2#./.yarn/patches/@graphql-tools-batch-execute-npm-9.0.2-732f31c0cf.patch",
     "@graphql-tools/executor-http": "1.0.2",
     "@graphql-tools/utils": "10.0.6",
-    "@graphql-tools/delegate": "10.0.3",
+    "@graphql-tools/delegate": "patch:@graphql-tools/delegate@10.0.3#./.yarn/patches/@graphql-tools-delegate-npm-10.0.3-2d5637f983.patch",
     "@graphql-tools/load": "8.0.0",
     "@graphql-tools/stitch": "9.0.3",
     "@graphql-yoga/plugin-prometheus": "2.0.0",

@@ -1182,6 +1182,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@graphql-tools/delegate@patch:@graphql-tools/delegate@10.0.3#./.yarn/patches/@graphql-tools-delegate-npm-10.0.3-2d5637f983.patch::locator=%40taql%40workspace%3A.":
+  version: 10.0.3
+  resolution: "@graphql-tools/delegate@patch:@graphql-tools/delegate@npm%3A10.0.3%3A%3A__archiveUrl=https%253A%252F%252Fmaven.dev.tripadvisor.com%253A443%252Fartifactory%252Fapi%252Fnpm%252Fyarn%252F%2540graphql-tools%252Fdelegate%252F-%252Fdelegate-10.0.3.tgz#./.yarn/patches/@graphql-tools-delegate-npm-10.0.3-2d5637f983.patch::version=10.0.3&hash=bfcd0f&locator=%40taql%40workspace%3A."
+  dependencies:
+    "@graphql-tools/batch-execute": ^9.0.1
+    "@graphql-tools/executor": ^1.0.0
+    "@graphql-tools/schema": ^10.0.0
+    "@graphql-tools/utils": ^10.0.5
+    dataloader: ^2.2.2
+    tslib: ^2.5.0
+  peerDependencies:
+    graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
+  checksum: 2c2d3de9a0c810c08d7c469c02b5e2e289d4d0fc2d5169e4acf4fc303ea02337fc28d20efdd70cebba3765dce367d9faf0cac26b64ba96a20dabd2d7d59fdf1c
+  languageName: node
+  linkType: hard
+
 "@graphql-tools/executor-http@npm:1.0.2":
   version: 1.0.2
   resolution: "@graphql-tools/executor-http@npm:1.0.2::__archiveUrl=https%3A%2F%2Fmaven.dev.tripadvisor.com%3A443%2Fartifactory%2Fapi%2Fnpm%2Fyarn%2F%40graphql-tools%2Fexecutor-http%2F-%2Fexecutor-http-1.0.2.tgz"
