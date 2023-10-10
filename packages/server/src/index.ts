@@ -36,6 +36,8 @@ const unhandledErrors = new promClient.Counter({
   labelNames: ['code', 'name', 'reason'] as const,
 });
 
+const shutdownMessage = 'taql:shutdown';
+
 const workerStartup = async () => {
   const port = SERVER_PARAMS.svcoWorker
     ? SERVER_PARAMS.port - 1
@@ -73,8 +75,23 @@ const workerStartup = async () => {
 
   // a long http keepalive timeout should help keep SVCO on same worker.
   //server.keepAliveTimeout = 60_000;
+  process.on('message', async (message: unknown) => {
+    if (message === shutdownMessage) {
+      // clean up the server
+      server.close(() => {
+        cluster.worker?.disconnect();
+      });
+    }
+  });
 
-  cluster.worker?.on('disconnect', () => {
+  cluster.worker?.on('disconnect', async () => {
+    // Stop accepting connections and terminate any idle connections. Connections still writing/reading will continue to exist
+    // During shutdown this will already have been called, but it's idempotent.
+    server.close();
+    // Wait for in flight requests to finish
+    await new Promise((resolve) =>
+      setTimeout(resolve, SERVER_PARAMS.workerDrainMs)
+    );
     server.removeAllListeners();
     server.closeAllConnections();
   });
@@ -82,6 +99,39 @@ const workerStartup = async () => {
 
 const primaryStartup = async () => {
   const { port } = SERVER_PARAMS;
+
+  ['SIGINT', 'SIGTERM'].forEach((signal) =>
+    process.on(signal, async (signal) => {
+      logger.info(
+        `Primary received ${signal}, initiating shutdown after ${SERVER_PARAMS.primaryDrainDelayMs}ms`
+      );
+
+      // By the time that we have been given a signal to stop, we will have been removed from the endpoints list.
+      // Before we stop, give callers time to have that change to DNS propagate
+      await new Promise((resolve) =>
+        setTimeout(resolve, SERVER_PARAMS.primaryDrainDelayMs)
+      );
+
+      for (const workerId in cluster.workers) {
+        if (cluster.workers[workerId]?.isConnected()) {
+          // Initiate shutdown
+          cluster.workers[workerId]?.send(shutdownMessage);
+        }
+      }
+      // Give workers a chance to clean up before terminating them
+      await new Promise((resolve) =>
+        setTimeout(resolve, SERVER_PARAMS.primaryDrainMs)
+      );
+
+      logger.info(
+        'exiting after drain window (${SERVER_PARAMS.primaryDrainMs}ms)'
+      );
+      for (const workerId in cluster.workers) {
+        cluster.workers[workerId]?.kill(signal);
+      }
+      process.exit(128 + signal);
+    })
+  );
 
   const schemaFile = SCHEMA.schemaFile ?? './supergraph.json';
   if (SCHEMA.source == 'gsr') {

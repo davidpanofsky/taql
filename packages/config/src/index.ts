@@ -299,6 +299,21 @@ export const SERVER_PARAMS = resolve({
     resolver: resolvers.nonNegativeInteger,
     defaultTo: 1000 * 60 * 10,
   },
+  workerDrainMs: {
+    property: 'WORKER_DRAIN_MS',
+    resolver: resolvers.nonNegativeInteger,
+    defaultTo: 3000,
+  },
+  primaryDrainMs: {
+    property: 'PRIMARY_DRAIN_MS',
+    resolver: resolvers.nonNegativeInteger,
+    defaultTo: 5000,
+  },
+  primaryDrainDelayMs: {
+    property: 'PRIMARY_DRAIN_DELAY_MS',
+    resolver: resolvers.nonNegativeInteger,
+    defaultTo: 3000,
+  },
 });
 
 export const ENABLE_FEATURES = resolve({
