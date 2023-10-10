@@ -37,6 +37,7 @@ const unhandledErrors = new promClient.Counter({
 });
 
 const shutdownMessage = 'taql:shutdown';
+let shuttingDown = false;
 
 const workerStartup = async () => {
   const port = SERVER_PARAMS.svcoWorker
@@ -102,6 +103,7 @@ const primaryStartup = async () => {
 
   ['SIGINT', 'SIGTERM'].forEach((signal) =>
     process.on(signal, async (signal) => {
+      shuttingDown = true;
       logger.info(
         `Primary received ${signal}, initiating shutdown after ${SERVER_PARAMS.primaryDrainDelayMs}ms`
       );
@@ -124,7 +126,7 @@ const primaryStartup = async () => {
       );
 
       logger.info(
-        'exiting after drain window (${SERVER_PARAMS.primaryDrainMs}ms)'
+        `exiting after drain window (${SERVER_PARAMS.primaryDrainMs}ms)`
       );
       for (const workerId in cluster.workers) {
         cluster.workers[workerId]?.kill(signal);
@@ -229,7 +231,7 @@ const primaryStartup = async () => {
     if (worker.exitedAfterDisconnect === true) {
       logger.info('worker shutdown gracefully', { pid: worker.process.pid });
       workersExited.inc({ kind: 'graceful', version: appMeta.version });
-    } else {
+    } else if (!shuttingDown) {
       if (signal) {
         logger.warn(`worker was killed by signal: ${signal}`, {
           pid: worker.process.pid,
@@ -241,6 +243,7 @@ const primaryStartup = async () => {
         });
         workersExited.inc({ kind: 'error', version: appMeta.version });
       }
+
       if (sucessfulInitialization) {
         logger.info(`replacing worker ${worker.id}...`);
         fork(environments.get(worker));
