@@ -114,20 +114,27 @@ const primaryStartup = async () => {
         setTimeout(resolve, SERVER_PARAMS.primaryDrainDelayMs)
       );
 
+      let workersDraining = 0;
       for (const workerId in cluster.workers) {
         if (cluster.workers[workerId]?.isConnected()) {
           // Initiate shutdown
           cluster.workers[workerId]?.send(shutdownMessage);
+          workersDraining++;
         }
       }
       // Give workers a chance to clean up before terminating them
-      await new Promise((resolve) =>
-        setTimeout(resolve, SERVER_PARAMS.primaryDrainMs)
-      );
+      if (workersDraining > 0) {
+        logger.info(`Draining ${workersDraining} workers`);
+        await new Promise((resolve) =>
+          setTimeout(resolve, SERVER_PARAMS.primaryDrainMs)
+        );
+        logger.info(
+          `exiting after drain window (${SERVER_PARAMS.primaryDrainMs}ms)`
+        );
+      } else {
+        logger.info('No workers to drain. Exiting');
+      }
 
-      logger.info(
-        `exiting after drain window (${SERVER_PARAMS.primaryDrainMs}ms)`
-      );
       for (const workerId in cluster.workers) {
         cluster.workers[workerId]?.kill(signal);
       }
