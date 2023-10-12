@@ -6,13 +6,13 @@ import {
   type BatchingStrategy,
 } from '@ta-graphql-utils/stitch';
 import { format as consoleFormat, inspect } from 'util';
-import { trace } from '@opentelemetry/api';
 import { format, loggers, transports } from 'winston';
 import { resolve, resolvers } from './resolution';
 import { availableParallelism } from 'node:os';
 import cluster from 'node:cluster';
 import { hostname } from 'os';
 import { logFmtFormat } from 'winston-logfmt';
+import { trace } from '@opentelemetry/api';
 
 /**
  * A consistent identifier for any given process, for example 'primary' for the
