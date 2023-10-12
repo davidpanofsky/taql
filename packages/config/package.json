@@ -13,6 +13,7 @@
     "typescript": "^5.0.4"
   },
   "dependencies": {
+    "@opentelemetry/api": "^1.6.0",
     "@ta-graphql-utils/stitch": "*",
     "winston": "^3.9.0",
     "winston-logfmt": "^1.0.0"

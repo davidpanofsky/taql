@@ -6,6 +6,7 @@ import {
   type BatchingStrategy,
 } from '@ta-graphql-utils/stitch';
 import { format as consoleFormat, inspect } from 'util';
+import { trace } from '@opentelemetry/api';
 import { format, loggers, transports } from 'winston';
 import { resolve, resolvers } from './resolution';
 import { availableParallelism } from 'node:os';
@@ -75,7 +76,13 @@ loggers.add('access', {
   }),
 });
 loggers.add('app', {
-  defaultMeta: { worker: WORKER, version: appMeta.version },
+  defaultMeta: {
+    worker: WORKER,
+    version: appMeta.version,
+    get traceID() {
+      return trace.getActiveSpan()?.spanContext().traceId;
+    },
+  },
   exitOnError: true,
   transports: new transports.Console({
     handleExceptions: !loggerConfig.console,

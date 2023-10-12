@@ -1,7 +1,6 @@
 import type { Plugin } from 'graphql-yoga';
 import { getOperationAST } from 'graphql';
 import { handleStreamOrSingleExecutionResult } from '@envelop/core';
-import { trace } from '@opentelemetry/api';
 import { logger } from '@taql/config';
 
 export const useErrorLogging: Plugin = {
@@ -13,7 +12,6 @@ export const useErrorLogging: Plugin = {
             const request = payload.args.contextValue.request;
             const uniqueId = request.headers.get('x-unique-id');
             const requestId = request.headers.get('x-request-id');
-            const traceID = trace.getActiveSpan()?.spanContext().traceId;
             const client =
               request.headers.get('x-app-name') ||
               request.headers.get('user-agent') ||
@@ -31,7 +29,6 @@ export const useErrorLogging: Plugin = {
                 client,
                 operationName,
                 operationType,
-                traceID,
               });
             });
           }
