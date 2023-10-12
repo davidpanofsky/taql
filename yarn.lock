@@ -2726,9 +2726,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@ta-graphql-utils/stitch@npm:5.0.0":
-  version: 5.0.0
-  resolution: "@ta-graphql-utils/stitch@npm:5.0.0::__archiveUrl=https%3A%2F%2Fgitlab.dev.tripadvisor.com%2Fapi%2Fv4%2Fprojects%2F16433%2Fpackages%2Fnpm%2F%40ta-graphql-utils%2Fstitch%2F-%2F%40ta-graphql-utils%2Fstitch-5.0.0.tgz"
+"@ta-graphql-utils/stitch@npm:5.1.0":
+  version: 5.1.0
+  resolution: "@ta-graphql-utils/stitch@npm:5.1.0::__archiveUrl=https%3A%2F%2Fgitlab.dev.tripadvisor.com%2Fapi%2Fv4%2Fprojects%2F16433%2Fpackages%2Fnpm%2F%40ta-graphql-utils%2Fstitch%2F-%2F%40ta-graphql-utils%2Fstitch-5.1.0.tgz"
   dependencies:
     "@graphql-tools/delegate": 10.0.3
     "@graphql-tools/load": 8.0.0
@@ -2738,7 +2738,7 @@ __metadata:
     "@graphql-tools/utils": 10.0.6
     "@graphql-tools/wrap": 10.0.1
     graphql: 16.6.0
-  checksum: b8b06d39d9caf2f0ddfd320644690e3bc9244afc6a503676ccd74390269788767a792046690a931412f7373ad29b4e7624159e04b2a38edc6ae729976b7d7705
+  checksum: 858d83851dd4bc386d2012723ace5819062af557dfd6b32ce0143155dcc49d4e3a807eedfeacf7e3369d15dfee14ec283d303dfceb60b603505439c1b4da3f0b
   languageName: node
   linkType: hard
 
