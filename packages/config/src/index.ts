@@ -12,6 +12,7 @@ import { availableParallelism } from 'node:os';
 import cluster from 'node:cluster';
 import { hostname } from 'os';
 import { logFmtFormat } from 'winston-logfmt';
+import { trace } from '@opentelemetry/api';
 
 /**
  * A consistent identifier for any given process, for example 'primary' for the
@@ -75,7 +76,13 @@ loggers.add('access', {
   }),
 });
 loggers.add('app', {
-  defaultMeta: { worker: WORKER, version: appMeta.version },
+  defaultMeta: {
+    worker: WORKER,
+    version: appMeta.version,
+    get traceID() {
+      return trace.getActiveSpan()?.spanContext().traceId;
+    },
+  },
   exitOnError: true,
   transports: new transports.Console({
     handleExceptions: !loggerConfig.console,

@@ -2769,6 +2769,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@taql/config@workspace:packages/config"
   dependencies:
+    "@opentelemetry/api": ^1.6.0
     "@ta-graphql-utils/stitch": "*"
     dotenv: ^16.0.3
     typescript: ^5.0.4
