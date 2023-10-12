@@ -6,6 +6,7 @@ build
 .gitlab-ci.yml
 *.md
 public
+supergraph.json
 
 # begin ignores for yarn
 .pnp.*

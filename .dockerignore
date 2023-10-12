@@ -9,6 +9,7 @@ node_modules
 **/node_modules
 **/build
 .tool-versions
+supergraph.json
 
 # begin ignores for yarn
 .pnp.*
