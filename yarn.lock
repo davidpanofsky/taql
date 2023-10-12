@@ -2979,6 +2979,7 @@ __metadata:
     "@graphql-tools/utils": "*"
     "@graphql-yoga/plugin-apq": ^2.0.0
     "@graphql-yoga/plugin-disable-introspection": ^1.0.0
+    "@opentelemetry/api": ^1.6.0
     "@taql/caching": "workspace:^"
     "@taql/config": "workspace:^"
     "@taql/context": "workspace:^"
