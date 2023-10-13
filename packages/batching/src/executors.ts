@@ -130,8 +130,8 @@ function makeLegacyGqlExecutor(
     async request(requests) {
       // Since we generate the legacy RequestContext from headers we assume that if those headers are considered batch-compatible,
       // we can just select any request in the batch from which to use the derived context.
-      const legacyContext = requests?.find((i) => i)?.context?.state.taql
-        .legacyContext;
+      const legacyContext = requests?.find((i) => i)?.context?.state?.taql
+        ?.legacyContext;
 
       BATCH_SIZE_HISTOGRAM.observe(
         {
@@ -166,7 +166,7 @@ function makeLegacyGqlExecutor(
     // speak the typical graphql API.
     (req: ExecutionRequest) =>
       load({
-        forwardHeaders: req.context?.state.taql.forwardHeaders,
+        forwardHeaders: req.context?.state?.taql?.forwardHeaders,
         request: [req],
       }).then((results) => results[0]),
     translateConfigToLoaderOptions(config)

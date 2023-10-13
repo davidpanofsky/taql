@@ -51,6 +51,13 @@
           }
         ]
       }
+    },
+    {
+      // sorting imports doesn't really work with cases where the order of execution matter (e.g. mocks being first)
+      "files": ["**/*.test.ts", "**/*.spec.ts"],
+      "rules": {
+        "sort-imports": "off"
+      }
     }
   ]
 }

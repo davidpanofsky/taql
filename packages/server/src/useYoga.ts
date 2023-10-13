@@ -5,6 +5,7 @@ import {
   accessLogger,
   logger,
 } from '@taql/config';
+import { Plugin, createYoga, useReadinessCheck } from 'graphql-yoga';
 import {
   Supergraph,
   TASchema,
@@ -12,7 +13,6 @@ import {
   makeSchema,
   overrideSupergraphWithSvco,
 } from '@taql/schema';
-import { createYoga, useReadinessCheck } from 'graphql-yoga';
 import fetch, {
   Headers as FetchHeaders,
   Response as FetchResponse,
@@ -47,7 +47,10 @@ import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspect
 import { useErrorLogging } from './logging';
 import { useTaqlSecurity } from '@taql/security';
 
-const makePlugins = async (defaultSchema: GraphQLSchema) => {
+export const makePlugins = async (
+  defaultSchema: GraphQLSchema
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): Promise<Plugin<any>[]> => {
   const apq = new TaqlAPQ();
 
   const preregPlugin = usePreregisteredQueries({

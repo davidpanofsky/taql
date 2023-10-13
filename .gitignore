@@ -2,6 +2,7 @@ node_modules
 coverage
 **/build
 *.env
+!test.env
 .tool-versions
 .vscode/*
 supergraph.json

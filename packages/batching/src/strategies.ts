@@ -45,16 +45,16 @@ const makeDeadlineClustering = (config: BatchingConfig) => {
   return {
     comparator: (lhs: TaqlRequest, rhs: TaqlRequest) =>
       //order from soonest to latest deadline
-      (lhs.context?.state.taql.deadline ?? 0) -
-      (rhs.context?.state.taql.deadline ?? 0),
+      (lhs.context?.state?.taql?.deadline ?? 0) -
+      (rhs.context?.state?.taql?.deadline ?? 0),
     clusterable: (base: TaqlRequest, update: TaqlRequest) =>
       // ensure the next deadline isn't substantially later than the current
       // deadline, using the wait millis as our cutoff. After all, the
       // configured wait millis is explicitly the amount of time upstreams are
       // willing to lose from their requests, so they can lose it from the last request
       // in a batch as surely as the first
-      (update.context?.state.taql.deadline ?? NaN) -
-        (base.context?.state.taql.deadline ?? NaN) <
+      (update.context?.state?.taql?.deadline ?? NaN) -
+        (base.context?.state?.taql?.deadline ?? NaN) <
       waitMillis,
   };
 };
@@ -65,7 +65,7 @@ const byRequestStrategy: Strategy = (executor, config) => async (requests) => {
     subBatchIdFn: (req) =>
       // Fall back to a symbol (which will never match another value)
       (req.context != undefined &&
-        loadState(req.context.state.taql).requestUnique) ||
+        loadState(req.context?.state?.taql).requestUnique) ||
       Symbol(),
     seriesIdFn,
     clustering,
@@ -75,7 +75,7 @@ const byRequestStrategy: Strategy = (executor, config) => async (requests) => {
     batches.map((subBatch) =>
       executor({
         request: subBatch.map((sub) => sub.val),
-        forwardHeaders: subBatch[0]?.val?.context?.state.taql.forwardHeaders,
+        forwardHeaders: subBatch[0]?.val?.context?.state?.taql?.forwardHeaders,
       })
     )
   );
@@ -124,7 +124,8 @@ const byHeadersStrategy: Strategy =
       batches.map((subBatch) =>
         executor({
           request: subBatch.map((sub) => sub.val),
-          forwardHeaders: subBatch[0]?.val?.context?.state.taql.forwardHeaders,
+          forwardHeaders:
+            subBatch[0]?.val?.context?.state?.taql?.forwardHeaders,
         })
       )
     );
@@ -156,7 +157,7 @@ const insecureAllowedHeaders: Set<ForwardHeaderName> = new Set([
 
 const mergeInsecureHeaders = (requests: TaqlRequest[]) => {
   const collectedHeaders = requests
-    .map((req) => req.context?.state.taql.forwardHeaders)
+    .map((req) => req.context?.state?.taql?.forwardHeaders)
     .map((headers) => Object.entries(headers ?? <ForwardableHeaders>{}))
     .flat()
     .filter(([key]) => insecureAllowedHeaders.has(<ForwardHeaderName>key))
