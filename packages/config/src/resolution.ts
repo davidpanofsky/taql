@@ -111,8 +111,11 @@ const options = <T extends string | undefined>(...options: T[]) => {
     if (valid.has(<T>value)) {
       return <T>value;
     }
-    logger.warn(`${value} is not one of ${options}`);
-    return undefined;
+    if (value) {
+      throw new Error(`${value} is not one of ${options}`);
+    } else {
+      return undefined;
+    }
   };
 };
 
