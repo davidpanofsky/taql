@@ -1,0 +1,185 @@
+diff --git a/cjs/Transformer.js b/cjs/Transformer.js
+index c0e779359996be74d0c4de872dc9ce3bd1103d79..e581787c4ce5b1844e03033c3d0b33d050810334 100644
+--- a/cjs/Transformer.js
++++ b/cjs/Transformer.js
+@@ -1,9 +1,24 @@
+ "use strict";
+ Object.defineProperty(exports, "__esModule", { value: true });
+ exports.Transformer = void 0;
++const graphql_1 = require("graphql");
++const utils_1 = require("@graphql-tools/utils");
+ const checkResultAndHandleErrors_js_1 = require("./checkResultAndHandleErrors.js");
+ const finalizeGatewayRequest_js_1 = require("./finalizeGatewayRequest.js");
+ const prepareGatewayDocument_js_1 = require("./prepareGatewayDocument.js");
++const EMPTY_ARRAY = [];
++const ANONYMOUS_OPERATION_NAME = {
++    kind: graphql_1.Kind.NAME,
++    value: 'Anonymous Operation',
++};
++const getActualFieldNodes = (0, utils_1.memoize1)(function getActualFieldNodes(fieldNode) {
++    return [fieldNode];
++});
++const getGatewayDocument = (0, utils_1.memoize2of4)(function getGatewayDocument(
++// First two are here just for memoization purposes
++_fieldNodes, _nameNode, document, delegationContext) {
++    return (0, prepareGatewayDocument_js_1.prepareGatewayDocument)(document, delegationContext.transformedSchema, delegationContext.returnType, delegationContext.info?.schema);
++});
+ class Transformer {
+     constructor(context) {
+         this.transformations = [];
+@@ -18,9 +33,10 @@ class Transformer {
+         this.transformations.push({ transform, context });
+     }
+     transformRequest(originalRequest) {
++        const fieldNodes = this.delegationContext.info?.fieldNodes;
+         let request = {
+             ...originalRequest,
+-            document: (0, prepareGatewayDocument_js_1.prepareGatewayDocument)(originalRequest.document, this.delegationContext.transformedSchema, this.delegationContext.returnType, this.delegationContext.info?.schema),
++            document: getGatewayDocument(fieldNodes?.length === 1 ? getActualFieldNodes(fieldNodes[0]) : fieldNodes || EMPTY_ARRAY, this.delegationContext.info?.operation.name || ANONYMOUS_OPERATION_NAME, originalRequest.document, this.delegationContext),
+         };
+         for (const transformation of this.transformations) {
+             if (transformation.transform.transformRequest) {
+diff --git a/cjs/finalizeGatewayRequest.js b/cjs/finalizeGatewayRequest.js
+index 6ce2dee286990fe77fe12ee21b9b9493e8052d7e..467114f64ed2d9b0b506f8ab51eb46c1db8c2d48 100644
+--- a/cjs/finalizeGatewayRequest.js
++++ b/cjs/finalizeGatewayRequest.js
+@@ -4,7 +4,7 @@ exports.finalizeGatewayRequest = void 0;
+ const graphql_1 = require("graphql");
+ const utils_1 = require("@graphql-tools/utils");
+ const getDocumentMetadata_js_1 = require("./getDocumentMetadata.js");
+-function finalizeGatewayDocument(targetSchema, fragments, operations) {
++const finalizeGatewayDocument = (0, utils_1.memoize3)(function finalizeGatewayDocument(targetSchema, fragments, operations) {
+     let usedVariables = [];
+     let usedFragments = [];
+     const newOperations = [];
+@@ -51,7 +51,7 @@ function finalizeGatewayDocument(targetSchema, fragments, operations) {
+         usedVariables,
+         newDocument,
+     };
+-}
++});
+ function finalizeGatewayRequest(originalRequest, delegationContext) {
+     let { document, variables } = originalRequest;
+     let { operations, fragments } = (0, getDocumentMetadata_js_1.getDocumentMetadata)(document);
+diff --git a/cjs/getDocumentMetadata.js b/cjs/getDocumentMetadata.js
+index 5a6c3f64f713f5d929c99cbcd7eaba3e68b686bc..745e53cbbf59fb6755e5644ae2223d55e0e7823e 100644
+--- a/cjs/getDocumentMetadata.js
++++ b/cjs/getDocumentMetadata.js
+@@ -2,7 +2,8 @@
+ Object.defineProperty(exports, "__esModule", { value: true });
+ exports.getDocumentMetadata = void 0;
+ const graphql_1 = require("graphql");
+-function getDocumentMetadata(document) {
++const utils_1 = require("@graphql-tools/utils");
++exports.getDocumentMetadata = (0, utils_1.memoize1)(function getDocumentMetadata(document) {
+     const operations = [];
+     const fragments = [];
+     const fragmentNames = new Set();
+@@ -21,5 +22,4 @@ function getDocumentMetadata(document) {
+         fragments,
+         fragmentNames,
+     };
+-}
+-exports.getDocumentMetadata = getDocumentMetadata;
++});
+diff --git a/esm/Transformer.js b/esm/Transformer.js
+index 768918dae4d85fce0b9ea86ee8907ee0cfeffb3e..c638efc072502f0fb99c7cbc34b7438ec788659b 100644
+--- a/esm/Transformer.js
++++ b/esm/Transformer.js
+@@ -1,6 +1,21 @@
++import { Kind } from 'graphql';
++import { memoize1, memoize2of4 } from '@graphql-tools/utils';
+ import { checkResultAndHandleErrors } from './checkResultAndHandleErrors.js';
+ import { finalizeGatewayRequest } from './finalizeGatewayRequest.js';
+ import { prepareGatewayDocument } from './prepareGatewayDocument.js';
++const EMPTY_ARRAY = [];
++const ANONYMOUS_OPERATION_NAME = {
++    kind: Kind.NAME,
++    value: 'Anonymous Operation',
++};
++const getActualFieldNodes = memoize1(function getActualFieldNodes(fieldNode) {
++    return [fieldNode];
++});
++const getGatewayDocument = memoize2of4(function getGatewayDocument(
++// First two are here just for memoization purposes
++_fieldNodes, _nameNode, document, delegationContext) {
++    return prepareGatewayDocument(document, delegationContext.transformedSchema, delegationContext.returnType, delegationContext.info?.schema);
++});
+ export class Transformer {
+     constructor(context) {
+         this.transformations = [];
+@@ -15,9 +30,10 @@ export class Transformer {
+         this.transformations.push({ transform, context });
+     }
+     transformRequest(originalRequest) {
++        const fieldNodes = this.delegationContext.info?.fieldNodes;
+         let request = {
+             ...originalRequest,
+-            document: prepareGatewayDocument(originalRequest.document, this.delegationContext.transformedSchema, this.delegationContext.returnType, this.delegationContext.info?.schema),
++            document: getGatewayDocument(fieldNodes?.length === 1 ? getActualFieldNodes(fieldNodes[0]) : fieldNodes || EMPTY_ARRAY, this.delegationContext.info?.operation.name || ANONYMOUS_OPERATION_NAME, originalRequest.document, this.delegationContext),
+         };
+         for (const transformation of this.transformations) {
+             if (transformation.transform.transformRequest) {
+diff --git a/esm/finalizeGatewayRequest.js b/esm/finalizeGatewayRequest.js
+index 6629225dd5c66b1492ec1ea82f05dfaa71db9d46..bed1e3731ae5a85af9f408b6885305a05ce464de 100644
+--- a/esm/finalizeGatewayRequest.js
++++ b/esm/finalizeGatewayRequest.js
+@@ -1,7 +1,7 @@
+ import { getNamedType, versionInfo as graphqlVersionInfo, isAbstractType, isInterfaceType, isObjectType, Kind, TypeInfo, TypeNameMetaFieldDef, visit, visitWithTypeInfo, } from 'graphql';
+-import { createVariableNameGenerator, getDefinedRootType, implementsAbstractType, inspect, serializeInputValue, updateArgument, } from '@graphql-tools/utils';
++import { createVariableNameGenerator, getDefinedRootType, implementsAbstractType, inspect, memoize3, serializeInputValue, updateArgument, } from '@graphql-tools/utils';
+ import { getDocumentMetadata } from './getDocumentMetadata.js';
+-function finalizeGatewayDocument(targetSchema, fragments, operations) {
++const finalizeGatewayDocument = memoize3(function finalizeGatewayDocument(targetSchema, fragments, operations) {
+     let usedVariables = [];
+     let usedFragments = [];
+     const newOperations = [];
+@@ -48,7 +48,7 @@ function finalizeGatewayDocument(targetSchema, fragments, operations) {
+         usedVariables,
+         newDocument,
+     };
+-}
++});
+ export function finalizeGatewayRequest(originalRequest, delegationContext) {
+     let { document, variables } = originalRequest;
+     let { operations, fragments } = getDocumentMetadata(document);
+diff --git a/esm/getDocumentMetadata.js b/esm/getDocumentMetadata.js
+index fb84a1f87ab9df9aa270158202500f31dd8a73ce..b668096857f5b34a2ace291fd81df1fe92b689ae 100644
+--- a/esm/getDocumentMetadata.js
++++ b/esm/getDocumentMetadata.js
+@@ -1,5 +1,6 @@
+ import { Kind } from 'graphql';
+-export function getDocumentMetadata(document) {
++import { memoize1 } from '@graphql-tools/utils';
++export const getDocumentMetadata = memoize1(function getDocumentMetadata(document) {
+     const operations = [];
+     const fragments = [];
+     const fragmentNames = new Set();
+@@ -18,4 +19,4 @@ export function getDocumentMetadata(document) {
+         fragments,
+         fragmentNames,
+     };
+-}
++});
+diff --git a/typings/getDocumentMetadata.d.cts b/typings/getDocumentMetadata.d.cts
+index a3d1482d4ecc56154e04fa8d05ca0de3d41840f2..8b5887981e6549f52de92764bbb0b3128aa89776 100644
+--- a/typings/getDocumentMetadata.d.cts
++++ b/typings/getDocumentMetadata.d.cts
+@@ -1,5 +1,5 @@
+ import { DocumentNode, FragmentDefinitionNode, OperationDefinitionNode } from 'graphql';
+-export declare function getDocumentMetadata(document: DocumentNode): {
++export declare const getDocumentMetadata: (document: DocumentNode) => {
+     operations: Array<OperationDefinitionNode>;
+     fragments: Array<FragmentDefinitionNode>;
+     fragmentNames: Set<string>;
+diff --git a/typings/getDocumentMetadata.d.ts b/typings/getDocumentMetadata.d.ts
+index a3d1482d4ecc56154e04fa8d05ca0de3d41840f2..8b5887981e6549f52de92764bbb0b3128aa89776 100644
+--- a/typings/getDocumentMetadata.d.ts
++++ b/typings/getDocumentMetadata.d.ts
+@@ -1,5 +1,5 @@
+ import { DocumentNode, FragmentDefinitionNode, OperationDefinitionNode } from 'graphql';
+-export declare function getDocumentMetadata(document: DocumentNode): {
++export declare const getDocumentMetadata: (document: DocumentNode) => {
+     operations: Array<OperationDefinitionNode>;
+     fragments: Array<FragmentDefinitionNode>;
+     fragmentNames: Set<string>;

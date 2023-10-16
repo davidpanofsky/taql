@@ -28,7 +28,7 @@ const loggerConfig = resolve({
   },
   logLevel: {
     property: 'LOG_LEVEL',
-    defaultTo: process.env.NODE_ENV === 'test' ? 'error' : 'info',
+    defaultTo: 'info',
   },
   accessLogMinStatus: {
     property: 'ACCESS_LOG_MIN_STATUS',
@@ -104,12 +104,15 @@ loggers.add('app', {
 export const logger = loggers.get('app');
 export const accessLogger = loggers.get('access');
 // monkey-patch the console to use the logger we've configured.
-console.dir = (arg, options) => logger.info(inspect(arg, options));
-console.debug = (...args) => logger.debug(consoleFormat(...args));
-console.info = (...args) => logger.info(consoleFormat(...args));
-console.log = (...args) => logger.info(consoleFormat(...args));
-console.warn = (...args) => logger.warn(consoleFormat(...args));
-console.error = (...args) => logger.error(consoleFormat(...args));
+// avoid patching it when running tests to make debugging easier
+if (process.env.NODE_ENV !== 'test') {
+  console.dir = (arg, options) => logger.info(inspect(arg, options));
+  console.debug = (...args) => logger.debug(consoleFormat(...args));
+  console.info = (...args) => logger.info(consoleFormat(...args));
+  console.log = (...args) => logger.info(consoleFormat(...args));
+  console.warn = (...args) => logger.warn(consoleFormat(...args));
+  console.error = (...args) => logger.error(consoleFormat(...args));
+}
 
 export const SCHEMA = resolve({
   source: {

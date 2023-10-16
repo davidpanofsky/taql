@@ -24,7 +24,8 @@ export const getDeadline = <
   // be overridden by a setting on the request extensions. We only support
   // this because when using graphql-tools/utils to merge queries, we can't
   // control the merged context but _can_ control the merged extensions.
-  request.extensions?.[deadlineSymbol] ?? request.context?.state.taql.deadline;
+  request.extensions?.[deadlineSymbol] ??
+  request.context?.state?.taql?.deadline;
 const reduceDeadlines = (acc?: number, next?: number): number | undefined =>
   // In pairing any two deadlines, use the most restrictive. If in practice this
   // means sometimes calls upstream fail due to timeouts (when, unbatched, each
