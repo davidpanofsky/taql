@@ -70,12 +70,14 @@ function instrumentedPrint(ast: DocumentNode): string {
   return result;
 }
 
+export class DummyRequestTerminated extends Error {}
+
 export const requestFormatter = () => async (request: TaqlRequest) => {
   const { document, variables, context } = request;
 
   if (context?.isDummyRequest) {
     memoizedPrint(document);
-    return {};
+    throw new DummyRequestTerminated();
   }
 
   const query = instrumentedPrint(document);

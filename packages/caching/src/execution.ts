@@ -7,6 +7,7 @@ import {
   VariableDefinitionNode,
   execute,
 } from 'graphql';
+import { DummyRequestTerminated } from '@taql/executors';
 import { logPrewarm } from './util';
 import { logger } from '@taql/config';
 
@@ -98,7 +99,9 @@ export async function prewarmExecutionCache(
     });
     if (
       result.errors &&
-      result.errors.some((err) => err.message !== 'NullQuery')
+      result.errors.some(
+        (err) => !(err.originalError instanceof DummyRequestTerminated)
+      )
     ) {
       logger.error('Error while prewarming execute cache', result.errors);
     }
