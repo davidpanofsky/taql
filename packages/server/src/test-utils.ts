@@ -56,6 +56,7 @@ export const testSupergraph: Supergraph = {
 type GraphqlRequest = {
   query: string;
   variables?: Record<string, unknown>;
+  extensions?: Record<string, unknown>;
 };
 
 export async function makeGraphqlRequest(

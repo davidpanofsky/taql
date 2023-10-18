@@ -6,28 +6,15 @@ import {
   normalizeSdl,
   stitch,
 } from '@ta-graphql-utils/stitch';
-import { Cache, caching, multiCaching } from 'cache-manager';
-import {
-  ENABLE_FEATURES,
-  PRINT_DOCUMENT_PARAMS,
-  SCHEMA,
-  logger,
-} from '@taql/config';
+import { ENABLE_FEATURES, SCHEMA, logger } from '@taql/config';
 import { GraphQLError, GraphQLSchema } from 'graphql';
 import {
-  PrintedDocumentCacheConfig,
   SubgraphConfig,
   authManager,
   makeRemoteExecutor,
   requestFormatter,
 } from '@taql/executors';
 import { getLegacySubgraph, legacyTransforms } from './legacy';
-import {
-  instrumentedStore,
-  isCache,
-  memoryStore,
-  redisStore,
-} from '@taql/caching';
 import type { Executor } from '@graphql-tools/utils';
 import { createExecutor as batchingExecutorFactory } from '@taql/batching';
 import { inspect } from 'util';
@@ -70,9 +57,7 @@ export const optimizeSdl = async (rawSchema: string): Promise<string> => {
   });
 };
 
-function makeExecutorFactory(
-  cacheConfig: PrintedDocumentCacheConfig
-): (config: SubgraphConfig) => Executor {
+function makeExecutorFactory(): (config: SubgraphConfig) => Executor {
   return (config: SubgraphConfig): Executor =>
     config.batching != undefined
       ? batchingExecutorFactory(
@@ -82,93 +67,10 @@ function makeExecutorFactory(
                 Required<Pick<SubgraphExecutorConfig, 'batching'>>
             >config),
           },
-          requestFormatter(cacheConfig)
+          requestFormatter()
         )
       : makeRemoteExecutor({ ...config });
 }
-
-/**
- * Converting from DocumentNode to string can take more than 20ms for some of our larger queries.
- * We'll cache the most common ones to avoid unnecessary work.
- * Currently only works for preregistered/persisted queries, as their respective IDs constitute a portion
- * of the cache key.
- */
-async function createPrintedDocumentCache(params: {
-  maxCacheSize: number;
-  redisTTL: number;
-  redisInstance?: string;
-  redisCluster?: string;
-  redisWaitTimeMs?: number;
-}) {
-  // Set up redis cache, if so configured
-  const printCacheRedisParams = params.redisInstance
-    ? {
-        ttl: params.redisTTL,
-        waitTimeMs: params.redisWaitTimeMs,
-        host: params.redisInstance,
-        port: 6379,
-      }
-    : params.redisCluster
-    ? {
-        ttl: params.redisTTL,
-        waitTimeMs: params.redisWaitTimeMs,
-        clusterConfig: {
-          nodes: [
-            {
-              host: params.redisCluster,
-              port: 6379,
-            },
-          ],
-        },
-      }
-    : undefined;
-
-  const cacheInfo = [
-    `lru: max=${params.maxCacheSize}`,
-    ...(printCacheRedisParams
-      ? [
-          `redis: ${params.redisInstance || params.redisCluster} ttl=${
-            params.redisTTL
-          }`,
-        ]
-      : []),
-  ];
-
-  logger.info(`building printed document cache: [${cacheInfo}]`);
-
-  const printRedisStore =
-    printCacheRedisParams &&
-    instrumentedStore({
-      name: 'printed_documents',
-      store: redisStore<string>(printCacheRedisParams),
-    });
-
-  // Try to establish connection to redis before we start handling traffic
-  await printRedisStore?.ready().catch((err) => {
-    // Still use the store even if this fails, since we may get connection later
-    // If we don't, volume of errors that store produces should let us know that something is wrong
-    logger.error(
-      `Failed to init printed documents redis: ${err?.message || err}`
-    );
-  });
-
-  // Multicache with redis if a redis configuration is present
-  return multiCaching(
-    [
-      await caching(
-        instrumentedStore({
-          name: 'printed_documents',
-          store: memoryStore<string>({
-            max: params.maxCacheSize,
-          }),
-        })
-      ),
-      printRedisStore && (await caching(printRedisStore)),
-    ].filter(isCache)
-  );
-}
-
-let printedDocumentCache: Omit<Cache, 'store'>;
 
 type RawSupergraph = {
   id: string;
@@ -278,22 +180,9 @@ export const loadSupergraph = async (): Promise<Supergraph> => {
 export const makeSchema = async (
   supergraph: Supergraph
 ): Promise<StitchResult> => {
-  // Initialize the printed document cache if it hasn't been already
-  if (!printedDocumentCache) {
-    printedDocumentCache = await createPrintedDocumentCache(
-      PRINT_DOCUMENT_PARAMS
-    );
-  }
   const schemaId =
     supergraph.id +
     (supergraph.legacyDigest != undefined ? `_${supergraph.legacyDigest}` : '');
-
-  const cacheConfig: PrintedDocumentCacheConfig = {
-    cache: printedDocumentCache,
-    keyFn(queryId: string, fieldName: string | number) {
-      return `${queryId}_${fieldName}_${schemaId}`;
-    },
-  };
 
   let isOverriddenBy = () => false;
   // Our runtime doesn't have `findLast` yet, so filter and pop to find the last legacy-graphql subgraph :(
@@ -341,7 +230,7 @@ export const makeSchema = async (
   try {
     const stitchResult = await stitch({
       subgraphs: supergraph.manifest,
-      executorFactory: makeExecutorFactory(cacheConfig),
+      executorFactory: makeExecutorFactory(),
       parseOptions: {
         noLocation: !ENABLE_FEATURES.astLocationInfo,
       },

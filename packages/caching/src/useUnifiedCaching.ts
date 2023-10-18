@@ -6,6 +6,7 @@ import { ValidationCache } from './validation';
 import { Plugin as YogaPlugin } from 'graphql-yoga';
 import { addClusterReadinessStage } from '@taql/readiness';
 import { logPrewarm } from './util';
+import { prewarmExecutionCache } from './execution';
 
 const unifiedCachesPrewarmed = addClusterReadinessStage(
   'unifiedCachesPrewarmed'
@@ -36,6 +37,7 @@ export async function useUnifiedCaching(options: {
         () => documentCache.prewarm(prewarm, documents),
         () => validationCache.prewarm(prewarm.schema, documents),
         () => jitCache?.prewarm(prewarm.schema, documents),
+        () => prewarmExecutionCache(prewarm.schema, documents),
       ],
       (fun) => fun()
     );

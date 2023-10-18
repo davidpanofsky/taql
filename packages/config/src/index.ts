@@ -425,32 +425,6 @@ export const AUTOMATIC_PERSISTED_QUERY_PARAMS = resolve({
   },
 });
 
-export const PRINT_DOCUMENT_PARAMS = resolve({
-  redisCluster: {
-    property: 'PRINTED_DOCUMENT_REDIS_CLUSTER',
-    defaultTo: undefined,
-  },
-  redisInstance: {
-    property: 'PRINTED_DOCUMENT_REDIS_INSTANCE',
-    defaultTo: undefined,
-  },
-  redisTTL: {
-    property: 'PRINTED_DOCUMENT_REDIS_TTL',
-    resolver: resolvers.nonNegativeInteger,
-    defaultTo: 300_000, // 5 minutes
-  },
-  redisWaitTimeMs: {
-    property: 'PRINTED_DOCUMENT_REDIS_WAIT_TIME_MS',
-    resolver: resolvers.nonNegativeInteger,
-    defaultTo: 2000,
-  },
-  maxCacheSize: {
-    property: 'PRINTED_DOCUMENT_CACHE_SIZE',
-    resolver: resolvers.nonNegativeInteger,
-    defaultTo: 4000,
-  },
-});
-
 export const PROM_PARAMS = resolve({
   prefix: {
     property: 'PROM_PREFIX',
