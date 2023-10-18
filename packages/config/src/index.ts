@@ -485,6 +485,10 @@ export const GITOPS_PARAMS = resolve({
     property: 'GITOPS_PATCH_FILE_PATH',
     defaultTo: undefined,
   },
+  valuesFilePath: {
+    property: 'GITOPS_VALUES_FILE_PATH',
+    defaultTo: undefined,
+  },
   useDummyDigest: {
     property: 'GITOPS_USE_DUMMY_DIGEST',
     resolver: resolvers.booleanFromString,

@@ -34,6 +34,10 @@ type PatchItem = {
   };
 };
 
+type ValuesWithDigest = {
+  schemaDigest?: string;
+};
+
 // we're only interested in the ID part of the schema.
 type Schema = { id: string };
 
@@ -46,6 +50,7 @@ function makeDigest(schema: Schema): string {
 
 async function updateSchemaDigest(
   patchFilePath: string,
+  valuesFilePath: string,
   schemaProvider: () => Promise<Schema | undefined>,
   envVarToInject = 'SCHEMA_DIGEST'
 ): Promise<{ schemaId: string; digest: string }> {
@@ -61,20 +66,39 @@ async function updateSchemaDigest(
     readFileSync(patchFilePath, 'utf-8')
   ) as Array<PatchItem>;
 
-  let changed = false;
+  let patchChanged = false;
   // Update digest if necessary
   patch.forEach((item: PatchItem) => {
     if (item.value.name == envVarToInject && item.value.value != digest) {
       item.value.value = digest;
-      changed = true;
+      patchChanged = true;
     }
   });
 
   // Write patch if changes were made
-  if (changed) {
+  if (patchChanged) {
     writeFileSync(
       patchFilePath,
       yaml.dump(patch, {
+        indent: 2,
+      })
+    );
+  }
+
+  let valuesChanged = false;
+  const values = yaml.load(
+    readFileSync(valuesFilePath, 'utf-8')
+  ) as ValuesWithDigest;
+
+  if (values['schemaDigest'] != digest) {
+    values['schemaDigest'] = digest;
+    valuesChanged = true;
+  }
+
+  if (valuesChanged) {
+    writeFileSync(
+      valuesFilePath,
+      yaml.dump(values, {
         indent: 2,
       })
     );
@@ -89,6 +113,7 @@ async function dummySchema(): Promise<Schema> {
     id: Math.random().toString(36).substring(2, 10),
   };
 }
+
 async function loadSchema(): Promise<Schema> {
   const stitchResult = await makeSchema(await loadSupergraph());
   if ('success' in stitchResult) {
@@ -122,17 +147,28 @@ function main() {
     );
   }
 
+  if (
+    !GITOPS_PARAMS.valuesFilePath ||
+    !lstatSync(GITOPS_PARAMS.valuesFilePath).isFile()
+  ) {
+    throw new Error(
+      `Can not write digest to ${GITOPS_PARAMS.valuesFilePath}, as it is not a file`
+    );
+  }
+
   let schemaProvider: () => Promise<Schema | undefined> = loadSchema;
   if (GITOPS_PARAMS.useDummyDigest) {
     console.log('RUNNING IN TEST MODE, USING DUMMY DIGEST');
     schemaProvider = dummySchema;
   }
 
-  updateSchemaDigest(GITOPS_PARAMS.patchFilePath, schemaProvider).then(
-    function (result) {
-      console.log(`Digest (base64 encoded): ${result}`);
-    }
-  );
+  updateSchemaDigest(
+    GITOPS_PARAMS.patchFilePath,
+    GITOPS_PARAMS.valuesFilePath,
+    schemaProvider
+  ).then(function (result) {
+    console.log(`Digest (base64 encoded): ${result}`);
+  });
 }
 
 main();
