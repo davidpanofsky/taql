@@ -39,9 +39,8 @@ export const logPrewarm = async <T>(
 
   logger.info(`prewarming ${stage} (${entries.length} item(s))`);
   const start = Date.now();
-  for (const entry of entries) {
-    await fun(entry);
-  }
+
+  await Promise.all(entries.map((entry) => fun(entry)));
   logger.info(
     `prewarmed ${stage} (${entries.length} item(s)) in ${Date.now() - start}ms`
   );

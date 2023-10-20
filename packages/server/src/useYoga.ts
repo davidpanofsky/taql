@@ -70,6 +70,11 @@ export const makePlugins = async (
       : undefined,
   });
 
+  const [preregistered, persisted] = await Promise.all([
+    preregPlugin.loadCurrentQueries(),
+    apq.loadPersistedQueries(),
+  ]);
+
   const unifiedCachingPlugin = await useUnifiedCaching({
     maxCacheSize: 2048,
     useJit: ENABLE_FEATURES.graphqlJIT && {
@@ -86,8 +91,8 @@ export const makePlugins = async (
     },
     prewarm: {
       schema: defaultSchema,
-      preregistered: await preregPlugin.loadCurrentQueries(),
-      persisted: await apq.loadPersistedQueries(),
+      preregistered,
+      persisted,
     },
   });
 
