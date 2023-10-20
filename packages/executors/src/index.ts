@@ -16,12 +16,15 @@ import {
   getOperationAST,
   print,
 } from 'graphql';
-import { ExecutionRequest, ExecutionResult } from '@graphql-tools/utils';
+import {
+  ExecutionRequest,
+  ExecutionResult,
+  memoize1,
+} from '@graphql-tools/utils';
 import { ForwardableHeaders, type TaqlState } from '@taql/context';
 import fetch, { Headers } from 'node-fetch';
 import { httpAgent, httpsAgent, legacyHttpsAgent } from '@taql/httpAgent';
 import type { Agent } from 'http';
-import { Cache } from 'cache-manager';
 import { SpanKind } from '@opentelemetry/api';
 import { SubgraphExecutorConfig } from '@ta-graphql-utils/stitch';
 import { getDeadline } from '@taql/deadlines';
@@ -31,27 +34,17 @@ import { tracerProvider } from '@taql/observability';
 
 export type TaqlRequest = ExecutionRequest<Record<string, unknown>, TaqlState>;
 
-export type PrintedDocumentCacheConfig = {
-  cache?: Omit<Cache, 'store'>;
-  keyFn?: (queryId: string, fieldName: string | number) => string;
-};
-
 const tracer = tracerProvider.getTracer('taql');
 const PRINT_OPERATION_NAME = 'graphql.print.operationName';
 
 const labelNames = ['worker'];
 const buckets = [0.0001, 0.0005, 0.001, 0.005, 0.01, 0.05, 0.1, 0.5];
 
+const memoizedPrint = memoize1(print);
+
 const EXECUTOR_PRINT_DURATION_HISTOGRAM = new promClient.Histogram({
   name: 'taql_executor_print_duration',
   help: 'Time spent printing the graphql document or accessing the printed ones from the cache',
-  labelNames,
-  buckets,
-});
-
-const EXECUTOR_UNCACHED_PRINT_DURATION_HISTOGRAM = new promClient.Histogram({
-  name: 'taql_executor_uncached_print_duration',
-  help: 'Time spent printing the graphql document',
   labelNames,
   buckets,
 });
@@ -68,40 +61,29 @@ function instrumentedPrint(ast: DocumentNode): string {
       },
     }
   );
-  const stopTimer = EXECUTOR_UNCACHED_PRINT_DURATION_HISTOGRAM.startTimer({
+  const stopTimer = EXECUTOR_PRINT_DURATION_HISTOGRAM.startTimer({
     worker,
   });
-  const result = print(ast);
+  const result = memoizedPrint(ast);
   stopTimer();
   printSpan.end();
   return result;
 }
 
-export const requestFormatter =
-  (config: PrintedDocumentCacheConfig) => async (request: TaqlRequest) => {
-    const { document, variables, context, info } = request;
-    const { cache, keyFn } = config;
+export class DummyRequestTerminated extends Error {}
 
-    const queryId =
-      context?.params?.extensions?.preRegisteredQueryId ||
-      context?.params?.extensions?.persistedQuery?.sha256Hash;
-    const fieldName = info?.path.key; // the aliased field name
+export const requestFormatter = () => async (request: TaqlRequest) => {
+  const { document, variables, context } = request;
 
-    const cacheKey = keyFn && queryId && fieldName && keyFn(queryId, fieldName);
+  if (context?.isDummyRequest) {
+    memoizedPrint(document);
+    throw new DummyRequestTerminated();
+  }
 
-    const stopTimer = EXECUTOR_PRINT_DURATION_HISTOGRAM.startTimer({ worker });
+  const query = instrumentedPrint(document);
 
-    // It's important that we call cache.wrap here, as for multicaches this ensures that if the value is in a "deeper" cache
-    // that the value is propagated into the "shallower" caches that we would prefer to resolve it from in the future.
-    const query: string =
-      cache && cacheKey
-        ? await cache.wrap(cacheKey, async () => instrumentedPrint(document))
-        : instrumentedPrint(document);
-
-    stopTimer();
-
-    return { query, variables } as const;
-  };
+  return { query, variables } as const;
+};
 
 const BODY_BYTES_SENT = new promClient.Counter({
   name: 'taql_executor_body_bytes_sent',
@@ -332,11 +314,10 @@ export const bindLoad = <T_1, R_1, T_2 = unknown, R_2 = unknown>(
 };
 
 export const makeRemoteExecutor = (
-  subgraph: SubgraphConfig,
-  printedDocumentCacheConfig: PrintedDocumentCacheConfig = {}
+  subgraph: SubgraphConfig
 ): ((req: ExecutionRequest) => Promise<ExecutionResult>) => {
   const load = bindLoad<TaqlRequest, ExecutionResult>(subgraph, getDeadline, {
-    request: requestFormatter(printedDocumentCacheConfig),
+    request: requestFormatter(),
   });
   return async (request: TaqlRequest): Promise<ExecutionResult> =>
     load({

@@ -21,7 +21,6 @@
     "@taql/deadlines": "workspace:^",
     "@taql/httpAgent": "workspace:^",
     "@taql/observability": "workspace:^",
-    "cache-manager": "^5.2.1",
     "graphql": "*",
     "node-fetch": "^2.6.11",
     "prom-client": "^14.2.0"

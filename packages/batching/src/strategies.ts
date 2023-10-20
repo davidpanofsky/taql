@@ -64,8 +64,8 @@ const byRequestStrategy: Strategy = (executor, config) => async (requests) => {
   const batches = batchByKey(requests, {
     subBatchIdFn: (req) =>
       // Fall back to a symbol (which will never match another value)
-      (req.context != undefined &&
-        loadState(req.context?.state?.taql).requestUnique) ||
+      (req.context?.state?.taql != undefined &&
+        loadState(req.context.state.taql).requestUnique) ||
       Symbol(),
     seriesIdFn,
     clustering,
@@ -107,13 +107,16 @@ const byHeadersStrategy: Strategy =
     const batches = batchByKey(requests, {
       subBatchIdFn: (req) =>
         // Fall back to a symbol (which will never match another value)
-        (req.context && loadState(req.context.state.taql).batchByHeadersHash) ||
+        (req.context?.state?.taql &&
+          loadState(req.context.state.taql).batchByHeadersHash) ||
         Symbol(),
       subBatchEqFn: (lhs, rhs) =>
         lhs === rhs ||
         headersEqual(
-          lhs.context && loadState(lhs.context.state.taql).batchByHeaders,
-          rhs.context && loadState(rhs.context.state.taql).batchByHeaders
+          lhs.context?.state?.taql &&
+            loadState(lhs.context.state.taql).batchByHeaders,
+          rhs.context?.state?.taql &&
+            loadState(rhs.context.state.taql).batchByHeaders
         ),
       seriesIdFn,
       clustering,
