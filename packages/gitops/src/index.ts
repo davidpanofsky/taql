@@ -35,7 +35,9 @@ type PatchItem = {
 };
 
 type ValuesWithDigest = {
-  schemaDigest?: string;
+  taql: {
+    schemaDigest?: string;
+  };
 };
 
 // we're only interested in the ID part of the schema.
@@ -90,8 +92,14 @@ async function updateSchemaDigest(
     readFileSync(valuesFilePath, 'utf-8')
   ) as ValuesWithDigest;
 
-  if (values['schemaDigest'] != digest) {
-    values['schemaDigest'] = digest;
+  if (!values['taql']) {
+    throw new Error(
+      `values file ${valuesFilePath} seems to be structured wrong; no 'taql' section found`
+    );
+  }
+
+  if (values['taql']['schemaDigest'] != digest) {
+    values['taql']['schemaDigest'] = digest;
     valuesChanged = true;
   }
 
