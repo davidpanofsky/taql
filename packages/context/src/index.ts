@@ -83,12 +83,9 @@ export const timeRemaining = (context: TaqlContext): number =>
 const svco = (headers: GenericHeaders): string | undefined =>
   getHeaderOrDefault(headers, 'x-service-overrides', undefined);
 
-const getClientName = (headers: GenericHeaders): string => {
-  return (
-    getHeaderOrDefault(headers, 'x-app-name', undefined) ||
-    getHeaderOrDefault(headers, 'user-agent', 'unknown')
-  );
-};
+const getClientName = (headers: GenericHeaders): string =>
+  getHeaderOrDefault(headers, 'x-app-name', undefined) ||
+  getHeaderOrDefault(headers, 'user-agent', 'unknown');
 
 const buildContext = (headers: GenericHeaders): TaqlContext => ({
   forwardHeaders: forwardableHeaders(headers),
