@@ -76,6 +76,7 @@ const byRequestStrategy: Strategy = (executor, config) => async (requests) => {
       executor({
         request: subBatch.map((sub) => sub.val),
         forwardHeaders: subBatch[0]?.val?.context?.state?.taql?.forwardHeaders,
+        clientName: subBatch[0]?.val?.context?.state?.taql?.client,
       })
     )
   );
@@ -129,6 +130,7 @@ const byHeadersStrategy: Strategy =
           request: subBatch.map((sub) => sub.val),
           forwardHeaders:
             subBatch[0]?.val?.context?.state?.taql?.forwardHeaders,
+          clientName: subBatch[0]?.val?.context?.state?.taql?.client,
         })
       )
     );
@@ -190,9 +192,15 @@ const insecureStrategy: Strategy = (executor, config) => async (requests) => {
   const resultBatches = await Promise.all(
     batches.map((subBatch) => {
       const request = subBatch.map((sub) => sub.val);
+      const clientNames = [
+        ...new Set(
+          request.map((r) => r.context?.state?.taql?.client).filter(Boolean)
+        ),
+      ];
       return executor({
         request,
         forwardHeaders: mergeInsecureHeaders(request),
+        clientName: clientNames.length === 1 ? clientNames[0] : undefined,
       });
     })
   );

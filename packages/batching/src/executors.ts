@@ -168,6 +168,7 @@ function makeLegacyGqlExecutor(
       load({
         forwardHeaders: req.context?.state?.taql?.forwardHeaders,
         request: [req],
+        clientName: req.context?.state?.taql?.client,
       }).then((results) => results[0]),
     translateConfigToLoaderOptions(config)
   );

@@ -7,6 +7,7 @@ export type TaqlRequest = ExecutionRequest<Record<string, unknown>, TaqlState>;
 export type TaqlBatchLoader = (args: {
   request: Readonly<TaqlRequest[]>;
   forwardHeaders: ForwardableHeaders | undefined;
+  clientName: string | undefined;
 }) => ReturnType<BatchLoadFn<TaqlRequest, ExecutionResult>>;
 
 export type BatchEntry<T> = { val: T; idx: number };
