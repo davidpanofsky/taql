@@ -29,6 +29,7 @@ import { SpanKind } from '@opentelemetry/api';
 import { SubgraphExecutorConfig } from '@ta-graphql-utils/stitch';
 import { getDeadline } from '@taql/deadlines';
 import path from 'node:path';
+import { performance } from 'perf_hooks';
 import promClient from 'prom-client';
 import { tracerProvider } from '@taql/observability';
 
@@ -85,6 +86,20 @@ export const requestFormatter = () => async (request: TaqlRequest) => {
   return { query, variables } as const;
 };
 
+const durationBucketsMs = [10, 25, 50, 75, 100, 150, 200, 500, 1000, 2000];
+const EXECUTOR_REQUEST_DURATION_HISTOGRAM = new promClient.Histogram({
+  name: 'taql_executor_request_duration_ms',
+  help: 'executor time (ms) spent on HTTP connection',
+  labelNames: ['subgraph', 'client'],
+  buckets: durationBucketsMs,
+});
+
+const EXECUTOR_ERROR_COUNT = new promClient.Counter({
+  name: 'taql_executor_error_count',
+  help: 'number of executor failures',
+  labelNames: ['subgraph'],
+});
+
 const BODY_BYTES_SENT = new promClient.Counter({
   name: 'taql_executor_body_bytes_sent',
   help: 'byte length of request bodies sent by taql executors',
@@ -110,6 +125,7 @@ type ConstantLoadParams = {
 type LoadParams<T> = {
   forwardHeaders?: ForwardableHeaders;
   request: Promise<T> | T;
+  clientName?: string;
 };
 
 type RequestTransform<T_1, T_2> = {
@@ -193,6 +209,7 @@ const load = async <T, R>({
   agent,
   forwardHeaders,
   request,
+  clientName,
 }: ConstantLoadParams & LoadParams<T>): Promise<R> => {
   const headers = new Headers();
   if (forwardHeaders) {
@@ -221,6 +238,7 @@ const load = async <T, R>({
   logger.debug(`Fetching from remote: ${subgraph.url}`);
   const body = Buffer.from(JSON.stringify(await request));
   BODY_BYTES_SENT.labels({ subgraph: subgraph.name }).inc(body.byteLength);
+  const start = performance.now();
   const response = await fetch(subgraph.url, {
     method: 'POST',
     redirect: 'error',
@@ -229,7 +247,13 @@ const load = async <T, R>({
     timeout,
     body,
   });
+  const duration = performance.now() - start;
+  EXECUTOR_REQUEST_DURATION_HISTOGRAM.observe(
+    { subgraph: subgraph.name, client: clientName || 'unknown' },
+    duration
+  );
   if (!response.ok) {
+    EXECUTOR_ERROR_COUNT.labels(subgraph.name).inc();
     throw new GraphQLError(
       `Got ${response.status} error from remote: ${subgraph.url}`
     );
@@ -323,5 +347,6 @@ export const makeRemoteExecutor = (
     load({
       forwardHeaders: request.context?.state.taql.forwardHeaders,
       request,
+      clientName: request.context?.state.taql.client,
     });
 };

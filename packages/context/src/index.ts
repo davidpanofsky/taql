@@ -32,6 +32,7 @@ export type TaqlContext = Readonly<{
   deadline: number;
   legacyContext: LegacyContext;
   SVCO?: string;
+  client: string;
 }>;
 
 type RawState = Readonly<{ taql: TaqlContext }>;
@@ -82,11 +83,19 @@ export const timeRemaining = (context: TaqlContext): number =>
 const svco = (headers: GenericHeaders): string | undefined =>
   getHeaderOrDefault(headers, 'x-service-overrides', undefined);
 
+const getClientName = (headers: GenericHeaders): string => {
+  return (
+    getHeaderOrDefault(headers, 'x-app-name', undefined) ||
+    getHeaderOrDefault(headers, 'user-agent', 'unknown')
+  );
+};
+
 const buildContext = (headers: GenericHeaders): TaqlContext => ({
   forwardHeaders: forwardableHeaders(headers),
   deadline: deadline(headers),
   legacyContext: legacyContextFromHeaders(headers),
   SVCO: svco(headers),
+  client: getClientName(headers),
 });
 
 export const useTaqlContext: TaqlMiddleware = async (ctx, next) => {
