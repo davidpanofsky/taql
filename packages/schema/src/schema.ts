@@ -201,6 +201,7 @@ export const makeSchema = async (
     const nonstitchedRoles = [
       // the components svc only consumes the schema - it's probably what called us
       'components*',
+      'componentsweb*',
       // taql _is_ us
       'taql*',
       `graphql*${legacyUrl.hostname}:${legacyPort}:${legacyUrl.protocol}`,
