@@ -80,9 +80,6 @@ const deadline = (headers: GenericHeaders): number =>
 export const timeRemaining = (context: TaqlContext): number =>
   context.deadline - Date.now();
 
-const svco = (headers: GenericHeaders): string | undefined =>
-  getHeaderOrDefault(headers, 'x-service-overrides', undefined);
-
 const getClientName = (headers: GenericHeaders): string =>
   getHeaderOrDefault(headers, 'x-app-name', undefined) ||
   getHeaderOrDefault(headers, 'user-agent', 'unknown');
@@ -91,13 +88,11 @@ const buildContext = (headers: GenericHeaders): TaqlContext => ({
   forwardHeaders: forwardableHeaders(headers),
   deadline: deadline(headers),
   legacyContext: legacyContextFromHeaders(headers),
-  SVCO: svco(headers),
+  SVCO: undefined, // we'll only assign it if it's intended to be used in current request via useSvco middleware
   client: getClientName(headers),
 });
 
 export const useTaqlContext: TaqlMiddleware = async (ctx, next) => {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore assign state anyhow here.
-  ctx.state.taql = buildContext(ctx.headers);
+  Object.assign(ctx.state, { taql: buildContext(ctx.headers) });
   await next();
 };

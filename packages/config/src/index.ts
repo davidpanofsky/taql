@@ -299,11 +299,6 @@ export const SERVER_PARAMS = resolve({
       availableParallelism instanceof Function ? availableParallelism() : 1,
     resolver: resolvers.nonNegativeInteger,
   },
-  svcoWorker: {
-    property: 'SVCO_WORKER',
-    resolver: resolvers.booleanFromString,
-    defaultTo: false,
-  },
   svcoSchemaTtl: {
     property: 'SVCO_SCHEMA_TTL',
     resolver: resolvers.nonNegativeInteger,
