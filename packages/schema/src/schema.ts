@@ -24,7 +24,6 @@ import { promises } from 'fs';
 
 export type TASchema = {
   schema: GraphQLSchema;
-  isOverriddenBy: (svco?: string) => boolean;
   id: string;
 };
 
@@ -184,45 +183,12 @@ export const makeSchema = async (
     supergraph.id +
     (supergraph.legacyDigest != undefined ? `_${supergraph.legacyDigest}` : '');
 
-  let isOverriddenBy = () => false;
   // Our runtime doesn't have `findLast` yet, so filter and pop to find the last legacy-graphql subgraph :(
   // There may be more than one if an override was applied; it is the last one that will be stitched.
   const legacySubgraph = supergraph.manifest
     .filter((sg) => sg.name == 'legacy-graphql')
     .pop();
   if (legacySubgraph != undefined) {
-    // We know these roles do not affect the stitched schema. This list is not
-    // intended to be exhaustive, and an exhaustive list is not desirable: services
-    // may _become_ stitched, unless there is some special property or use case
-    // around the service that makes that extremely unlikely.
-    const legacyUrl = new URL(legacySubgraph.executorConfig.url);
-    const legacyPort =
-      legacyUrl.port || (legacyUrl.protocol == 'http:' ? 80 : 443);
-    const nonstitchedRoles = [
-      // the components svc only consumes the schema - it's probably what called us
-      'components*',
-      'componentsweb*',
-      // taql _is_ us
-      'taql*',
-      `graphql*${legacyUrl.hostname}:${legacyPort}:${legacyUrl.protocol}`,
-    ];
-    logger.info(
-      `Schema will ignore SVCO records starting with ${nonstitchedRoles}`
-    );
-
-    isOverriddenBy = (svco?: string) =>
-      svco != undefined &&
-      svco
-        .split('|')
-        .filter((role) => role.trim() !== '')
-        .find(
-          (role) =>
-            // The role is not non-stitched, so it _may_ be stitched.
-            nonstitchedRoles.find((nonStitched) =>
-              role.startsWith(nonStitched)
-            ) == undefined
-        ) != undefined;
-
     // We need a few transforms for the legacy subgraph to work, add a final copy of it to the manifest with the transforms
     // Cast to dangerously escape the readonly nature of the subgraphs.
     (<Record<string, unknown>>legacySubgraph).transforms = legacyTransforms;
@@ -244,13 +210,12 @@ export const makeSchema = async (
 
     if ('schema' in stitchResult) {
       const { schema } = stitchResult;
-      return { success: { schema, isOverriddenBy, id: schemaId } };
+      return { success: { schema, id: schemaId } };
     } else if ('schemaWithErrors' in stitchResult) {
       const { schemaWithErrors: schema } = stitchResult;
       return {
         partial: {
           schema,
-          isOverriddenBy,
           validationErrors,
           id: schemaId,
         },

@@ -62,7 +62,7 @@ export const useMetricsEndpoint = async (
   }
 };
 
-export const httpStatusTrackingFactory = (options: {
+export const createHttpTrackingMiddleware = (options: {
   promPrefix?: string;
   logger?: {
     error: (msg: string) => void;
@@ -96,7 +96,25 @@ export const httpStatusTrackingFactory = (options: {
     buckets: durationBucketsMs,
   });
 
-  return async function httpStatusTracking(
+  // Buckets for request/response sizes
+  const defaultSizeBytesBuckets = promClient.exponentialBuckets(25, 5, 7);
+  const payloadSizeLabels = ['method', 'path', 'statusCode'];
+
+  const requestSizeMetric = new promClient.Histogram({
+    name: `${promPrefix}request_size_bytes`,
+    help: 'Size of HTTP requests in bytes',
+    labelNames: payloadSizeLabels,
+    buckets: defaultSizeBytesBuckets,
+  });
+
+  const responseSizeMetric = new promClient.Histogram({
+    name: `${promPrefix}response_size_bytes`,
+    help: 'Size of HTTP responses in bytes',
+    labelNames: payloadSizeLabels,
+    buckets: defaultSizeBytesBuckets,
+  });
+
+  return async function useHttpTracking(
     ctx: ParameterizedContext,
     next: () => Promise<void>
   ) {
@@ -122,6 +140,15 @@ export const httpStatusTrackingFactory = (options: {
         client,
         path,
       });
+
+      // Capture metrics for request and response sizes.
+      const labels = {
+        method: ctx.request.method,
+        path: ctx.request.path,
+        statusCode: ctx.status,
+      };
+      requestSizeMetric.observe(labels, ctx.request.length || 0);
+      responseSizeMetric.observe(labels, ctx.response.length || 0);
     } else {
       logger?.error(
         'useHttpStatusTracking: no status on context! Is this middleware applied properly?'

@@ -14,18 +14,19 @@ import {
 import { Server, createServer as httpServer } from 'http';
 import cluster, { Worker } from 'node:cluster';
 import {
-  httpStatusTrackingFactory,
+  createHttpTrackingMiddleware,
   useMetricsEndpoint,
 } from '@taql/observability';
 import Koa from 'koa';
 import { SSL_CONFIG } from '@taql/ssl';
+import { createSvcoMiddleware } from './useSvco';
+import { createYogaMiddleware } from './useYoga';
 import { createServer as httpsServer } from 'https';
 import { loadSupergraph } from '@taql/schema';
 import process from 'node:process';
 import promClient from 'prom-client';
 import { promises } from 'fs';
 import { useTaqlContext } from '@taql/context';
-import { useYoga } from './useYoga';
 
 const serverListening = addClusterReadinessStage('serverListening');
 const workersForked = addPrimaryReadinessStage('allWorkersForked');
@@ -40,10 +41,6 @@ const shutdownMessage = 'taql:shutdown';
 let shuttingDown = false;
 
 const workerStartup = async () => {
-  const port = SERVER_PARAMS.svcoWorker
-    ? SERVER_PARAMS.port - 1
-    : SERVER_PARAMS.port;
-
   const koa = new Koa();
 
   koa.on('error', function errorHandler(error) {
@@ -55,24 +52,37 @@ const workerStartup = async () => {
     logger.error('Unhandled koa error', error);
   });
 
-  koa.use(httpStatusTrackingFactory({ logger }));
+  const supergraph = await loadSupergraph();
 
-  //Initialize taql state.
+  // The order in which middleware is registered matters
+  //  - We first parse headers and convert them to taql context, as we'll likely use that in other middlewares
+  //  - We also handle svcos if they are enabled, and forward the request to correct worker if necessary
+  //  - Request/response tracking comes after forwarding, so that we don't track same request twice (but before doing actual work)
+  //  - And finally we hand off the request to yoga server
   koa.use(useTaqlContext);
-
-  koa.use(await useYoga());
+  if (ENABLE_FEATURES.serviceOverrides) {
+    koa.use(createSvcoMiddleware(supergraph));
+  }
+  koa.use(createHttpTrackingMiddleware({ logger }));
+  koa.use(await createYogaMiddleware(supergraph));
 
   const server: Server =
     SSL_CONFIG == undefined ? httpServer() : httpsServer(SSL_CONFIG);
 
   server.addListener('request', koa.callback());
-  logger.info('created server');
 
-  logger.info(`launching server on port ${port}`);
-  server.listen(port, () => {
+  server.listen(SERVER_PARAMS.port, () => {
     serverListening.ready();
-    logger.info('server running');
+    logger.info(`server listening on port ${SERVER_PARAMS.port}`);
   });
+
+  if (ENABLE_FEATURES.serviceOverrides) {
+    const svcoPort = SERVER_PARAMS.port - (cluster.worker?.id || 1);
+    server.listen(svcoPort, () => {
+      serverListening.ready();
+      logger.info(`server listening on port ${svcoPort}`);
+    });
+  }
 
   // a long http keepalive timeout should help keep SVCO on same worker.
   //server.keepAliveTimeout = 60_000;
@@ -212,17 +222,8 @@ const primaryStartup = async () => {
     SCHEMA_SOURCE: 'file',
   };
 
-  // create one worker for svco on port - 1 if enabled.
-  ENABLE_FEATURES.serviceOverrides &&
-    fork({ SVCO_WORKER: 'true', ...schemaEnv });
-  const clusterParallelism = ENABLE_FEATURES.serviceOverrides
-    ? Math.max(SERVER_PARAMS.clusterParallelism - 1, 1)
-    : SERVER_PARAMS.clusterParallelism;
-  for (let i = 0; i < clusterParallelism; i++) {
-    fork({
-      SVCO_WORKER: 'false',
-      ...schemaEnv,
-    });
+  for (let i = 0; i < SERVER_PARAMS.clusterParallelism; i++) {
+    fork(schemaEnv);
     // A small delay between forks seems to help keep external dependencies happy.
     await new Promise<void>((resolve) => setTimeout(resolve, 100));
   }
