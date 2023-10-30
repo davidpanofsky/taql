@@ -87,7 +87,9 @@ export const createHttpTrackingMiddleware = (options: {
 
   // Request duration is recorded in ms, so default buckets are unsuitable.
   // The default buckets are [.005, .01, .025, .05, .1, .25, .5, 1, 2.5, 5, 10, +Inf]
-  const durationBucketsMs = [10, 25, 50, 75, 100, 150, 200, 500, 1000, 2000];
+  const durationBucketsMs = [
+    10, 25, 50, 75, 100, 150, 200, 300, 500, 700, 1000, 2000,
+  ];
 
   const HTTP_REQUEST_DURATION_HISTOGRAM = new promClient.Histogram({
     name: `${promPrefix}http_duration_ms`,

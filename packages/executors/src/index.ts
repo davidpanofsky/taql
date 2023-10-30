@@ -86,7 +86,9 @@ export const requestFormatter = () => async (request: TaqlRequest) => {
   return { query, variables } as const;
 };
 
-const durationBucketsMs = [10, 25, 50, 75, 100, 150, 200, 500, 1000, 2000];
+const durationBucketsMs = [
+  10, 25, 50, 75, 100, 150, 200, 300, 500, 700, 1000, 2000,
+];
 const EXECUTOR_REQUEST_DURATION_HISTOGRAM = new promClient.Histogram({
   name: 'taql_executor_request_duration_ms',
   help: 'executor time (ms) spent on HTTP connection',
