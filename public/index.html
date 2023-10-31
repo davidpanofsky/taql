@@ -7,8 +7,9 @@
   </head>
   <body>
     <h1>TAQL Bookmarklets</h1>
-    <p>TAQL can be enabled/disabled explicitly in TA minisites via the 'GraphQLNextGen' cookie.  The following bookmarklets can be used to set the cookie while visiting hare/lapin. To install the bookmarklets, drag the links to your browser's bookmarks bar. When viewing webml.dev.tripadvisor.com or hare.tripadvisor.com, click the appropriate bookmark(let) to force taql on or off, or to force the default behavior.</p>
-    <ul>
+    <p><strong>TAQL can no longer be disabled by cookie after becoming Direct-To-Mesh. Previously TRTOP handled these cookies and routing appropriately, but TRTOP no longer touches requests to TAQL.</strong></p>
+    <p hidden>TAQL can be enabled/disabled explicitly in TA minisites via the 'GraphQLNextGen' cookie.  The following bookmarklets can be used to set the cookie while visiting hare/lapin. To install the bookmarklets, drag the links to your browser's bookmarks bar. When viewing webml.dev.tripadvisor.com or hare.tripadvisor.com, click the appropriate bookmark(let) to force taql on or off, or to force the default behavior.</p>
+    <ul hidden>
       <li>
         <a href='javascript:(function() { document.cookie = "GraphQLNextGen=true;path=%2F"; location.reload()})()'>TAQL: Enable explicitly</a>        
       </li>
