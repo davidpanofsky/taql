@@ -1,7 +1,7 @@
 import * as yaml from 'js-yaml';
+import { GITOPS_PARAMS, logger } from '@taql/config';
 import { existsSync, lstatSync, readFileSync, writeFileSync } from 'fs';
 import { loadSupergraph, makeSchema } from '@taql/schema';
-import { GITOPS_PARAMS } from '@taql/config';
 import { inspect } from 'util';
 
 // Env vars
@@ -92,6 +92,12 @@ async function updateSchemaDigest(
         })
       );
     }
+  } else if (!patchFilePath) {
+    logger.info('Kustomize patch file not set, skipping');
+  } else {
+    logger.info(
+      `Kustomize patch file ${patchFilePath} does not exist, skipping`
+    );
   }
 
   let valuesChanged = false;
