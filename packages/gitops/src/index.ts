@@ -96,7 +96,7 @@ async function updateSchemaDigest(
     logger.info('Kustomize patch file not set, skipping');
   } else {
     logger.info(
-      `Kustomize patch file ${patchFilePath} does not exist, skipping`
+      `Kustomize patch file ${patchFilePath} does not exist or is not a file, skipping`
     );
   }
 
