@@ -18,10 +18,7 @@ if [[ -z "${GITOPS_AUTH_TOKEN}" ]]; then
     fail "GITOPS_AUTH_TOKEN not set"
 fi
 
-# GITOPS_PATCH_FILE
-if [[ -z "${GITOPS_PATCH_FILE}" ]]; then
-    fail "GITOPS_PATCH_FILE not set"
-fi
+# GITOPS_PATCH_FILE is optional
 
 # GITOPS_VALUES_FILE
 if [[ -z "${GITOPS_VALUES_FILE}" ]]; then
@@ -37,7 +34,12 @@ function gitops::updateSchema() {
         "https://${GITOPS_USER}:${GITOPS_AUTH_TOKEN}@${GITOPS_GIT_HOST}/${GITOPS_REPO_GROUP}/${GITOPS_REPO_NAME}.git" \
         "${clone}" || fail "Failed to clone https://${GITOPS_USER}@${GITOPS_GIT_HOST}/${GITOPS_REPO_GROUP}/${GITOPS_REPO_NAME}.git"
 
-    export GITOPS_PATCH_FILE_PATH="${clone}/${GITOPS_PATCH_FILE}"
+    # GITOPS_PATCH_FILE is optional; if it is set, then set GITOPS_PATCH_FILE_PATH appropriately
+    if [[ -z "${GITOPS_PATCH_FILE}" ]]; then
+        echo "GITOPS_PATCH_FILE not set, no kustomization updates will be made"
+    else
+        export GITOPS_PATCH_FILE_PATH="${clone}/${GITOPS_PATCH_FILE}"
+    fi
     export GITOPS_VALUES_FILE_PATH="${clone}/${GITOPS_VALUES_FILE}"
 
     # checkout the target branch
