@@ -1,12 +1,13 @@
 import * as yaml from 'js-yaml';
+import { GITOPS_PARAMS, logger } from '@taql/config';
+import { existsSync, lstatSync, readFileSync, writeFileSync } from 'fs';
 import { loadSupergraph, makeSchema } from '@taql/schema';
-import { lstatSync, readFileSync, writeFileSync } from 'fs';
-import { GITOPS_PARAMS } from '@taql/config';
 import { inspect } from 'util';
 
 // Env vars
 // = This package =
-// GITOPS_FILE_TO_PATCH
+// GITOPS_VALUES_FILE_PATH
+// GITOPS_PATCH_FILE_PATH
 //
 // = Schema generation =
 // LEGACY_GQL_URL
@@ -51,7 +52,7 @@ function makeDigest(schema: Schema): string {
 }
 
 async function updateSchemaDigest(
-  patchFilePath: string,
+  patchFilePath: string | undefined,
   valuesFilePath: string,
   schemaProvider: () => Promise<Schema | undefined>,
   envVarToInject = 'SCHEMA_DIGEST'
@@ -62,28 +63,40 @@ async function updateSchemaDigest(
   }
   const digest = makeDigest(schema);
 
-  // nodegit doesn't compile on my mac, so we won't use that and will instead just use a standard git installation
-  // Load existing patch
-  const patch = yaml.load(
-    readFileSync(patchFilePath, 'utf-8')
-  ) as Array<PatchItem>;
+  // During migration away from kustomize, allow patch file to not exist
+  if (
+    patchFilePath &&
+    existsSync(patchFilePath) &&
+    lstatSync(patchFilePath).isFile()
+  ) {
+    // Load existing patch
+    const patch = yaml.load(
+      readFileSync(patchFilePath, 'utf-8')
+    ) as Array<PatchItem>;
 
-  let patchChanged = false;
-  // Update digest if necessary
-  patch.forEach((item: PatchItem) => {
-    if (item.value.name == envVarToInject && item.value.value != digest) {
-      item.value.value = digest;
-      patchChanged = true;
+    let patchChanged = false;
+    // Update digest if necessary
+    patch.forEach((item: PatchItem) => {
+      if (item.value.name == envVarToInject && item.value.value != digest) {
+        item.value.value = digest;
+        patchChanged = true;
+      }
+    });
+
+    // Write patch if changes were made
+    if (patchChanged) {
+      writeFileSync(
+        patchFilePath,
+        yaml.dump(patch, {
+          indent: 2,
+        })
+      );
     }
-  });
-
-  // Write patch if changes were made
-  if (patchChanged) {
-    writeFileSync(
-      patchFilePath,
-      yaml.dump(patch, {
-        indent: 2,
-      })
+  } else if (!patchFilePath) {
+    logger.info('Kustomize patch file not set, skipping');
+  } else {
+    logger.info(
+      `Kustomize patch file ${patchFilePath} does not exist or is not a file, skipping`
     );
   }
 
@@ -147,16 +160,8 @@ async function loadSchema(): Promise<Schema> {
 
 function main() {
   if (
-    !GITOPS_PARAMS.patchFilePath ||
-    !lstatSync(GITOPS_PARAMS.patchFilePath).isFile()
-  ) {
-    throw new Error(
-      `Can not write digest to ${GITOPS_PARAMS.patchFilePath}, as it is not a file`
-    );
-  }
-
-  if (
     !GITOPS_PARAMS.valuesFilePath ||
+    !existsSync(GITOPS_PARAMS.valuesFilePath) ||
     !lstatSync(GITOPS_PARAMS.valuesFilePath).isFile()
   ) {
     throw new Error(
