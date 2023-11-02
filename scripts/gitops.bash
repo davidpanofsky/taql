@@ -28,19 +28,21 @@ fi
 UPDATE_COMMAND=("yarn" "workspace" "@taql/gitops" "run" "update")
 
 function gitops::updateSchema() {
-    local clone
+    local clone files
     clone="$(mktemp -d)/deployment-repo"
     git clone \
         "https://${GITOPS_USER}:${GITOPS_AUTH_TOKEN}@${GITOPS_GIT_HOST}/${GITOPS_REPO_GROUP}/${GITOPS_REPO_NAME}.git" \
         "${clone}" || fail "Failed to clone https://${GITOPS_USER}@${GITOPS_GIT_HOST}/${GITOPS_REPO_GROUP}/${GITOPS_REPO_NAME}.git"
 
+    export GITOPS_VALUES_FILE_PATH="${clone}/${GITOPS_VALUES_FILE}"
+    files=( "$GITOPS_VALUES_FILE_PATH" )
     # GITOPS_PATCH_FILE is optional; if it is set, then set GITOPS_PATCH_FILE_PATH appropriately
     if [[ -z "${GITOPS_PATCH_FILE}" ]]; then
         echo "GITOPS_PATCH_FILE not set, no kustomization updates will be made"
     else
         export GITOPS_PATCH_FILE_PATH="${clone}/${GITOPS_PATCH_FILE}"
+        files+=( "$GITOPS_PATCH_FILE_PATH" )
     fi
-    export GITOPS_VALUES_FILE_PATH="${clone}/${GITOPS_VALUES_FILE}"
 
     # checkout the target branch
     echo "Using branch ${GITOPS_REPO_BRANCH} of ${GITOPS_REPO_GROUP}/${GITOPS_REPO_NAME}"
@@ -54,9 +56,9 @@ function gitops::updateSchema() {
     cd "${clone}"
     if ! git diff --exit-code; then
         # Add only the file(s) we expect to have modified
-        git add "${GITOPS_PATCH_FILE}" "${GITOPS_VALUES_FILE}" || fail "Could not add ${GITOPS_PATCH_FILE}, ${GITOPS_VALUES_FILE}"
+        git add ${files[@]} || fail "Could not add ${files[@]}"
         git -c "user.name=${GITOPS_USER}" -c "user.email=${GITOPS_USER}@${GITOPS_GIT_HOST}" \
-            commit -m "$(date): Update schema digest '${GITOPS_PATCH_FILE}', '${GITOPS_VALUES_FILE}'" || fail "Could not commit changes"
+            commit -m "$(date): Update schema digest ${files[@]}" || fail "Could not commit changes"
         if ! git push origin "${GITOPS_REPO_BRANCH}"; then
             # We failed to push, hopefully because of a concurrent commit to a different file.
             # Try to pull and rebase and push again.  If we fail again, kubernetes will give us one more try
