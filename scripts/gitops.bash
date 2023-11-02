@@ -30,18 +30,19 @@ UPDATE_COMMAND=("yarn" "workspace" "@taql/gitops" "run" "update")
 function gitops::updateSchema() {
     local clone files
     clone="$(mktemp -d)/deployment-repo"
+    # GITOPS_VALUES_FILE is required; we should always try to commit changes to it
+    files=( "$GITOPS_VALUES_FILE" )
     git clone \
         "https://${GITOPS_USER}:${GITOPS_AUTH_TOKEN}@${GITOPS_GIT_HOST}/${GITOPS_REPO_GROUP}/${GITOPS_REPO_NAME}.git" \
         "${clone}" || fail "Failed to clone https://${GITOPS_USER}@${GITOPS_GIT_HOST}/${GITOPS_REPO_GROUP}/${GITOPS_REPO_NAME}.git"
 
     export GITOPS_VALUES_FILE_PATH="${clone}/${GITOPS_VALUES_FILE}"
-    files=( "$GITOPS_VALUES_FILE_PATH" )
     # GITOPS_PATCH_FILE is optional; if it is set, then set GITOPS_PATCH_FILE_PATH appropriately
     if [[ -z "${GITOPS_PATCH_FILE}" ]]; then
         echo "GITOPS_PATCH_FILE not set, no kustomization updates will be made"
     else
         export GITOPS_PATCH_FILE_PATH="${clone}/${GITOPS_PATCH_FILE}"
-        files+=( "$GITOPS_PATCH_FILE_PATH" )
+        files+=( "$GITOPS_PATCH_FILE" )
     fi
 
     # checkout the target branch
