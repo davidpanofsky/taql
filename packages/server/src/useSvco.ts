@@ -1,4 +1,5 @@
 import { SERVER_PARAMS, logger } from '@taql/config';
+import { httpAgent, httpsAgent } from '@taql/httpAgent';
 import HttpProxy from 'http-proxy';
 import { ParameterizedContext } from 'koa';
 import { Supergraph } from '@taql/schema';
@@ -59,7 +60,8 @@ export function createSvcoMiddleware(supergraph: Supergraph): TaqlMiddleware {
   const proxy = new HttpProxy();
   const proxyRequest = (target: string, ctx: ParameterizedContext) =>
     new Promise<void>((resolve, reject) => {
-      proxy.web(ctx.req, ctx.res, { target }, (err) => {
+      const agent = ctx.request.protocol === 'https' ? httpsAgent : httpAgent;
+      proxy.web(ctx.req, ctx.res, { target, agent }, (err) => {
         err ? reject(err) : resolve();
       });
     });
