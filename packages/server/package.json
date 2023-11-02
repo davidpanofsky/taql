@@ -25,6 +25,7 @@
     "@taql/context": "workspace:^",
     "@taql/debug": "workspace:^",
     "@taql/headers": "workspace:^",
+    "@taql/httpAgent": "workspace:^",
     "@taql/observability": "workspace:^",
     "@taql/prereg": "workspace:^",
     "@taql/readiness": "workspace:^",
