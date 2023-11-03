@@ -179,8 +179,8 @@ function main() {
     GITOPS_PARAMS.patchFilePath,
     GITOPS_PARAMS.valuesFilePath,
     schemaProvider
-  ).then(function (result) {
-    console.log(`Digest (base64 encoded): ${result}`);
+  ).then(function ({ schemaId, digest }) {
+    console.log(`Digest (base64 encoded) for schema ${schemaId}: ${digest}`);
   });
 }
 

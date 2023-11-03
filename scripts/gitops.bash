@@ -46,7 +46,7 @@ function gitops::updateSchema() {
     fi
 
     # checkout the target branch
-    echo "Using branch ${GITOPS_REPO_BRANCH} of ${GITOPS_REPO_GROUP}/${GITOPS_REPO_NAME}"
+    echo "Using branch ${GITOPS_REPO_BRANCH} of ${GITOPS_GIT_HOST}/${GITOPS_REPO_GROUP}/${GITOPS_REPO_NAME}"
     pushd "${clone}"
     git checkout "${GITOPS_REPO_BRANCH}" || fail "Could not checkout branch ${GITOPS_REPO_BRANCH}"
     popd
