@@ -27,6 +27,7 @@ import process from 'node:process';
 import promClient from 'prom-client';
 import { promises } from 'fs';
 import { useTaqlContext } from '@taql/context';
+import { createComposeMiddleware } from './useCompose';
 
 const serverListening = addClusterReadinessStage('serverListening');
 const workersForked = addPrimaryReadinessStage('allWorkersForked');
@@ -171,6 +172,11 @@ const primaryStartup = async () => {
   );
   // add prom metrics endpoint
   koa.use(useMetricsEndpoint);
+
+  // TODO(jdujic): use different feature flag
+  if (ENABLE_FEATURES.serviceOverrides) {
+    koa.use(createComposeMiddleware());
+  }
 
   const server: Server =
     SSL_CONFIG == undefined ? httpServer() : httpsServer(SSL_CONFIG);
