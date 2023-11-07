@@ -1,9 +1,9 @@
-import { makeClient } from '@gsr/client';
-import { ComposeSubgraphsRequest } from '@gsr/api.endpoints.compose-subgraphs';
+import type { ComposeSubgraphsRequest } from '@gsr/api.endpoints.compose-subgraphs';
 import { IncomingMessage } from 'http';
 import { SCHEMA } from '@taql/config';
 import { TaqlMiddleware } from '@taql/context';
 import { authManager } from '@taql/executors';
+import { makeClient } from '@gsr/client';
 
 function parseBody(req: IncomingMessage) {
   return new Promise<ComposeSubgraphsRequest['body']>((resolve, reject) => {
@@ -15,12 +15,16 @@ function parseBody(req: IncomingMessage) {
       reject(err);
     });
     req.on('end', () => {
-      resolve(JSON.parse(data));
+      try {
+        resolve(JSON.parse(data));
+      } catch (err) {
+        reject(err);
+      }
     });
   });
 }
 
-export function createComposeMiddleware(): TaqlMiddleware {
+export function createComposeEndpoint(): TaqlMiddleware {
   const manager = authManager(SCHEMA.oidcLiteAuthorizationDomain);
   const gsrClient = makeClient(SCHEMA, manager);
 
@@ -39,7 +43,7 @@ export function createComposeMiddleware(): TaqlMiddleware {
             : result.body.compositionError;
       } catch (err) {
         ctx.status = 500;
-        ctx.body = err;
+        ctx.body = err?.toString();
       }
     } else {
       await next();

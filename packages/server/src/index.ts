@@ -19,6 +19,7 @@ import {
 } from '@taql/observability';
 import Koa from 'koa';
 import { SSL_CONFIG } from '@taql/ssl';
+import { createComposeEndpoint } from './useCompose';
 import { createSvcoMiddleware } from './useSvco';
 import { createYogaMiddleware } from './useYoga';
 import { createServer as httpsServer } from 'https';
@@ -27,7 +28,6 @@ import process from 'node:process';
 import promClient from 'prom-client';
 import { promises } from 'fs';
 import { useTaqlContext } from '@taql/context';
-import { createComposeMiddleware } from './useCompose';
 
 const serverListening = addClusterReadinessStage('serverListening');
 const workersForked = addPrimaryReadinessStage('allWorkersForked');
@@ -175,7 +175,7 @@ const primaryStartup = async () => {
 
   // TODO(jdujic): use different feature flag
   if (ENABLE_FEATURES.serviceOverrides) {
-    koa.use(createComposeMiddleware());
+    koa.use(createComposeEndpoint());
   }
 
   const server: Server =
