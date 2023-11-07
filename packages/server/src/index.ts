@@ -173,8 +173,7 @@ const primaryStartup = async () => {
   // add prom metrics endpoint
   koa.use(useMetricsEndpoint);
 
-  // TODO(jdujic): use different feature flag
-  if (ENABLE_FEATURES.serviceOverrides) {
+  if (ENABLE_FEATURES.composeEndpoint) {
     koa.use(createComposeEndpoint());
   }
 
