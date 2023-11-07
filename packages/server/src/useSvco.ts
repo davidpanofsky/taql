@@ -80,7 +80,9 @@ export function createSvcoMiddleware(supergraph: Supergraph): TaqlMiddleware {
         logger.debug(
           `SVCO cookie set, but I'm not the correct worker... forwarding request from worker ${cluster.worker?.id} to worker ${expectedWorkerId}. SVCO: ${svco}`
         );
-        const target = `${ctx.request.protocol}://${ctx.request.hostname}:${
+        // When deployed in a container, we must use the container's lo (loopback) interface to avoid colliding
+        // with other containers that might use the same non-cluster IPs associated with our hostname
+        const target = `${ctx.request.protocol}://127.0.0.1:${
           SERVER_PARAMS.port - expectedWorkerId
         }${ctx.request.url}`;
         await proxyRequest(target, ctx);
