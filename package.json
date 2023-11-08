@@ -49,6 +49,7 @@
     "@graphql-tools/load": "8.0.0",
     "@graphql-tools/stitch": "9.0.3",
     "@graphql-yoga/plugin-prometheus": "2.0.0",
+    "@gsr/client": "2.2.0",
     "@envelop/prometheus@8.0.0": "patch:@envelop/prometheus@8.0.0#./.yarn/patches/@envelop-prometheus-npm-8.0.0-1628bc60e8.patch"
   },
   "dependencies": {
