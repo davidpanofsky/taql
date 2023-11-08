@@ -5,7 +5,7 @@
   "scripts": {
     "build": "tsc",
     "incremental-build": "tsc --build",
-    "start": "node --interpreted-frames-native-stack build/index.js"
+    "start": "node build/index.js"
   },
   "license": "UNLICENSED",
   "devDependencies": {
