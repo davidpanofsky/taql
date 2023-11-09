@@ -19,6 +19,7 @@ import {
 } from '@taql/observability';
 import Koa from 'koa';
 import { SSL_CONFIG } from '@taql/ssl';
+import { createComposeEndpoint } from './useCompose';
 import { createSvcoMiddleware } from './useSvco';
 import { createYogaMiddleware } from './useYoga';
 import { createServer as httpsServer } from 'https';
@@ -171,6 +172,10 @@ const primaryStartup = async () => {
   );
   // add prom metrics endpoint
   koa.use(useMetricsEndpoint);
+
+  if (ENABLE_FEATURES.composeEndpoint) {
+    koa.use(createComposeEndpoint());
+  }
 
   const server: Server =
     SSL_CONFIG == undefined ? httpServer() : httpsServer(SSL_CONFIG);

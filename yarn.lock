@@ -1657,7 +1657,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@gsr/api.endpoints.compose-subgraphs@npm:3.0.0":
+"@gsr/api.endpoints.compose-subgraphs@npm:*, @gsr/api.endpoints.compose-subgraphs@npm:3.0.0":
   version: 3.0.0
   resolution: "@gsr/api.endpoints.compose-subgraphs@npm:3.0.0::__archiveUrl=https%3A%2F%2Fgitlab.dev.tripadvisor.com%2Fapi%2Fv4%2Fprojects%2F15885%2Fpackages%2Fnpm%2F%40gsr%2Fapi.endpoints.compose-subgraphs%2F-%2F%40gsr%2Fapi.endpoints.compose-subgraphs-3.0.0.tgz"
   dependencies:
@@ -1729,7 +1729,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@gsr/client@npm:^2.2.0":
+"@gsr/client@npm:2.2.0":
   version: 2.2.0
   resolution: "@gsr/client@npm:2.2.0::__archiveUrl=https%3A%2F%2Fgitlab.dev.tripadvisor.com%2Fapi%2Fv4%2Fprojects%2F15885%2Fpackages%2Fnpm%2F%40gsr%2Fclient%2F-%2F%40gsr%2Fclient-2.2.0.tgz"
   dependencies:
@@ -3279,7 +3279,7 @@ __metadata:
     "@graphql-tools/delegate": "*"
     "@graphql-tools/load": "*"
     "@graphql-tools/utils": "*"
-    "@gsr/client": ^2.2.0
+    "@gsr/client": "*"
     "@ta-graphql-utils/auth-manager": ^2.1.1
     "@ta-graphql-utils/stitch": "*"
     "@taql/batching": "workspace:^"
@@ -3314,11 +3314,14 @@ __metadata:
     "@graphql-tools/utils": "*"
     "@graphql-yoga/plugin-apq": ^2.0.0
     "@graphql-yoga/plugin-disable-introspection": ^1.0.0
+    "@gsr/api.endpoints.compose-subgraphs": "*"
+    "@gsr/client": "*"
     "@ta-graphql-utils/stitch": "*"
     "@taql/caching": "workspace:^"
     "@taql/config": "workspace:^"
     "@taql/context": "workspace:^"
     "@taql/debug": "workspace:^"
+    "@taql/executors": "workspace:^"
     "@taql/headers": "workspace:^"
     "@taql/httpAgent": "workspace:^"
     "@taql/observability": "workspace:^"
