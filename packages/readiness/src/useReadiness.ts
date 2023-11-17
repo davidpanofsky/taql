@@ -10,6 +10,16 @@ export const useClusterReadiness = (params: {
 }) => {
   const { path, readiness, readyBody, unreadyBody } = params;
 
+  let shuttingDown = false;
+  // Listen on signals to stop and fail the readiness check
+  // so that we stop sending traffic to a pod that's shutting down
+  ['SIGINT', 'SIGTERM'].forEach((signal) => {
+    process.on(signal, () => {
+      logger.debug(`Received ${signal} - will start failing readiness checks`);
+      shuttingDown = true;
+    });
+  });
+
   logger.info(`useClusterReadiness: handling ${path}`);
 
   function unready(ctx: ParameterizedContext) {
@@ -27,7 +37,7 @@ export const useClusterReadiness = (params: {
   return async (ctx: ParameterizedContext, next: () => Promise<unknown>) => {
     if (ctx.request.method === 'GET' && ctx.request.path === path) {
       try {
-        if (await readiness.isReady()) {
+        if (!shuttingDown && (await readiness.isReady())) {
           ready(ctx);
         } else {
           unready(ctx);
