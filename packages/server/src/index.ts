@@ -44,6 +44,13 @@ let shuttingDown = false;
 const workerStartup = async () => {
   const koa = new Koa();
 
+  ['SIGINT', 'SIGTERM'].forEach((signal) =>
+    process.on(signal, () => {
+      // intercept kill signal and do nothing
+      // this ensures worker waits for primary to shut it down
+    })
+  );
+
   koa.on('error', function errorHandler(error) {
     unhandledErrors.inc({
       code: error?.code || 'Unknown',
