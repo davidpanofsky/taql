@@ -79,7 +79,11 @@ const workerStartup = async () => {
 
   server.addListener('request', koa.callback());
 
-  server.keepAliveTimeout = SERVER_PARAMS.keepAliveTimeout;
+  // Sends `Connection: close` if keepAliveTimeout is 0 instead of setting the HTTP timeout to 0.
+  SERVER_PARAMS.keepAliveTimeout == 0
+    ? (server.maxRequestsPerSocket = 1)
+    : (server.keepAliveTimeout = SERVER_PARAMS.keepAliveTimeout);
+
   server.listen(SERVER_PARAMS.port, () => {
     serverListening.ready();
     logger.info(`server listening on port ${SERVER_PARAMS.port}`);
