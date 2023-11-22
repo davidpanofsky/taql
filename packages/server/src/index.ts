@@ -79,6 +79,7 @@ const workerStartup = async () => {
 
   server.addListener('request', koa.callback());
 
+  server.keepAliveTimeout = SERVER_PARAMS.keepAliveTimeout;
   server.listen(SERVER_PARAMS.port, () => {
     serverListening.ready();
     logger.info(`server listening on port ${SERVER_PARAMS.port}`);
@@ -92,8 +93,6 @@ const workerStartup = async () => {
     });
   }
 
-  // a long http keepalive timeout should help keep SVCO on same worker.
-  //server.keepAliveTimeout = 60_000;
   process.on('message', async (message: unknown) => {
     if (message === shutdownMessage) {
       // clean up the server
