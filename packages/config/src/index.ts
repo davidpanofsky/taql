@@ -319,6 +319,11 @@ export const SERVER_PARAMS = resolve({
     resolver: resolvers.nonNegativeInteger,
     defaultTo: 3000,
   },
+  keepAliveTimeout: {
+    property: 'SERVER_KEEP_ALIVE_TIMEOUT',
+    resolver: resolvers.nonNegativeInteger,
+    defaultTo: 5000,
+  },
 });
 
 export const ENABLE_FEATURES = resolve({
