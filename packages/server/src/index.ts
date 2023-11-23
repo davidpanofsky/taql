@@ -175,6 +175,7 @@ const primaryStartup = async () => {
   koa.use(
     useClusterReadiness({
       path: '/NotImplemented',
+      preStopPath: '/PreStop',
       readyBody: '<NotImplemented/>\n',
       unreadyBody: '<NotReady/>\n',
       readiness: CLUSTER_READINESS,

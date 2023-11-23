@@ -4,21 +4,14 @@ import { logger } from '@taql/config';
 
 export const useClusterReadiness = (params: {
   path: string;
+  preStopPath: string;
   readiness: ClusterReadiness;
   readyBody: string;
   unreadyBody?: string;
 }) => {
-  const { path, readiness, readyBody, unreadyBody } = params;
+  const { path, preStopPath, readiness, readyBody, unreadyBody } = params;
 
   let shuttingDown = false;
-  // Listen on signals to stop and fail the readiness check
-  // so that we stop sending traffic to a pod that's shutting down
-  ['SIGINT', 'SIGTERM'].forEach((signal) => {
-    process.on(signal, () => {
-      logger.debug(`Received ${signal} - will start failing readiness checks`);
-      shuttingDown = true;
-    });
-  });
 
   logger.info(`useClusterReadiness: handling ${path}`);
 
@@ -38,15 +31,21 @@ export const useClusterReadiness = (params: {
     if (ctx.request.method === 'GET' && ctx.request.path === path) {
       try {
         if (!shuttingDown && (await readiness.isReady())) {
-          logger.info(`useClusterReadiness: ready`);
+          logger.debug('useClusterReadiness: ready');
           ready(ctx);
         } else {
-          logger.info(`useClusterReadiness: unready`);
+          logger.debug('useClusterReadiness: unready');
           unready(ctx);
         }
       } catch (err) {
         unready(ctx);
       }
+    } else if (ctx.request.method === 'GET' && ctx.request.path === preStopPath) {
+      logger.info('useClusterReadiness: preStop hook called');
+      shuttingDown = true;
+      await new Promise((resolve) => setTimeout(resolve, 20000)); // hardcode to 20s - will make it configurable later
+      ctx.body = '';
+      ctx.status = 200;
     } else {
       await next();
     }
