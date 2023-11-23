@@ -38,8 +38,10 @@ export const useClusterReadiness = (params: {
     if (ctx.request.method === 'GET' && ctx.request.path === path) {
       try {
         if (!shuttingDown && (await readiness.isReady())) {
+          logger.info(`useClusterReadiness: ready`);
           ready(ctx);
         } else {
+          logger.info(`useClusterReadiness: unready`);
           unready(ctx);
         }
       } catch (err) {
