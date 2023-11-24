@@ -41,6 +41,22 @@ const unhandledErrors = new promClient.Counter({
 const shutdownMessage = 'taql:shutdown';
 let shuttingDown = false;
 
+const gracefulShutdown = async (server: Server) => {
+  if (!server.listening) {
+    // If the server is already closed, do not try to do it twice
+    return;
+  }
+  try {
+    // Wait for in flight requests to finish
+    await new Promise<void>((resolve, reject) => {
+      // Stop accepting connections and terminate any idle connections. Connections still writing/reading will continue to exist
+      server.close((err) => (err ? reject(err) : resolve()));
+    });
+  } catch (err) {
+    logger.error(err);
+  }
+};
+
 const workerStartup = async () => {
   const koa = new Koa();
 
@@ -99,66 +115,51 @@ const workerStartup = async () => {
 
   process.on('message', async (message: unknown) => {
     if (message === shutdownMessage) {
+      logger.debug('Worker received shutdown message');
       // clean up the server
-      server.close(() => {
-        cluster.worker?.disconnect();
-      });
+      await gracefulShutdown(server);
+      cluster.worker?.disconnect();
     }
   });
 
   cluster.worker?.on('disconnect', async () => {
-    // Stop accepting connections and terminate any idle connections. Connections still writing/reading will continue to exist
     // During shutdown this will already have been called, but it's idempotent.
-    server.close();
-    // Wait for in flight requests to finish
-    await new Promise((resolve) =>
-      setTimeout(resolve, SERVER_PARAMS.workerDrainMs)
-    );
+    await gracefulShutdown(server);
     server.removeAllListeners();
-    server.closeAllConnections();
+    server.closeAllConnections?.();
+    logger.info('Gracefully shutting down the worker');
+    cluster.worker?.kill();
   });
 };
 
 const primaryStartup = async () => {
   const { port } = SERVER_PARAMS;
 
+  // Try to gracefully shutdown the server and handle all the connections that may still be active
+  // In case we aren't able to do so in the specified termination grace period, k8s will forcibly kill the process
   ['SIGINT', 'SIGTERM'].forEach((signal) =>
     process.on(signal, async (signal) => {
       shuttingDown = true;
-      logger.info(
-        `Primary received ${signal}, initiating shutdown after ${SERVER_PARAMS.primaryDrainDelayMs}ms`
+
+      logger.debug(`Primary received ${signal} - initiating shutdown`);
+
+      if (!cluster.workers) {
+        process.exit(128 + signal);
+      }
+
+      const workers = Object.values(cluster.workers);
+
+      await Promise.all(
+        workers.map(async (worker) => {
+          if (!worker) {
+            return;
+          }
+          worker.send(shutdownMessage);
+          await new Promise((resolve) => worker.on('exit', resolve));
+        })
       );
 
-      // By the time that we have been given a signal to stop, we will have been removed from the endpoints list.
-      // Before we stop, give callers time to have that change to DNS propagate
-      await new Promise((resolve) =>
-        setTimeout(resolve, SERVER_PARAMS.primaryDrainDelayMs)
-      );
-
-      let workersDraining = 0;
-      for (const workerId in cluster.workers) {
-        if (cluster.workers[workerId]?.isConnected()) {
-          // Initiate shutdown
-          cluster.workers[workerId]?.send(shutdownMessage);
-          workersDraining++;
-        }
-      }
-      // Give workers a chance to clean up before terminating them
-      if (workersDraining > 0) {
-        logger.info(`Draining ${workersDraining} workers`);
-        await new Promise((resolve) =>
-          setTimeout(resolve, SERVER_PARAMS.primaryDrainMs)
-        );
-        logger.info(
-          `exiting after drain window (${SERVER_PARAMS.primaryDrainMs}ms)`
-        );
-      } else {
-        logger.info('No workers to drain. Exiting');
-      }
-
-      for (const workerId in cluster.workers) {
-        cluster.workers[workerId]?.kill(signal);
-      }
+      logger.info('Gracefully shutting down the primary');
       process.exit(128 + signal);
     })
   );
@@ -175,7 +176,6 @@ const primaryStartup = async () => {
   koa.use(
     useClusterReadiness({
       path: '/NotImplemented',
-      preStopPath: '/PreStop',
       readyBody: '<NotImplemented/>\n',
       unreadyBody: '<NotReady/>\n',
       readiness: CLUSTER_READINESS,
@@ -253,7 +253,6 @@ const primaryStartup = async () => {
 
   cluster.on('exit', (worker, code, signal) => {
     if (worker.exitedAfterDisconnect === true) {
-      logger.info('worker shutdown gracefully', { pid: worker.process.pid });
       workersExited.inc({ kind: 'graceful', version: appMeta.version });
     } else if (!shuttingDown) {
       if (signal) {

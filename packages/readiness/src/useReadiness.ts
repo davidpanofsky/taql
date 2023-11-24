@@ -4,16 +4,13 @@ import { logger } from '@taql/config';
 
 export const useClusterReadiness = (params: {
   path: string;
-  preStopPath: string;
   readiness: ClusterReadiness;
   readyBody: string;
   unreadyBody?: string;
 }) => {
-  const { path, preStopPath, readiness, readyBody, unreadyBody } = params;
+  const { path, readiness, readyBody, unreadyBody } = params;
 
-  let shuttingDown = false;
-
-  logger.info(`useClusterReadiness: handling ${path}`);
+  logger.debug(`useClusterReadiness: handling ${path}`);
 
   function unready(ctx: ParameterizedContext) {
     ctx.status = 500;
@@ -30,22 +27,14 @@ export const useClusterReadiness = (params: {
   return async (ctx: ParameterizedContext, next: () => Promise<unknown>) => {
     if (ctx.request.method === 'GET' && ctx.request.path === path) {
       try {
-        if (!shuttingDown && (await readiness.isReady())) {
-          logger.debug('useClusterReadiness: ready');
+        if (await readiness.isReady()) {
           ready(ctx);
         } else {
-          logger.debug('useClusterReadiness: unready');
           unready(ctx);
         }
       } catch (err) {
         unready(ctx);
       }
-    } else if (ctx.request.method === 'GET' && ctx.request.path === preStopPath) {
-      logger.info('useClusterReadiness: preStop hook called');
-      shuttingDown = true;
-      await new Promise((resolve) => setTimeout(resolve, 20000)); // hardcode to 20s - will make it configurable later
-      ctx.body = '';
-      ctx.status = 200;
     } else {
       await next();
     }
