@@ -154,8 +154,11 @@ const primaryStartup = async () => {
           if (!worker) {
             return;
           }
+          const workerShutdownPromise = new Promise((resolve) =>
+            worker.on('exit', resolve)
+          );
           worker.send(shutdownMessage);
-          await new Promise((resolve) => worker.on('exit', resolve));
+          await workerShutdownPromise;
         })
       );
 
