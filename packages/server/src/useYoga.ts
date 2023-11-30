@@ -92,19 +92,21 @@ export const makePlugins = async (
 
   const securityPlugin = useTaqlSecurity();
 
+  const openTelemetryPlugin = useOpenTelemetry(
+    {
+      variables: true, // Includes the operation variables values as part of the metadata collected
+      // The following are disabled due to their negative performance impact
+      resolvers: false, // Tracks resolvers calls, and tracks resolvers thrown errors
+      result: false, // Includes execution result object as part of the metadata collected
+    },
+    tracerProvider
+  );
+
   const yogaPlugins = [
     ...((securityPlugin && [securityPlugin]) || []),
     useErrorLogging,
     mutatedFieldsExtensionPlugin,
-    useOpenTelemetry(
-      {
-        variables: true, // Includes the operation variables values as part of the metadata collected
-        // The following are disabled due to their negative performance impact
-        resolvers: false, // Tracks resolvers calls, and tracks resolvers thrown errors
-        result: false, // Includes execution result object as part of the metadata collected
-      },
-      tracerProvider
-    ),
+    ...(ENABLE_FEATURES.lifecycleSpans ? [openTelemetryPlugin] : []),
     ...(ENABLE_FEATURES.debugExtensions
       ? [serverHostExtensionPlugin, subschemaExtensionsPlugin]
       : []),

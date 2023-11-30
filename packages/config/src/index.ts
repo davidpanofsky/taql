@@ -362,6 +362,11 @@ export const ENABLE_FEATURES = resolve({
     resolver: resolvers.booleanFromString,
     defaultTo: process.env.NODE_ENV === 'production' ? false : true,
   },
+  lifecycleSpans: {
+    property: 'ENABLE_LIFECYCLE_SPANS',
+    resolver: resolvers.booleanFromString,
+    defaultTo: !(process.env.NODE_ENV === 'production'),
+  },
 });
 
 export const PREREGISTERED_QUERY_PARAMS = resolve({
