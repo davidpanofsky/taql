@@ -1,5 +1,6 @@
 import {
   AUTH_MANAGER_CONFIG,
+  ENABLE_FEATURES,
   EXECUTION_TIMEOUT_PARAMS,
   UPSTREAM_TIMEOUT_PARAMS,
   logger,
@@ -53,21 +54,20 @@ const EXECUTOR_PRINT_DURATION_HISTOGRAM = new promClient.Histogram({
 function instrumentedPrint(ast: DocumentNode): string {
   const operationAST = getOperationAST(ast);
   const operationName = operationAST?.name?.value;
-  const printSpan = tracer.startSpan(
-    `print - ${operationName || 'Anonymous Operation'}`,
-    {
-      kind: SpanKind.SERVER,
-      attributes: {
-        [PRINT_OPERATION_NAME]: operationName,
-      },
-    }
-  );
+  const printSpan = ENABLE_FEATURES.printSpans
+    ? tracer.startSpan(`print - ${operationName || 'Anonymous Operation'}`, {
+        kind: SpanKind.SERVER,
+        attributes: {
+          [PRINT_OPERATION_NAME]: operationName,
+        },
+      })
+    : undefined;
   const stopTimer = EXECUTOR_PRINT_DURATION_HISTOGRAM.startTimer({
     worker,
   });
   const result = memoizedPrint(ast);
   stopTimer();
-  printSpan.end();
+  printSpan?.end();
   return result;
 }
 

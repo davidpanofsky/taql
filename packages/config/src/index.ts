@@ -362,6 +362,11 @@ export const ENABLE_FEATURES = resolve({
     resolver: resolvers.booleanFromString,
     defaultTo: false,
   },
+  printSpans: {
+    property: 'ENABLE_PRINT_SPANS',
+    resolver: resolvers.booleanFromString,
+    defaultTo: false,
+  },
 });
 
 export const PREREGISTERED_QUERY_PARAMS = resolve({
