@@ -357,6 +357,11 @@ export const ENABLE_FEATURES = resolve({
     resolver: resolvers.booleanFromString,
     defaultTo: !(process.env.NODE_ENV === 'production'),
   },
+  cacheSpans: {
+    property: 'ENABLE_CACHE_SPANS',
+    resolver: resolvers.booleanFromString,
+    defaultTo: false,
+  },
 });
 
 export const PREREGISTERED_QUERY_PARAMS = resolve({
