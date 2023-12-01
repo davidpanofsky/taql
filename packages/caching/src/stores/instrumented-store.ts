@@ -212,12 +212,11 @@ export function instrumentedStore<T, S extends Store<T>>({
       promiseOrResult = getPromiseOrResult();
     } catch (err) {
       stopTimer({ status: 'error' });
-      cacheSpan &&
-        cacheSpan.recordException({
-          name: AttributeName.CACHE_ERROR,
-          message: JSON.stringify(err),
-        });
-      cacheSpan && cacheSpan.end();
+      cacheSpan?.recordException({
+        name: AttributeName.CACHE_ERROR,
+        message: JSON.stringify(err),
+      });
+      cacheSpan?.end();
       if (emptyOnError) {
         return undefined;
       } else {
@@ -230,26 +229,24 @@ export function instrumentedStore<T, S extends Store<T>>({
         .then((result) => {
           const status = getStatus?.(result) || 'success';
           stopTimer({ status });
-          cacheSpan &&
-            cacheSpan.setAttribute(AttributeName.CACHE_STATUS, status);
-          cacheSpan && cacheSpan.end();
+          cacheSpan?.setAttribute(AttributeName.CACHE_STATUS, status);
+          cacheSpan?.end();
           return result;
         })
         .catch((err) => {
           stopTimer({ status: 'error' });
-          cacheSpan &&
-            cacheSpan.recordException({
-              name: AttributeName.CACHE_ERROR,
-              message: JSON.stringify(err),
-            });
-          cacheSpan && cacheSpan.end();
+          cacheSpan?.recordException({
+            name: AttributeName.CACHE_ERROR,
+            message: JSON.stringify(err),
+          });
+          cacheSpan?.end();
           return emptyOnError ? undefined : Promise.reject(err);
         });
     } else {
       const status = getStatus?.(promiseOrResult) || 'success';
       stopTimer({ status });
-      cacheSpan && cacheSpan.setAttribute(AttributeName.CACHE_STATUS, status);
-      cacheSpan && cacheSpan.end();
+      cacheSpan?.setAttribute(AttributeName.CACHE_STATUS, status);
+      cacheSpan?.end();
       return promiseOrResult;
     }
   };
