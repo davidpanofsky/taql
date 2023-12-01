@@ -1,9 +1,9 @@
+import { ENABLE_FEATURES, logger } from '@taql/config';
 import { type MemoryStore, isMemoryStore } from './memory-store';
 import { type RedisStore, isRedisStore } from './redis-store';
 import promClient, { Gauge } from 'prom-client';
 import { SpanKind } from '@opentelemetry/api';
 import type { Store } from 'cache-manager';
-import { logger } from '@taql/config';
 import { tracerProvider } from '@taql/observability';
 import { WORKER as worker } from '@taql/config';
 
@@ -189,14 +189,16 @@ export function instrumentedStore<T, S extends Store<T>>({
     getPromiseOrResult: () => T | Promise<T>,
     getStatus?: (result: T) => string
   ) => {
-    const cacheSpan = tracer.startSpan(`cache.${operation}`, {
-      kind: SpanKind.SERVER,
-      attributes: {
-        [AttributeName.CACHE_OPERATION]: operation,
-        [AttributeName.CACHE_NAME]: name,
-        [AttributeName.CACHE_TYPE]: type,
-      },
-    });
+    const cacheSpan = ENABLE_FEATURES.cacheSpans
+      ? tracer.startSpan(`cache.${operation}`, {
+          kind: SpanKind.SERVER,
+          attributes: {
+            [AttributeName.CACHE_OPERATION]: operation,
+            [AttributeName.CACHE_NAME]: name,
+            [AttributeName.CACHE_TYPE]: type,
+          },
+        })
+      : undefined;
 
     const stopTimer = OPERATION_DURATION_HISTOGRAM.startTimer({
       name,
@@ -210,11 +212,12 @@ export function instrumentedStore<T, S extends Store<T>>({
       promiseOrResult = getPromiseOrResult();
     } catch (err) {
       stopTimer({ status: 'error' });
-      cacheSpan.recordException({
-        name: AttributeName.CACHE_ERROR,
-        message: JSON.stringify(err),
-      });
-      cacheSpan.end();
+      cacheSpan &&
+        cacheSpan.recordException({
+          name: AttributeName.CACHE_ERROR,
+          message: JSON.stringify(err),
+        });
+      cacheSpan && cacheSpan.end();
       if (emptyOnError) {
         return undefined;
       } else {
@@ -227,24 +230,26 @@ export function instrumentedStore<T, S extends Store<T>>({
         .then((result) => {
           const status = getStatus?.(result) || 'success';
           stopTimer({ status });
-          cacheSpan.setAttribute(AttributeName.CACHE_STATUS, status);
-          cacheSpan.end();
+          cacheSpan &&
+            cacheSpan.setAttribute(AttributeName.CACHE_STATUS, status);
+          cacheSpan && cacheSpan.end();
           return result;
         })
         .catch((err) => {
           stopTimer({ status: 'error' });
-          cacheSpan.recordException({
-            name: AttributeName.CACHE_ERROR,
-            message: JSON.stringify(err),
-          });
-          cacheSpan.end();
+          cacheSpan &&
+            cacheSpan.recordException({
+              name: AttributeName.CACHE_ERROR,
+              message: JSON.stringify(err),
+            });
+          cacheSpan && cacheSpan.end();
           return emptyOnError ? undefined : Promise.reject(err);
         });
     } else {
       const status = getStatus?.(promiseOrResult) || 'success';
       stopTimer({ status });
-      cacheSpan.setAttribute(AttributeName.CACHE_STATUS, status);
-      cacheSpan.end();
+      cacheSpan && cacheSpan.setAttribute(AttributeName.CACHE_STATUS, status);
+      cacheSpan && cacheSpan.end();
       return promiseOrResult;
     }
   };
