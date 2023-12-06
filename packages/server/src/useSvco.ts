@@ -80,7 +80,10 @@ export function createSvcoMiddleware(supergraph: Supergraph): TaqlMiddleware {
         logger.debug(
           `SVCO cookie set, but I'm not the correct worker... forwarding request from worker ${cluster.worker?.id} to worker ${expectedWorkerId}. SVCO: ${svco}`
         );
-        const target = `${ctx.request.protocol}://${ctx.request.hostname}:${
+        // Keeping in mind kubernetes or other containerized deployments where our IP could be shared, use lo (loopback) interface
+        // to avoid colliding with other containers using the same IP.  In such circumstances we do not enumerate the worker ports for external
+        // use, so the cluster scheduler has no reason not to allocate those ports to other tenants.
+        const target = `${ctx.request.protocol}://127.0.0.1:${
           SERVER_PARAMS.port - expectedWorkerId
         }${ctx.request.url}`;
         await proxyRequest(target, ctx);
