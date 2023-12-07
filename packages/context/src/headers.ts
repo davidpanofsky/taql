@@ -15,6 +15,7 @@ export enum ForwardHeader {
   'x-service-overrides',
   'x-txip',
   'authorization',
+  'x-trip-iat',
 
   // testing & debug headers
   'lt',
@@ -22,14 +23,6 @@ export enum ForwardHeader {
   'x-loadtest',
   'x-swedwig-feed-viewer',
   'x-tripadvisor-graphql-debug',
-
-  // tracing headers
-  //'x-b3-traceid',
-  //'x-b3-spanid',
-  //'x-b3-parentspanid',
-  //'x-b3-flags',
-  //'x-b3-sampled',
-  //'b3',
 }
 export type ForwardHeaderName = keyof typeof ForwardHeader;
 export type ForwardableHeaders = { [K in ForwardHeaderName]?: string[] };

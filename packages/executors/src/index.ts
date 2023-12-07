@@ -233,8 +233,14 @@ const load = async <T, R>({
   );
 
   const token = (await subgraph.authProvider?.getAuth())?.accessToken;
-  // Currently following the assumption that subgraphs in AWS will use the 'Authorization' header.
-  token != undefined && headers.set('authorization', `Bearer ${token}`);
+  token != undefined && headers.set('x-oidc-authorization', `Bearer ${token}`);
+
+  //copy authorization header to x-trip-iat if not already set
+  if (!headers.has('x-trip-iat')) {
+    const authorization = headers.get('authorization');
+    authorization != undefined && headers.set('x-trip-iat', authorization);
+  }
+
   headers.set('x-timeout', `${paddedTimeout}`);
   headers.set('content-type', 'application/json');
   logger.debug(`Fetching from remote: ${subgraph.url}`);
