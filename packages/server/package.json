@@ -9,7 +9,7 @@
   },
   "license": "UNLICENSED",
   "devDependencies": {
-    "@gsr/api.endpoints.compose-subgraphs": "*",
+    "@gsr/api.endpoints.compose-subgraphs": "3.2.0",
     "@ta-graphql-utils/stitch": "*",
     "@types/koa": "^2.13.6",
     "fetch-mock-jest": "^1.5.1",
