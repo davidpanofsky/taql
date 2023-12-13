@@ -186,10 +186,7 @@ const primaryStartup = async () => {
   );
   // add prom metrics endpoint
   koa.use(useMetricsEndpoint);
-
-  if (ENABLE_FEATURES.composeEndpoint) {
-    koa.use(createComposeEndpoint());
-  }
+  koa.use(createComposeEndpoint());
 
   const server: Server =
     SSL_CONFIG == undefined ? httpServer() : httpsServer(SSL_CONFIG);
