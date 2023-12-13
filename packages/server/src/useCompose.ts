@@ -1,6 +1,6 @@
+import { SCHEMA, logger } from '@taql/config';
 import type { ComposeSubgraphsRequest } from '@gsr/api.endpoints.compose-subgraphs';
 import { IncomingMessage } from 'http';
-import { SCHEMA } from '@taql/config';
 import { TaqlMiddleware } from '@taql/context';
 import { authManager } from '@taql/executors';
 import { makeClient } from '@gsr/client';
@@ -37,11 +37,9 @@ export function createComposeEndpoint(): TaqlMiddleware {
           query: { environment: SCHEMA.environment },
         });
         ctx.status = parseInt(result.statusCode);
-        ctx.body =
-          result.statusCode === '200'
-            ? result.body.supergraph
-            : result.body.compositionError;
+        ctx.body = JSON.stringify(result.body);
       } catch (err) {
+        logger.error(err);
         ctx.status = 500;
         ctx.body = err?.toString();
       }
