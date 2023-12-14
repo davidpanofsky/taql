@@ -37,7 +37,7 @@ export function createGSRProxy(): TaqlMiddleware {
       const result = await gsrPromise;
       ctx.status = parseInt(result.statusCode);
       if ('body' in result) {
-        ctx.body = JSON.stringify(result.body);
+        ctx.body = result.body;
       }
     } catch (err) {
       logger.error(err);
