@@ -155,7 +155,7 @@ const makeSchemaProvider = (
   const schemaForSVCOCache = instrumentedStore({
     name: 'svco_schemas',
     store: memoryStore<GraphQLSchema>({
-      max: 16,
+      max: 10,
       ttl: SERVER_PARAMS.svcoSchemaTtl,
       async fetchMethod(legacySVCO): Promise<GraphQLSchema> {
         logger.debug(`Fetching and building schema for SVCO: ${legacySVCO}`);
