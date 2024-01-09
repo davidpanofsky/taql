@@ -347,6 +347,11 @@ export const ENABLE_FEATURES = resolve({
     resolver: resolvers.booleanFromString,
     defaultTo: process.env.NODE_ENV === 'production' ? false : true,
   },
+  composeEndpoint: {
+    property: 'ENABLE_COMPOSE_ENDPOINT',
+    resolver: resolvers.booleanFromString,
+    defaultTo: process.env.NODE_ENV === 'production' ? false : true,
+  },
   lifecycleSpans: {
     property: 'ENABLE_LIFECYCLE_SPANS',
     resolver: resolvers.booleanFromString,
