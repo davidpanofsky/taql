@@ -114,6 +114,13 @@ if (process.env.NODE_ENV !== 'test') {
   console.error = (...args) => logger.error(consoleFormat(...args));
 }
 
+export const DEFAULT = resolve({
+  redisCluster: {
+    property: 'DEFAULT_REDIS_CLUSTER',
+    defaultTo: 'redis.taql-query-cache.svc.kub.n.tripadvisor.com',
+  },
+});
+
 export const SCHEMA = resolve({
   source: {
     property: 'SCHEMA_SOURCE',
@@ -189,6 +196,15 @@ export const SCHEMA = resolve({
   oidcLiteAuthorizationDomain: {
     property: 'GSR_OIDC_DOMAIN',
     defaultTo: 'domains-platform-dev.tamg.cloud',
+  },
+  trySchemaFromCache: {
+    property: 'SCHEMA_TRY_FROM_CACHE_ON_FAILURE',
+    resolver: resolvers.booleanFromString,
+    defaultTo: true,
+  },
+  schemaCacheKey: {
+    property: 'SCHEMA_CACHE_KEY',
+    defaultTo: 'SCHEMA_CACHE',
   },
 });
 

@@ -3290,6 +3290,7 @@ __metadata:
     "@taql/httpAgent": "workspace:^"
     "@types/node-fetch": ^2.6.3
     graphql: "*"
+    ioredis: ^5.3.2
     node-fetch: ^2.6.11
     typescript: ^5.0.4
   languageName: unknown

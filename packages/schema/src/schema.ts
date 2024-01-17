@@ -6,7 +6,7 @@ import {
   normalizeSdl,
   stitch,
 } from '@ta-graphql-utils/stitch';
-import { ENABLE_FEATURES, SCHEMA, logger } from '@taql/config';
+import { DEFAULT, ENABLE_FEATURES, SCHEMA, logger } from '@taql/config';
 import { GraphQLError, GraphQLSchema } from 'graphql';
 import {
   SubgraphConfig,
@@ -16,6 +16,7 @@ import {
 } from '@taql/executors';
 import { getLegacySubgraph, legacyTransforms } from './legacy';
 import type { Executor } from '@graphql-tools/utils';
+import { Redis } from 'ioredis';
 import { createExecutor as batchingExecutorFactory } from '@taql/batching';
 import { inspect } from 'util';
 import { loadSchema } from '@graphql-tools/load';
@@ -108,10 +109,21 @@ export const loadSupergraph = async (): Promise<Supergraph> => {
     return JSON.parse(await promises.readFile(SCHEMA.schemaFile, 'utf-8'));
   }
 
+  const redisClient =
+    SCHEMA.trySchemaFromCache && DEFAULT.redisCluster
+      ? new Redis.Cluster([
+          {
+            host: DEFAULT.redisCluster,
+            port: 6379,
+          },
+        ])
+      : undefined;
+
   let id = 'unknown';
   let manifest: Subgraph[] = [];
   let sdl = '';
   let legacyDigest: string | undefined = undefined;
+  let fromCache = false;
 
   try {
     logger.info('loading supergraph from GSR');
@@ -120,7 +132,7 @@ export const loadSupergraph = async (): Promise<Supergraph> => {
     sdl = supergraph.supergraph;
     manifest = [...supergraph.manifest];
   } catch (err) {
-    if (SCHEMA.legacySchemaSource == 'gsr') {
+    if (SCHEMA.legacySchemaSource == 'gsr' || !redisClient) {
       // we have no schema. DO not proceed.
       throw err;
     }
@@ -128,7 +140,31 @@ export const loadSupergraph = async (): Promise<Supergraph> => {
     // This is a safety valve to allow us to 'test' GSR contact
     // by trying to load from GSR but falling back to querying legacy graphql.
     // That possibility will not remain long; remove this.
-    logger.error(`unable to load schema from GSR: ${err}`);
+    logger.error(
+      `unable to load schema from GSR: ${err}, trying to load from redis...`
+    );
+    try {
+      const raw = await redisClient.get(SCHEMA.schemaCacheKey);
+      if (raw == null) {
+        console.warn('No cached subgraph manifest found in redis');
+        throw err;
+      }
+      manifest = JSON.parse(raw);
+      fromCache = true;
+    } catch (redisErr) {
+      console.error(`unable to load cached schema from redis: ${redisErr}`);
+      // Throw the original error from the GSR
+      throw err;
+    }
+  }
+
+  if (!fromCache && redisClient) {
+    try {
+      logger.info('Caching subgraph manifests in redis');
+      redisClient.set(SCHEMA.schemaCacheKey, JSON.stringify(manifest));
+    } catch (err) {
+      logger.error(`Unable to cache subgraph manifests in redis: ${err}`);
+    }
   }
 
   if (SCHEMA.legacySchemaSource != 'gsr') {
