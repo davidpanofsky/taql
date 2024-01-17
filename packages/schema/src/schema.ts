@@ -146,8 +146,7 @@ export const loadSupergraph = async (): Promise<Supergraph> => {
     try {
       const raw = await redisClient.get(SCHEMA.schemaCacheKey);
       if (raw == null) {
-        console.warn('No cached subgraph manifest found in redis');
-        throw err;
+        throw new Error(`No cached schema found in ${DEFAULT.redisCluster} with key ${SCHEMA.schemaCacheKey}`);
       }
       manifest = JSON.parse(raw);
       fromCache = true;
