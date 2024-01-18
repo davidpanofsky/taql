@@ -3292,6 +3292,7 @@ __metadata:
     graphql: "*"
     ioredis: ^5.3.2
     node-fetch: ^2.6.11
+    prom-client: ^14.2.0
     typescript: ^5.0.4
   languageName: unknown
   linkType: soft

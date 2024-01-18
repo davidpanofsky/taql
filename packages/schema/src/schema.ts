@@ -21,6 +21,7 @@ import { createExecutor as batchingExecutorFactory } from '@taql/batching';
 import { inspect } from 'util';
 import { loadSchema } from '@graphql-tools/load';
 import { makeClient } from '@gsr/client';
+import promClient from 'prom-client';
 import { promises } from 'fs';
 
 export type TASchema = {
@@ -100,6 +101,12 @@ const loadSupergraphFromGsr = async (): Promise<RawSupergraph> => {
   }
 };
 
+const subgraphsPulled = new promClient.Gauge({
+  name: 'subgraphs_pulled',
+  help: 'count of subgraphs pulled',
+  labelNames: ['source'] as const,
+});
+
 export const loadSupergraph = async (): Promise<Supergraph> => {
   if (SCHEMA.source == 'file') {
     logger.info(`loaded supergraph from file: ${SCHEMA.schemaFile}`);
@@ -131,6 +138,7 @@ export const loadSupergraph = async (): Promise<Supergraph> => {
     id = supergraph.id;
     sdl = supergraph.supergraph;
     manifest = [...supergraph.manifest];
+    subgraphsPulled.set({ source: 'gsr' }, manifest.length);
   } catch (err) {
     if (SCHEMA.legacySchemaSource == 'gsr' || !redisClient) {
       // we have no schema. DO not proceed.
@@ -146,10 +154,13 @@ export const loadSupergraph = async (): Promise<Supergraph> => {
     try {
       const raw = await redisClient.get(SCHEMA.schemaCacheKey);
       if (raw == null) {
-        throw new Error(`No cached schema found in ${DEFAULT.redisCluster} with key ${SCHEMA.schemaCacheKey}`);
+        throw new Error(
+          `No cached schema found in ${DEFAULT.redisCluster} with key ${SCHEMA.schemaCacheKey}`
+        );
       }
       manifest = JSON.parse(raw);
       fromCache = true;
+      subgraphsPulled.set({ source: 'cache' }, manifest.length);
     } catch (redisErr) {
       console.error(`unable to load cached schema from redis: ${redisErr}`);
       // Throw the original error from the GSR
@@ -175,6 +186,7 @@ export const loadSupergraph = async (): Promise<Supergraph> => {
     );
     legacyDigest = digest;
     manifest.push(subgraph);
+    subgraphsPulled.set({ source: 'legacy' }, 1);
   }
 
   const subgraphs = await Promise.all(
