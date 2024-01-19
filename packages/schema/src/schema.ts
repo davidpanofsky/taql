@@ -206,7 +206,7 @@ export const loadSupergraph = async (): Promise<Supergraph> => {
       redisClient.set(SCHEMA.schemaCacheKey, stringifiedManifest);
       updateSubgraphCacheSizeMetric(SCHEMA.schemaCacheKey, redisClient);
       if (SCHEMA.schemaDigest) {
-        // In bootstrapping environments, there might be no schemaDigest specified in the environment.
+        // In bootstrapping environments, there might be no schema digest specified in the environment.
         redisClient.set(SCHEMA.schemaDigest, stringifiedManifest);
         updateSubgraphCacheSizeMetric(SCHEMA.schemaDigest, redisClient);
       }
