@@ -152,7 +152,7 @@ export const loadSupergraph = async (): Promise<Supergraph> => {
       ? new RedisCluster([
           {
             host: DEFAULT.redisCluster,
-            port: 6379,
+            port: DEFAULT.redisPort,
           },
         ])
       : undefined;

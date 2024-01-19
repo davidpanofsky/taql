@@ -119,6 +119,11 @@ export const DEFAULT = resolve({
     property: 'DEFAULT_REDIS_CLUSTER',
     defaultTo: 'redis.taql-query-cache.svc.kub.n.tripadvisor.com',
   },
+  redisPort: {
+    property: 'DEFAULT_REDIS_PORT',
+    resolver: resolvers.nonNegativeInteger,
+    defaultTo: 6379,
+  },
 });
 
 export const SCHEMA = resolve({
