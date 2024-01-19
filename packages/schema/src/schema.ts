@@ -175,10 +175,6 @@ export const loadSupergraph = async (): Promise<Supergraph> => {
       // we have no schema. DO not proceed.
       throw err;
     }
-    // TODO
-    // This is a safety valve to allow us to 'test' GSR contact
-    // by trying to load from GSR but falling back to querying legacy graphql.
-    // That possibility will not remain long; remove this.
     logger.error(
       `unable to load schema from GSR: ${err}, trying to load from cache...`
     );
