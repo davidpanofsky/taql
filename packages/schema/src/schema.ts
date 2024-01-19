@@ -202,10 +202,14 @@ export const loadSupergraph = async (): Promise<Supergraph> => {
   if (!fromCache && redisClient) {
     try {
       logger.info('Caching subgraph manifests in redis');
-      redisClient.set(SCHEMA.schemaCacheKey, JSON.stringify(manifest));
+      const stringifiedManifest = JSON.stringify(manifest);
+      redisClient.set(SCHEMA.schemaCacheKey, stringifiedManifest);
       updateSubgraphCacheSizeMetric(SCHEMA.schemaCacheKey, redisClient);
-      redisClient.set(SCHEMA.schemaDigest, JSON.stringify(manifest));
-      updateSubgraphCacheSizeMetric(SCHEMA.schemaDigest, redisClient);
+      if (SCHEMA.schemaDigest) {
+        // In bootstrapping environments, there might be no schemaDigest specified in the environment.
+        redisClient.set(SCHEMA.schemaDigest, stringifiedManifest);
+        updateSubgraphCacheSizeMetric(SCHEMA.schemaDigest, redisClient);
+      }
     } catch (err) {
       logger.error(`Unable to cache subgraph manifests in redis: ${err}`);
     }
