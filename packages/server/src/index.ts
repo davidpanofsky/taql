@@ -168,7 +168,7 @@ const primaryStartup = async () => {
   );
 
   const schemaFile = SCHEMA.schemaFile ?? './supergraph.json';
-  if (SCHEMA.source == 'gsr') {
+  if (SCHEMA.source == 'gsr' || SCHEMA.source == 'cache') {
     const supergraph = await loadSupergraph();
     await promises.writeFile(schemaFile, JSON.stringify(supergraph));
     logger.info(`serialized supergraph from GSR to ${schemaFile}`);

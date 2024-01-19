@@ -138,6 +138,18 @@ const updateSubgraphCacheSizeMetric = (key: string, client: RedisCluster) => {
   });
 };
 
+const loadSchemaFromCache = async (
+  key: string,
+  redisClient: RedisCluster
+): Promise<Subgraph[]> => {
+  const raw = await redisClient.get(SCHEMA.schemaCacheKey);
+  if (raw == null) {
+    throw new Error(`No cached schema found with key ${key}`);
+  }
+
+  return JSON.parse(raw);
+};
+
 export const loadSupergraph = async (): Promise<Supergraph> => {
   if (SCHEMA.source == 'file') {
     logger.info(`loaded supergraph from file: ${SCHEMA.schemaFile}`);
@@ -148,7 +160,8 @@ export const loadSupergraph = async (): Promise<Supergraph> => {
   }
 
   const redisClient =
-    SCHEMA.trySchemaFromCache && DEFAULT.redisCluster
+    (SCHEMA.trySchemaFromCache || SCHEMA.source == 'cache') &&
+    DEFAULT.redisCluster
       ? new RedisCluster([
           {
             host: DEFAULT.redisCluster,
@@ -164,14 +177,33 @@ export const loadSupergraph = async (): Promise<Supergraph> => {
   let fromCache = false;
 
   try {
-    logger.info('loading supergraph from GSR');
-    const supergraph = await loadSupergraphFromGsr();
-    id = supergraph.id;
-    sdl = supergraph.supergraph;
-    manifest = [...supergraph.manifest];
-    subgraphsPulled.set({ source: 'gsr' }, manifest.length);
+    if (SCHEMA.source == 'cache') {
+      if (!redisClient) {
+        throw new Error(
+          "Schema source is set to 'cache' but there is no configured default redis cache"
+        );
+      }
+      logger.info(
+        `loading supergraph preferentially from cache with key = ${SCHEMA.schemaCacheKey}`
+      );
+      manifest = await loadSchemaFromCache(SCHEMA.schemaCacheKey, redisClient);
+      fromCache = true;
+      subgraphsPulled.set({ source: 'cache' }, manifest.length);
+      updateSubgraphCacheSizeMetric(SCHEMA.schemaCacheKey, redisClient);
+    } else {
+      logger.info('loading supergraph from GSR');
+      const supergraph = await loadSupergraphFromGsr();
+      id = supergraph.id;
+      sdl = supergraph.supergraph;
+      manifest = [...supergraph.manifest];
+      subgraphsPulled.set({ source: 'gsr' }, manifest.length);
+    }
   } catch (err) {
-    if (SCHEMA.legacySchemaSource == 'gsr' || !redisClient) {
+    if (
+      SCHEMA.source == 'cache' ||
+      SCHEMA.legacySchemaSource == 'gsr' ||
+      !redisClient
+    ) {
       // we have no schema. DO not proceed.
       throw err;
     }
@@ -179,13 +211,7 @@ export const loadSupergraph = async (): Promise<Supergraph> => {
       `unable to load schema from GSR: ${err}, trying to load from cache...`
     );
     try {
-      const raw = await redisClient.get(SCHEMA.schemaCacheKey);
-      if (raw == null) {
-        throw new Error(
-          `No cached schema found in ${DEFAULT.redisCluster} with key ${SCHEMA.schemaCacheKey}`
-        );
-      }
-      manifest = JSON.parse(raw);
+      manifest = await loadSchemaFromCache(SCHEMA.schemaCacheKey, redisClient);
       fromCache = true;
       subgraphsPulled.set({ source: 'cache' }, manifest.length);
       updateSubgraphCacheSizeMetric(SCHEMA.schemaCacheKey, redisClient);

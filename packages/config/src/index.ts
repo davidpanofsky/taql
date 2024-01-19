@@ -129,7 +129,7 @@ export const DEFAULT = resolve({
 export const SCHEMA = resolve({
   source: {
     property: 'SCHEMA_SOURCE',
-    resolver: resolvers.options('gsr', 'file'),
+    resolver: resolvers.options('gsr', 'file', 'cache'),
     defaultTo: 'gsr',
   },
   schemaFile: {
