@@ -270,14 +270,19 @@ const primaryStartup = async () => {
         workersExited.inc({ kind: 'error', version: appMeta.version });
       }
 
-      if (sucessfulInitialization) {
-        logger.info(`replacing worker ${worker.id}...`);
-        fork(environments.get(worker));
-      } else {
+      if (!sucessfulInitialization) {
         logger.warn(
           'worker died before any sucessfull initialization. Shutting down cluster to prevent crashlooping'
         );
         cluster.disconnect(process.exit(1));
+      } else if (ENABLE_FEATURES.serviceOverrides) {
+        logger.warn(
+          'worker died and SVCOs are enabled. Shutting down cluster to prevent problems'
+        );
+        cluster.disconnect(process.exit(1));
+      } else {
+        logger.info(`replacing worker ${worker.id}...`);
+        fork(environments.get(worker));
       }
     }
   });
