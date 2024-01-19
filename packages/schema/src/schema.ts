@@ -208,6 +208,8 @@ export const loadSupergraph = async (): Promise<Supergraph> => {
       logger.info('Caching subgraph manifests in redis');
       redisClient.set(SCHEMA.schemaCacheKey, JSON.stringify(manifest));
       updateSubgraphCacheSizeMetric(SCHEMA.schemaCacheKey, redisClient);
+      redisClient.set(SCHEMA.schemaDigest, JSON.stringify(manifest));
+      updateSubgraphCacheSizeMetric(SCHEMA.schemaDigest, redisClient);
     } catch (err) {
       logger.error(`Unable to cache subgraph manifests in redis: ${err}`);
     }

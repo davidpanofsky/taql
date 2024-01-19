@@ -130,6 +130,9 @@ export const SCHEMA = resolve({
   schemaFile: {
     property: 'SCHEMA_FILE',
   },
+  schemaDigest: {
+    property: 'SCHEMA_DIGEST',
+  },
   legacySchemaSource: {
     property: 'LEGACY_SCHEMA_SOURCE',
     resolver: (prop) =>
