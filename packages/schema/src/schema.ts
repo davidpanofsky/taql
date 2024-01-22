@@ -228,13 +228,26 @@ export const loadSupergraph = async (): Promise<Supergraph> => {
   if (!fromCache && redisClient) {
     try {
       logger.info('Caching subgraph manifests in redis');
+      const lastSchemaDigest = await redisClient.get(
+        SCHEMA.lastSchemaDigestKey
+      );
       const stringifiedManifest = JSON.stringify(manifest);
-      redisClient.set(SCHEMA.schemaCacheKey, stringifiedManifest);
+      await redisClient.set(SCHEMA.schemaCacheKey, stringifiedManifest);
       updateSubgraphCacheSizeMetric(SCHEMA.schemaCacheKey, redisClient);
       if (SCHEMA.schemaDigest) {
         // In bootstrapping environments, there might be no schema digest specified in the environment.
-        redisClient.set(SCHEMA.schemaDigest, stringifiedManifest);
+        await redisClient.set(SCHEMA.schemaDigest, stringifiedManifest);
         updateSubgraphCacheSizeMetric(SCHEMA.schemaDigest, redisClient);
+      }
+      if (
+        lastSchemaDigest &&
+        SCHEMA.schemaDigest &&
+        lastSchemaDigest != SCHEMA.schemaDigest
+      ) {
+        // We are observing a new schema, update the cached digest with the new one and expire the old
+        // cache after 48 hours.
+        await redisClient.set(SCHEMA.lastSchemaDigestKey, SCHEMA.schemaDigest);
+        await redisClient.expire(lastSchemaDigest, 2 * 24 * 60 * 60);
       }
     } catch (err) {
       logger.error(`Unable to cache subgraph manifests in redis: ${err}`);

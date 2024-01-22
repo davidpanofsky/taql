@@ -214,6 +214,10 @@ export const SCHEMA = resolve({
     property: 'SCHEMA_CACHE_KEY',
     defaultTo: 'SCHEMA_CACHE',
   },
+  lastSchemaDigestKey: {
+    property: 'LAST_SCHEMA_CACHE_KEY',
+    defaultTo: 'LAST_SCHEMA_DIGEST',
+  },
 });
 
 export const AUTH_MANAGER_CONFIG = resolve({
