@@ -18,7 +18,7 @@ function assertSingleValue<TValue extends object>(
 }
 export const getExecutor = <
   TServerContext extends Record<string, unknown> = Record<string, never>,
-  TUserContext extends Record<string, unknown> = Record<string, never>
+  TUserContext extends Record<string, unknown> = Record<string, never>,
 >(
   options: YogaServerOptions<TServerContext, TUserContext>
 ): ((req: ExecutionRequest) => Promise<ExecutionResult>) => {

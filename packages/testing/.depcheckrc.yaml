@@ -1,0 +1,7 @@
+ignores:
+  [
+    '@graphql-tools/executor-http',
+    '@graphql-tools/utils',
+    'graphql',
+    'graphql-yoga',
+  ]

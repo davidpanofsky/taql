@@ -16,7 +16,7 @@ type DefaultRecord = Record<string, unknown>;
 
 export const getDeadline = <
   Args extends DefaultRecord = DefaultRecord,
-  Root = DefaultRecord
+  Root = DefaultRecord,
 >(
   request: ExecutionRequest<Args, TaqlState, Root, Extensions>
 ): number | undefined =>

@@ -9,11 +9,11 @@
   },
   "license": "UNLICENSED",
   "devDependencies": {
-    "typescript": "^5.0.4"
+    "typescript": "*"
   },
   "dependencies": {
     "@graphql-tools/utils": "*",
-    "@opentelemetry/api": "^1.6.0",
+    "@opentelemetry/api": "*",
     "@ta-graphql-utils/auth-manager": "*",
     "@ta-graphql-utils/stitch": "*",
     "@taql/config": "workspace:^",
@@ -22,7 +22,7 @@
     "@taql/httpAgent": "workspace:^",
     "@taql/observability": "workspace:^",
     "graphql": "*",
-    "node-fetch": "^2.6.11",
-    "prom-client": "^14.2.0"
+    "node-fetch": "*",
+    "prom-client": "*"
   }
 }

@@ -14,7 +14,7 @@ type HeaderKey = string | number | symbol;
 export type TaqlHeaderPair<T extends HeaderKey> = [key: T, val: string];
 type RawHeaderPair = readonly [
   key: string | undefined,
-  val: string | undefined
+  val: string | undefined,
 ];
 type HeaderFilter<T extends HeaderKey> = (
   pair: RawHeaderPair | TaqlHeaderPair<T>

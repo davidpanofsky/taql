@@ -11,14 +11,13 @@
   "devDependencies": {
     "@graphql-tools/delegate": "*",
     "@graphql-tools/utils": "*",
-    "@taql/context": "workspace:^",
-    "@types/node-fetch": "^2.6.3",
-    "typescript": "^5.0.4"
+    "@types/node-fetch": "*",
+    "typescript": "*"
   },
   "dependencies": {
-    "@graphql-tools/load": "*",
+    "@graphql-tools/load": "^8.0.1",
     "@gsr/client": "*",
-    "@ta-graphql-utils/auth-manager": "^2.1.1",
+    "@ta-graphql-utils/auth-manager": "*",
     "@ta-graphql-utils/stitch": "*",
     "@taql/batching": "workspace:^",
     "@taql/config": "workspace:^",
@@ -26,8 +25,8 @@
     "@taql/executors": "workspace:^",
     "@taql/httpAgent": "workspace:^",
     "graphql": "*",
-    "ioredis": "^5.3.2",
-    "node-fetch": "^2.6.11",
-    "prom-client": "^14.2.0"
+    "ioredis": "*",
+    "node-fetch": "*",
+    "prom-client": "*"
   }
 }

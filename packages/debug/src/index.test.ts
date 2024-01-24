@@ -34,7 +34,7 @@ describe('subschemaExtensionsPlugin', () => {
             ({
               data: testQueryResult,
               extensions: { foo: 'bar', baz: 'qux' },
-            } as ExecutionResult),
+            }) as ExecutionResult,
           transforms: [
             new ForwardSubschemaExtensions('test', ({ foo }) => ({ foo })),
           ],

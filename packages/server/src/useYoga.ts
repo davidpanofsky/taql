@@ -167,8 +167,8 @@ const makeSchemaProvider = (
             return stitchResult == undefined || 'error' in stitchResult
               ? defaultSchema.schema
               : 'partial' in stitchResult
-              ? stitchResult.partial.schema
-              : stitchResult.success.schema;
+                ? stitchResult.partial.schema
+                : stitchResult.success.schema;
           }
         );
       },
@@ -220,8 +220,8 @@ export async function createYogaMiddleware(supergraph: Supergraph) {
     'success' in stitchResult
       ? stitchResult.success
       : 'partial' in stitchResult
-      ? stitchResult.partial
-      : undefined;
+        ? stitchResult.partial
+        : undefined;
   if (schema == undefined) {
     throw new Error('failed to load initial schema');
   }

@@ -85,7 +85,10 @@ async function preloadCache(
   limit: number
 ): Promise<number> {
   return db
-    .query<{ id: string; code: string }>(
+    .query<{
+      id: string;
+      code: string;
+    }>(
       'WITH most_recent AS (SELECT max(updated) AS updated FROM t_graphql_operations) ' +
         'SELECT id, code FROM t_graphql_operations WHERE updated = (select updated from most_recent) LIMIT $1',
       [limit]

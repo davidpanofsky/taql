@@ -9,7 +9,7 @@
   },
   "license": "UNLICENSED",
   "devDependencies": {
-    "typescript": "^5.0.4"
+    "typescript": "*"
   },
   "dependencies": {
     "@taql/config": "workspace:^"
