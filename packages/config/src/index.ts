@@ -114,14 +114,29 @@ if (process.env.NODE_ENV !== 'test') {
   console.error = (...args) => logger.error(consoleFormat(...args));
 }
 
+export const DEFAULT = resolve({
+  redisCluster: {
+    property: 'DEFAULT_REDIS_CLUSTER',
+    defaultTo: 'redis.taql-query-cache.svc.kub.n.tripadvisor.com',
+  },
+  redisPort: {
+    property: 'DEFAULT_REDIS_PORT',
+    resolver: resolvers.nonNegativeInteger,
+    defaultTo: 6379,
+  },
+});
+
 export const SCHEMA = resolve({
   source: {
     property: 'SCHEMA_SOURCE',
-    resolver: resolvers.options('gsr', 'file'),
+    resolver: resolvers.options('gsr', 'file', 'cache'),
     defaultTo: 'gsr',
   },
   schemaFile: {
     property: 'SCHEMA_FILE',
+  },
+  schemaDigest: {
+    property: 'SCHEMA_DIGEST',
   },
   legacySchemaSource: {
     property: 'LEGACY_SCHEMA_SOURCE',
@@ -189,6 +204,19 @@ export const SCHEMA = resolve({
   oidcLiteAuthorizationDomain: {
     property: 'GSR_OIDC_DOMAIN',
     defaultTo: 'domains-platform-dev.tamg.cloud',
+  },
+  trySchemaFromCache: {
+    property: 'SCHEMA_TRY_FROM_CACHE_ON_FAILURE',
+    resolver: resolvers.booleanFromString,
+    defaultTo: true,
+  },
+  schemaCacheKey: {
+    property: 'SCHEMA_CACHE_KEY',
+    defaultTo: 'SCHEMA_CACHE',
+  },
+  lastSchemaDigestKey: {
+    property: 'LAST_SCHEMA_CACHE_KEY',
+    defaultTo: 'LAST_SCHEMA_DIGEST',
   },
 });
 

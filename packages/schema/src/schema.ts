@@ -6,7 +6,7 @@ import {
   normalizeSdl,
   stitch,
 } from '@ta-graphql-utils/stitch';
-import { ENABLE_FEATURES, SCHEMA, logger } from '@taql/config';
+import { DEFAULT, ENABLE_FEATURES, SCHEMA, logger } from '@taql/config';
 import { GraphQLError, GraphQLSchema } from 'graphql';
 import {
   SubgraphConfig,
@@ -16,10 +16,12 @@ import {
 } from '@taql/executors';
 import { getLegacySubgraph, legacyTransforms } from './legacy';
 import type { Executor } from '@graphql-tools/utils';
+import { Cluster as RedisCluster } from 'ioredis';
 import { createExecutor as batchingExecutorFactory } from '@taql/batching';
 import { inspect } from 'util';
 import { loadSchema } from '@graphql-tools/load';
 import { makeClient } from '@gsr/client';
+import promClient from 'prom-client';
 import { promises } from 'fs';
 
 export type TASchema = {
@@ -99,6 +101,55 @@ const loadSupergraphFromGsr = async (): Promise<RawSupergraph> => {
   }
 };
 
+const subgraphsPulled = new promClient.Gauge({
+  name: 'subgraphs_pulled',
+  help: 'count of subgraphs pulled',
+  labelNames: ['source'] as const,
+});
+
+const subgraphCacheMemory = new promClient.Gauge({
+  name: 'subgraph_cache_size_bytes',
+  help: 'size of cached subgraphs in bytes',
+  labelNames: ['cacheKey'] as const,
+});
+
+/**
+ * Try to update a metric with the cached schema size.  Unfortunately this doesn't seem reliable;
+ * often we get null back without an error.  It seems that this is an issue with the command not being
+ * handled by the node that actually has the key.
+ * For now this is best effort. Hopefully _an_ instance will succeed in surfacing the information.
+ */
+const updateSubgraphCacheSizeMetric = (key: string, client: RedisCluster) => {
+  client.memory('USAGE', key, (err, result) => {
+    if (err) {
+      console.warn(
+        `Failed to fetch size of cached manifests with key ${key}: ${err}`
+      );
+      return;
+    }
+    if (result) {
+      logger.info(`Current cached schema size (bytes): ${result}`);
+      subgraphCacheMemory.set({ cacheKey: key }, result);
+    } else {
+      logger.warn(
+        `Got null when fetching size of cached schema for key ${key}`
+      );
+    }
+  });
+};
+
+const loadSchemaFromCache = async (
+  key: string,
+  redisClient: RedisCluster
+): Promise<Subgraph[]> => {
+  const raw = await redisClient.get(SCHEMA.schemaCacheKey);
+  if (raw == null) {
+    throw new Error(`No cached schema found with key ${key}`);
+  }
+
+  return JSON.parse(raw);
+};
+
 export const loadSupergraph = async (): Promise<Supergraph> => {
   if (SCHEMA.source == 'file') {
     logger.info(`loaded supergraph from file: ${SCHEMA.schemaFile}`);
@@ -108,27 +159,99 @@ export const loadSupergraph = async (): Promise<Supergraph> => {
     return JSON.parse(await promises.readFile(SCHEMA.schemaFile, 'utf-8'));
   }
 
+  const redisClient =
+    (SCHEMA.trySchemaFromCache || SCHEMA.source == 'cache') &&
+    DEFAULT.redisCluster
+      ? new RedisCluster([
+          {
+            host: DEFAULT.redisCluster,
+            port: DEFAULT.redisPort,
+          },
+        ])
+      : undefined;
+
   let id = 'unknown';
   let manifest: Subgraph[] = [];
   let sdl = '';
   let legacyDigest: string | undefined = undefined;
+  let fromCache = false;
 
   try {
-    logger.info('loading supergraph from GSR');
-    const supergraph = await loadSupergraphFromGsr();
-    id = supergraph.id;
-    sdl = supergraph.supergraph;
-    manifest = [...supergraph.manifest];
+    if (SCHEMA.source == 'cache') {
+      if (!redisClient) {
+        throw new Error(
+          "Schema source is set to 'cache' but there is no configured default redis cache"
+        );
+      }
+      logger.info(
+        `loading supergraph preferentially from cache with key = ${SCHEMA.schemaCacheKey}`
+      );
+      manifest = await loadSchemaFromCache(SCHEMA.schemaCacheKey, redisClient);
+      fromCache = true;
+      subgraphsPulled.set({ source: 'cache' }, manifest.length);
+      updateSubgraphCacheSizeMetric(SCHEMA.schemaCacheKey, redisClient);
+    } else {
+      logger.info('loading supergraph from GSR');
+      const supergraph = await loadSupergraphFromGsr();
+      id = supergraph.id;
+      sdl = supergraph.supergraph;
+      manifest = [...supergraph.manifest];
+      subgraphsPulled.set({ source: 'gsr' }, manifest.length);
+    }
   } catch (err) {
-    if (SCHEMA.legacySchemaSource == 'gsr') {
+    if (
+      SCHEMA.source == 'cache' ||
+      SCHEMA.legacySchemaSource == 'gsr' ||
+      !redisClient
+    ) {
       // we have no schema. DO not proceed.
       throw err;
     }
-    // TODO
-    // This is a safety valve to allow us to 'test' GSR contact
-    // by trying to load from GSR but falling back to querying legacy graphql.
-    // That possibility will not remain long; remove this.
-    logger.error(`unable to load schema from GSR: ${err}`);
+    logger.error(
+      `unable to load schema from GSR: ${err}, trying to load from cache...`
+    );
+    try {
+      manifest = await loadSchemaFromCache(SCHEMA.schemaCacheKey, redisClient);
+      fromCache = true;
+      subgraphsPulled.set({ source: 'cache' }, manifest.length);
+      updateSubgraphCacheSizeMetric(SCHEMA.schemaCacheKey, redisClient);
+      console.log(
+        `Successfully pulled ${manifest.length} subgraphs from cache`
+      );
+    } catch (redisErr) {
+      console.error(`unable to load cached schema from redis: ${redisErr}`);
+      // Throw the original error from the GSR
+      throw err;
+    }
+  }
+
+  if (!fromCache && redisClient) {
+    try {
+      logger.info('Caching subgraph manifests in redis');
+      const lastSchemaDigest = await redisClient.get(
+        SCHEMA.lastSchemaDigestKey
+      );
+      const stringifiedManifest = JSON.stringify(manifest);
+      await redisClient.set(SCHEMA.schemaCacheKey, stringifiedManifest);
+      updateSubgraphCacheSizeMetric(SCHEMA.schemaCacheKey, redisClient);
+      if (SCHEMA.schemaDigest) {
+        // In bootstrapping environments, there might be no schema digest specified in the environment.
+        await redisClient.set(SCHEMA.schemaDigest, stringifiedManifest);
+        updateSubgraphCacheSizeMetric(SCHEMA.schemaDigest, redisClient);
+      }
+      if (
+        lastSchemaDigest &&
+        SCHEMA.schemaDigest &&
+        lastSchemaDigest != SCHEMA.schemaDigest
+      ) {
+        // We are observing a new schema, update the cached digest with the new one and expire the old
+        // cache after 48 hours.
+        await redisClient.set(SCHEMA.lastSchemaDigestKey, SCHEMA.schemaDigest);
+        await redisClient.expire(lastSchemaDigest, 2 * 24 * 60 * 60);
+      }
+    } catch (err) {
+      logger.error(`Unable to cache subgraph manifests in redis: ${err}`);
+    }
   }
 
   if (SCHEMA.legacySchemaSource != 'gsr') {
@@ -140,6 +263,7 @@ export const loadSupergraph = async (): Promise<Supergraph> => {
     );
     legacyDigest = digest;
     manifest.push(subgraph);
+    subgraphsPulled.set({ source: 'legacy' }, 1);
   }
 
   const subgraphs = await Promise.all(
