@@ -10,7 +10,7 @@
   "license": "UNLICENSED",
   "devDependencies": {
     "@types/node": "^18.16.7",
-    "typescript": "^5.0.4"
+    "typescript": "*"
   },
   "dependencies": {
     "@taql/config": "workspace:^",

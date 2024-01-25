@@ -24,7 +24,7 @@ export const translateConfigToLoaderOptions = <T = unknown, E = unknown>({
 export type BatchingOptions<
   T,
   V extends string | number | symbol,
-  U extends string | number | symbol
+  U extends string | number | symbol,
 > = {
   /** Method to extract batch keys from values */
   subBatchIdFn?: (val: T) => V;
@@ -71,13 +71,13 @@ export type BatchingOptions<
 export type BatchingParams<
   T,
   V extends string | number | symbol,
-  U extends string | number | symbol
+  U extends string | number | symbol,
 > = T extends V
   ? [vals: ReadonlyArray<T>, options?: BatchingOptions<T, V, U>]
   : [
       vals: ReadonlyArray<T>,
       options: BatchingOptions<T, V, U> &
-        Required<Pick<BatchingOptions<T, V, U>, 'subBatchIdFn'>>
+        Required<Pick<BatchingOptions<T, V, U>, 'subBatchIdFn'>>,
     ];
 
 /**
@@ -98,7 +98,7 @@ export type BatchingParams<
 export const batchByKey = <
   T,
   V extends string | number | symbol,
-  U extends string | number | symbol
+  U extends string | number | symbol,
 >(
   ...args: BatchingParams<T, V, U>
 ): BatchEntry<T>[][] => {

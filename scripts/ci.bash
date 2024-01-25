@@ -2,9 +2,25 @@
 
 set -euo pipefail 
 
+function lint {
+  SUCCESS=true
+  OLDDIFF="lol"
+  DIFF=""
+  RUNS=0
+  while [ "$OLDDIFF" != "$DIFF" -a $((RUNS++)) -lt 10 ]; do
+    SUCCESS=true
+    OLDDIFF="$DIFF"
+    yarn run lint || SUCCESS=false
+    DIFF="$(git diff)"
+  done
+  # report success or failure
+  $SUCCESS
+}
+
 function main {
   IGNORE_CHANGES=false
   NO_CLEAN=false
+  NO_DEPS=false
   while [ $# -gt 0 ]; do
     case $1 in
       --ignore-changes|-i )
@@ -12,6 +28,9 @@ function main {
         ;;
       --no-clean|-n )
         NO_CLEAN=true
+        ;;
+      --no-deps|-n )
+        NO_DEPS=true
         ;;
     esac
     shift
@@ -28,9 +47,9 @@ function main {
   # Jacob: for some reason big yarn installs make his terminal perform poorly
   # if it is using fancy output. :(
   yarn install | cat
-  yarn run lint
+  lint
   yarn run build
-  yarn run depcheck
+  $NO_DEPS || yarn run depcheck
   yarn run test
 
   $IGNORE_CHANGES || git diff --exit-code

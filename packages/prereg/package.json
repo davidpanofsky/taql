@@ -10,18 +10,18 @@
   "license": "UNLICENSED",
   "devDependencies": {
     "@taql/testing": "workspace:^",
-    "@types/pg": "^8.6.6",
-    "cache-manager": "^5.2.1",
-    "typescript": "^5.0.4"
+    "@types/pg": "^8.10.9",
+    "cache-manager": "*",
+    "typescript": "*"
   },
   "dependencies": {
-    "@envelop/core": "4.0.0",
+    "@envelop/core": "*",
     "@taql/caching": "workspace:^",
     "@taql/config": "workspace:^",
     "@taql/readiness": "workspace:^",
     "graphql": "*",
-    "graphql-yoga": "^4.0.0",
-    "pg": "^8.10.0",
-    "prom-client": "^14.2.0"
+    "graphql-yoga": "*",
+    "pg": "^8.11.3",
+    "prom-client": "*"
   }
 }

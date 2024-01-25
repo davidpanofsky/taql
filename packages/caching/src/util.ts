@@ -8,7 +8,7 @@ import { logger } from '@taql/config';
 export class BiWeakMap<
   K1 extends NonNullable<unknown>,
   K2 extends NonNullable<unknown>,
-  V
+  V,
 > {
   private delegate = new WeakMap<K1, WeakMap<K2, V>>();
 

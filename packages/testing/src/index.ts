@@ -1,5 +1,11 @@
 import { ExecutionRequest, ExecutionResult } from '@graphql-tools/utils';
-import { YogaServerOptions, createSchema, createYoga } from 'graphql-yoga';
+import {
+  GraphQLSchemaWithContext,
+  YogaInitialContext,
+  YogaServerOptions,
+  createSchema,
+  createYoga,
+} from 'graphql-yoga';
 import { buildHTTPExecutor } from '@graphql-tools/executor-http';
 import { parse } from 'graphql';
 
@@ -10,10 +16,9 @@ function assertSingleValue<TValue extends object>(
     throw new Error('Expected single value');
   }
 }
-
 export const getExecutor = <
   TServerContext extends Record<string, unknown> = Record<string, never>,
-  TUserContext extends Record<string, unknown> = Record<string, never>
+  TUserContext extends Record<string, unknown> = Record<string, never>,
 >(
   options: YogaServerOptions<TServerContext, TUserContext>
 ): ((req: ExecutionRequest) => Promise<ExecutionResult>) => {
@@ -41,7 +46,9 @@ const posts = [
   { id: 4, authorId: 3, title: 'Advanced GraphQL', votes: 1 },
 ];
 
-export const testSchema = createSchema({
+export const testSchema = <
+  GraphQLSchemaWithContext<Record<string, never> & YogaInitialContext>
+>createSchema({
   typeDefs: /* GraphQL */ `
     type Author {
       id: Int!

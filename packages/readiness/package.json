@@ -9,8 +9,8 @@
   },
   "license": "UNLICENSED",
   "devDependencies": {
-    "@types/koa": "^2.13.6",
-    "typescript": "^5.0.4"
+    "@types/koa": "*",
+    "typescript": "*"
   },
   "dependencies": {
     "@taql/config": "workspace:^"

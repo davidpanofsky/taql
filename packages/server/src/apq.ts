@@ -46,19 +46,19 @@ export class TaqlAPQ {
         port: 6379,
       }
     : AUTOMATIC_PERSISTED_QUERY_PARAMS.redisCluster
-    ? {
-        ttl: AUTOMATIC_PERSISTED_QUERY_PARAMS.redisTTL,
-        waitTimeMS: AUTOMATIC_PERSISTED_QUERY_PARAMS.redisWaitTimeMs,
-        clusterConfig: {
-          nodes: [
-            {
-              host: AUTOMATIC_PERSISTED_QUERY_PARAMS.redisCluster,
-              port: 6379,
-            },
-          ],
-        },
-      }
-    : undefined;
+      ? {
+          ttl: AUTOMATIC_PERSISTED_QUERY_PARAMS.redisTTL,
+          waitTimeMS: AUTOMATIC_PERSISTED_QUERY_PARAMS.redisWaitTimeMs,
+          clusterConfig: {
+            nodes: [
+              {
+                host: AUTOMATIC_PERSISTED_QUERY_PARAMS.redisCluster,
+                port: 6379,
+              },
+            ],
+          },
+        }
+      : undefined;
 
   private redisStore =
     this.redisParams &&

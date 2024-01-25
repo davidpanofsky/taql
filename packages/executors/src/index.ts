@@ -293,8 +293,8 @@ export const bindLoad = <T_1, R_1, T_2 = unknown, R_2 = unknown>(
     subgraph.url.protocol == 'http:'
       ? httpAgent
       : subgraph.authProvider == undefined
-      ? legacyHttpsAgent
-      : httpsAgent;
+        ? legacyHttpsAgent
+        : httpsAgent;
 
   const maxTimeout = Math.min(
     UPSTREAM_TIMEOUT_PARAMS.hardMaxUpstreamTimeoutMillis,

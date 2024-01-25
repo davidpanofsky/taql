@@ -12,18 +12,19 @@ type EnvVal =
   | SimpleEnvVal
   | (Named & (Resolving | Defaulting | (Resolving & Defaulting)));
 
-type Resolved<T extends EnvVal> = T extends Defaulting<infer D>
-  ? T extends Resolving<infer V>
-    ? // If there is a default and aresolver, the result will be resolver type
-      // unless it resolves to undefined; then it will be the default type.
-      D | Exclude<V, undefined>
-    : // If no resolver, when a value is defined it will be a string
-      D | string
-  : T extends Resolving<infer V>
-  ? // If there is a resolver and no default, the result type is whatever the env val resolves to.
-    V
-  : // If there is no resolver or default, the result is string | undefined
-    string | undefined;
+type Resolved<T extends EnvVal> =
+  T extends Defaulting<infer D>
+    ? T extends Resolving<infer V>
+      ? // If there is a default and aresolver, the result will be resolver type
+        // unless it resolves to undefined; then it will be the default type.
+        D | Exclude<V, undefined>
+      : // If no resolver, when a value is defined it will be a string
+        D | string
+    : T extends Resolving<infer V>
+      ? // If there is a resolver and no default, the result type is whatever the env val resolves to.
+        V
+      : // If there is no resolver or default, the result is string | undefined
+        string | undefined;
 
 function resolveSingle<T extends EnvVal>(decl: T): Resolved<T> {
   if (typeof decl === 'object') {
@@ -62,8 +63,8 @@ type ResolvedConfig<T> = {
   [V in keyof T]: T[V] extends string
     ? string | undefined
     : T[V] extends EnvVal
-    ? Resolved<T[V]>
-    : never;
+      ? Resolved<T[V]>
+      : never;
 };
 
 export const resolve = <T extends { [property: string]: EnvVal }>(

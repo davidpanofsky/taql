@@ -9,11 +9,12 @@
   },
   "license": "UNLICENSED",
   "devDependencies": {
-    "typescript": "^5.0.4"
+    "typescript": "*"
   },
   "dependencies": {
     "@taql/config": "workspace:^",
     "@taql/headers": "workspace:^",
-    "graphql-yoga": "^4.0.0"
+    "graphql": "*",
+    "graphql-yoga": "*"
   }
 }

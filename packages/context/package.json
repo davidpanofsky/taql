@@ -9,15 +9,14 @@
   },
   "license": "UNLICENSED",
   "devDependencies": {
-    "@types/node-fetch": "^2.6.3",
-    "graphql-yoga": "^4.0.0",
-    "koa": "^2.14.2",
-    "typescript": "^5.0.4"
+    "@types/node-fetch": "*",
+    "graphql-yoga": "*",
+    "koa": "*",
+    "typescript": "*"
   },
   "dependencies": {
     "@taql/config": "workspace:^",
     "@taql/headers": "workspace:^",
-    "graphql": "*",
-    "node-fetch": "^2.6.11"
+    "node-fetch": "*"
   }
 }

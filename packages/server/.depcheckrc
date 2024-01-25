@@ -1,1 +1,0 @@
-ignores: ["dotenv", "ioredis", "@types/koa"]

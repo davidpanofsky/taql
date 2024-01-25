@@ -9,8 +9,8 @@
   },
   "license": "UNLICENSED",
   "devDependencies": {
-    "@types/js-yaml": "^4.0.5",
-    "typescript": "^5.0.4"
+    "@types/js-yaml": "^4.0.9",
+    "typescript": "*"
   },
   "dependencies": {
     "@taql/config": "workspace:^",

@@ -10,14 +10,13 @@
   "license": "UNLICENSED",
   "devDependencies": {
     "@graphql-tools/delegate": "*",
-    "@graphql-tools/stitch": "*",
+    "@graphql-tools/stitch": "^9.0.3",
     "@graphql-tools/utils": "*",
     "@taql/testing": "workspace:^",
-    "typescript": "^5.0.4"
+    "typescript": "*"
   },
   "dependencies": {
-    "@envelop/core": "4.0.0",
-    "@taql/config": "workspace:^",
-    "graphql": "*"
+    "@envelop/core": "*",
+    "@taql/config": "workspace:^"
   }
 }
