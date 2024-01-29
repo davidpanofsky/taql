@@ -39,12 +39,15 @@ import promClient from 'prom-client';
 import { readFileSync } from 'fs';
 import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspection';
 import { useErrorLogging } from './logging';
+import { useSchema } from './schemaPlugin';
 import { useTaqlSecurity } from '@taql/security';
 
 export const makePlugins = async (
-  defaultSchema: GraphQLSchema
+  defaultSupergraph: Supergraph,
+  defaultSchema: TASchema
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<Plugin<any>[]> => {
+  const schemaProvider = makeSchemaProvider(defaultSupergraph, defaultSchema);
   const apq = new TaqlAPQ();
 
   const preregPlugin = usePreregisteredQueries({
@@ -84,7 +87,7 @@ export const makePlugins = async (
       },
     },
     prewarm: {
-      schema: defaultSchema,
+      schema: defaultSchema.schema,
       preregistered,
       persisted,
     },
@@ -103,6 +106,7 @@ export const makePlugins = async (
   );
 
   const yogaPlugins = [
+    useSchema(schemaProvider),
     ...((securityPlugin && [securityPlugin]) || []),
     useErrorLogging,
     mutatedFieldsExtensionPlugin,
@@ -228,9 +232,8 @@ export async function createYogaMiddleware(supergraph: Supergraph) {
   logger.info('created initial schema');
 
   const yoga = createYoga<TaqlState>({
-    schema: makeSchemaProvider(supergraph, schema),
     ...yogaOptions,
-    plugins: await makePlugins(schema.schema),
+    plugins: await makePlugins(supergraph, schema),
   });
   logger.info('Created yoga server');
 
@@ -250,7 +253,7 @@ export async function createYogaMiddleware(supergraph: Supergraph) {
 
   return async function useYoga(ctx: TaqlState) {
     const accessTimer = accessLogger.startTimer();
-    const response = await yoga.handleNodeRequest(ctx.req, ctx);
+    const response = await yoga.handleNodeRequest(ctx.request, ctx);
 
     // Set status code
     ctx.status = response.status;

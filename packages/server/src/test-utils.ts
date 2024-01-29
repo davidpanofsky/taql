@@ -87,6 +87,6 @@ export async function createTaqlServer(
   return createYoga({
     ...baseYogaOptions,
     schema: stitchResult.success.schema,
-    plugins: await makePlugins(stitchResult.success.schema),
+    plugins: await makePlugins(supergraph, stitchResult.success),
   });
 }

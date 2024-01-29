@@ -5,7 +5,8 @@
   "scripts": {
     "build": "tsc",
     "incremental-build": "tsc --build",
-    "start": "node build/index.js"
+    "start": "node build/index.js",
+    "inspect": "node --inspect build/index.js"
   },
   "license": "UNLICENSED",
   "devDependencies": {
