@@ -2,22 +2,11 @@ import {
   ENABLE_FEATURES,
   PREREGISTERED_QUERY_PARAMS,
   SERVER_PARAMS,
-  WORKER,
   accessLogger,
   logger,
 } from '@taql/config';
 import { Plugin, createYoga, useReadinessCheck } from 'graphql-yoga';
-import {
-  Supergraph,
-  TASchema,
-  makeSchema,
-  overrideSupergraphWithSvco,
-} from '@taql/schema';
-import {
-  instrumentedStore,
-  memoryStore,
-  useUnifiedCaching,
-} from '@taql/caching';
+import { Supergraph, TASchema, makeSchema } from '@taql/schema';
 import {
   mutatedFieldsExtensionPlugin,
   usePreregisteredQueries,
@@ -31,23 +20,21 @@ import {
   useOpenTelemetry,
   usePrometheus,
 } from '@taql/observability';
-import { GraphQLSchema } from 'graphql';
 import { TaqlAPQ } from './apq';
 import { TaqlState } from '@taql/context';
 import { addClusterReadinessStage } from '@taql/readiness';
-import promClient from 'prom-client';
 import { readFileSync } from 'fs';
 import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspection';
 import { useErrorLogging } from './logging';
-import { useSchema } from './schemaPlugin';
+import { useSchema } from './useSchema';
 import { useTaqlSecurity } from '@taql/security';
+import { useUnifiedCaching } from '@taql/caching';
 
 export const makePlugins = async (
   defaultSupergraph: Supergraph,
   defaultSchema: TASchema
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<Plugin<any>[]> => {
-  const schemaProvider = makeSchemaProvider(defaultSupergraph, defaultSchema);
   const apq = new TaqlAPQ();
 
   const preregPlugin = usePreregisteredQueries({
@@ -106,7 +93,7 @@ export const makePlugins = async (
   );
 
   const yogaPlugins = [
-    useSchema(schemaProvider),
+    useSchema(defaultSupergraph, defaultSchema),
     ...((securityPlugin && [securityPlugin]) || []),
     useErrorLogging,
     mutatedFieldsExtensionPlugin,
@@ -137,60 +124,6 @@ export const makePlugins = async (
 
   ENABLE_FEATURES.introspection || yogaPlugins.push(useDisableIntrospection());
   return yogaPlugins;
-};
-
-const SVCO_SCHEMA_BUILD_HISTOGRAM = new promClient.Histogram({
-  name: 'taql_svco_schema_build',
-  help: 'Total number of times and duration of new schema builds required to serve an SVCO cookie/header',
-  labelNames: ['worker'],
-  buckets: [0.5, 1, 2.5, 5, 10],
-});
-
-const makeSchemaProvider = (
-  defaultSupergraph: Supergraph,
-  defaultSchema: TASchema
-):
-  | GraphQLSchema
-  | ((context?: Partial<TaqlState>) => Promise<GraphQLSchema>) => {
-  if (!ENABLE_FEATURES.serviceOverrides) {
-    return defaultSchema.schema;
-  }
-
-  const schemaForSVCOCache = instrumentedStore({
-    name: 'svco_schemas',
-    store: memoryStore<GraphQLSchema>({
-      max: 10,
-      ttl: SERVER_PARAMS.svcoSchemaTtl,
-      async fetchMethod(legacySVCO): Promise<GraphQLSchema> {
-        logger.debug(`Fetching and building schema for SVCO: ${legacySVCO}`);
-        const stopTimer =
-          SVCO_SCHEMA_BUILD_HISTOGRAM.labels(WORKER).startTimer();
-        return overrideSupergraphWithSvco(defaultSupergraph, legacySVCO).then(
-          (stitchResult) => {
-            stopTimer();
-            return stitchResult == undefined || 'error' in stitchResult
-              ? defaultSchema.schema
-              : 'partial' in stitchResult
-                ? stitchResult.partial.schema
-                : stitchResult.success.schema;
-          }
-        );
-      },
-    }),
-  });
-
-  return async function getSchemaForSvco(context) {
-    const svco = context?.state?.taql.SVCO;
-    if (svco) {
-      logger.debug(`Using schema for SVCO: ${svco}`);
-      const schemaForSVCO = await schemaForSVCOCache?.lruCache.fetch(svco, {
-        allowStale: true,
-      });
-      return schemaForSVCO == undefined ? defaultSchema.schema : schemaForSVCO;
-    } else {
-      return defaultSchema.schema;
-    }
-  };
 };
 
 const yogaPrewarmed = addClusterReadinessStage('yogaPrewarmed');
