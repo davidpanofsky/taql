@@ -203,7 +203,7 @@ export const loadSupergraph = async (options: {
   let legacyDigest: string | undefined = undefined;
   let fromCache = false;
 
-  // try ... finally redisClient.quit()
+  // try ... finally redisClient.disconnect()
   try {
     // try pulling the schema from the configured source.
     try {
@@ -283,7 +283,11 @@ export const loadSupergraph = async (options: {
       }
     }
   } finally {
-    redisClient && redisClient.quit();
+    try {
+      redisClient && redisClient.disconnect();
+    } catch (disconnectErr) {
+      console.warn(`Error while shutting down schema cache redis client: ${disconnectErr}`);
+    }
   }
 
   if (SCHEMA.legacySchemaSource != 'gsr') {
