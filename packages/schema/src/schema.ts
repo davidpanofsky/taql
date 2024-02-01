@@ -162,7 +162,7 @@ export const loadSupergraph = async (options: {
 }): Promise<Supergraph> => {
   const {
     source,
-    updateCache = false,
+    updateCache = !(options.source == 'file' || options.source == 'cache'),
     useCacheOnFailure = SCHEMA.trySchemaFromCache,
     schemaCacheKey = SCHEMA.schemaCacheKey,
     lastSchemaDigestKey = SCHEMA.lastSchemaDigestKey,
@@ -232,6 +232,7 @@ export const loadSupergraph = async (options: {
       if (
         source == 'cache' ||
         SCHEMA.legacySchemaSource == 'gsr' ||
+        !useCacheOnFailure ||
         !redisClient
       ) {
         // we have no schema. DO not proceed.
@@ -255,19 +256,20 @@ export const loadSupergraph = async (options: {
       }
     }
 
-    if (!fromCache && redisClient) {
+    if (!fromCache && updateCache && redisClient) {
       try {
-        // catch redis error and log
         logger.info('Caching subgraph manifests in redis');
         const lastSchemaDigest = await redisClient.get(lastSchemaDigestKey);
         const stringifiedManifest = JSON.stringify(manifest);
         await redisClient.set(schemaCacheKey, stringifiedManifest);
         updateSubgraphCacheSizeMetric(schemaCacheKey, redisClient);
+
         if (SCHEMA.schemaDigest) {
           // In bootstrapping environments, there might be no schema digest specified in the environment.
           await redisClient.set(SCHEMA.schemaDigest, stringifiedManifest);
           updateSubgraphCacheSizeMetric(SCHEMA.schemaDigest, redisClient);
         }
+
         if (
           lastSchemaDigest &&
           SCHEMA.schemaDigest &&
