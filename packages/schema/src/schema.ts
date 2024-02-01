@@ -241,6 +241,7 @@ export const loadSupergraph = async (options: {
       logger.error(
         `unable to load schema from GSR: ${err}, trying to load from cache...`
       );
+      // try loading from the cache after failing to pull from the configured source
       try {
         manifest = await loadSchemaFromCache(schemaCacheKey, redisClient);
         fromCache = true;
@@ -257,6 +258,7 @@ export const loadSupergraph = async (options: {
     }
 
     if (!fromCache && updateCache && redisClient) {
+      // try updating the redis cache
       try {
         logger.info('Caching subgraph manifests in redis');
         const lastSchemaDigest = await redisClient.get(lastSchemaDigestKey);
@@ -285,6 +287,7 @@ export const loadSupergraph = async (options: {
       }
     }
   } finally {
+    // try to shut down the redis client if one has been constructed
     try {
       redisClient && redisClient.disconnect();
     } catch (disconnectErr) {
