@@ -1,5 +1,5 @@
 import * as yaml from 'js-yaml';
-import { GITOPS_PARAMS, logger } from '@taql/config';
+import { GITOPS_PARAMS, SCHEMA, logger } from '@taql/config';
 import { existsSync, lstatSync, readFileSync, writeFileSync } from 'fs';
 import { loadSupergraph, makeSchema } from '@taql/schema';
 import { inspect } from 'util';
@@ -136,7 +136,14 @@ async function dummySchema(): Promise<Schema> {
 }
 
 async function loadSchema(): Promise<Schema> {
-  const stitchResult = await makeSchema(await loadSupergraph());
+  const stitchResult = await makeSchema(
+    await loadSupergraph({
+      source: SCHEMA.source,
+      updateCache: false,
+      useCacheOnFailure: false,
+    })
+  );
+
   if ('success' in stitchResult) {
     return stitchResult.success;
   } else if ('partial' in stitchResult) {
@@ -175,13 +182,19 @@ function main() {
     schemaProvider = dummySchema;
   }
 
-  updateSchemaDigest(
-    GITOPS_PARAMS.patchFilePath,
-    GITOPS_PARAMS.valuesFilePath,
-    schemaProvider
-  ).then(function ({ schemaId, digest }) {
-    console.log(`Digest (base64 encoded) for schema ${schemaId}: ${digest}`);
-  });
+  if (SCHEMA.source != 'cache') {
+    updateSchemaDigest(
+      GITOPS_PARAMS.patchFilePath,
+      GITOPS_PARAMS.valuesFilePath,
+      schemaProvider
+    ).then(function ({ schemaId, digest }) {
+      console.log(`Digest (base64 encoded) for schema ${schemaId}: ${digest}`);
+    });
+  } else {
+    logger.info(
+      "Schema source is set to 'cache'; no reason to attempt updates to the schema digest"
+    );
+  }
 }
 
 main();
