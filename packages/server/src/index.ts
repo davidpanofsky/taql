@@ -76,7 +76,7 @@ const workerStartup = async () => {
     logger.error('Unhandled koa error', error);
   });
 
-  const supergraph = await loadSupergraph();
+  const supergraph = await loadSupergraph({ source: SCHEMA.source });
 
   // The order in which middleware is registered matters
   //  - We first parse headers and convert them to taql context, as we'll likely use that in other middlewares
@@ -169,7 +169,7 @@ const primaryStartup = async () => {
 
   const schemaFile = SCHEMA.schemaFile ?? './supergraph.json';
   if (SCHEMA.source == 'gsr' || SCHEMA.source == 'cache') {
-    const supergraph = await loadSupergraph();
+    const supergraph = await loadSupergraph({ source: SCHEMA.source });
     await promises.writeFile(schemaFile, JSON.stringify(supergraph));
     logger.info(`serialized supergraph from GSR to ${schemaFile}`);
   }

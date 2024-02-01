@@ -150,22 +150,49 @@ const loadSchemaFromCache = async (
   return JSON.parse(raw);
 };
 
-export const loadSupergraph = async (): Promise<Supergraph> => {
-  if (SCHEMA.source == 'file') {
-    logger.info(`loaded supergraph from file: ${SCHEMA.schemaFile}`);
-    if (SCHEMA.schemaFile == undefined) {
+export const loadSupergraph = async (options: {
+  source: string;
+  updateCache?: boolean;
+  useCacheOnFailure?: boolean;
+  schemaCacheKey?: string;
+  lastSchemaDigestKey?: string;
+  schemaFile?: string;
+  redisCluster?: string;
+  redisPort?: number;
+}): Promise<Supergraph> => {
+  const {
+    source,
+    updateCache = false,
+    useCacheOnFailure = SCHEMA.trySchemaFromCache,
+    schemaCacheKey = SCHEMA.schemaCacheKey,
+    lastSchemaDigestKey = SCHEMA.lastSchemaDigestKey,
+    schemaFile = SCHEMA.schemaFile,
+    redisCluster = DEFAULT.redisCluster,
+    redisPort = DEFAULT.redisPort,
+  } = options;
+
+  if (source == 'file') {
+    logger.info(`loaded supergraph from file: ${schemaFile}`);
+    if (schemaFile == undefined) {
       throw new Error('no schema file specified');
     }
-    return JSON.parse(await promises.readFile(SCHEMA.schemaFile, 'utf-8'));
+    return JSON.parse(await promises.readFile(schemaFile, 'utf-8'));
+  }
+
+  const wantsCache = updateCache || useCacheOnFailure || source == 'cache';
+
+  if (wantsCache && !redisCluster) {
+    logger.error(
+      'loadSupergraph configured to interact with cache, but redis is not configured!'
+    );
   }
 
   const redisClient =
-    (SCHEMA.trySchemaFromCache || SCHEMA.source == 'cache') &&
-    DEFAULT.redisCluster
+    wantsCache && redisCluster
       ? new RedisCluster([
           {
-            host: DEFAULT.redisCluster,
-            port: DEFAULT.redisPort,
+            host: redisCluster,
+            port: redisPort,
           },
         ])
       : undefined;
@@ -177,19 +204,19 @@ export const loadSupergraph = async (): Promise<Supergraph> => {
   let fromCache = false;
 
   try {
-    if (SCHEMA.source == 'cache') {
+    if (source == 'cache') {
       if (!redisClient) {
         throw new Error(
           "Schema source is set to 'cache' but there is no configured default redis cache"
         );
       }
       logger.info(
-        `loading supergraph preferentially from cache with key = ${SCHEMA.schemaCacheKey}`
+        `loading supergraph preferentially from cache with key = ${schemaCacheKey}`
       );
-      manifest = await loadSchemaFromCache(SCHEMA.schemaCacheKey, redisClient);
+      manifest = await loadSchemaFromCache(schemaCacheKey, redisClient);
       fromCache = true;
       subgraphsPulled.set({ source: 'cache' }, manifest.length);
-      updateSubgraphCacheSizeMetric(SCHEMA.schemaCacheKey, redisClient);
+      updateSubgraphCacheSizeMetric(schemaCacheKey, redisClient);
     } else {
       logger.info('loading supergraph from GSR');
       const supergraph = await loadSupergraphFromGsr();
@@ -200,7 +227,7 @@ export const loadSupergraph = async (): Promise<Supergraph> => {
     }
   } catch (err) {
     if (
-      SCHEMA.source == 'cache' ||
+      source == 'cache' ||
       SCHEMA.legacySchemaSource == 'gsr' ||
       !redisClient
     ) {
@@ -211,10 +238,10 @@ export const loadSupergraph = async (): Promise<Supergraph> => {
       `unable to load schema from GSR: ${err}, trying to load from cache...`
     );
     try {
-      manifest = await loadSchemaFromCache(SCHEMA.schemaCacheKey, redisClient);
+      manifest = await loadSchemaFromCache(schemaCacheKey, redisClient);
       fromCache = true;
       subgraphsPulled.set({ source: 'cache' }, manifest.length);
-      updateSubgraphCacheSizeMetric(SCHEMA.schemaCacheKey, redisClient);
+      updateSubgraphCacheSizeMetric(schemaCacheKey, redisClient);
       console.log(
         `Successfully pulled ${manifest.length} subgraphs from cache`
       );
@@ -228,12 +255,10 @@ export const loadSupergraph = async (): Promise<Supergraph> => {
   if (!fromCache && redisClient) {
     try {
       logger.info('Caching subgraph manifests in redis');
-      const lastSchemaDigest = await redisClient.get(
-        SCHEMA.lastSchemaDigestKey
-      );
+      const lastSchemaDigest = await redisClient.get(lastSchemaDigestKey);
       const stringifiedManifest = JSON.stringify(manifest);
-      await redisClient.set(SCHEMA.schemaCacheKey, stringifiedManifest);
-      updateSubgraphCacheSizeMetric(SCHEMA.schemaCacheKey, redisClient);
+      await redisClient.set(schemaCacheKey, stringifiedManifest);
+      updateSubgraphCacheSizeMetric(schemaCacheKey, redisClient);
       if (SCHEMA.schemaDigest) {
         // In bootstrapping environments, there might be no schema digest specified in the environment.
         await redisClient.set(SCHEMA.schemaDigest, stringifiedManifest);
@@ -246,7 +271,7 @@ export const loadSupergraph = async (): Promise<Supergraph> => {
       ) {
         // We are observing a new schema, update the cached digest with the new one and expire the old
         // cache after 48 hours.
-        await redisClient.set(SCHEMA.lastSchemaDigestKey, SCHEMA.schemaDigest);
+        await redisClient.set(lastSchemaDigestKey, SCHEMA.schemaDigest);
         await redisClient.expire(lastSchemaDigest, 2 * 24 * 60 * 60);
       }
     } catch (err) {
