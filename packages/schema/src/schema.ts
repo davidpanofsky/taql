@@ -286,7 +286,9 @@ export const loadSupergraph = async (options: {
     try {
       redisClient && redisClient.disconnect();
     } catch (disconnectErr) {
-      console.warn(`Error while shutting down schema cache redis client: ${disconnectErr}`);
+      console.warn(
+        `Error while shutting down schema cache redis client: ${disconnectErr}`
+      );
     }
   }
 
