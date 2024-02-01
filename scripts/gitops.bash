@@ -54,12 +54,17 @@ function gitops::updateSchema() {
     # Perform the update
     "${UPDATE_COMMAND[@]}" "$@" || fail "Failed to update schema with ${UPDATE_COMMAND[@]}"
 
+    echo "Changing working directory to clone path ${clone}"
     cd "${clone}"
+    echo "Checking for changes..."
     if ! git diff --exit-code; then
+        echo "Changes exist, adding..."
         # Add only the file(s) we expect to have modified
         git add ${files[@]} || fail "Could not add ${files[@]}"
+        echo "... and committing ..."
         git -c "user.name=${GITOPS_USER}" -c "user.email=${GITOPS_USER}@${GITOPS_GIT_HOST}" \
             commit -m "$(date): Update schema digest ${files[@]}" || fail "Could not commit changes"
+        echo "... and finally pushing."
         if ! git push origin "${GITOPS_REPO_BRANCH}"; then
             # We failed to push, hopefully because of a concurrent commit to a different file.
             # Try to pull and rebase and push again.  If we fail again, kubernetes will give us one more try
@@ -68,6 +73,7 @@ function gitops::updateSchema() {
             git pull --rebase || fail "Failed to rebase"
             git push origin "${GITOPS_REPO_BRANCH}" || fail "Could not push changes"
         fi
+        echo "Changes pushed."
     else
         echo "No schema changes to commit"
     fi
