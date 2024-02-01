@@ -203,80 +203,87 @@ export const loadSupergraph = async (options: {
   let legacyDigest: string | undefined = undefined;
   let fromCache = false;
 
+  // try ... finally redisClient.quit()
   try {
-    if (source == 'cache') {
-      if (!redisClient) {
-        throw new Error(
-          "Schema source is set to 'cache' but there is no configured default redis cache"
+    // try pulling the schema from the configured source.
+    try {
+      if (source == 'cache') {
+        if (!redisClient) {
+          throw new Error(
+            "Schema source is set to 'cache' but there is no configured default redis cache"
+          );
+        }
+        logger.info(
+          `loading supergraph preferentially from cache with key = ${schemaCacheKey}`
         );
-      }
-      logger.info(
-        `loading supergraph preferentially from cache with key = ${schemaCacheKey}`
-      );
-      manifest = await loadSchemaFromCache(schemaCacheKey, redisClient);
-      fromCache = true;
-      subgraphsPulled.set({ source: 'cache' }, manifest.length);
-      updateSubgraphCacheSizeMetric(schemaCacheKey, redisClient);
-    } else {
-      logger.info('loading supergraph from GSR');
-      const supergraph = await loadSupergraphFromGsr();
-      id = supergraph.id;
-      sdl = supergraph.supergraph;
-      manifest = [...supergraph.manifest];
-      subgraphsPulled.set({ source: 'gsr' }, manifest.length);
-    }
-  } catch (err) {
-    if (
-      source == 'cache' ||
-      SCHEMA.legacySchemaSource == 'gsr' ||
-      !redisClient
-    ) {
-      // we have no schema. DO not proceed.
-      throw err;
-    }
-    logger.error(
-      `unable to load schema from GSR: ${err}, trying to load from cache...`
-    );
-    try {
-      manifest = await loadSchemaFromCache(schemaCacheKey, redisClient);
-      fromCache = true;
-      subgraphsPulled.set({ source: 'cache' }, manifest.length);
-      updateSubgraphCacheSizeMetric(schemaCacheKey, redisClient);
-      console.log(
-        `Successfully pulled ${manifest.length} subgraphs from cache`
-      );
-    } catch (redisErr) {
-      console.error(`unable to load cached schema from redis: ${redisErr}`);
-      // Throw the original error from the GSR
-      throw err;
-    }
-  }
-
-  if (!fromCache && redisClient) {
-    try {
-      logger.info('Caching subgraph manifests in redis');
-      const lastSchemaDigest = await redisClient.get(lastSchemaDigestKey);
-      const stringifiedManifest = JSON.stringify(manifest);
-      await redisClient.set(schemaCacheKey, stringifiedManifest);
-      updateSubgraphCacheSizeMetric(schemaCacheKey, redisClient);
-      if (SCHEMA.schemaDigest) {
-        // In bootstrapping environments, there might be no schema digest specified in the environment.
-        await redisClient.set(SCHEMA.schemaDigest, stringifiedManifest);
-        updateSubgraphCacheSizeMetric(SCHEMA.schemaDigest, redisClient);
-      }
-      if (
-        lastSchemaDigest &&
-        SCHEMA.schemaDigest &&
-        lastSchemaDigest != SCHEMA.schemaDigest
-      ) {
-        // We are observing a new schema, update the cached digest with the new one and expire the old
-        // cache after 48 hours.
-        await redisClient.set(lastSchemaDigestKey, SCHEMA.schemaDigest);
-        await redisClient.expire(lastSchemaDigest, 2 * 24 * 60 * 60);
+        manifest = await loadSchemaFromCache(schemaCacheKey, redisClient);
+        fromCache = true;
+        subgraphsPulled.set({ source: 'cache' }, manifest.length);
+        updateSubgraphCacheSizeMetric(schemaCacheKey, redisClient);
+      } else {
+        logger.info('loading supergraph from GSR');
+        const supergraph = await loadSupergraphFromGsr();
+        id = supergraph.id;
+        sdl = supergraph.supergraph;
+        manifest = [...supergraph.manifest];
+        subgraphsPulled.set({ source: 'gsr' }, manifest.length);
       }
     } catch (err) {
-      logger.error(`Unable to cache subgraph manifests in redis: ${err}`);
+      if (
+        source == 'cache' ||
+        SCHEMA.legacySchemaSource == 'gsr' ||
+        !redisClient
+      ) {
+        // we have no schema. DO not proceed.
+        throw err;
+      }
+      logger.error(
+        `unable to load schema from GSR: ${err}, trying to load from cache...`
+      );
+      try {
+        manifest = await loadSchemaFromCache(schemaCacheKey, redisClient);
+        fromCache = true;
+        subgraphsPulled.set({ source: 'cache' }, manifest.length);
+        updateSubgraphCacheSizeMetric(schemaCacheKey, redisClient);
+        console.log(
+          `Successfully pulled ${manifest.length} subgraphs from cache`
+        );
+      } catch (redisErr) {
+        console.error(`unable to load cached schema from redis: ${redisErr}`);
+        // Throw the original error from the GSR
+        throw err;
+      }
     }
+
+    if (!fromCache && redisClient) {
+      try {
+        // catch redis error and log
+        logger.info('Caching subgraph manifests in redis');
+        const lastSchemaDigest = await redisClient.get(lastSchemaDigestKey);
+        const stringifiedManifest = JSON.stringify(manifest);
+        await redisClient.set(schemaCacheKey, stringifiedManifest);
+        updateSubgraphCacheSizeMetric(schemaCacheKey, redisClient);
+        if (SCHEMA.schemaDigest) {
+          // In bootstrapping environments, there might be no schema digest specified in the environment.
+          await redisClient.set(SCHEMA.schemaDigest, stringifiedManifest);
+          updateSubgraphCacheSizeMetric(SCHEMA.schemaDigest, redisClient);
+        }
+        if (
+          lastSchemaDigest &&
+          SCHEMA.schemaDigest &&
+          lastSchemaDigest != SCHEMA.schemaDigest
+        ) {
+          // We are observing a new schema, update the cached digest with the new one and expire the old
+          // cache after 48 hours.
+          await redisClient.set(lastSchemaDigestKey, SCHEMA.schemaDigest);
+          await redisClient.expire(lastSchemaDigest, 2 * 24 * 60 * 60);
+        }
+      } catch (err) {
+        logger.error(`Unable to cache subgraph manifests in redis: ${err}`);
+      }
+    }
+  } finally {
+    redisClient && redisClient.quit();
   }
 
   if (SCHEMA.legacySchemaSource != 'gsr') {
