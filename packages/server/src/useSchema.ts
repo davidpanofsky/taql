@@ -22,7 +22,7 @@ export const useSchema = (
     // One schema to rule them all, and never think about.
     return {
       onEnveloped({ setSchema }) {
-        setSchema(defaultSchema);
+        setSchema(defaultSchema.schema);
       },
     };
   }
