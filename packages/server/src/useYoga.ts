@@ -143,7 +143,7 @@ export async function createYogaMiddleware(supergraph: Supergraph) {
     // The following are graphql-yoga defaults added explicitly here for future stability.
     //logging: true,
     logging: logger,
-    maskedErrors: true,
+    maskedErrors: ENABLE_FEATURES.maskErrors,
     graphqlEndpoint: '/graphql',
     healthCheckEndpoint: '/health',
     landingPage: ENABLE_FEATURES.graphiql,
