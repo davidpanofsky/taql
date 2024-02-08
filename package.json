@@ -1,6 +1,6 @@
 {
   "name": "@taql",
-  "version": "12.1",
+  "version": "12.4",
   "main": "build/index.js",
   "scripts": {
     "format": "prettier --write . || true && eslint --fix . || true",

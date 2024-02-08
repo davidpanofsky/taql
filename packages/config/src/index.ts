@@ -345,6 +345,11 @@ export const ENABLE_FEATURES = resolve({
     resolver: resolvers.booleanFromString,
     defaultTo: process.env.NODE_ENV === 'production' ? false : true,
   },
+  maskErrors: {
+    property: 'MASK_ERRORS',
+    resolver: resolvers.booleanFromString,
+    defaultTo: process.env.NODE_ENV === 'production' ? true : false,
+  },
   graphiql: {
     property: 'ENABLE_GRAPHIQL',
     resolver: resolvers.booleanFromString,
