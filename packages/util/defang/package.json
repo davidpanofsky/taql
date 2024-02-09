@@ -1,0 +1,12 @@
+{
+  "name": "@taql/util.defang",
+  "main": "build/index.js",
+  "scripts": {
+    "build": "tsc",
+    "incremental-build": "tsc --build"
+  },
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "typescript": "*"
+  }
+}
