@@ -9,12 +9,12 @@
   },
   "license": "UNLICENSED",
   "devDependencies": {
-    "dotenv": "^16.4.1",
     "typescript": "*"
   },
   "dependencies": {
     "@opentelemetry/api": "*",
     "@ta-graphql-utils/stitch": "*",
+    "dotenv": "^16.4.1",
     "winston": "^3.11.0",
     "winston-logfmt": "^1.0.0"
   }

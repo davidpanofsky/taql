@@ -1,36 +1,54 @@
-FROM node:18-alpine3.17
-WORKDIR /opt/taql
+# syntax=docker/dockerfile:1
 
-# Prepare a skeleton of the project including only what is needed for yarn
-# install (e.g. package.json files and yarn config). This will be copied into
-# the next build stage and yarn installed there. This way, the yarn install
-# step can be cached in the second build stage based only on changes to yarn
-# inputs This can't be one stage because we also copy in files we _don't_ need
-# for yarn and remove them; these removed files will still invalidate
-# subsequent steps but this will not cross the stage boundary.
+ARG ALPINE_VERSION=3.17
+ARG NODE_VERSION=18.16.0
+ARG IMAGE=node:${NODE_VERSION}-alpine${ALPINE_VERSION}
 
-COPY ./package.json ./yarn.lock ./.yarnrc.yml /opt/taql/
-COPY ./.yarn /opt/taql/.yarn
-COPY ./packages /opt/taql/packages
-RUN find /opt/taql/packages -type f \! -name "package.json" | xargs rm
+FROM --platform=$TARGETPLATFORM $IMAGE as base
 
-FROM node:18-alpine3.17
+# Install non-application packages
+RUN \
+    #apk update && \
+    #apk upgrade && \
+    apk add --no-cache \
+    bash \
+    git \
+    strace
+
+FROM --platform=$TARGETPLATFORM $IMAGE as install
+WORKDIR /build
+
+# Copy in files needed for yarn to install dependencies including the yarn cache
+COPY tsconfig.json package.json yarn.lock .yarnrc.yml ./
+COPY .yarn .yarn
+COPY packages packages
+RUN find packages -type f \! -name "package.json" -delete
+
+# Download and install all node packages needed for building
+RUN yarn install --immutable
+
+FROM --platform=$BUILDPLATFORM install as build
+# Copy in the rest of the project
+COPY . .
+# Transpile ts to js
+RUN yarn run build
+# remove dev node dependencies
+RUN yarn workspaces focus -A --production
+
+FROM --platform=$TARGETPLATFORM base as assemble
 WORKDIR /opt/taql
 
 ARG APP_VERSION
 ENV APP_VERSION=${APP_VERSION}
 
-# Install non-application packages
-RUN apk update && \
-    apk upgrade && \
-    apk add --no-cache git bash strace
-
-# Copy in a project skeleton, containing only what yarn needs to know to install
-COPY --from=0 /opt/taql /opt/taql
-RUN yarn install --immutable
-
-# Copy in the rest of the project to be built
-COPY . /opt/taql/
-RUN yarn run build
+# Copy in project from build layer
+COPY --from=build /build/node_modules ./node_modules
+COPY --from=build /build/packages ./packages
+COPY --from=build /build/tsconfig.json /build/package.json /build/.yarnrc.yml /build/yarn.lock ./
+# Copy in only whats needed from yarn for the project to execute
+COPY --from=build /build/.yarn/install-state.gz .yarn/
+COPY --from=build /build/.yarn/patches .yarn/patches/
+COPY --from=build /build/.yarn/plugins .yarn/plugins/
+COPY --from=build /build/.yarn/releases .yarn/releases/
 
 CMD ["yarn", "workspace", "@taql/server", "run", "start"]

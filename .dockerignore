@@ -5,6 +5,8 @@
 # we think it is
 .env
 
+Dockerfile
+
 node_modules
 **/node_modules
 **/build
