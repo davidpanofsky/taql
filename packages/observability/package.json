@@ -35,6 +35,7 @@
     "@opentelemetry/sdk-trace-node": "^1.20.0",
     "@opentelemetry/semantic-conventions": "^1.20.0",
     "@taql/config": "workspace:^",
+    "@taql/util.defang": "workspace:^",
     "graphql": "*",
     "graphql-yoga": "*",
     "prom-client": "*"

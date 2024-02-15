@@ -2902,6 +2902,7 @@ __metadata:
     "@opentelemetry/sdk-trace-node": ^1.20.0
     "@opentelemetry/semantic-conventions": ^1.20.0
     "@taql/config": "workspace:^"
+    "@taql/util.defang": "workspace:^"
     "@types/koa": "*"
     graphql: "*"
     graphql-yoga: "*"
@@ -3031,6 +3032,20 @@ __metadata:
     "@graphql-tools/utils": "*"
     graphql: "*"
     graphql-yoga: "*"
+  languageName: unknown
+  linkType: soft
+
+"@taql/util.defang@workspace:^, @taql/util.defang@workspace:packages/util/defang":
+  version: 0.0.0-use.local
+  resolution: "@taql/util.defang@workspace:packages/util/defang"
+  dependencies:
+    typescript: "*"
+  languageName: unknown
+  linkType: soft
+
+"@taql/util@workspace:packages/util":
+  version: 0.0.0-use.local
+  resolution: "@taql/util@workspace:packages/util"
   languageName: unknown
   linkType: soft
 

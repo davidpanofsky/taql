@@ -5,7 +5,23 @@ import {
   createSummary,
   usePrometheus,
 } from '@graphql-yoga/plugin-prometheus';
+import { defang } from '@taql/util.defang';
 import promClient from 'prom-client';
+
+const DefangedHistogram = defang(
+  promClient.Histogram,
+  'observe',
+  'remove',
+  'reset',
+  'zero'
+);
+const DefangedCounter = defang(promClient.Counter, 'inc', 'remove', 'reset');
+const DefangedSummary = defang(
+  promClient.Summary,
+  'observe',
+  'remove',
+  'reset'
+);
 
 const histoBucketsSec = [
   0.0001, 0.0005, 0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1, 5,
@@ -26,7 +42,7 @@ const phaseHisto = ({
   buckets?: number[];
 }) =>
   createHistogram({
-    histogram: new promClient.Histogram({
+    histogram: new DefangedHistogram({
       name,
       help,
       buckets,
@@ -37,7 +53,7 @@ const phaseHisto = ({
 
 const evtCounter = ({ name, help }: { name: string; help: string }) =>
   createCounter({
-    counter: new promClient.Counter({
+    counter: new DefangedCounter({
       name,
       help,
       labelNames: ['operationName', 'operationType'],
@@ -50,15 +66,15 @@ const evtCounter = ({ name, help }: { name: string; help: string }) =>
 
 const errorCounter = ({ name, help }: { name: string; help: string }) =>
   createCounter({
-    counter: new promClient.Counter({
+    counter: new DefangedCounter({
       name,
       help,
-      labelNames: ['operationName', 'operationType', 'errorPhase'],
+      labelNames: ['operationName', 'operationType', 'phase'],
     }),
     fillLabelsFn: (params: FillLabelsFnParams) => ({
       operationName: params.operationName ?? 'unknown',
       operationType: params.operationType ?? 'unknown',
-      errorPhase: params.error?.message?.startsWith('Variable')
+      phase: params.error?.message?.startsWith('Variable')
         ? 'variables'
         : params.errorPhase ?? 'unknown',
     }),
@@ -84,7 +100,7 @@ export function usePreconfiguredPrometheus() {
     }),
     // requires `execute` to be enabled
     requestSummary: createSummary({
-      summary: new promClient.Summary({
+      summary: new DefangedSummary({
         name: 'taql_envelop_request_time_summary',
         help: 'Summary to measure the time (sec) to complete GraphQL operations',
         labelNames: operationLabelNames,
@@ -103,7 +119,7 @@ export function usePreconfiguredPrometheus() {
     }),
     // no labels on this one. We don't do appreciable amounts of context buliding and it doesn't vary by operation anyhow.
     contextBuilding: createHistogram({
-      histogram: new promClient.Histogram({
+      histogram: new DefangedHistogram({
         name: 'taql_envelop_phase_context',
         help: 'Time (sec) spent building the GraphQL context',
         buckets: histoBucketsSec,
