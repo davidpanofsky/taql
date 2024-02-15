@@ -50,5 +50,6 @@ COPY --from=build /build/.yarn/install-state.gz .yarn/
 COPY --from=build /build/.yarn/patches .yarn/patches/
 COPY --from=build /build/.yarn/plugins .yarn/plugins/
 COPY --from=build /build/.yarn/releases .yarn/releases/
+COPY --from=build /build/scripts/gitops.bash scripts/gitops.bash
 
 CMD ["yarn", "workspace", "@taql/server", "run", "start"]
