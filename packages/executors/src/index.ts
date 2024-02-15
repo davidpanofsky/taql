@@ -83,7 +83,20 @@ export const requestFormatter = () => async (request: TaqlRequest) => {
 
   const query = instrumentedPrint(document);
 
-  return { query, variables } as const;
+  // Pass on as much information as we can to upstreams by extensions
+  // preregisteredQueryId gives a hint of how to trace back to a client component/use case and
+  // operation id gives even more to sniff out.
+  // Note: this function is not currently called for single batching executors, so they
+  // won't get the same information.  This might be ok, as it will be less meaningful there, but it's still
+  // worth noting
+  const extensions = {
+    servicing: {
+      preregisteredQueryId: context?.params?.extensions?.preregisteredQueryId ?? 'N/A',
+      operationName: context?.params?.operationName ?? 'unknown',
+    }
+  };
+
+  return { query, variables, extensions } as const;
 };
 
 const durationBucketsMs = [
