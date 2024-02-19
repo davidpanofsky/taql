@@ -1,0 +1,6 @@
+{
+  "name": "@taql/util",
+  "workspaces": [
+    "./*"
+  ]
+}
