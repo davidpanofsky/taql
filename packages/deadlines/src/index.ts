@@ -1,18 +1,13 @@
+import {
+  DefaultRecord,
+  Extensions,
+  ExtensionsReducer,
+  defaultExtensionsReducer,
+} from '@taql/yogaUtils';
 import { ExecutionRequest } from '@graphql-tools/utils';
 import { TaqlState } from '@taql/context';
 
 const deadlineSymbol = Symbol('deadline');
-//const deadlineSymbol = 'deadline';
-
-type Extensions = Record<string, unknown> &
-  Partial<Record<typeof deadlineSymbol, number>>;
-
-type ExtensionsReducer<Request = ExecutionRequest> = (
-  extensions: Extensions,
-  next: Request
-) => Extensions;
-
-type DefaultRecord = Record<string, unknown>;
 
 export const getDeadline = <
   Args extends DefaultRecord = DefaultRecord,
@@ -36,9 +31,6 @@ const reduceDeadlines = (acc?: number, next?: number): number | undefined =>
   // the batch will kick off sooner and the first query will not have wasted much
   // of its limited timeout waiting for the batch to fill.
   acc != undefined && next != undefined ? Math.min(acc, next) : acc || next;
-
-const defaultExtensionsReducer: ExtensionsReducer = (extensions, next) =>
-  Object.assign(extensions, next.extensions);
 
 /**
  * Modify an existing request extension reducer to preserve the lowest deadline

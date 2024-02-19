@@ -23,6 +23,7 @@ import {
   memoize1,
 } from '@graphql-tools/utils';
 import { ForwardableHeaders, type TaqlState } from '@taql/context';
+import { extensionsFromContext, upstreamHeadersFromExtensions } from '@taql/extensions';
 import fetch, { Headers } from 'node-fetch';
 import { httpAgent, httpsAgent, legacyHttpsAgent } from '@taql/httpAgent';
 import type { Agent } from 'http';
@@ -89,12 +90,7 @@ export const requestFormatter = () => async (request: TaqlRequest) => {
   // Note: this function is not currently called for single batching executors, so they
   // won't get the same information.  This might be ok, as it will be less meaningful there, but it's still
   // worth noting
-  const extensions = {
-    servicing: {
-      preregisteredQueryId: context?.params?.extensions?.preregisteredQueryId ?? 'N/A',
-      operationName: context?.params?.operationName ?? 'unknown',
-    }
-  };
+  const extensions = extensionsFromContext(context);
 
   return { query, variables, extensions } as const;
 };
@@ -135,6 +131,7 @@ type ConstantLoadParams = {
   subgraph: SubgraphConfig;
   agent: Agent;
   timeout: number;
+  upstreamHeaders?: Record<string, string>;
 };
 
 type LoadParams<T> = {
@@ -225,6 +222,7 @@ const load = async <T, R>({
   forwardHeaders,
   request,
   clientName,
+  upstreamHeaders,
 }: ConstantLoadParams & LoadParams<T>): Promise<R> => {
   const headers = new Headers();
   if (forwardHeaders) {
@@ -232,6 +230,9 @@ const load = async <T, R>({
       entry[1].forEach((val) => headers.append(entry[0], val))
     );
   }
+
+  upstreamHeaders && Object.entries(upstreamHeaders).forEach((entry) =>
+    headers.set(entry[0], entry[1]));
 
   if (timeout < 0) {
     throw new Error(
@@ -290,6 +291,7 @@ const load = async <T, R>({
 export const bindLoad = <T_1, R_1, T_2 = unknown, R_2 = unknown>(
   subgraph: SubgraphConfig,
   getDeadline: (req: T_1) => number | undefined,
+  getUpstreamHeaders: (req: T_1) => Record<string, string>,
   transform?: Transform<T_1, R_1, T_2, R_2>
 ): Load<T_1, R_1> => {
   subgraph.authProvider = subgraphAuthProvider(
@@ -325,6 +327,7 @@ export const bindLoad = <T_1, R_1, T_2 = unknown, R_2 = unknown>(
         timeout: requestTimeout(await args.request),
         agent,
         ...args,
+        upstreamHeaders: getUpstreamHeaders(await args.request),
       });
   } else if (!('response' in transform)) {
     // this is a request transformation without a response transformation:
@@ -335,6 +338,7 @@ export const bindLoad = <T_1, R_1, T_2 = unknown, R_2 = unknown>(
         ...args,
         timeout: requestTimeout(await args.request),
         request: transform.request(await args.request),
+        upstreamHeaders: getUpstreamHeaders(await args.request),
       });
   } else if (!('request' in transform)) {
     // the response is transformed but the request is not
@@ -343,6 +347,7 @@ export const bindLoad = <T_1, R_1, T_2 = unknown, R_2 = unknown>(
         subgraph,
         agent,
         timeout: requestTimeout(await args.request),
+        upstreamHeaders: getUpstreamHeaders(await args.request),
         ...args,
       }).then((response) => transform.response(<R_2>response));
   } else {
@@ -352,6 +357,7 @@ export const bindLoad = <T_1, R_1, T_2 = unknown, R_2 = unknown>(
         subgraph,
         agent,
         timeout: requestTimeout(await args.request),
+        upstreamHeaders: getUpstreamHeaders(await args.request),
         ...args,
         request: transform.request(await args.request),
       }).then((response) => transform.response(<R_2>response));
@@ -361,7 +367,7 @@ export const bindLoad = <T_1, R_1, T_2 = unknown, R_2 = unknown>(
 export const makeRemoteExecutor = (
   subgraph: SubgraphConfig
 ): ((req: ExecutionRequest) => Promise<ExecutionResult>) => {
-  const load = bindLoad<TaqlRequest, ExecutionResult>(subgraph, getDeadline, {
+  const load = bindLoad<TaqlRequest, ExecutionResult>(subgraph, getDeadline, upstreamHeadersFromExtensions, {
     request: requestFormatter(),
   });
   return async (request: TaqlRequest): Promise<ExecutionResult> =>

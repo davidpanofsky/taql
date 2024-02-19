@@ -2742,6 +2742,7 @@ __metadata:
     "@taql/context": "workspace:^"
     "@taql/deadlines": "workspace:^"
     "@taql/executors": "workspace:^"
+    "@taql/extensions": "workspace:^"
     dataloader: ^2.2.2
     graphql: "*"
     prom-client: "*"
@@ -2805,6 +2806,7 @@ __metadata:
   dependencies:
     "@graphql-tools/utils": "*"
     "@taql/context": "workspace:^"
+    "@taql/yogaUtils": "workspace:^"
     typescript: "*"
   languageName: unknown
   linkType: soft
@@ -2834,11 +2836,23 @@ __metadata:
     "@taql/config": "workspace:^"
     "@taql/context": "workspace:^"
     "@taql/deadlines": "workspace:^"
+    "@taql/extensions": "workspace:^"
     "@taql/httpAgent": "workspace:^"
     "@taql/observability": "workspace:^"
     graphql: "*"
     node-fetch: "*"
     prom-client: "*"
+    typescript: "*"
+  languageName: unknown
+  linkType: soft
+
+"@taql/extensions@workspace:^, @taql/extensions@workspace:packages/extensions":
+  version: 0.0.0-use.local
+  resolution: "@taql/extensions@workspace:packages/extensions"
+  dependencies:
+    "@graphql-tools/utils": "*"
+    "@taql/context": "workspace:^"
+    "@taql/yogaUtils": "workspace:^"
     typescript: "*"
   languageName: unknown
   linkType: soft
@@ -3031,6 +3045,15 @@ __metadata:
     "@graphql-tools/utils": "*"
     graphql: "*"
     graphql-yoga: "*"
+  languageName: unknown
+  linkType: soft
+
+"@taql/yogaUtils@workspace:^, @taql/yogaUtils@workspace:packages/yogaUtils":
+  version: 0.0.0-use.local
+  resolution: "@taql/yogaUtils@workspace:packages/yogaUtils"
+  dependencies:
+    "@graphql-tools/utils": "*"
+    typescript: "*"
   languageName: unknown
   linkType: soft
 

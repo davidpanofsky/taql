@@ -19,6 +19,7 @@
     "@taql/config": "workspace:^",
     "@taql/context": "workspace:^",
     "@taql/deadlines": "workspace:^",
+    "@taql/extensions": "workspace:^",
     "@taql/httpAgent": "workspace:^",
     "@taql/observability": "workspace:^",
     "graphql": "*",

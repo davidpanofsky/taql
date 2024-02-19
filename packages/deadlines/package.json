@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@graphql-tools/utils": "*",
-    "@taql/context": "workspace:^"
+    "@taql/context": "workspace:^",
+    "@taql/yogaUtils": "workspace:^"
   }
 }
