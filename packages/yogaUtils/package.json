@@ -1,0 +1,17 @@
+{
+  "name": "@taql/yogaUtils",
+  "version": "1.0.0",
+  "main": "build/index.js",
+  "scripts": {
+    "build": "tsc",
+    "incremental-build": "tsc --build",
+    "start": "node build/index.js"
+  },
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "typescript": "*"
+  },
+  "dependencies": {
+    "@graphql-tools/utils": "*"
+  }
+}
