@@ -23,7 +23,10 @@ import {
   memoize1,
 } from '@graphql-tools/utils';
 import { ForwardableHeaders, type TaqlState } from '@taql/context';
-import { extensionsFromContext, upstreamHeadersFromExtensions } from '@taql/extensions';
+import {
+  extensionsFromContext,
+  upstreamHeadersFromExtensions,
+} from '@taql/extensions';
 import fetch, { Headers } from 'node-fetch';
 import { httpAgent, httpsAgent, legacyHttpsAgent } from '@taql/httpAgent';
 import type { Agent } from 'http';
@@ -231,8 +234,10 @@ const load = async <T, R>({
     );
   }
 
-  upstreamHeaders && Object.entries(upstreamHeaders).forEach((entry) =>
-    headers.set(entry[0], entry[1]));
+  upstreamHeaders &&
+    Object.entries(upstreamHeaders).forEach((entry) =>
+      headers.set(entry[0], entry[1])
+    );
 
   if (timeout < 0) {
     throw new Error(
@@ -367,9 +372,14 @@ export const bindLoad = <T_1, R_1, T_2 = unknown, R_2 = unknown>(
 export const makeRemoteExecutor = (
   subgraph: SubgraphConfig
 ): ((req: ExecutionRequest) => Promise<ExecutionResult>) => {
-  const load = bindLoad<TaqlRequest, ExecutionResult>(subgraph, getDeadline, upstreamHeadersFromExtensions, {
-    request: requestFormatter(),
-  });
+  const load = bindLoad<TaqlRequest, ExecutionResult>(
+    subgraph,
+    getDeadline,
+    upstreamHeadersFromExtensions,
+    {
+      request: requestFormatter(),
+    }
+  );
   return async (request: TaqlRequest): Promise<ExecutionResult> =>
     load({
       forwardHeaders: request.context?.state.taql.forwardHeaders,

@@ -7,7 +7,10 @@ import {
 } from '@graphql-tools/utils';
 import { TaqlRequest, translateConfigToLoaderOptions } from './utils';
 import { bindLoad, makeRemoteExecutor } from '@taql/executors';
-import { mergeUpstreamHeaders, wrapReducer as wrapReducerWithAttribution } from '@taql/extensions';
+import {
+  mergeUpstreamHeaders,
+  wrapReducer as wrapReducerWithAttribution,
+} from '@taql/extensions';
 import {
   pickDeadline,
   wrapReducer as wrapReducerWithDeadlineHandling,
@@ -18,7 +21,6 @@ import { SubgraphConfig } from '@taql/executors';
 import type { TaqlState } from '@taql/context';
 import { createLoadFn } from '@graphql-tools/batch-execute';
 import promClient from 'prom-client';
-
 
 const BATCH_SIZE_HISTOGRAM = new promClient.Histogram({
   name: 'taql_executor_batch_size',
