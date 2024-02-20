@@ -234,6 +234,7 @@ const load = async <T, R>({
     );
   }
 
+  logger.info(`Applying upstream headers: ${upstreamHeaders}`);
   upstreamHeaders &&
     Object.entries(upstreamHeaders).forEach((entry) =>
       headers.set(entry[0], entry[1])
