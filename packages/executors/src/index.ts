@@ -33,6 +33,7 @@ import type { Agent } from 'http';
 import { SpanKind } from '@opentelemetry/api';
 import { SubgraphExecutorConfig } from '@ta-graphql-utils/stitch';
 import { getDeadline } from '@taql/deadlines';
+import { inspect } from 'util';
 import path from 'node:path';
 import { performance } from 'perf_hooks';
 import promClient from 'prom-client';
@@ -234,7 +235,7 @@ const load = async <T, R>({
     );
   }
 
-  logger.info(`Applying upstream headers: ${upstreamHeaders}`);
+  logger.info(`Applying upstream headers: ${inspect(upstreamHeaders)}`);
   upstreamHeaders &&
     Object.entries(upstreamHeaders).forEach((entry) =>
       headers.set(entry[0], entry[1])
