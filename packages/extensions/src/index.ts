@@ -7,7 +7,7 @@ import {
 
 import { ExecutionRequest } from '@graphql-tools/utils';
 import { TaqlState } from '@taql/context';
-import { inspect ] from 'util';
+import { inspect } from 'util';
 
 const servicingExtension = 'servicing';
 const servicingPreregisteredQueryIds = 'preregisteredQueries';
@@ -71,7 +71,9 @@ export const upstreamHeadersFromExtensions = <
   const servicing: any = request?.extensions?.[servicingExtension];
   const result: Record<string, string> = {};
   if (!servicing) {
-    console.log('No "servicing" found in extensions, returning empty dictionary');
+    console.log(
+      'No "servicing" found in extensions, returning empty dictionary'
+    );
     return result;
   }
 
