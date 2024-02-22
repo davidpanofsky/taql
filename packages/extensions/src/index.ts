@@ -7,6 +7,7 @@ import {
 
 import { ExecutionRequest } from '@graphql-tools/utils';
 import { TaqlState } from '@taql/context';
+import { inspect ] from 'util';
 
 const servicingExtension = 'servicing';
 const servicingPreregisteredQueryIds = 'preregisteredQueries';
@@ -49,6 +50,7 @@ export const wrapReducer =
 
     const result = reducer(extensions, nextRequest);
     result[servicingExtension] = acc;
+    console.log(`Accumulating servicing extensions: ${inspect(result)}`);
     return result;
   };
 
@@ -69,6 +71,7 @@ export const upstreamHeadersFromExtensions = <
   const servicing: any = request?.extensions?.[servicingExtension];
   const result: Record<string, string> = {};
   if (!servicing) {
+    console.log('No "servicing" found in extensions, returning empty dictionary');
     return result;
   }
 
