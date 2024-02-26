@@ -41,7 +41,8 @@ export const wrapReducer =
     }
 
     const nextPreregisteredQueryId =
-      nextRequest.extensions?.['preregisteredQueryId'];
+      nextRequest.extensions?.['preregisteredQueryId'] ??
+      nextRequest.context?.params?.extensions?.['preregisteredQureyId'];
     nextPreregisteredQueryId &&
       acc[servicingPreregisteredQueryIds]?.push(nextPreregisteredQueryId);
 
