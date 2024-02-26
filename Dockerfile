@@ -4,7 +4,7 @@ ARG ALPINE_VERSION=3.17
 ARG NODE_VERSION=18.16.0
 ARG IMAGE=node:${NODE_VERSION}-alpine${ALPINE_VERSION}
 
-FROM --platform=$TARGETPLATFORM $IMAGE as base
+FROM --platform=${TARGETPLATFORM:-linux} $IMAGE as base
 
 # Install non-application packages
 RUN \
@@ -15,7 +15,7 @@ RUN \
     git \
     strace
 
-FROM --platform=$TARGETPLATFORM $IMAGE as install
+FROM --platform=${TARGETPLATFORM:-linux} $IMAGE as install
 WORKDIR /build
 
 # Copy in files needed for yarn to install dependencies including the yarn cache
@@ -27,7 +27,7 @@ RUN find packages -type f \! -name "package.json" -delete
 # Download and install all node packages needed for building
 RUN yarn install --immutable
 
-FROM --platform=$BUILDPLATFORM install as build
+FROM --platform=${BUILDPLATFORM:-linux} install as build
 # Copy in the rest of the project
 COPY . .
 # Transpile ts to js
@@ -35,7 +35,7 @@ RUN yarn run build
 # remove dev node dependencies
 RUN yarn workspaces focus -A --production
 
-FROM --platform=$TARGETPLATFORM base as assemble
+FROM --platform=${TARGETPLATFORM:-linux} base as assemble
 WORKDIR /opt/taql
 
 ARG APP_VERSION
