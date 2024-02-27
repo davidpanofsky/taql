@@ -4,11 +4,9 @@ import {
   ExtensionsReducer,
   defaultExtensionsReducer,
 } from '@taql/yogaUtils';
-import { logger, preregisteredQueryExtensionKey  } from '@taql/config';
 import { ExecutionRequest } from '@graphql-tools/utils';
 import { TaqlState } from '@taql/context';
-import { inspect } from 'util';
-
+import { preregisteredQueryExtensionKey } from '@taql/config';
 
 const getPreregisteredQueryId = <
   Args extends DefaultRecord = DefaultRecord,
@@ -75,12 +73,6 @@ export const upstreamHeadersFromContext = <
     | null
     | undefined
 ): Record<string, string> => {
-  if (!request?.context?.isDummyRequest) {
-    logger.debug(`upstreamHeadersFromContext - request : ${inspect(request)}`);
-    logger.debug(
-      `upstreamHeadersFromContext - request.context : ${inspect(request?.context)}`
-    );
-  }
   const result: Record<string, string> = {};
 
   const preregisteredQueryId = request && getPreregisteredQueryId(request);
@@ -93,30 +85,19 @@ export const upstreamHeadersFromContext = <
   if (operationName) {
     result[operationNamesServicedHeader] = operationName;
   }
-  if (!request?.context?.isDummyRequest) {
-    logger.debug(`upstreamHeadersFromContext - result: ${inspect(result)}`);
-  }
   return result;
 };
 
 export const extensionsFromContext = (
   context: TaqlState | undefined
-): Extensions => {
-  if (context && !context.isDummyRequest) {
-    logger.debug(
-      `extensionsFromContext - context.params: ${inspect(context.params)}`
-    );
-  }
-
-  return {
-    servicing: {
-      preregisteredQueryIds: [
-        context?.params?.extensions?.[preregisteredQueryExtensionKey] ?? 'N/A',
-      ],
-      operationNames: [context?.params?.operationName ?? 'unknown'],
-    },
-  };
-};
+): Extensions => ({
+  servicing: {
+    preregisteredQueryIds: [
+      context?.params?.extensions?.[preregisteredQueryExtensionKey] ?? 'N/A',
+    ],
+    operationNames: [context?.params?.operationName ?? 'unknown'],
+  },
+});
 
 export const mergeUpstreamHeaders = (
   requests: ReadonlyArray<ExecutionRequest>
