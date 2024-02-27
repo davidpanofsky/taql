@@ -104,9 +104,10 @@ export const mergeUpstreamHeaders = (
 ): Record<string, string> =>
   requests.map(upstreamHeadersFromContext).reduce((acc, current) => {
     Object.entries(current).forEach((entry) => {
-      acc[entry[0]] = acc[entry[0]]
-        ? [acc[entry[0]], entry[1]].join(',')
-        : entry[1];
+      acc[entry[0]] =
+        acc[entry[0]] && acc[entry[0]] != entry[1]
+          ? [acc[entry[0]], entry[1]].join(',')
+          : entry[1];
     });
     return acc;
   }, {});
