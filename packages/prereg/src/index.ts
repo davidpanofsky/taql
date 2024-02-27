@@ -2,7 +2,11 @@ import { Kind, OperationDefinitionNode, OperationTypeNode } from 'graphql';
 import { Plugin, handleStreamOrSingleExecutionResult } from '@envelop/core';
 import { Plugin as YogaPlugin, createGraphQLError } from 'graphql-yoga';
 import { instrumentedStore, memoryStore } from '@taql/caching';
-import { logger, WORKER as worker } from '@taql/config';
+import {
+  logger,
+  preregisteredQueryExtensionKey,
+  WORKER as worker,
+} from '@taql/config';
 import { Pool } from 'pg';
 import type { Store } from 'cache-manager';
 import { addClusterReadinessStage } from '@taql/readiness';
@@ -197,7 +201,7 @@ export function usePreregisteredQueries(options: {
     async onParams({ params, setParams }) {
       const extensions = params.extensions;
       const maybePreregisteredId: string | undefined =
-        extensions?.['preRegisteredQueryId'];
+        extensions?.[preregisteredQueryExtensionKey];
       if (
         maybePreregisteredId &&
         (knownQueries.has(maybePreregisteredId) || knownQueries.size == 0)

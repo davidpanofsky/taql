@@ -25,7 +25,7 @@ import {
 import { ForwardableHeaders, type TaqlState } from '@taql/context';
 import {
   extensionsFromContext,
-  upstreamHeadersFromExtensions,
+  upstreamHeadersFromContext,
 } from '@taql/extensions';
 import fetch, { Headers } from 'node-fetch';
 import { httpAgent, httpsAgent, legacyHttpsAgent } from '@taql/httpAgent';
@@ -95,7 +95,6 @@ export const requestFormatter = () => async (request: TaqlRequest) => {
   // won't get the same information.  This might be ok, as it will be less meaningful there, but it's still
   // worth noting
   const extensions = extensionsFromContext(context);
-
   return { query, variables, extensions } as const;
 };
 
@@ -235,7 +234,7 @@ const load = async <T, R>({
     );
   }
 
-  logger.info(`Applying upstream headers: ${inspect(upstreamHeaders)}`);
+  logger.debug(`Applying upstream headers: ${inspect(upstreamHeaders)}`);
   upstreamHeaders &&
     Object.entries(upstreamHeaders).forEach((entry) =>
       headers.set(entry[0], entry[1])
@@ -377,7 +376,7 @@ export const makeRemoteExecutor = (
   const load = bindLoad<TaqlRequest, ExecutionResult>(
     subgraph,
     getDeadline,
-    upstreamHeadersFromExtensions,
+    upstreamHeadersFromContext,
     {
       request: requestFormatter(),
     }

@@ -2851,6 +2851,7 @@ __metadata:
   resolution: "@taql/extensions@workspace:packages/extensions"
   dependencies:
     "@graphql-tools/utils": "*"
+    "@taql/config": "workspace:^"
     "@taql/context": "workspace:^"
     "@taql/yogaUtils": "workspace:^"
     typescript: "*"

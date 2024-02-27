@@ -4,10 +4,20 @@ import {
   ExtensionsReducer,
   defaultExtensionsReducer,
 } from '@taql/yogaUtils';
-
+import { logger, preregisteredQueryExtensionKey  } from '@taql/config';
 import { ExecutionRequest } from '@graphql-tools/utils';
 import { TaqlState } from '@taql/context';
 import { inspect } from 'util';
+
+
+const getPreregisteredQueryId = <
+  Args extends DefaultRecord = DefaultRecord,
+  Root = DefaultRecord,
+>(
+  request: ExecutionRequest<Args, TaqlState, Root, Extensions>
+): string | undefined =>
+  request.extensions?.[preregisteredQueryExtensionKey] ??
+  request.context?.params?.extensions?.[preregisteredQueryExtensionKey];
 
 const servicingExtension = 'servicing';
 const servicingPreregisteredQueryIds = 'preregisteredQueries';
@@ -40,18 +50,15 @@ export const wrapReducer =
       acc[servicingOperationNames] = [];
     }
 
-    const nextPreregisteredQueryId =
-      nextRequest.extensions?.['preregisteredQueryId'] ??
-      nextRequest.context?.params?.extensions?.['preregisteredQureyId'];
+    const nextPreregisteredQueryId = getPreregisteredQueryId(nextRequest);
     nextPreregisteredQueryId &&
       acc[servicingPreregisteredQueryIds]?.push(nextPreregisteredQueryId);
 
-    const nextOperationId = nextRequest.context?.params?.operationName;
-    nextOperationId && acc[servicingOperationNames]?.push(nextOperationId);
+    const nextOperationName = nextRequest.context?.params?.operationName;
+    nextOperationName && acc[servicingOperationNames]?.push(nextOperationName);
 
     const result = reducer(extensions, nextRequest);
     result[servicingExtension] = acc;
-    console.log(`Accumulating servicing extensions: ${inspect(result)}`);
     return result;
   };
 
@@ -59,7 +66,7 @@ const preregisteredQueriesServicedHeader =
   'x-servicing-preregistered-query-ids';
 const operationNamesServicedHeader = 'x-servicing-operation-names';
 
-export const upstreamHeadersFromExtensions = <
+export const upstreamHeadersFromContext = <
   Args extends DefaultRecord = DefaultRecord,
   Root = DefaultRecord,
 >(
@@ -68,45 +75,57 @@ export const upstreamHeadersFromExtensions = <
     | null
     | undefined
 ): Record<string, string> => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const servicing: any = request?.extensions?.[servicingExtension];
-  const result: Record<string, string> = {};
-  if (!servicing) {
-    console.log(
-      'No "servicing" found in extensions, returning empty dictionary'
+  if (!request?.context?.isDummyRequest) {
+    logger.debug(`upstreamHeadersFromContext - request : ${inspect(request)}`);
+    logger.debug(
+      `upstreamHeadersFromContext - request.context : ${inspect(request?.context)}`
     );
-    return result;
+  }
+  const result: Record<string, string> = {};
+
+  const preregisteredQueryId = request && getPreregisteredQueryId(request);
+
+  if (preregisteredQueryId) {
+    result[preregisteredQueriesServicedHeader] = preregisteredQueryId;
   }
 
-  const preregisteredQueries = servicing[servicingPreregisteredQueryIds];
-  if (Array.isArray(preregisteredQueries)) {
-    result[preregisteredQueriesServicedHeader] = preregisteredQueries.join(',');
+  const operationName = request?.context?.params?.operationName;
+  if (operationName) {
+    result[operationNamesServicedHeader] = operationName;
   }
-
-  const operationNames = servicing[servicingOperationNames];
-  if (Array.isArray(operationNames)) {
-    result[operationNamesServicedHeader] = operationNames.join(',');
+  if (!request?.context?.isDummyRequest) {
+    logger.debug(`upstreamHeadersFromContext - result: ${inspect(result)}`);
   }
   return result;
 };
 
 export const extensionsFromContext = (
   context: TaqlState | undefined
-): Extensions => ({
-  servicing: {
-    preregisteredQueryIds: [
-      context?.params?.extensions?.preregisteredQueryId ?? 'N/A',
-    ],
-    operationNames: [context?.params?.operationName ?? 'unknown'],
-  },
-});
+): Extensions => {
+  if (context && !context.isDummyRequest) {
+    logger.debug(
+      `extensionsFromContext - context.params: ${inspect(context.params)}`
+    );
+  }
+
+  return {
+    servicing: {
+      preregisteredQueryIds: [
+        context?.params?.extensions?.[preregisteredQueryExtensionKey] ?? 'N/A',
+      ],
+      operationNames: [context?.params?.operationName ?? 'unknown'],
+    },
+  };
+};
 
 export const mergeUpstreamHeaders = (
   requests: ReadonlyArray<ExecutionRequest>
 ): Record<string, string> =>
-  requests.map(upstreamHeadersFromExtensions).reduce((acc, current) => {
+  requests.map(upstreamHeadersFromContext).reduce((acc, current) => {
     Object.entries(current).forEach((entry) => {
-      acc[entry[0]] = [acc[entry[0]] ?? '', entry[1]].join(',');
+      acc[entry[0]] = acc[entry[0]]
+        ? [acc[entry[0]], entry[1]].join(',')
+        : entry[1];
     });
     return acc;
   }, {});
