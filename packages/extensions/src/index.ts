@@ -101,13 +101,27 @@ export const extensionsFromContext = (
 
 export const mergeUpstreamHeaders = (
   requests: ReadonlyArray<ExecutionRequest>
-): Record<string, string> =>
-  requests.map(upstreamHeadersFromContext).reduce((acc, current) => {
-    Object.entries(current).forEach((entry) => {
-      acc[entry[0]] =
-        acc[entry[0]] && acc[entry[0]] != entry[1]
-          ? [acc[entry[0]], entry[1]].join(',')
-          : entry[1];
-    });
-    return acc;
-  }, {});
+): Record<string, string> => {
+  const deduplicated: Record<string, Set<string>> = requests
+    .map(upstreamHeadersFromContext)
+    .reduce(
+      (acc, current) => {
+        Object.entries(current).forEach((entry) => {
+          if (!(entry[0] in acc)) {
+            acc[entry[0]] = new Set<string>();
+          }
+          acc[entry[0]].add(entry[1]);
+        });
+        return acc;
+      },
+      <Record<string, Set<string>>>{}
+    );
+
+  return Object.entries(deduplicated).reduce(
+    (acc, entry) => {
+      acc[entry[0]] = Array.from(entry[1]).join(',');
+      return acc;
+    },
+    <Record<string, string>>{}
+  );
+};
