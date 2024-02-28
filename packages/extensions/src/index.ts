@@ -61,8 +61,8 @@ export const wrapReducer =
   };
 
 const preregisteredQueriesServicedHeader =
-  'x-servicing-preregistered-query-ids';
-const operationNamesServicedHeader = 'x-servicing-operation-names';
+  'x-taql-servicing-query-ids';
+const operationNamesServicedHeader = 'x-taql-servicing-operation-names';
 
 export const upstreamHeadersFromContext = <
   Args extends DefaultRecord = DefaultRecord,
