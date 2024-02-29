@@ -30,10 +30,7 @@ export const wrapReducer =
     nextRequest: ExecutionRequest<Args, TaqlState, Root, Extensions>
   ): Extensions => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let acc: any = extensions[servicingExtension] ?? {
-      [servicingPreregisteredQueryIds]: [],
-      [servicingOperationNames]: [],
-    };
+    let acc: any = extensions[servicingExtension];
 
     // Be completely overly defensive of what's in the `servicing` extension
     if (!(typeof acc === 'object')) {
