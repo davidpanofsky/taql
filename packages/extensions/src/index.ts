@@ -60,8 +60,7 @@ export const wrapReducer =
     return result;
   };
 
-const preregisteredQueriesServicedHeader =
-  'x-taql-servicing-query-ids';
+const preregisteredQueriesServicedHeader = 'x-taql-servicing-query-ids';
 const operationNamesServicedHeader = 'x-taql-servicing-operation-names';
 
 export const upstreamHeadersFromContext = <
