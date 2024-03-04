@@ -247,11 +247,11 @@ export const loadSupergraph = async (options: {
         fromCache = true;
         subgraphsPulled.set({ source: 'cache' }, manifest.length);
         updateSubgraphCacheSizeMetric(schemaCacheKey, redisClient);
-        console.log(
+        logger.info(
           `Successfully pulled ${manifest.length} subgraphs from cache`
         );
       } catch (redisErr) {
-        console.error(`unable to load cached schema from redis: ${redisErr}`);
+        logger.error(`unable to load cached schema from redis: ${redisErr}`);
         // Throw the original error from the GSR
         throw err;
       }

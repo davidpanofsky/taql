@@ -19,6 +19,7 @@ import { trace } from '@opentelemetry/api';
  * main process, or 'worker_n' for the nth worker if clustering is enabled.
  */
 export const WORKER = cluster.isPrimary ? 'primary' : `${cluster.worker?.id}`;
+export const preregisteredQueryExtensionKey = 'preRegisteredQueryId';
 
 const loggerConfig = resolve({
   console: {

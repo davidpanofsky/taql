@@ -1,5 +1,5 @@
 {
-  "name": "@taql/deadlines",
+  "name": "@taql/yogaUtils",
   "version": "1.0.0",
   "main": "build/index.js",
   "scripts": {
@@ -12,8 +12,6 @@
     "typescript": "*"
   },
   "dependencies": {
-    "@graphql-tools/utils": "*",
-    "@taql/context": "workspace:^",
-    "@taql/yogaUtils": "workspace:^"
+    "@graphql-tools/utils": "*"
   }
 }

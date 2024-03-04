@@ -1,5 +1,5 @@
 {
-  "name": "@taql/executors",
+  "name": "@taql/extensions",
   "version": "1.0.0",
   "main": "build/index.js",
   "scripts": {
@@ -13,17 +13,8 @@
   },
   "dependencies": {
     "@graphql-tools/utils": "*",
-    "@opentelemetry/api": "*",
-    "@ta-graphql-utils/auth-manager": "*",
-    "@ta-graphql-utils/stitch": "*",
     "@taql/config": "workspace:^",
     "@taql/context": "workspace:^",
-    "@taql/deadlines": "workspace:^",
-    "@taql/extensions": "workspace:^",
-    "@taql/httpAgent": "workspace:^",
-    "@taql/observability": "workspace:^",
-    "graphql": "*",
-    "node-fetch": "*",
-    "prom-client": "*"
+    "@taql/yogaUtils": "workspace:^"
   }
 }

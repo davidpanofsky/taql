@@ -8,6 +8,10 @@ import {
 import { TaqlRequest, translateConfigToLoaderOptions } from './utils';
 import { bindLoad, makeRemoteExecutor } from '@taql/executors';
 import {
+  mergeUpstreamHeaders,
+  wrapReducer as wrapReducerWithAttribution,
+} from '@taql/extensions';
+import {
   pickDeadline,
   wrapReducer as wrapReducerWithDeadlineHandling,
 } from '@taql/deadlines';
@@ -62,7 +66,7 @@ function makeSingleQueryBatchingExecutor(
   // effort of merging queries for us.
   const loadFn = createLoadFn(
     <Executor>executor,
-    wrapReducerWithDeadlineHandling()
+    wrapReducerWithDeadlineHandling(wrapReducerWithAttribution())
   );
 
   return createBatchingExecutor(
@@ -82,6 +86,7 @@ function makeArrayBatchingExecutor(
   const arrayLoader = bindLoad<ReadonlyArray<TaqlRequest>, ExecutionResult[]>(
     config,
     pickDeadline,
+    mergeUpstreamHeaders,
     {
       async request(requests) {
         BATCH_SIZE_HISTOGRAM.observe(
@@ -125,7 +130,7 @@ function makeLegacyGqlExecutor(
     ExecutionResult[],
     unknown,
     { results: { result: ExecutionResult }[] }
-  >(config, pickDeadline, {
+  >(config, pickDeadline, mergeUpstreamHeaders, {
     // legacy graphql's batched endpoint accepts `{ requests: request[] }`, not request[]
     async request(requests) {
       // Since we generate the legacy RequestContext from headers we assume that if those headers are considered batch-compatible,
