@@ -14,7 +14,7 @@
     "test": "DOTENV_CONFIG_PATH='./test.env' jest"
   },
   "engines": {
-    "node": "18.16.0",
+    "node": "20.11.0",
     "yarn": "3.1.1"
   },
   "workspaces": [
@@ -33,7 +33,7 @@
     "fetch-mock-jest": "*",
     "jest": "^29.7.0",
     "pg-mem": "^2.8.1",
-    "prettier": "^3.2.4",
+    "prettier": "^3.2.5",
     "ts-jest": "^29.1.2"
   },
   "license": "UNLINCENSED",

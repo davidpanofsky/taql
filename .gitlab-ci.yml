@@ -6,7 +6,7 @@ variables:
   # And renewed with: https://sponsor.tamg.io/
 
 default:
-  image: node:16.18.0
+  image: node:20.11.0
 
 stages:
   - test
