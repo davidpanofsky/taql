@@ -1,5 +1,6 @@
 {
   "name": "@taql/util.defang",
+  "version": "1.0.0",
   "main": "build/index.js",
   "scripts": {
     "build": "tsc",
